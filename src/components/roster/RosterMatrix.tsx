@@ -62,6 +62,19 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
     const weekStart = getWeekStart(weekOffset)
 
+    // Calculate dates for the header
+    const weekDates = useMemo(() => {
+        const start = new Date(weekStart)
+        return Array.from({ length: 7 }).map((_, i) => {
+            const date = new Date(start)
+            date.setDate(start.getDate() + i)
+            return {
+                day: DAYS[i],
+                dateStr: date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) // DD/MM
+            }
+        })
+    }, [weekStart])
+
     // Sorted staff based on hotel settings
     const sortedStaff = useMemo(() => {
         if (!hotel?.settings?.staff_order || staff.length === 0) return staff;
@@ -234,11 +247,12 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                             <tr className="border-b border-zinc-800">
                                 {canEdit && <th className="w-8"></th>}
                                 <th className="text-left py-2 px-2 text-zinc-400 font-medium">{t('common.staff')}</th>
-                                {DAYS.map((day) => {
+                                {weekDates.map(({ day, dateStr }) => {
                                     const dayKey = `day.${day.toLowerCase()}` as any
                                     return (
                                         <th key={day} className="text-center py-2 px-1 text-zinc-400 font-medium w-12">
-                                            {t(dayKey)}
+                                            <div className="text-[10px] opacity-50 mb-0.5 font-mono">{dateStr}</div>
+                                            <div>{t(dayKey)}</div>
                                         </th>
                                     )
                                 })}

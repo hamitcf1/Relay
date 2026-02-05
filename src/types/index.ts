@@ -165,6 +165,11 @@ export interface ShiftNote {
     resolved_at: Date | null
     resolved_by: string | null
     is_anonymous?: boolean
+    // Expanded properties for calendar sync & detailed tracking
+    time?: string // HH:MM
+    guest_name?: string
+    assigned_staff_uid?: string
+    assigned_staff_name?: string
 }
 
 // Room Types

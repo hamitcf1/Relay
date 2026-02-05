@@ -1,1 +1,0 @@
-﻿src/components/rooms/RoomManagementModal.tsx(4,5): error TS6133: 'X' is declared but its value is never read.

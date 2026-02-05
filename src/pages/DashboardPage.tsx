@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import {
     User,
     LogOut,
-    Plus,
     Play,
     StopCircle,
     Globe,
@@ -26,7 +25,6 @@ import {
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
-import { NewLogModal } from '@/components/logs/NewLogModal'
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
 import { RoomManagementModal } from '@/components/rooms/RoomManagementModal'
 import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
@@ -63,7 +61,7 @@ export function DashboardPage() {
     const { subscribeToNotes } = useNotesStore()
     const { t, language, setLanguage } = useLanguageStore()
 
-    const [isNewLogOpen, setIsNewLogOpen] = useState(false)
+
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
     const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
     const [activeTab, setActiveTab] = useState('overview')
@@ -240,11 +238,6 @@ export function DashboardPage() {
                                     <span className="text-xs font-medium">Assistant AI</span>
                                 </DropdownMenuItem>
 
-                                <DropdownMenuItem onClick={() => setIsNewLogOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
-                                    <Plus className="w-4 h-4 text-emerald-400" />
-                                    <span className="text-xs font-medium">{t('dashboard.newLog')}</span>
-                                </DropdownMenuItem>
-
                                 <DropdownMenuItem onClick={() => setIsRoomManagerOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-amber-500/10 transition-colors">
                                     <BedDouble className="w-4 h-4 text-amber-400" />
                                     <span className="text-xs font-medium">{t('dashboard.rooms')}</span>
@@ -411,11 +404,6 @@ export function DashboardPage() {
             <RoomManagementModal
                 isOpen={isRoomManagerOpen}
                 onClose={() => setIsRoomManagerOpen(false)}
-            />
-
-            <NewLogModal
-                isOpen={isNewLogOpen}
-                onClose={() => setIsNewLogOpen(false)}
             />
 
             <HandoverWizard

@@ -26,6 +26,7 @@ interface NotesState {
 interface NotesActions {
     subscribeToNotes: (hotelId: string) => () => void
     addNote: (hotelId: string, note: Omit<ShiftNote, 'id' | 'created_at' | 'resolved_at' | 'resolved_by' | 'status'>) => Promise<void>
+    updateNote: (hotelId: string, noteId: string, updates: Partial<ShiftNote>) => Promise<void>
     updateNoteStatus: (hotelId: string, noteId: string, status: NoteStatus, resolvedBy?: string) => Promise<void>
     toggleRelevance: (hotelId: string, noteId: string, isRelevant: boolean) => Promise<void>
     markPaid: (hotelId: string, noteId: string) => Promise<void>
@@ -111,6 +112,35 @@ export const useNotesStore = create<NotesStore>((set) => ({
             }
         } catch (error) {
             console.error('Error adding note:', error)
+            throw error
+        }
+    },
+
+    updateNote: async (hotelId, noteId, updates) => {
+        try {
+            const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
+
+            // Optimize: if status is changing to resolved, handle metadata
+            if (updates.status === 'resolved' || updates.status === 'archived') {
+                updates.resolved_at = updates.resolved_at || new Date()
+            }
+
+            // Clean undefined
+            const cleanUpdates = Object.entries(updates).reduce((acc, [k, v]) => {
+                if (v !== undefined) acc[k] = v
+                return acc
+            }, {} as any)
+
+            await updateDoc(noteRef, cleanUpdates)
+
+            // Re-sync with calendar
+            const note = useNotesStore.getState().notes.find(n => n.id === noteId)
+            if (note && (note.is_relevant || updates.is_relevant)) {
+                // Merge current note with updates for sync
+                await syncNoteToCalendar(hotelId, { ...note, ...updates } as ShiftNote)
+            }
+        } catch (error) {
+            console.error('Error updating note:', error)
             throw error
         }
     },

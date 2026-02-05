@@ -9,7 +9,8 @@ import {
     Clock,
     User,
     Trash2,
-    Wand2
+    Wand2,
+    Pencil
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,8 +19,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { useNotesStore, categoryInfo, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
+import { type ShiftNote } from '@/types'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useRosterStore } from '@/stores/rosterStore'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 
 interface ShiftNotesProps {
@@ -28,15 +31,29 @@ interface ShiftNotesProps {
 }
 
 export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
-    const { notes, addNote, markPaid, deleteNote } = useNotesStore()
+    const { notes, addNote, updateNote, markPaid, deleteNote } = useNotesStore()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
+    const { staff, subscribeToRoster } = useRosterStore()
+
+    // Ensure we have staff list
+    useState(() => {
+        if (hotelId) subscribeToRoster(hotelId)
+    })
 
     const [isAdding, setIsAdding] = useState(false)
     const [newCategory, setNewCategory] = useState<NoteCategory>('handover')
     const [newContent, setNewContent] = useState('')
     const [newRoom, setNewRoom] = useState('')
     const [newAmount, setNewAmount] = useState('')
+    const [newTime, setNewTime] = useState('')
+    const [newGuest, setNewGuest] = useState('')
+    const [newAssignedStaff, setNewAssignedStaff] = useState<string>('')
+
+    const [editingId, setEditingId] = useState<string | null>(null)
+    const [editContent, setEditContent] = useState('')
+    const [editCategory, setEditCategory] = useState<NoteCategory>('handover') // Default, will update on edit click
+
     const [loading, setLoading] = useState(false)
     const [isAIModalOpen, setIsAIModalOpen] = useState(false)
     const [statusFilter, setStatusFilter] = useState<NoteStatus | 'all'>('active')
@@ -66,12 +83,20 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 created_by: user.uid,
                 created_by_name: user.name || 'Unknown',
                 shift_id: null,
+                // New Fields
+                time: newTime || undefined,
+                guest_name: newGuest.trim() || undefined,
+                assigned_staff_uid: (newAssignedStaff && newAssignedStaff !== 'none') ? newAssignedStaff : undefined,
+                assigned_staff_name: (newAssignedStaff && newAssignedStaff !== 'none') ? staff.find(s => s.uid === newAssignedStaff)?.name : undefined
             })
 
             // Reset form
             setNewContent('')
             setNewRoom('')
             setNewAmount('')
+            setNewTime('')
+            setNewGuest('')
+            setNewAssignedStaff('')
             setIsAdding(false)
         } finally {
             setLoading(false)
@@ -90,6 +115,26 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const handleDelete = async (noteId: string) => {
         if (confirm(t('common.deleteConfirm'))) {
             await deleteNote(hotelId, noteId)
+        }
+    }
+
+    const startEditing = (note: ShiftNote) => {
+        setEditingId(note.id)
+        setEditContent(note.content)
+        setEditCategory(note.category)
+    }
+
+    const handleUpdateNote = async () => {
+        if (!editingId || !user) return
+        try {
+            setLoading(true)
+            await updateNote(hotelId, editingId, {
+                content: editContent,
+                category: editCategory
+            })
+            setEditingId(null)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -211,12 +256,17 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                 ))}
                             </div>
 
-                            {/* Room & Amount (for damage) */}
                             <div className="flex gap-2">
                                 <Input
                                     placeholder={t('common.room') + " #"}
                                     value={newRoom}
                                     onChange={(e) => setNewRoom(e.target.value)}
+                                    className="w-20 text-sm bg-zinc-800/50"
+                                />
+                                <Input
+                                    type="time"
+                                    value={newTime}
+                                    onChange={(e) => setNewTime(e.target.value)}
                                     className="w-24 text-sm bg-zinc-800/50"
                                 />
                                 {newCategory === 'damage' && (
@@ -225,9 +275,29 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         type="number"
                                         value={newAmount}
                                         onChange={(e) => setNewAmount(e.target.value)}
-                                        className="w-28 text-sm bg-zinc-800/50"
+                                        className="w-24 text-sm bg-zinc-800/50"
                                     />
                                 )}
+                            </div>
+
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Guest Name (Optional)"
+                                    value={newGuest}
+                                    onChange={(e) => setNewGuest(e.target.value)}
+                                    className="flex-1 text-sm bg-zinc-800/50"
+                                />
+                                <Select value={newAssignedStaff} onValueChange={setNewAssignedStaff}>
+                                    <SelectTrigger className="w-[140px] text-xs h-9 bg-zinc-800/50 border-zinc-700">
+                                        <SelectValue placeholder="Assign Staff" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">Unassigned</SelectItem>
+                                        {staff.map(s => (
+                                            <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* Content */}
@@ -338,7 +408,42 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         </div>
 
                                         {/* Content */}
-                                        <p className="text-sm text-zinc-300 mb-2 leading-relaxed">{note.content}</p>
+                                        {editingId === note.id ? (
+                                            <div className="space-y-2 mb-2">
+                                                <div className="flex flex-wrap gap-1 mb-2">
+                                                    {(Object.keys(categoryInfo) as NoteCategory[]).map((cat) => (
+                                                        <button
+                                                            key={cat}
+                                                            onClick={() => setEditCategory(cat)}
+                                                            className={cn(
+                                                                'text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 transition-all',
+                                                                editCategory === cat
+                                                                    ? `${categoryInfo[cat].color} text-white`
+                                                                    : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'
+                                                            )}
+                                                        >
+                                                            {categoryInfo[cat].icon} {categoryInfo[cat].label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <Input
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                    className="h-8 text-sm bg-zinc-950 border-zinc-700"
+                                                    autoFocus
+                                                />
+                                                <div className="flex gap-2">
+                                                    <Button size="sm" onClick={handleUpdateNote} disabled={loading} className="h-6 text-xs bg-emerald-600 hover:bg-emerald-500 text-white">
+                                                        {t('common.save')}
+                                                    </Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-6 text-xs">
+                                                        {t('common.cancel')}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-zinc-300 mb-2 leading-relaxed">{note.content}</p>
+                                        )}
 
                                         {/* Footer */}
                                         <div className="flex items-center gap-3 text-[10px] text-zinc-500">
@@ -390,6 +495,15 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 <Trash2 className="w-3.5 h-3.5" />
                                             </Button>
                                         )}
+
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            onClick={() => startEditing(note)}
+                                            className="h-6 w-6 text-indigo-400 hover:bg-indigo-500/10"
+                                        >
+                                            <Pencil className="w-3.5 h-3.5" />
+                                        </Button>
                                     </div>
                                 </div>
                             </motion.div>

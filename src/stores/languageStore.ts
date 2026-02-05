@@ -618,6 +618,13 @@ const translations: Record<Language, Translations> = {
         'onboarding.stepOf': 'Step {current} of {total}',
     },
     tr: {
+        'app.welcome': 'Relay\'e Hoşgeldiniz',
+        'app.description': 'Dijital devir teslim sisteminiz. Vardiyaları yönetin, kayıtları takip edin ve uyumluluğu sağlayın - hepsi tek bir yerde.',
+        'app.activeShift': 'Aktif Vardiya',
+        'app.openTickets': 'Açık Kayıtlar',
+        'app.cashBalance': 'Kasa Bakiyesi',
+        'app.systemTitle': 'Relay Otel Operasyon Sistemi',
+
         'auth.login': 'Giriş Yap',
         'auth.register': 'Kayıt Ol',
         'auth.email': 'E-posta Adresi',
@@ -707,13 +714,6 @@ const translations: Record<Language, Translations> = {
         'module.tours': 'Turlar',
         'module.sales': 'Satışlar',
 
-        'day.mon': 'Pzt',
-        'day.tue': 'Sal',
-        'day.wed': 'Çar',
-        'day.thu': 'Per',
-        'day.fri': 'Cum',
-        'day.sat': 'Cmt',
-        'day.sun': 'Paz',
 
 
         'handover.title': 'Devir Teslim Sihirbazı',
@@ -865,11 +865,6 @@ const translations: Record<Language, Translations> = {
         // Status
         'status.all': 'Tümü',
 
-        'app.description': 'Kesintisiz otel operasyonları için dijital devir teslim sisteminiz. Vardiyaları yönetin, kayıtları takip edin ve uyumluluğu sağlayın; hepsi tek bir yerde.',
-        'app.activeShift': 'Aktif Vardiya',
-        'app.openTickets': 'Açık Kayıtlar',
-        'app.cashBalance': 'Nakit Dengesi',
-        'app.systemTitle': 'Relay Otel Operasyon Sistemi',
 
         'common.add': 'Ekle',
         'common.cancel': 'İptal',
