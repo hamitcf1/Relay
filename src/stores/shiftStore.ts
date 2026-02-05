@@ -4,6 +4,7 @@ import {
     doc,
     setDoc,
     updateDoc,
+    getDocs,
     query,
     where,
     limit,
@@ -21,18 +22,14 @@ interface ShiftState {
 
 interface ShiftActions {
     subscribeToCurrentShift: (hotelId: string) => () => void
-    startShift: (hotelId: string, userId: string, type: ShiftType, cashStart: number) => Promise<void>
+    startShift: (hotelId: string, staffIds: string[], type: ShiftType, cashStart: number, date?: string) => Promise<void>
     endShift: (hotelId: string, cashEnd: number, handoverNote: string) => Promise<void>
+    getLastClosedShift: (hotelId: string) => Promise<Shift | null>
     updateCompliance: (hotelId: string, field: 'kbs_checked' | 'agency_msg_checked_count', value: boolean | number) => Promise<void>
 }
 
 type ShiftStore = ShiftState & ShiftActions
 
-// Generate shift ID: "2026-02-05_SHIFT_A"
-const generateShiftId = (type: ShiftType): string => {
-    const today = new Date().toISOString().split('T')[0]
-    return `${today}_SHIFT_${type}`
-}
 
 
 
@@ -88,9 +85,9 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
         return unsubscribe
     },
 
-    startShift: async (hotelId: string, userId: string, type: ShiftType, cashStart: number) => {
-        const shiftId = generateShiftId(type)
-        const today = new Date().toISOString().split('T')[0]
+    startShift: async (hotelId: string, staffIds: string[], type: ShiftType, cashStart: number, date?: string) => {
+        const today = date || new Date().toISOString().split('T')[0]
+        const shiftId = `${today}_SHIFT_${type}`
 
         try {
             const shiftRef = doc(db, 'hotels', hotelId, 'shifts', shiftId)
@@ -99,7 +96,7 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
                 shift_id: shiftId,
                 date: today,
                 type,
-                staff_ids: [userId],
+                staff_ids: staffIds,
                 compliance: {
                     kbs_checked: false,
                     agency_msg_checked_count: 0,
@@ -114,6 +111,37 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
         } catch (error) {
             console.error('Error starting shift:', error)
             throw error
+        }
+    },
+
+    getLastClosedShift: async (hotelId: string) => {
+        const shiftsRef = collection(db, 'hotels', hotelId, 'shifts')
+        const q = query(
+            shiftsRef,
+            where('status', '==', 'closed'),
+            limit(1)
+        )
+        try {
+            const snap = await getDocs(q)
+            if (!snap.empty) {
+                const doc = snap.docs[0]
+                const data = doc.data()
+                return {
+                    shift_id: doc.id,
+                    date: data.date,
+                    type: data.type,
+                    staff_ids: data.staff_ids || [],
+                    compliance: data.compliance || { kbs_checked: false, agency_msg_checked_count: 0 },
+                    cash_start: data.cash_start || 0,
+                    cash_end: data.cash_end || 0,
+                    handover_note: data.handover_note || '',
+                    status: data.status,
+                } as Shift
+            }
+            return null
+        } catch (e) {
+            console.error("Error fetching last shift:", e)
+            return null
         }
     },
 

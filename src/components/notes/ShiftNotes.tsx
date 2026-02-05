@@ -8,7 +8,8 @@ import {
     DollarSign,
     Clock,
     User,
-    Trash2
+    Trash2,
+    Wand2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +19,7 @@ import { cn } from '@/lib/utils'
 import { useNotesStore, categoryInfo, type NoteCategory } from '@/stores/notesStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -36,6 +38,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [newAmount, setNewAmount] = useState('')
     const [filter, setFilter] = useState<NoteCategory | 'all' | 'relevant'>('relevant')
     const [loading, setLoading] = useState(false)
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false)
 
     // Filter notes
     const filteredNotes = useMemo(() => {
@@ -216,11 +219,33 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             </div>
 
                             {/* Content */}
-                            <Input
-                                placeholder={t('module.shiftNotes') + "..."}
-                                value={newContent}
-                                onChange={(e) => setNewContent(e.target.value)}
-                                className="text-sm bg-zinc-800/50"
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between px-1">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t('module.shiftNotes')}</label>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setIsAIModalOpen(true)}
+                                        className="h-6 text-[9px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1"
+                                    >
+                                        <Wand2 className="w-3 h-3" />
+                                        AI Help
+                                    </Button>
+                                </div>
+                                <Input
+                                    placeholder={t('module.shiftNotes') + "..."}
+                                    value={newContent}
+                                    onChange={(e) => setNewContent(e.target.value)}
+                                    className="text-sm bg-zinc-800/50"
+                                />
+                            </div>
+
+                            <AIAssistantModal
+                                isOpen={isAIModalOpen}
+                                onClose={() => setIsAIModalOpen(false)}
+                                initialTask="report"
+                                initialPrompt={newContent}
                             />
 
                             {/* Actions */}

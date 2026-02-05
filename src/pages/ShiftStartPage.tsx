@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { LogIn, Loader2, Play, Wallet, Clock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { doc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useShiftStore } from '@/stores/shiftStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
 
@@ -30,27 +31,11 @@ export default function ShiftStartPage() {
         setError(null)
 
         try {
-            const shiftId = `shift-${Date.now()}`
             const hotelId = hotel.id
 
             // Create active shift document
-            await setDoc(doc(db, 'hotels', hotelId, 'shifts', shiftId), {
-                userId: user.uid, // Keep for backward compatibility or simple queries if needed
-                userName: user.name,
-                startTime: serverTimestamp(),
-                endTime: null,
-                date: new Date().toISOString().split('T')[0],
-                status: 'active',
-                type: shiftType,
-                staff_ids: [user.uid],
-                cash_start: parseFloat(cashStart) || 0,
-                cash_end: 0,
-                compliance: {
-                    kbs_checked: false,
-                    agency_msg_checked_count: 0
-                },
-                handover_note: ''
-            })
+            const { startShift } = useShiftStore.getState()
+            await startShift(hotelId, [user.uid], shiftType, parseFloat(cashStart) || 0)
 
             // Update user state (redundant but helpful for some local queries)
             await updateDoc(doc(db, 'users', user.uid), {

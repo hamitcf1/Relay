@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, AlertTriangle, MessageSquare, Wrench, Settings, Edit2 } from 'lucide-react'
+import { X, Plus, AlertTriangle, MessageSquare, Wrench, Settings, Edit2, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useLogsStore } from '@/stores/logsStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 import type { Log, LogType, LogUrgency } from '@/types'
 
 interface NewLogModalProps {
@@ -38,6 +39,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
     const [content, setContent] = useState('')
     const [roomNumber, setRoomNumber] = useState('')
     const [loading, setLoading] = useState(false)
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     // Pre-fill if editing
@@ -194,16 +196,35 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
                                     </div>
 
                                     {/* Content */}
-                                    <div className="space-y-3">
-                                        <label className="text-sm font-medium text-zinc-400">{t('log.contentLabel')}</label>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-sm font-medium text-zinc-400">{t('log.contentLabel')}</label>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setIsAIModalOpen(true)}
+                                                className="h-7 text-[10px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1.5"
+                                            >
+                                                <Wand2 className="w-3.5 h-3.5" />
+                                                AI Help
+                                            </Button>
+                                        </div>
                                         <textarea
                                             value={content}
                                             onChange={(e) => setContent(e.target.value)}
-                                            placeholder="What happened? Use #101 to link a room."
-                                            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none min-h-[100px]"
+                                            placeholder={t('log.enterContent')}
+                                            className="w-full h-32 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            required
                                         />
                                     </div>
 
+                                    <AIAssistantModal
+                                        isOpen={isAIModalOpen}
+                                        onClose={() => setIsAIModalOpen(false)}
+                                        initialTask="report"
+                                        initialPrompt={content}
+                                    />
                                     {/* Room Number (Optional) */}
                                     <div className="space-y-3">
                                         <label className="text-sm font-medium text-zinc-400">{t('log.roomNumberLabel')}</label>

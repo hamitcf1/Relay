@@ -9,7 +9,8 @@ import {
     Globe,
     ChevronDown,
     Check,
-    BedDouble
+    BedDouble,
+    Sparkles
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
@@ -29,6 +30,7 @@ import {
 import { LogFeed } from '@/components/logs/LogFeed'
 import { StickyBoard } from '@/components/logs/StickyBoard'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
+import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 import { NewLogModal } from '@/components/logs/NewLogModal'
 import { RoomManagementModal } from '@/components/rooms/RoomManagementModal'
 import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
@@ -38,6 +40,7 @@ import { ShiftNotes } from '@/components/notes/ShiftNotes'
 import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
 import { CalendarWidget } from '@/components/calendar/CalendarWidget'
+import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useLogsStore } from '@/stores/logsStore'
@@ -60,6 +63,9 @@ export function DashboardPage() {
     const [editingLog, setEditingLog] = useState<Log | null>(null)
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
     const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
+
+    // Automate shifts
+    useShiftAutomator(hotel?.id || null)
 
     // Calculate compliance percentage
     const compliancePercentage = useMemo(() => {
@@ -134,9 +140,22 @@ export function DashboardPage() {
         navigate('/shift-start') // Or wherever appropriate
     }
 
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false)
+    const [aiInitialTask, setAiInitialTask] = useState<'general' | 'report' | 'email' | 'review'>('general')
+
+    const openAI = (mode: typeof aiInitialTask = 'general') => {
+        setAiInitialTask(mode)
+        setIsAIModalOpen(true)
+    }
+
     return (
         <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans selection:bg-indigo-500/30">
             <OnboardingWizard />
+            <AIAssistantModal
+                isOpen={isAIModalOpen}
+                onClose={() => setIsAIModalOpen(false)}
+                initialTask={aiInitialTask}
+            />
             {/* Header */}
             <header className="h-16 border-b border-zinc-800 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
                 <div className="flex items-center gap-4">
@@ -200,8 +219,13 @@ export function DashboardPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800">
                             <DropdownMenuLabel className="text-xs text-zinc-500 font-normal uppercase">{t('dashboard.actions')}</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => setIsNewLogOpen(true)} className="text-xs cursor-pointer">
-                                <Plus className="w-3.5 h-3.5 mr-2" /> {t('dashboard.newLog')}
+                            <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2.5 rounded-lg focus:bg-indigo-500/10">
+                                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                                <span className="text-xs font-semibold">AI Assistant</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setIsNewLogOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2.5 rounded-lg focus:bg-emerald-500/10">
+                                <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                                <span className="text-xs font-semibold">{t('dashboard.newLog')}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="text-xs cursor-pointer">
                                 <LogOut className="w-3.5 h-3.5 mr-2" /> {t('category.handover')}

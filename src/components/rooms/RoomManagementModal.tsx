@@ -10,7 +10,7 @@ import {
     SprayCan,
     Search,
 } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
@@ -124,6 +124,9 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                 Room Management
                             </div>
                         </DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Manage hotel rooms, status, and occupancy.
+                        </DialogDescription>
                     </DialogHeader>
 
                     <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as any)} className="mt-6">
