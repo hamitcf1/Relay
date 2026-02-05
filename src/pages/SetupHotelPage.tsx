@@ -74,11 +74,11 @@ export function SetupHotelPage() {
                 staff_list: arrayUnion(user.uid)
             })
 
-            // Update user's assigned hotel
+            // Update user's assigned hotel (safe for missing documents)
             const userRef = doc(db, 'users', user.uid)
-            await updateDoc(userRef, {
+            await setDoc(userRef, {
                 hotel_id: selectedHotel
-            })
+            }, { merge: true })
 
             // Store in localStorage for quick access
             localStorage.setItem('relay_hotel_id', selectedHotel)
@@ -121,11 +121,11 @@ export function SetupHotelPage() {
                 created_at: new Date(),
             })
 
-            // Update user's assigned hotel
+            // Update user's assigned hotel (safe for missing documents)
             const userRef = doc(db, 'users', user.uid)
-            await updateDoc(userRef, {
+            await setDoc(userRef, {
                 hotel_id: hotelId
-            })
+            }, { merge: true })
 
             // Store in localStorage
             localStorage.setItem('relay_hotel_id', hotelId)

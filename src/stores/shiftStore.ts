@@ -4,6 +4,7 @@ import {
     doc,
     setDoc,
     updateDoc,
+    getDoc,
     getDocs,
     query,
     where,
@@ -91,6 +92,8 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
 
         try {
             const shiftRef = doc(db, 'hotels', hotelId, 'shifts', shiftId)
+            const snap = await getDoc(shiftRef)
+            if (snap.exists()) return // Already started manually or by another client
 
             await setDoc(shiftRef, {
                 shift_id: shiftId,

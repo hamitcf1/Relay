@@ -66,6 +66,11 @@ export interface Log {
     is_pinned: boolean
 }
 
+// Input type for creating new logs
+export type LogInput = Omit<Log, 'id' | 'created_at'> & {
+    created_at?: any // Can be FieldValue on write
+}
+
 export interface ShiftCompliance {
     kbs_checked: boolean
     agency_msg_checked_count: number
@@ -126,9 +131,6 @@ export interface AuthState {
     loading: boolean
     error: string | null
 }
-
-// ... (previous types)
-
 // Room Types
 export type RoomStatus = 'clean' | 'dirty' | 'inspect' | 'dnd'
 export type RoomOccupancy = 'vacant' | 'occupied'

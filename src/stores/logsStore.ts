@@ -11,7 +11,7 @@ import {
     Timestamp
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { Log, LogType, LogUrgency, LogStatus } from '@/types'
+import type { Log, LogType, LogUrgency, LogStatus, LogInput } from '@/types'
 
 interface LogsState {
     logs: Log[]
@@ -24,7 +24,7 @@ interface LogsState {
 interface LogsActions {
     setHotelId: (hotelId: string) => void
     subscribeToLogs: () => () => void
-    addLog: (log: Omit<Log, 'id' | 'created_at'>) => Promise<void>
+    addLog: (log: LogInput) => Promise<void>
     editLog: (id: string, updates: Partial<Log>) => Promise<void>
     updateLogStatus: (logId: string, status: LogStatus | 'archived') => Promise<void>
     togglePin: (logId: string, isPinned: boolean) => Promise<void>
@@ -115,7 +115,6 @@ export const useLogsStore = create<LogsStore>((set, get) => ({
 
         try {
             const logsRef = collection(db, 'hotels', hotelId, 'logs')
-            // @ts-ignore - explicitly ignoring type check for now to fix build if types verify fails
             await addDoc(logsRef, {
                 ...logData,
                 created_at: serverTimestamp()

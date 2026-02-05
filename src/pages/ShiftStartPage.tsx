@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { LogIn, Loader2, Play, Wallet, Clock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,10 +37,11 @@ export default function ShiftStartPage() {
             const { startShift } = useShiftStore.getState()
             await startShift(hotelId, [user.uid], shiftType, parseFloat(cashStart) || 0)
 
-            // Update user state (redundant but helpful for some local queries)
-            await updateDoc(doc(db, 'users', user.uid), {
+            // Update user state (safe for missing documents)
+            const { setDoc } = await import('firebase/firestore')
+            await setDoc(doc(db, 'users', user.uid), {
                 current_shift_type: shiftType
-            })
+            }, { merge: true })
 
             navigate('/')
         } catch (err) {
