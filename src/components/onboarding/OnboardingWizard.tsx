@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface Step {
     title: string
@@ -22,7 +23,7 @@ interface Step {
 
 export function OnboardingWizard() {
     const { user, updateSettings } = useAuthStore()
-    // const { t } = useLanguageStore() // t is currently unused, uncomment when needed
+    const { t } = useLanguageStore()
     const [isOpen, setIsOpen] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
 
@@ -34,32 +35,32 @@ export function OnboardingWizard() {
 
     const steps: Step[] = [
         {
-            title: "Welcome to Relay",
-            description: "Your digital hotel operations hub. Let's take a quick look around.",
+            title: t('onboarding.welcome.title'),
+            description: t('onboarding.welcome.desc'),
             icon: Layout,
             color: "text-indigo-400"
         },
         {
-            title: "Live Activity Feed",
-            description: "The left column shows all guest requests and maintenance logs in real-time.",
+            title: t('onboarding.activity.title'),
+            description: t('onboarding.activity.desc'),
             icon: Activity,
             color: "text-emerald-400"
         },
         {
-            title: "Shift Operations",
-            description: "The center column tracks your active shift, cash, and compliance checklists.",
+            title: t('onboarding.shift.title'),
+            description: t('onboarding.shift.desc'),
             icon: ShieldCheck,
             color: "text-amber-400"
         },
         {
-            title: "Team & Schedule",
-            description: "The right column manages the roster, calendar, and general hotel info.",
+            title: t('onboarding.team.title'),
+            description: t('onboarding.team.desc'),
             icon: Calendar,
             color: "text-purple-400"
         },
         {
-            title: "Localization",
-            description: "Use the globe icon in the header to switch between Turkish and English anytime.",
+            title: t('onboarding.localization.title'),
+            description: t('onboarding.localization.desc'),
             icon: Globe,
             color: "text-blue-400"
         }
@@ -142,14 +143,14 @@ export function OnboardingWizard() {
                             className="text-zinc-500 hover:text-white"
                         >
                             <ChevronLeft className="w-4 h-4 mr-1" />
-                            Back
+                            {t('common.back')}
                         </Button>
 
                         <Button
                             onClick={handleNext}
                             className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20"
                         >
-                            {currentStep === steps.length - 1 ? "Finish" : "Next"}
+                            {currentStep === steps.length - 1 ? t('common.finish') : t('common.next')}
                             {currentStep < steps.length - 1 && <ChevronRight className="w-4 h-4 ml-1" />}
                         </Button>
                     </div>
@@ -157,7 +158,9 @@ export function OnboardingWizard() {
 
                 <div className="bg-white/5 p-4 text-center">
                     <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">
-                        Step {currentStep + 1} of {steps.length}
+                        {t('onboarding.stepOf')
+                            .replace('{current}', (currentStep + 1).toString())
+                            .replace('{total}', steps.length.toString())}
                     </p>
                 </div>
             </motion.div>

@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion'
-import { Hotel, Menu, User, LayoutGrid } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Hotel, Menu, User } from 'lucide-react'
 import { NotificationDropdown } from '../notifications/NotificationDropdown'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface AppShellProps {
     children?: React.ReactNode
 }
 
 export function AppShell({ children }: AppShellProps) {
+    const { t } = useLanguageStore()
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100">
             {/* Ambient Background Effect */}
@@ -45,11 +46,8 @@ export function AppShell({ children }: AppShellProps) {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 }}
                         >
-                            <Link to="/operations" className="p-2 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white">
-                                <LayoutGrid className="w-5 h-5" />
-                            </Link>
                             <NotificationDropdown />
-                            <button className="p-2 rounded-lg hover:bg-zinc-800 transition-colors">
+                            <button className="p-2 rounded-lg hover:bg-zinc-800 transition-colors" title={t('dashboard.userProfile')}>
                                 <User className="w-5 h-5 text-zinc-400" />
                             </button>
                             <button className="p-2 rounded-lg hover:bg-zinc-800 transition-colors md:hidden">
@@ -70,28 +68,27 @@ export function AppShell({ children }: AppShellProps) {
                         transition={{ duration: 0.6, delay: 0.3 }}
                     >
                         <h1 className="text-4xl font-bold mb-4 text-gradient-primary">
-                            Welcome to Relay
+                            {t('app.welcome')}
                         </h1>
                         <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-                            Your digital handover system for seamless hotel operations.
-                            Manage shifts, track logs, and ensure compliance—all in one place.
+                            {t('app.description')}
                         </p>
 
                         {/* Quick Stats Preview Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
                             {[
-                                { label: 'Active Shift', value: '—', color: 'indigo' },
-                                { label: 'Open Tickets', value: '0', color: 'amber' },
-                                { label: 'Cash Balance', value: '—', color: 'emerald' },
+                                { key: 'app.activeShift', value: '—', color: 'indigo' },
+                                { key: 'app.openTickets', value: '0', color: 'amber' },
+                                { key: 'app.cashBalance', value: '—', color: 'emerald' },
                             ].map((stat, i) => (
                                 <motion.div
-                                    key={stat.label}
+                                    key={stat.key}
                                     className="glass p-6 rounded-2xl glass-hover"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
                                 >
-                                    <div className="text-zinc-400 text-sm mb-1">{stat.label}</div>
+                                    <div className="text-zinc-400 text-sm mb-1">{t(stat.key as any)}</div>
                                     <div className={`text-3xl font-bold text-${stat.color}-400`}>
                                         {stat.value}
                                     </div>
@@ -104,7 +101,7 @@ export function AppShell({ children }: AppShellProps) {
 
             {/* Footer */}
             <footer className="text-center py-6 text-zinc-600 text-sm">
-                Relay Hotel Operations System • {new Date().getFullYear()}
+                {t('app.systemTitle')} • {new Date().getFullYear()}
             </footer>
         </div>
     )

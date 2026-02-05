@@ -13,6 +13,7 @@ import {
     isSameDay,
     isToday
 } from 'date-fns'
+import { getDateLocale } from '@/lib/utils'
 import { ChevronLeft, ChevronRight, Plus, X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -128,7 +129,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
     }
 
     const handleDeleteEvent = async (eventId: string) => {
-        if (confirm('Delete this event?')) {
+        if (confirm(t('common.deleteConfirm'))) {
             await deleteEvent(hotelId, eventId)
         }
     }
@@ -151,7 +152,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
                         <span className="text-xs text-zinc-400 min-w-[80px] text-center">
-                            {format(currentMonth, 'MMM yyyy')}
+                            {format(currentMonth, 'MMM yyyy', { locale: getDateLocale() })}
                         </span>
                         <Button
                             size="icon"
@@ -168,7 +169,15 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
             <CardContent className="space-y-3">
                 {/* Weekday headers */}
                 <div className="grid grid-cols-7 gap-1">
-                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                    {[
+                        t('day.short.mon'),
+                        t('day.short.tue'),
+                        t('day.short.wed'),
+                        t('day.short.thu'),
+                        t('day.short.fri'),
+                        t('day.short.sat'),
+                        t('day.short.sun')
+                    ].map((day, i) => (
                         <div key={i} className="text-center text-[10px] text-zinc-500 font-medium">
                             {day}
                         </div>
@@ -246,7 +255,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                 </Badge>
                                             ))
                                         ) : (
-                                            <span className="text-[10px] text-zinc-600 italic">No shifts scheduled</span>
+                                            <span className="text-[10px] text-zinc-600 italic">{t('calendar.noShifts')}</span>
                                         )}
                                     </div>
                                 </div>
@@ -254,7 +263,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs text-zinc-400">
-                                            {format(selectedDate, 'EEEE, MMM d')}
+                                            {format(selectedDate, 'EEEE, MMM d', { locale: getDateLocale() })}
                                         </span>
                                         <Button
                                             size="sm"
@@ -263,7 +272,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                             onClick={() => setIsAdding(!isAdding)}
                                         >
                                             <Plus className="w-3 h-3 mr-1" />
-                                            Add
+                                            {t('calendar.addEvent')}
                                         </Button>
                                     </div>
 
@@ -295,7 +304,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                 </div>
 
                                                 <Input
-                                                    placeholder="Etkinlik Başlığı..."
+                                                    placeholder={t('calendar.eventTitle')}
                                                     value={newEventTitle}
                                                     onChange={(e) => setNewEventTitle(e.target.value)}
                                                     className="h-8 text-xs bg-zinc-950 border-zinc-700"
@@ -303,7 +312,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
 
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Zaman</label>
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.time')}</label>
                                                         <Input
                                                             value={newEventTime}
                                                             onChange={(e) => setNewEventTime(e.target.value)}
@@ -312,9 +321,9 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Oda #</label>
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.roomNumber')}</label>
                                                         <Input
-                                                            placeholder="Oda"
+                                                            placeholder={t('log.roomPlaceholder')}
                                                             value={newEventRoom}
                                                             onChange={(e) => setNewEventRoom(e.target.value)}
                                                             className="h-8 text-xs bg-zinc-950 border-zinc-700"
@@ -324,7 +333,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
 
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Toplam Ücret (€)</label>
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.totalPrice')}</label>
                                                         <Input
                                                             type="number"
                                                             placeholder="0"
@@ -334,7 +343,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Alınan Ödeme (€)</label>
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.collectedAmount')}</label>
                                                         <Input
                                                             type="number"
                                                             placeholder="0"
@@ -353,7 +362,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                         disabled={!newEventTitle.trim()}
                                                     >
                                                         <Check className="w-3 h-3 mr-1" />
-                                                        Kaydet
+                                                        {t('log.save')}
                                                     </Button>
                                                     <Button
                                                         size="sm"
@@ -370,7 +379,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
 
                                     {/* Events List */}
                                     {selectedDateEvents.length === 0 && !isAdding ? (
-                                        <p className="text-xs text-zinc-500 text-center py-2">No events</p>
+                                        <p className="text-xs text-zinc-500 text-center py-2">{t('calendar.noEvents')}</p>
                                     ) : (
                                         <div className="space-y-1.5 max-h-32 overflow-y-auto scrollbar-thin">
                                             {selectedDateEvents.map((event) => (
@@ -413,13 +422,13 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                                 <div className="text-[10px] text-zinc-500">
                                                                     {event.time && <span>{event.time}</span>}
                                                                     {event.time && event.room_number && <span> • </span>}
-                                                                    {event.room_number && <span>Oda {event.room_number}</span>}
+                                                                    {event.room_number && <span>{t('calendar.roomNumber')} {event.room_number}</span>}
                                                                 </div>
                                                             )}
                                                             {event.total_price !== null && (
                                                                 <div className="flex items-center gap-1.5">
                                                                     <div className="text-[10px] font-bold text-zinc-400">
-                                                                        Ödeme:
+                                                                        {t('calendar.payment')}:
                                                                         <span className={cn(
                                                                             "ml-1",
                                                                             (event.collected_amount || 0) >= (event.total_price || 0)
@@ -452,12 +461,12 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                                             }}
                                                                             className="text-[9px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
                                                                         >
-                                                                            Güncelle
+                                                                            {t('common.update')}
                                                                         </button>
                                                                     )}
                                                                     {(event.total_price - (event.collected_amount || 0)) > 0 && (
                                                                         <Badge variant="outline" className="text-[8px] h-3 px-1 border-rose-500/30 text-rose-400 lowercase leading-none">
-                                                                            Kalan: {event.total_price - (event.collected_amount || 0)} €
+                                                                            {t('calendar.remaining')}: {event.total_price - (event.collected_amount || 0)} €
                                                                         </Badge>
                                                                     )}
                                                                 </div>

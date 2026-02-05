@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
+import { getDateLocale } from '@/lib/utils'
 import {
     Plus,
     Check,
@@ -87,7 +88,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     }
 
     const handleDelete = async (noteId: string) => {
-        if (confirm('Delete this note?')) {
+        if (confirm(t('common.deleteConfirm'))) {
             await deleteNote(hotelId, noteId)
         }
     }
@@ -111,7 +112,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         📋 {t('module.shiftNotes')}
                         {counts.active > 0 && (
                             <Badge variant="secondary" className="text-xs">
-                                {counts.active} active
+                                {counts.active} {t('status.active')}
                             </Badge>
                         )}
                     </CardTitle>
@@ -131,10 +132,10 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 {/* Status Tabs */}
                 <div className="flex gap-1 mb-4 p-1 bg-zinc-950/50 rounded-lg border border-zinc-800/50">
                     {[
-                        { key: 'active' as const, label: 'Active', color: 'bg-emerald-500' },
-                        { key: 'resolved' as const, label: 'Resolved', color: 'bg-indigo-500' },
-                        { key: 'archived' as const, label: 'Archived', color: 'bg-zinc-600' },
-                        { key: 'all' as const, label: 'All', color: 'bg-zinc-400' }
+                        { key: 'active' as const, label: t('status.active'), color: 'bg-emerald-500' },
+                        { key: 'resolved' as const, label: t('status.resolved'), color: 'bg-indigo-500' },
+                        { key: 'archived' as const, label: t('status.archived'), color: 'bg-zinc-600' },
+                        { key: 'all' as const, label: t('status.all'), color: 'bg-zinc-400' }
                     ].map((tab) => (
                         <button
                             key={tab.key}
@@ -157,7 +158,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 {/* Category Tabs */}
                 <div className="flex flex-wrap gap-1.5">
                     {[
-                        { key: 'all' as const, label: 'All Issues', color: 'bg-indigo-500', icon: '📁' },
+                        { key: 'all' as const, label: t('category.allIssues'), color: 'bg-indigo-500', icon: '📁' },
                         { key: 'handover' as const, ...categoryInfo.handover, label: t('category.handover') },
                         { key: 'feedback' as const, ...categoryInfo.feedback, label: t('category.feedback') },
                         { key: 'damage' as const, ...categoryInfo.damage, label: t('category.damage') },
@@ -241,7 +242,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         className="h-6 text-[9px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1"
                                     >
                                         <Wand2 className="w-3 h-3" />
-                                        AI Help
+                                        {t('notes.aiHelp')}
                                     </Button>
                                 </div>
                                 <Input
@@ -284,7 +285,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
                 {/* Notes List */}
                 {filteredNotes.length === 0 ? (
-                    <p className="text-zinc-500 text-sm text-center py-8">No notes to show.</p>
+                    <p className="text-zinc-500 text-sm text-center py-8">{t('notes.noNotes')}</p>
                 ) : (
                     <div className="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar">
                         {filteredNotes.map((note) => (
@@ -332,7 +333,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                     note.status === 'resolved' ? "text-indigo-500 bg-indigo-500/10" :
                                                         "text-zinc-500 bg-zinc-500/10"
                                             )}>
-                                                {note.status.toUpperCase()}
+                                                {t(`status.${note.status}` as any).toUpperCase()}
                                             </Badge>
                                         </div>
 
@@ -343,11 +344,11 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         <div className="flex items-center gap-3 text-[10px] text-zinc-500">
                                             <span className="flex items-center gap-1">
                                                 <User className="w-2.5 h-2.5" />
-                                                {note.is_anonymous ? 'Anonymous' : note.created_by_name}
+                                                {note.is_anonymous ? t('notes.anonymous') : note.created_by_name}
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Clock className="w-2.5 h-2.5" />
-                                                {formatDistanceToNow(note.created_at, { addSuffix: true })}
+                                                {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
                                             </span>
                                         </div>
                                     </div>
@@ -373,9 +374,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="bg-zinc-900 border-zinc-800">
-                                                <SelectItem value="active" className="text-xs">Active</SelectItem>
-                                                <SelectItem value="resolved" className="text-xs">Resolved</SelectItem>
-                                                <SelectItem value="archived" className="text-xs">Archived</SelectItem>
+                                                <SelectItem value="active" className="text-xs">{t('status.active')}</SelectItem>
+                                                <SelectItem value="resolved" className="text-xs">{t('status.resolved')}</SelectItem>
+                                                <SelectItem value="archived" className="text-xs">{t('status.archived')}</SelectItem>
                                             </SelectContent>
                                         </Select>
 

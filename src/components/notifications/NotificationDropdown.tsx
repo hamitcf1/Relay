@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/button'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { formatDistanceToNow } from 'date-fns'
+import { getDateLocale } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { NotificationType } from '@/types'
 
@@ -42,6 +44,7 @@ export function NotificationDropdown() {
         markAsRead,
         markAllAsRead
     } = useNotificationStore()
+    const { t } = useLanguageStore()
 
     useEffect(() => {
         if (user && hotel?.id) {
@@ -75,7 +78,7 @@ export function NotificationDropdown() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 bg-zinc-900/95 backdrop-blur-md border-zinc-800 p-0 shadow-2xl">
                 <div className="p-4 flex items-center justify-between border-b border-zinc-800">
-                    <DropdownMenuLabel className="p-0 font-bold text-base text-white font-sans">Notifications</DropdownMenuLabel>
+                    <DropdownMenuLabel className="p-0 font-bold text-base text-white font-sans">{t('notifications.title')}</DropdownMenuLabel>
                     {unreadCount > 0 && (
                         <Button
                             variant="ghost"
@@ -84,7 +87,7 @@ export function NotificationDropdown() {
                             className="h-8 text-[11px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1.5"
                         >
                             <CheckCheck className="w-3.5 h-3.5" />
-                            Mark all read
+                            {t('notifications.markAllRead')}
                         </Button>
                     )}
                 </div>
@@ -93,7 +96,7 @@ export function NotificationDropdown() {
                     {notifications.length === 0 ? (
                         <div className="p-8 text-center">
                             <Bell className="w-8 h-8 text-zinc-700 mx-auto mb-3 opacity-20" />
-                            <p className="text-sm text-zinc-500 font-medium">No notifications yet</p>
+                            <p className="text-sm text-zinc-500 font-medium">{t('notifications.noNotifications')}</p>
                         </div>
                     ) : (
                         <div className="py-2">
@@ -120,7 +123,7 @@ export function NotificationDropdown() {
                                                     {n.title}
                                                 </p>
                                                 <span className="text-[10px] text-zinc-600 whitespace-nowrap">
-                                                    {formatDistanceToNow(n.timestamp, { addSuffix: true })}
+                                                    {formatDistanceToNow(n.timestamp, { addSuffix: true, locale: getDateLocale() })}
                                                 </span>
                                             </div>
                                             <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed">
@@ -139,7 +142,7 @@ export function NotificationDropdown() {
                     variant="ghost"
                     className="w-full rounded-none h-11 text-xs text-zinc-500 hover:text-white transition-colors"
                 >
-                    View All Activity
+                    {t('notifications.viewAll')}
                 </Button>
             </DropdownMenuContent>
         </DropdownMenu>

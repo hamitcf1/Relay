@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Calendar, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { motion, Reorder } from 'framer-motion'
+import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical } from 'lucide-react'
 import {
     collection,
     doc,
@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { ShiftType } from '@/types'
+import { useHotelStore } from '@/stores/hotelStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface RosterMatrixProps {
     hotelId: string
@@ -41,6 +43,8 @@ const SHIFT_COLORS: Record<ShiftValue & string, string> = {
 const SHIFT_CYCLE: (ShiftType | 'OFF')[] = ['A', 'B', 'C', 'E', 'OFF']
 
 export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
+    const { t } = useLanguageStore()
+    const { hotel, updateStaffOrder } = useHotelStore()
     const [staff, setStaff] = useState<StaffMember[]>([])
     const [schedule, setSchedule] = useState<Record<string, Record<string, ShiftValue>>>({})
     const [weekOffset, setWeekOffset] = useState(0)
@@ -58,6 +62,36 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
     const weekStart = getWeekStart(weekOffset)
 
+    // Sorted staff based on hotel settings
+    const sortedStaff = useMemo(() => {
+        if (!hotel?.settings?.staff_order || staff.length === 0) return staff;
+
+        const order = hotel.settings.staff_order;
+        const sorted = [...staff].sort((a, b) => {
+            const indexA = order.indexOf(a.uid);
+            const indexB = order.indexOf(b.uid);
+
+            if (indexA === -1 && indexB === -1) return 0;
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+
+            return indexA - indexB;
+        });
+
+        return sorted;
+    }, [staff, hotel?.settings?.staff_order]);
+
+    const handleReorder = async (newOrder: StaffMember[]) => {
+        setStaff(newOrder);
+        if (canEdit && hotelId) {
+            try {
+                await updateStaffOrder(hotelId, newOrder.map(s => s.uid));
+            } catch (error) {
+                console.error('Failed to save staff order:', error);
+            }
+        }
+    };
+
     // Fetch staff and schedule
     useEffect(() => {
         if (!hotelId) return
@@ -74,10 +108,12 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                 const staffList: StaffMember[] = []
                 usersSnap.forEach((doc) => {
                     const data = doc.data()
-                    staffList.push({
-                        uid: doc.id,
-                        name: data.name || 'Unknown',
-                    })
+                    if (data.name && data.name !== 'Unknown') {
+                        staffList.push({
+                            uid: doc.id,
+                            name: data.name,
+                        })
+                    }
                 })
                 setStaff(staffList)
 
@@ -162,7 +198,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-indigo-400" />
-                    Weekly Roster
+                    {t('roster.title')}
                     {saving && <Loader2 className="w-3 h-3 animate-spin text-zinc-500" />}
                 </CardTitle>
 
@@ -190,23 +226,42 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             <CardContent className="overflow-x-auto">
                 {staff.length === 0 ? (
                     <p className="text-zinc-500 text-sm text-center py-8">
-                        No staff members found
+                        {t('roster.noStaff')}
                     </p>
                 ) : (
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-zinc-800">
-                                <th className="text-left py-2 px-2 text-zinc-400 font-medium">Staff</th>
-                                {DAYS.map((day) => (
-                                    <th key={day} className="text-center py-2 px-1 text-zinc-400 font-medium w-12">
-                                        {day}
-                                    </th>
-                                ))}
+                                {canEdit && <th className="w-8"></th>}
+                                <th className="text-left py-2 px-2 text-zinc-400 font-medium">{t('common.staff')}</th>
+                                {DAYS.map((day) => {
+                                    const dayKey = `day.${day.toLowerCase()}` as any
+                                    return (
+                                        <th key={day} className="text-center py-2 px-1 text-zinc-400 font-medium w-12">
+                                            {t(dayKey)}
+                                        </th>
+                                    )
+                                })}
                             </tr>
                         </thead>
-                        <tbody>
-                            {staff.map((member) => (
-                                <tr key={member.uid} className="border-b border-zinc-800/50">
+                        <Reorder.Group
+                            as="tbody"
+                            axis="y"
+                            values={sortedStaff}
+                            onReorder={handleReorder}
+                        >
+                            {sortedStaff.map((member) => (
+                                <Reorder.Item
+                                    key={member.uid}
+                                    value={member}
+                                    as="tr"
+                                    className="border-b border-zinc-800/50 bg-zinc-950/50"
+                                >
+                                    {canEdit && (
+                                        <td className="py-2 px-1 text-zinc-600 cursor-grab active:cursor-grabbing">
+                                            <GripVertical className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" />
+                                        </td>
+                                    )}
                                     <td className="py-2 px-2 text-zinc-300 whitespace-nowrap">
                                         {member.name}
                                     </td>
@@ -230,9 +285,9 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                             </td>
                                         )
                                     })}
-                                </tr>
+                                </Reorder.Item>
                             ))}
-                        </tbody>
+                        </Reorder.Group>
                     </table>
                 )}
 
@@ -244,11 +299,11 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                 {shift}
                             </div>
                             <span className="text-xs text-zinc-500">
-                                {shift === 'A' && 'Morning'}
-                                {shift === 'B' && 'Afternoon'}
-                                {shift === 'C' && 'Night'}
-                                {shift === 'E' && 'Extra'}
-                                {shift === 'OFF' && 'Off'}
+                                {shift === 'A' && t('shift.morning')}
+                                {shift === 'B' && t('shift.afternoon')}
+                                {shift === 'C' && t('shift.night')}
+                                {shift === 'E' && t('shift.extra')}
+                                {shift === 'OFF' && t('shift.off')}
                             </span>
                         </div>
                     ))}

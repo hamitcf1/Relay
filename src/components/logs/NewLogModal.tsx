@@ -62,12 +62,12 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
         e.preventDefault()
 
         if (!content.trim()) {
-            setError('Please enter a description')
+            setError(t('log.error.enterDescription'))
             return
         }
 
         if (!user) {
-            setError('You must be logged in')
+            setError(t('log.error.mustBeLoggedIn'))
             return
         }
 
@@ -92,7 +92,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
                     room_number: roomNumber || null,
                     status: 'open',
                     created_by: user.uid,
-                    created_by_name: user.name || 'Staff', // Pass creator name
+                    created_by_name: user.name || t('common.staff'), // Pass creator name
                     is_pinned: false
                 })
             }
@@ -207,7 +207,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
                                                 className="h-7 text-[10px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1.5"
                                             >
                                                 <Wand2 className="w-3.5 h-3.5" />
-                                                AI Help
+                                                {t('log.aiHelp')}
                                             </Button>
                                         </div>
                                         <textarea
@@ -231,7 +231,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
                                         <Input
                                             value={roomNumber}
                                             onChange={(e) => setRoomNumber(e.target.value)}
-                                            placeholder="e.g. 101"
+                                            placeholder={t('log.roomPlaceholder')}
                                             className="bg-zinc-800/50 border-zinc-700"
                                         />
                                     </div>

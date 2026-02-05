@@ -52,8 +52,8 @@ export function ComplianceChecklist({
     const checks = [
         {
             key: 'agency',
-            label: 'Agency Messages Checked',
-            description: 'Check all OTA messages (Booking, Expedia, etc.)',
+            label: t('compliance.agency.label'),
+            description: t('compliance.agency.desc'),
             icon: Mail,
             checked: compliance.agency_msg_checked_count > 0,
             count: compliance.agency_msg_checked_count,
@@ -62,8 +62,8 @@ export function ComplianceChecklist({
         },
         {
             key: 'kbs',
-            label: 'KBS System Verified',
-            description: 'Daily compliance check before 23:00',
+            label: t('compliance.kbs.label'),
+            description: t('compliance.kbs.checklistDesc'),
             icon: FileCheck,
             checked: compliance.kbs_checked,
             count: null,

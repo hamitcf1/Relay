@@ -1,11 +1,5 @@
 import { create } from 'zustand'
-import {
-    collection,
-    getDocs,
-    onSnapshot,
-    query,
-    where
-} from 'firebase/firestore'
+import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { format, addDays, parseISO } from 'date-fns'
 
@@ -32,6 +26,8 @@ interface RosterActions {
 type RosterStore = RosterState & RosterActions
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+const SHIFT_PRIORITY: Record<string, number> = { 'A': 1, 'E': 2, 'B': 3, 'C': 4 }
 
 export const useRosterStore = create<RosterStore>((set, get) => ({
     staff: [],
@@ -92,11 +88,13 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
                     userSnap.forEach(uDoc => {
                         const uData = uDoc.data()
-                        staffList.push({
-                            uid: uDoc.id,
-                            name: uData.name || 'Unknown',
-                            role: uData.role
-                        })
+                        if (uData.name && uData.name !== 'Unknown') {
+                            staffList.push({
+                                uid: uDoc.id,
+                                name: uData.name,
+                                role: uData.role
+                            })
+                        }
                     })
                     set({ staff: staffList })
                 } catch (e) {
@@ -132,6 +130,11 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             }
         })
 
-        return result
+        // Sort by shift priority A -> E -> B -> C
+        return result.sort((a, b) => {
+            const priorityA = SHIFT_PRIORITY[a.shift] || 99
+            const priorityB = SHIFT_PRIORITY[b.shift] || 99
+            return priorityA - priorityB
+        })
     }
 }))

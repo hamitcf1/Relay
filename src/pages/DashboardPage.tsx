@@ -7,13 +7,11 @@ import {
     Play,
     StopCircle,
     Globe,
-    ChevronDown,
     Check,
     BedDouble,
-    Sparkles,
-    LayoutGrid
+    Sparkles
 } from 'lucide-react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -49,6 +47,14 @@ import { useNotesStore } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useSalesStore } from '@/stores/salesStore'
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MessagingPanel } from '@/components/messaging/MessagingPanel'
+import { FeedbackSection } from '@/components/feedback/FeedbackSection'
+import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
+import { TourCatalogue } from '@/components/tours/TourCatalogue'
+import { SalesPanel } from '@/components/sales/SalesPanel'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard } from 'lucide-react'
+
 export function DashboardPage() {
     const navigate = useNavigate()
     const { user, initialize: initAuth, signOut } = useAuthStore()
@@ -60,6 +66,7 @@ export function DashboardPage() {
     const [isNewLogOpen, setIsNewLogOpen] = useState(false)
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
     const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
+    const [activeTab, setActiveTab] = useState('overview')
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
@@ -152,7 +159,7 @@ export function DashboardPage() {
             />
             {/* Header */}
             <header className="h-16 border-b border-zinc-800 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-8">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                             <span className="font-bold text-white">R</span>
@@ -162,22 +169,30 @@ export function DashboardPage() {
                             <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{hotel?.info.name}</p>
                         </div>
                     </div>
+
+                    {/* Dashboard Tabs List */}
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="hidden md:block">
+                        <TabsList className="bg-zinc-900/50 border border-zinc-800 h-9">
+                            <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                                {t('module.overview') || 'Genel Bakış'}
+                            </TabsTrigger>
+                            <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                                {t('module.operations') || 'Operasyon Merkezi'}
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
                 </div>
 
                 <div className="flex items-center gap-3">
                     {/* Compliance Pulse (Mini) */}
                     {currentShift && (
-                        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
+                        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
                             <div className={cn("w-2 h-2 rounded-full animate-pulse",
                                 compliancePercentage === 100 ? "bg-emerald-500" : "bg-amber-500"
                             )} />
                             <span className="text-xs text-zinc-400 font-medium">{compliancePercentage}% {t('module.compliance')}</span>
                         </div>
                     )}
-
-                    <Link to="/operations" className="p-2 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white">
-                        <LayoutGrid className="w-5 h-5" />
-                    </Link>
 
                     <NotificationDropdown />
 
@@ -198,145 +213,209 @@ export function DashboardPage() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Rooms Manager Button */}
-                    <Button
-                        variant="secondary"
-                        className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 h-9 hidden sm:flex"
-                        onClick={() => setIsRoomManagerOpen(true)}
-                    >
-                        <BedDouble className="w-4 h-4 mr-2" />
-                        {t('dashboard.rooms')}
-                    </Button>
-
-                    {/* Actions Menu (Merged) */}
+                    {/* User Profile - Consolidated Actions */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 h-9">
-                                <Plus className="w-4 h-4 mr-2" />
-                                {t('dashboard.actions')}
-                                <ChevronDown className="w-3 h-3 ml-2 opacity-50" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800">
-                            <DropdownMenuLabel className="text-xs text-zinc-500 font-normal uppercase">{t('dashboard.actions')}</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2.5 rounded-lg focus:bg-indigo-500/10">
-                                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                                <span className="text-xs font-semibold">AI Assistant</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setIsNewLogOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2.5 rounded-lg focus:bg-emerald-500/10">
-                                <Plus className="w-3.5 h-3.5 text-emerald-400" />
-                                <span className="text-xs font-semibold">{t('dashboard.newLog')}</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="text-xs cursor-pointer">
-                                <LogOut className="w-3.5 h-3.5 mr-2" /> {t('category.handover')}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-zinc-800" />
-                            {!currentShift ? (
-                                <DropdownMenuItem onClick={() => navigate('/shift-start')} className="text-xs cursor-pointer text-emerald-400">
-                                    <Play className="w-3.5 h-3.5 mr-2" /> {t('dashboard.startShift')}
-                                </DropdownMenuItem>
-                            ) : (
-                                <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="text-xs cursor-pointer text-rose-400">
-                                    <StopCircle className="w-3.5 h-3.5 mr-2" /> {t('dashboard.endShift')}
-                                </DropdownMenuItem>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {/* User Profile */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 ml-2 hover:bg-zinc-700 transition-colors">
-                                <User className="w-4 h-4 text-zinc-400" />
+                            <button className="h-9 w-9 rounded-full bg-indigo-600 flex items-center justify-center border border-indigo-500/50 shadow-lg shadow-indigo-500/20 ml-2 hover:bg-indigo-500 transition-colors overflow-hidden">
+                                <span className="text-xs font-bold text-white">
+                                    {user?.name?.charAt(0).toUpperCase() || <User className="w-4 h-4 text-white" />}
+                                </span>
                             </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800">
-                            <DropdownMenuLabel className="text-xs text-zinc-500 font-normal uppercase">{user?.name || 'User'}</DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-zinc-800" />
-                            <DropdownMenuItem onClick={() => signOut()} className="text-xs cursor-pointer text-rose-400">
-                                <LogOut className="w-3.5 h-3.5 mr-2" /> Logout
+                        <DropdownMenuContent align="end" className="w-56 bg-zinc-900 border-zinc-800 p-2">
+                            <DropdownMenuLabel className="px-2 py-1.5">
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-semibold text-white">{user?.name || t('common.unknown')}</span>
+                                    <span className="text-[10px] text-zinc-500 uppercase">{user?.role}</span>
+                                </div>
+                            </DropdownMenuLabel>
+
+                            <DropdownMenuSeparator className="bg-zinc-800 my-2" />
+
+                            <div className="space-y-1">
+                                <DropdownMenuLabel className="text-[10px] text-zinc-500 font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
+
+                                <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-indigo-500/10 transition-colors">
+                                    <Sparkles className="w-4 h-4 text-indigo-400" />
+                                    <span className="text-xs font-medium">Assistant AI</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem onClick={() => setIsNewLogOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
+                                    <Plus className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-xs font-medium">{t('dashboard.newLog')}</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem onClick={() => setIsRoomManagerOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-amber-500/10 transition-colors">
+                                    <BedDouble className="w-4 h-4 text-amber-400" />
+                                    <span className="text-xs font-medium">{t('dashboard.rooms')}</span>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator className="bg-zinc-800" />
+
+                                {!currentShift ? (
+                                    <DropdownMenuItem onClick={() => navigate('/shift-start')} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
+                                        <Play className="w-4 h-4" />
+                                        <span className="text-xs font-medium">{t('dashboard.startShift')}</span>
+                                    </DropdownMenuItem>
+                                ) : (
+                                    <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-rose-500/10 transition-colors">
+                                        <StopCircle className="w-4 h-4" />
+                                        <span className="text-xs font-medium">{t('dashboard.endShift')}</span>
+                                    </DropdownMenuItem>
+                                )}
+                            </div>
+
+                            <DropdownMenuSeparator className="bg-zinc-800 my-2" />
+
+                            <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-zinc-400 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-zinc-800 transition-colors">
+                                <LogOut className="w-4 h-4" />
+                                <span className="text-xs font-medium">{t('auth.logout')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
             </header>
 
-            {/* Main Layout - 3 Columns */}
+            {/* Mobile Tabs (Visible only on small screens) */}
+            <div className="md:hidden border-b border-zinc-800 bg-black/50 backdrop-blur-xl px-4 py-2">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="bg-zinc-900/50 border border-zinc-800 h-10 w-full">
+                        <TabsTrigger value="overview" className="flex-1 text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                            {t('module.overview') || 'Genel Bakış'}
+                        </TabsTrigger>
+                        <TabsTrigger value="operations" className="flex-1 text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                            {t('module.operations') || 'Operasyon'}
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
+            </div>
+
+            {/* Main Content Area */}
             <main className="flex-1 overflow-hidden p-4 lg:p-6">
                 <AnnouncementBanner />
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+                <Tabs value={activeTab} className="h-full border-none p-0 bg-transparent shadow-none">
+                    <TabsContent value="overview" className="h-full m-0 border-none p-0 outline-none">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+                            {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
+                            <div className="lg:col-span-3 h-full flex flex-col min-h-0">
+                                <ShiftNotes hotelId={hotel?.id || ''} />
+                            </div>
 
-                    {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
-                    <div className="lg:col-span-3 h-full flex flex-col min-h-0">
-                        <ShiftNotes hotelId={hotel?.id || ''} />
-                    </div>
+                            {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
+                            <div className="lg:col-span-5 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                                {/* 1. Current Shift & Pulse */}
+                                <div className="space-y-4">
+                                    <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
+                                </div>
 
-                    {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
-                    <div className="lg:col-span-5 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
-                        {/* 1. Current Shift & Pulse */}
-                        <div className="space-y-4">
-                            <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
+                                {/* 2. Compliance Checklist */}
+                                {currentShift && (
+                                    <ComplianceChecklist
+                                        compliance={currentShift.compliance}
+                                        onKBSCheck={handleKBSCheck}
+                                        onAgencyCheck={handleAgencyCheck}
+                                        disabled={false}
+                                    />
+                                )}
+                            </div>
+
+                            {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
+                            <div className="lg:col-span-4 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                                {/* 1. Calendar Widget */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                >
+                                    <CalendarWidget hotelId={hotel?.id || ''} />
+                                </motion.div>
+
+                                {/* 3. Hotel Info */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                >
+                                    <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                </motion.div>
+
+                                {/* 4. Roster (Only for GM) */}
+                                {(user?.role === 'gm' || user?.role === 'receptionist') && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: 0.5 }}
+                                    >
+                                        <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                    </motion.div>
+                                )}
+                            </div>
                         </div>
+                    </TabsContent>
 
-                        {/* 2. Compliance Checklist */}
-                        {currentShift && (
-                            <ComplianceChecklist
-                                compliance={currentShift.compliance}
-                                onKBSCheck={handleKBSCheck}
-                                onAgencyCheck={handleAgencyCheck}
-                                disabled={false}
-                            />
-                        )}
-                    </div>
+                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
+                        <div className="space-y-8 pb-12">
+                            <div className="flex flex-col gap-2">
+                                <h2 className="text-3xl font-bold text-white tracking-tight">{t('dashboard.operationsHub')}</h2>
+                                <p className="text-zinc-500 text-lg font-sans">{t('dashboard.operationsDesc')}</p>
+                            </div>
 
-                    {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
-                    <div className="lg:col-span-4 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
-                        {/* 1. Calendar Widget */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                        >
-                            <CalendarWidget hotelId={hotel?.id || ''} />
-                        </motion.div>
+                            <Tabs defaultValue="messaging" className="space-y-8">
+                                <TabsList className="bg-zinc-900/50 p-1 rounded-xl border border-zinc-800 h-12 inline-flex">
+                                    <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                        <MessageCircle className="w-4 h-4" />
+                                        <span className="hidden sm:inline">{t('module.messaging')}</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                        <ShieldAlert className="w-4 h-4" />
+                                        <span className="hidden sm:inline">{t('module.complaints')}</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="off-days" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                        <CalendarDays className="w-4 h-4" />
+                                        <span className="hidden sm:inline">{t('module.offDays')}</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="tours" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                        <Map className="w-4 h-4" />
+                                        <span className="hidden sm:inline">{t('module.tours')}</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="sales" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                        <CreditCard className="w-4 h-4" />
+                                        <span className="hidden sm:inline">{t('module.sales')}</span>
+                                    </TabsTrigger>
+                                </TabsList>
 
-
-
-                        {/* 3. Hotel Info */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                        >
-                            <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                        </motion.div>
-
-                        {/* 4. Roster (Only for GM) */}
-                        {(user?.role === 'gm' || user?.role === 'receptionist') && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.5 }}
-                            >
-                                <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                            </motion.div>
-                        )}
-                    </div>
-                </div>
+                                <div className="mt-8">
+                                    <TabsContent value="messaging" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                        <MessagingPanel />
+                                    </TabsContent>
+                                    <TabsContent value="feedback" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                        <FeedbackSection />
+                                    </TabsContent>
+                                    <TabsContent value="off-days" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                        <OffDayScheduler />
+                                    </TabsContent>
+                                    <TabsContent value="tours" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                        <TourCatalogue />
+                                    </TabsContent>
+                                    <TabsContent value="sales" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                        <SalesPanel />
+                                    </TabsContent>
+                                </div>
+                            </Tabs>
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </main>
 
             {/* Modals */}
             <RoomManagementModal
                 isOpen={isRoomManagerOpen}
-                onClose={() => setIsRoomManagerOpen(false)
-                }
+                onClose={() => setIsRoomManagerOpen(false)}
             />
 
             <NewLogModal
                 isOpen={isNewLogOpen}
-                onClose={() => {
-                    setIsNewLogOpen(false)
-                }}
+                onClose={() => setIsNewLogOpen(false)}
             />
 
             <HandoverWizard

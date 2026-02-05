@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, X, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface KBSAlertModalProps {
     isOpen: boolean
@@ -10,6 +11,7 @@ interface KBSAlertModalProps {
 }
 
 export function KBSAlertModal({ isOpen, onClose, onCheckKBS }: KBSAlertModalProps) {
+    const { t } = useLanguageStore()
     const [loading, setLoading] = useState(false)
 
     const handleCheck = async () => {
@@ -82,19 +84,18 @@ export function KBSAlertModal({ isOpen, onClose, onCheckKBS }: KBSAlertModalProp
                                 </motion.div>
 
                                 <h2 className="text-2xl font-bold text-rose-400 mb-2">
-                                    KBS Check Required!
+                                    {t('compliance.kbs.required')}
                                 </h2>
                                 <div className="flex items-center justify-center gap-2 text-zinc-400">
                                     <Clock className="w-4 h-4" />
-                                    <span>It's past 23:00</span>
+                                    <span>{t('compliance.kbs.pastTime')}</span>
                                 </div>
                             </div>
 
                             {/* Content */}
                             <div className="p-6">
                                 <p className="text-center text-zinc-300 mb-6">
-                                    The KBS system check must be completed before your shift ends.
-                                    This is a mandatory compliance requirement.
+                                    {t('compliance.kbs.desc')}
                                 </p>
 
                                 <div className="flex gap-3">
@@ -103,7 +104,7 @@ export function KBSAlertModal({ isOpen, onClose, onCheckKBS }: KBSAlertModalProp
                                         onClick={onClose}
                                         className="flex-1"
                                     >
-                                        Remind Later
+                                        {t('compliance.kbs.remindLater')}
                                     </Button>
                                     <Button
                                         variant="destructive"
@@ -111,7 +112,7 @@ export function KBSAlertModal({ isOpen, onClose, onCheckKBS }: KBSAlertModalProp
                                         disabled={loading}
                                         className="flex-1 bg-rose-600 hover:bg-rose-700"
                                     >
-                                        {loading ? 'Checking...' : 'Check KBS Now'}
+                                        {loading ? t('common.loading') : t('compliance.kbs.checkNow')}
                                     </Button>
                                 </div>
                             </div>

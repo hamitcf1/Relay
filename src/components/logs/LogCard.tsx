@@ -181,7 +181,7 @@ export function LogCard({
                                     size="icon"
                                     onClick={() => onEdit(log)}
                                     className="h-7 w-7 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-full"
-                                    title="Edit"
+                                    title={t('common.edit')}
                                 >
                                     <Edit2 className="w-3.5 h-3.5" />
                                 </Button>
@@ -211,7 +211,7 @@ export function LogCard({
                                     size="icon"
                                     onClick={() => onArchive(log.id)}
                                     className="h-7 w-7 text-zinc-500 hover:text-purple-400 hover:bg-purple-500/10 rounded-full"
-                                    title="Archive"
+                                    title={t('common.archive')}
                                 >
                                     <Archive className="w-3.5 h-3.5" />
                                 </Button>
@@ -224,7 +224,7 @@ export function LogCard({
                                     size="icon"
                                     onClick={() => onResolve(log.id, log.status)}
                                     className="h-7 w-7 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-full"
-                                    title="Reopen"
+                                    title={t('common.reopen')}
                                 >
                                     <Undo2 className="w-3.5 h-3.5" />
                                 </Button>
@@ -234,7 +234,7 @@ export function LogCard({
                                     size="icon"
                                     onClick={() => onResolve(log.id, log.status)}
                                     className="h-7 w-7 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-full"
-                                    title="Resolve"
+                                    title={t('common.resolve')}
                                 >
                                     <CheckCircle className="w-3.5 h-3.5" />
                                 </Button>

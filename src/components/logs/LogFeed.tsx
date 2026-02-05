@@ -97,7 +97,7 @@ export function LogFeed({
                 <div className="text-center py-12 glass rounded-xl border-dashed border-zinc-800">
                     <FileText className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
                     <h3 className="text-sm font-medium text-zinc-400 mb-1">
-                        {activeTab === 'open' ? 'No active logs' : activeTab === 'resolved' ? 'No resolved logs' : 'Archive empty'}
+                        {activeTab === 'open' ? t('log.feed.noActive') : activeTab === 'resolved' ? t('log.feed.noResolved') : t('log.feed.noArchived')}
                     </h3>
                 </div>
             ) : (

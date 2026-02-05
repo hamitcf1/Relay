@@ -104,7 +104,7 @@ export function LoginPage() {
                             <Hotel className="w-8 h-8 text-white" />
                         </div>
                         <h1 className="text-3xl font-bold text-gradient-primary">Relay</h1>
-                        <p className="text-zinc-400 mt-2">Hotel Operations System</p>
+                        <p className="text-zinc-400 mt-2">{t('app.description')}</p>
                     </motion.div>
 
                     {/* Form */}
@@ -196,7 +196,7 @@ export function LoginPage() {
                             </Link>
                         </p>
                         <p className="text-zinc-600 text-xs">
-                            Contact your GM for account access
+                            {t('auth.contactGM')}
                         </p>
                     </motion.div>
                 </div>

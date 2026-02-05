@@ -29,17 +29,17 @@ export function RegisterPage() {
 
         // Validation
         if (!name.trim()) {
-            setError('Please enter your name')
+            setError(t('auth.error.enterName'))
             return
         }
 
         if (password.length < 6) {
-            setError('Password must be at least 6 characters')
+            setError(t('auth.error.passwordLength'))
             return
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match')
+            setError(t('auth.error.passwordMismatch'))
             return
         }
 
@@ -61,7 +61,7 @@ export function RegisterPage() {
             // Navigate to hotel setup
             navigate('/setup-hotel')
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Registration failed'
+            const errorMessage = err instanceof Error ? err.message : t('auth.error.regFailed')
             setError(errorMessage.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim())
         } finally {
             setLoading(false)
@@ -69,8 +69,8 @@ export function RegisterPage() {
     }
 
     const roles: { value: UserRole; label: string; desc: string }[] = [
-        { value: 'receptionist', label: 'Receptionist', desc: 'Front desk staff' },
-        { value: 'housekeeping', label: 'Housekeeping', desc: 'Cleaning & maintenance' },
+        { value: 'receptionist', label: t('auth.role.receptionist'), desc: t('auth.role.receptionistDesc') },
+        { value: 'housekeeping', label: t('auth.role.housekeeping'), desc: t('auth.role.housekeepingDesc') },
     ]
 
     return (
@@ -127,7 +127,7 @@ export function RegisterPage() {
                             <Hotel className="w-8 h-8 text-white" />
                         </div>
                         <h1 className="text-2xl font-bold text-gradient-primary">{t('auth.register')}</h1>
-                        <p className="text-zinc-400 mt-1 text-sm">Join your hotel's Relay system</p>
+                        <p className="text-zinc-400 mt-1 text-sm">{t('auth.registerSubtitle')}</p>
                     </motion.div>
 
                     {/* Form */}
@@ -204,7 +204,7 @@ export function RegisterPage() {
 
                         {/* Role Selection */}
                         <div className="space-y-2">
-                            <label className="text-sm text-zinc-400 ml-1">Your Role</label>
+                            <label className="text-sm text-zinc-400 ml-1">{t('auth.roleLabel')}</label>
                             <div className="grid gap-2">
                                 {roles.map((r) => (
                                     <button
@@ -239,10 +239,10 @@ export function RegisterPage() {
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Creating account...
+                                    {t('auth.creatingAccount')}
                                 </>
                             ) : (
-                                'Create Account'
+                                t('auth.createAccount')
                             )}
                         </Button>
                     </form>

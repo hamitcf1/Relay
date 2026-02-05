@@ -44,7 +44,7 @@ export function SetupHotelPage() {
                     if (data.info) {
                         hotelsList.push({
                             id: doc.id,
-                            name: data.info.name || 'Unnamed Hotel',
+                            name: data.info.name || t('setup.unnamedHotel'),
                             address: data.info.address || '',
                         })
                     }
@@ -82,7 +82,7 @@ export function SetupHotelPage() {
 
             navigate('/')
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to join hotel')
+            setError(err instanceof Error ? err.message : t('setup.error.joinFailed'))
         } finally {
             setCreating(false)
         }
@@ -92,7 +92,7 @@ export function SetupHotelPage() {
         e.preventDefault()
 
         if (!hotelName.trim() || !user) {
-            setError('Please enter a hotel name')
+            setError(t('setup.error.enterName'))
             return
         }
 
@@ -126,7 +126,7 @@ export function SetupHotelPage() {
 
             navigate('/')
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create hotel')
+            setError(err instanceof Error ? err.message : t('setup.error.createFailed'))
         } finally {
             setCreating(false)
         }
@@ -268,7 +268,7 @@ export function SetupHotelPage() {
                                 <div className="relative">
                                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                     <Input
-                                        placeholder="Grand Palace Hotel"
+                                        placeholder={t('setup.hotelNamePlaceholder')}
                                         value={hotelName}
                                         onChange={(e) => setHotelName(e.target.value)}
                                         className="pl-11"
@@ -284,7 +284,7 @@ export function SetupHotelPage() {
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                     <Input
-                                        placeholder="123 Main Street, City"
+                                        placeholder={t('setup.addressPlaceholder')}
                                         value={hotelAddress}
                                         onChange={(e) => setHotelAddress(e.target.value)}
                                         className="pl-11"

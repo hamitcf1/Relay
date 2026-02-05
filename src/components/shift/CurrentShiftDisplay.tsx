@@ -8,6 +8,7 @@ import { useRosterStore } from '@/stores/rosterStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
+import { getDateLocale } from '@/lib/utils'
 import type { ShiftType } from '@/types'
 
 interface CurrentShiftDisplayProps {
@@ -15,19 +16,20 @@ interface CurrentShiftDisplayProps {
     userId: string
 }
 
-const SHIFT_INFO: Record<string, { label: string; time: string; color: string }> = {
-    'A': { label: 'Morning', time: '08:00 - 16:00', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-    'B': { label: 'Afternoon', time: '16:00 - 00:00', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-    'C': { label: 'Night', time: '00:00 - 08:00', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
-    'E': { label: 'Extra', time: '10:00 - 18:00', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-    'OFF': { label: 'Off', time: '-', color: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
-}
-
 export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProps) {
     const { schedule, subscribeToRoster } = useRosterStore()
     const { currentShift } = useShiftStore()
     const { t } = useLanguageStore()
     const [isRefreshing, setIsRefreshing] = useState(false)
+
+    // Move SHIFT_INFO inside to use t() for localized labels
+    const SHIFT_INFO: Record<string, { label: string; time: string; color: string }> = {
+        'A': { label: t('shift.morning'), time: '08:00 - 16:00', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+        'B': { label: t('shift.afternoon'), time: '16:00 - 00:00', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+        'C': { label: t('shift.night'), time: '00:00 - 08:00', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+        'E': { label: t('shift.extra'), time: '10:00 - 18:00', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+        'OFF': { label: t('shift.off'), time: '-', color: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
+    }
 
     // Ensure we are subscribed
     useEffect(() => {
@@ -38,8 +40,6 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
 
     const handleRefresh = async () => {
         setIsRefreshing(true)
-        // Re-subscribe briefly to force fetch logic if needed, or just simulate visual feedback
-        // Since it's a listener, it's always live, but we can animate the user intent
         subscribeToRoster(hotelId)
         setTimeout(() => setIsRefreshing(false), 800)
     }
@@ -59,7 +59,7 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
 
             shifts.push({
                 date,
-                dayName: format(date, 'EEE'),
+                dayName: format(date, 'EEE', { locale: getDateLocale() }),
                 shift: shiftCode,
                 isToday: isSameDay(date, today)
             })
@@ -71,7 +71,7 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
     const activeShiftType = currentShift?.type
 
     // Determine active shift label
-    const activeLabel = activeShiftType ? SHIFT_INFO[activeShiftType]?.label : 'None'
+    const activeLabel = activeShiftType ? SHIFT_INFO[activeShiftType]?.label : t('shift.none')
 
     return (
         <Card className="bg-zinc-900 border-zinc-800">

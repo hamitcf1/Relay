@@ -51,6 +51,7 @@ export interface HotelInfo {
 export interface HotelSettings {
     kbs_time: string
     check_agency_intervals: number[]
+    staff_order?: string[]
 }
 
 export interface Hotel {

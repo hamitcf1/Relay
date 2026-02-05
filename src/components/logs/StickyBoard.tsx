@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Pin } from 'lucide-react'
 import { LogCard } from './LogCard'
 import type { Log } from '@/types'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface StickyBoardProps {
     pinnedLogs: Log[]
@@ -11,6 +12,7 @@ interface StickyBoardProps {
 }
 
 export function StickyBoard({ pinnedLogs, onTogglePin, onResolve, onRoomClick }: StickyBoardProps) {
+    const { t } = useLanguageStore()
     if (pinnedLogs.length === 0) {
         return null
     }
@@ -24,9 +26,9 @@ export function StickyBoard({ pinnedLogs, onTogglePin, onResolve, onRoomClick }:
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <Pin className="w-4 h-4 text-indigo-400" />
-                <h2 className="text-sm font-semibold text-zinc-300">Sticky Board</h2>
+                <h2 className="text-sm font-semibold text-zinc-300">{t('module.stickyBoard')}</h2>
                 <span className="text-xs text-zinc-500">
-                    {pinnedLogs.length} pinned
+                    {t('sticky.pinnedCount', { count: String(pinnedLogs.length) })}
                 </span>
             </div>
 

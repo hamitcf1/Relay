@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface CompliancePulseProps {
     percentage: number
@@ -14,6 +15,7 @@ export function CompliancePulse({
     showLabel = true,
     className
 }: CompliancePulseProps) {
+    const { t } = useLanguageStore()
     // Size configurations
     const sizes = {
         sm: { outer: 40, inner: 32, stroke: 3, text: 'text-xs' },
@@ -98,7 +100,7 @@ export function CompliancePulse({
             {/* Label */}
             {showLabel && (
                 <div className="text-xs text-zinc-500">
-                    Compliance
+                    {t('module.compliance')}
                 </div>
             )}
         </div>

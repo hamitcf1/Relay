@@ -9,22 +9,18 @@ import {
     Save,
     Loader2,
     Edit2,
-    X,
-    ShieldCheck
+    X
 } from 'lucide-react'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { useRoomStore } from '@/stores/roomStore'
-import { useCalendarStore } from '@/stores/calendarStore'
-import { startOfDay, endOfDay } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface HotelInfoData {
     iban: string
     bank_name: string
-    tour_prices: Record<string, number>
     laundry_price: number
     transfer_price: number
     late_checkout_price: number
@@ -40,7 +36,6 @@ interface HotelInfoPanelProps {
 const defaultInfo: HotelInfoData = {
     iban: '',
     bank_name: '',
-    tour_prices: {},
     laundry_price: 0,
     transfer_price: 0,
     late_checkout_price: 0,
@@ -49,21 +44,12 @@ const defaultInfo: HotelInfoData = {
 }
 
 export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
+    const { t } = useLanguageStore()
     const [info, setInfo] = useState<HotelInfoData>(defaultInfo)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [editInfo, setEditInfo] = useState<HotelInfoData>(defaultInfo)
-
-    const { rooms, subscribeToRooms } = useRoomStore()
-    const { events, subscribeToEvents } = useCalendarStore()
-
-    // Calculate real stats
-    const totalRooms = rooms.length
-    const occupiedRooms = rooms.filter(r => r.occupancy === 'occupied').length
-    const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0
-
-    const todayArrivals = events.filter(e => e.type === 'arrival').length
 
     // Fetch hotel info
     useEffect(() => {
@@ -87,20 +73,6 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
         fetchInfo()
     }, [hotelId])
-
-    // Subscribe to rooms for occupancy stats
-    useEffect(() => {
-        if (!hotelId) return
-        const unsub = subscribeToRooms(hotelId)
-        return () => unsub()
-    }, [hotelId, subscribeToRooms])
-
-    // Subscribe to calendar events for arrivals
-    useEffect(() => {
-        if (!hotelId) return
-        const unsub = subscribeToEvents(hotelId, startOfDay(new Date()), endOfDay(new Date()))
-        return () => unsub()
-    }, [hotelId, subscribeToEvents])
 
     const handleEdit = () => {
         setEditInfo(info)
@@ -136,10 +108,10 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     }
 
     const priceItems = [
-        { key: 'laundry_price', label: 'Laundry Service', icon: Shirt },
-        { key: 'transfer_price', label: 'Airport Transfer', icon: Plane },
-        { key: 'late_checkout_price', label: 'Late Checkout', icon: MapPin },
-        { key: 'extra_bed_price', label: 'Extra Bed', icon: Settings },
+        { key: 'laundry_price', label: t('hotel.laundry'), icon: Shirt },
+        { key: 'transfer_price', label: t('hotel.transfer'), icon: Plane },
+        { key: 'late_checkout_price', label: t('hotel.lateCheckout'), icon: MapPin },
+        { key: 'extra_bed_price', label: t('hotel.extraBed'), icon: Settings },
     ]
 
     return (
@@ -147,7 +119,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                     <Settings className="w-4 h-4 text-indigo-400" />
-                    Hotel Information
+                    {t('module.hotelInfo')}
                 </CardTitle>
 
                 {canEdit && !isEditing && (
@@ -166,7 +138,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                     >
                         {/* IBAN */}
                         <div className="space-y-2">
-                            <label className="text-xs text-zinc-400">Bank IBAN</label>
+                            <label className="text-xs text-zinc-400">{t('hotel.iban')}</label>
                             <Input
                                 placeholder="TR00 0000 0000 0000 0000 0000 00"
                                 value={editInfo.iban}
@@ -175,9 +147,9 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         </div>
 
                         <div>
-                            <label className="text-xs text-zinc-400">Bank Name</label>
+                            <label className="text-xs text-zinc-400">{t('hotel.bankName')}</label>
                             <Input
-                                placeholder="e.g. Garanti BBVA"
+                                placeholder={t('hotel.bankNamePlaceholder')}
                                 value={editInfo.bank_name}
                                 onChange={(e) => setEditInfo((prev) => ({ ...prev, bank_name: e.target.value }))}
                             />
@@ -202,9 +174,9 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                         {/* Notes */}
                         <div>
-                            <label className="text-xs text-zinc-400">Additional Notes</label>
+                            <label className="text-xs text-zinc-400">{t('hotel.additionalNotes')}</label>
                             <textarea
-                                placeholder="Any other important information..."
+                                placeholder={t('hotel.notesPlaceholder')}
                                 value={editInfo.notes}
                                 onChange={(e) => setEditInfo((prev) => ({ ...prev, notes: e.target.value }))}
                                 rows={3}
@@ -216,11 +188,11 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         <div className="flex gap-2">
                             <Button onClick={handleSave} disabled={saving} size="sm">
                                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                Save
+                                {t('common.save')}
                             </Button>
                             <Button variant="ghost" onClick={handleCancel} size="sm">
                                 <X className="w-4 h-4" />
-                                Cancel
+                                {t('common.cancel')}
                             </Button>
                         </div>
                     </motion.div>
@@ -231,7 +203,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             <div className="p-3 bg-zinc-800/50 rounded-lg">
                                 <div className="flex items-center gap-2 mb-1">
                                     <CreditCard className="w-4 h-4 text-indigo-400" />
-                                    <span className="text-xs text-zinc-400">Bank Account</span>
+                                    <span className="text-xs text-zinc-400">{t('hotel.bankAccount')}</span>
                                 </div>
                                 <p className="font-mono text-sm text-zinc-200">{info.iban}</p>
                                 {info.bank_name && (
@@ -258,32 +230,6 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             })}
                         </div>
 
-                        {/* Receptionist Toolkit (Quick Actions & Stats) */}
-                        <div className="space-y-3 pb-4 border-b border-zinc-800">
-                            <div className="flex items-center gap-2 mb-1">
-                                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                                <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Receptionist Toolkit</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/30">
-                                    <p className="text-[10px] text-zinc-500 uppercase font-medium">Expected Arrivals</p>
-                                    <p className="text-lg font-bold text-white">{todayArrivals}</p>
-                                </div>
-                                <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/30">
-                                    <p className="text-[10px] text-zinc-500 uppercase font-medium">Current Occupancy</p>
-                                    <p className="text-lg font-bold text-white">{occupancyRate}%</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                <Button variant="outline" size="sm" className="h-8 text-[10px] bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
-                                    Print Registration
-                                </Button>
-                                <Button variant="outline" size="sm" className="h-8 text-[10px] bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
-                                    Guest Directory
-                                </Button>
-                            </div>
-                        </div>
-
                         {/* Notes */}
                         {info.notes && (
                             <div className="text-sm text-zinc-400 p-2 bg-zinc-800/30 rounded">
@@ -293,7 +239,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                         {!info.iban && !info.notes && priceItems.every((item) => !info[item.key as keyof HotelInfoData]) && (
                             <p className="text-zinc-500 text-sm text-center py-4">
-                                No hotel information set{canEdit && ' - Click edit to add'}
+                                {t('hotel.noInfo')}{canEdit && ` - ${t('hotel.clickEdit')}`}
                             </p>
                         )}
                     </div>

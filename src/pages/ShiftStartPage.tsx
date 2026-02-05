@@ -53,9 +53,9 @@ export default function ShiftStartPage() {
     }
 
     const shiftTypes = [
-        { id: 'A', label: 'Shift A', time: '08:00 - 16:00', icon: Clock },
-        { id: 'B', label: 'Shift B', time: '16:00 - 00:00', icon: Clock },
-        { id: 'C', label: 'Shift C', time: '00:00 - 08:00', icon: Clock },
+        { id: 'A', label: t('shift.morning'), time: '08:00 - 16:00', icon: Clock },
+        { id: 'B', label: t('shift.afternoon'), time: '16:00 - 00:00', icon: Clock },
+        { id: 'C', label: t('shift.night'), time: '00:00 - 08:00', icon: Clock },
     ] as const
 
     return (
@@ -88,13 +88,13 @@ export default function ShiftStartPage() {
                             <Play className="w-6 h-6 text-indigo-400" />
                         </div>
                         <h1 className="text-2xl font-bold text-white tracking-tight">{t('dashboard.startShift')}</h1>
-                        <p className="text-zinc-500 text-sm">Welcome! Please initialize your shift data.</p>
+                        <p className="text-zinc-500 text-sm">{t('shift.welcome')}</p>
                     </div>
 
                     <form onSubmit={handleStartShift} className="space-y-6">
                         {/* Shift Type Selection */}
                         <div className="space-y-3">
-                            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 ml-1">Select Shift Type</label>
+                            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 ml-1">{t('shift.selectType')}</label>
                             <div className="grid grid-cols-1 gap-2">
                                 {shiftTypes.map((type) => (
                                     <button
@@ -134,7 +134,7 @@ export default function ShiftStartPage() {
 
                         {/* Starting Cash */}
                         <div className="space-y-3">
-                            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 ml-1">Starting Cash</label>
+                            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 ml-1">{t('shift.startingCash')}</label>
                             <div className="relative group">
                                 <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
                                 <Input
@@ -166,7 +166,7 @@ export default function ShiftStartPage() {
                             ) : (
                                 <div className="flex items-center justify-center gap-2">
                                     <LogIn className="w-5 h-5" />
-                                    <span>Proceed to Dashboard</span>
+                                    <span>{t('shift.proceed')}</span>
                                 </div>
                             )}
                         </Button>
@@ -174,12 +174,12 @@ export default function ShiftStartPage() {
                 </div>
 
                 <div className="mt-8 text-center space-y-4">
-                    <p className="text-zinc-600 text-xs">Logged in as <span className="text-zinc-400 font-medium">{user?.name}</span></p>
+                    <p className="text-zinc-600 text-xs">{t('shift.loggedAs')} <span className="text-zinc-400 font-medium">{user?.name}</span></p>
                     <button
                         onClick={() => navigate('/login')}
                         className="text-zinc-500 hover:text-zinc-300 text-xs font-medium transition-colors underline underline-offset-4"
                     >
-                        Switch Account
+                        {t('auth.switchAccount')}
                     </button>
                 </div>
             </motion.div>
