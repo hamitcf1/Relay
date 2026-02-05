@@ -31,6 +31,7 @@ import {
 import { LogFeed } from '@/components/logs/LogFeed'
 import { StickyBoard } from '@/components/logs/StickyBoard'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
+import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 import { NewLogModal } from '@/components/logs/NewLogModal'
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
@@ -393,6 +394,7 @@ export function DashboardPage() {
                 hotelId={hotel?.id || ''}
                 onComplete={handleHandoverComplete}
             />
+            <AnnouncementModal />
         </div>
     )
 }

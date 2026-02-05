@@ -194,20 +194,16 @@ export interface OffDayRequest {
     processed_by?: string
 }
 
-// Tour Currency Prices
-export interface TourPrices {
-    try: number
-    eur: number
-    usd: number
-    gbp: number
-}
-
 // Tour
 export interface Tour {
     id: string
     name: string
     description: string
-    prices: TourPrices
+    base_price_eur: number
+    adult_price: number
+    child_3_7_price: number
+    child_0_3_price: number
+    operating_days: string[] // e.g. ['Monday', 'Wednesday']
     is_active: boolean
 }
 

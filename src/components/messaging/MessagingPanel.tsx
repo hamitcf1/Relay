@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useMessageStore } from '@/stores/messageStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useNotificationStore } from '@/stores/notificationStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,6 +15,7 @@ export function MessagingPanel() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
     const { messages, subscribeToMessages, sendMessage, loading } = useMessageStore()
+    const { addNotification } = useNotificationStore()
 
     const [content, setContent] = useState('')
     const [submitting, setSubmitting] = useState(false)
@@ -40,6 +42,17 @@ export function MessagingPanel() {
                 receiver_id: recipient,
                 content: content.trim()
             })
+
+            // If it's a broadcast, also create a notification
+            if (recipient === 'all' && hotel?.id) {
+                await addNotification(hotel.id, {
+                    type: 'announcement',
+                    title: 'Yeni GM Duyurusu',
+                    content: content.trim(),
+                    target_role: 'all'
+                })
+            }
+
             setContent('')
         } catch (error) {
             console.error("Message send error:", error)

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Map, Plus, Save, Trash2, Calendar, DollarSign, Euro, PoundSterling, Coins, Loader2, Edit3, X } from 'lucide-react'
+import { Map, Plus, Save, Trash2, Calendar, Euro, Loader2, Edit3, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTourStore } from '@/stores/tourStore'
 import { useCalendarStore } from '@/stores/calendarStore'
@@ -10,14 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import type { Tour, TourPrices } from '@/types'
+import type { Tour } from '@/types'
 
-const CURRENCIES = [
-    { code: 'TRY', label: 'Turkish Lira', icon: Coins, color: 'text-rose-400' },
-    { code: 'EUR', label: 'Euro', icon: Euro, color: 'text-indigo-400' },
-    { code: 'USD', label: 'US Dollar', icon: DollarSign, color: 'text-emerald-400' },
-    { code: 'GBP', label: 'British Pound', icon: PoundSterling, color: 'text-amber-400' },
-]
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export function TourCatalogue() {
     const { user } = useAuthStore()
@@ -30,7 +25,11 @@ export function TourCatalogue() {
     const [formData, setFormData] = useState<Omit<Tour, 'id'>>({
         name: '',
         description: '',
-        prices: { try: 0, eur: 0, usd: 0, gbp: 0 },
+        base_price_eur: 0,
+        adult_price: 0,
+        child_3_7_price: 0,
+        child_0_3_price: 0,
+        operating_days: [],
         is_active: true
     })
 
@@ -53,30 +52,43 @@ export function TourCatalogue() {
                 await addTour(hotel.id, formData)
                 setIsAdding(false)
             }
-            setFormData({ name: '', description: '', prices: { try: 0, eur: 0, usd: 0, gbp: 0 }, is_active: true })
+            setFormData({
+                name: '',
+                description: '',
+                base_price_eur: 0,
+                adult_price: 0,
+                child_3_7_price: 0,
+                child_0_3_price: 0,
+                operating_days: [],
+                is_active: true
+            })
         } catch (error) {
             console.error("Save tour error:", error)
         }
     }
 
-    const handleBook = async (tour: Tour, currencyCode: keyof TourPrices) => {
+    const handleBook = async (tour: Tour, type: 'adult' | 'child_3_7' | 'child_0_3') => {
         if (!hotel?.id || !user) return
-        const price = tour.prices[currencyCode]
+
+        let price = tour.adult_price
+        let label = 'Adult'
+        if (type === 'child_3_7') { price = tour.child_3_7_price; label = 'Child (3-7)' }
+        if (type === 'child_0_3') { price = tour.child_0_3_price; label = 'Child (0-3)' }
 
         try {
             await addEvent(hotel.id, {
                 type: 'tour',
-                title: `Tour: ${tour.name}`,
-                description: `Booked by ${user.name}. Price: ${price} ${currencyCode.toUpperCase()}`,
+                title: `Tour: ${tour.name} (${label})`,
+                description: `Booked by ${user.name}. Price: ${price} EUR`,
                 date: new Date(),
                 time: null,
                 room_number: null,
                 price,
-                currency: currencyCode.toUpperCase(),
+                currency: 'EUR',
                 created_by: user.uid,
                 created_by_name: user.name
             })
-            alert(`Tour ${tour.name} added to calendar for tracking!`)
+            alert(`Tour ${tour.name} (${label}) added to calendar!`)
         } catch (error) {
             console.error("Booking error:", error)
         }
@@ -133,24 +145,70 @@ export function TourCatalogue() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {CURRENCIES.map(curr => (
-                                            <div key={curr.code} className="space-y-2">
-                                                <div className="flex items-center gap-1.5">
-                                                    <curr.icon className={cn("w-3 h-3", curr.color)} />
-                                                    <label className="text-[10px] text-zinc-500 uppercase font-bold">{curr.label}</label>
-                                                </div>
-                                                <Input
-                                                    type="number"
-                                                    value={formData.prices[curr.code.toLowerCase() as keyof TourPrices]}
-                                                    onChange={e => setFormData(p => ({
-                                                        ...p,
-                                                        prices: { ...p.prices, [curr.code.toLowerCase()]: parseFloat(e.target.value) || 0 }
-                                                    }))}
-                                                    className="bg-zinc-950 border-zinc-800"
-                                                />
-                                            </div>
-                                        ))}
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-zinc-500 uppercase font-bold flex items-center gap-1">
+                                                <Euro className="w-3 h-3 text-indigo-400" /> Base Price (EUR)
+                                            </label>
+                                            <Input
+                                                type="number"
+                                                value={formData.base_price_eur}
+                                                onChange={e => setFormData(p => ({ ...p, base_price_eur: parseFloat(e.target.value) || 0 }))}
+                                                className="bg-zinc-950 border-zinc-800"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-zinc-500 uppercase font-bold">Adult Price</label>
+                                            <Input
+                                                type="number"
+                                                value={formData.adult_price}
+                                                onChange={e => setFormData(p => ({ ...p, adult_price: parseFloat(e.target.value) || 0 }))}
+                                                className="bg-zinc-950 border-zinc-800"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-zinc-500 uppercase font-bold text-amber-400">Child (3-7y)</label>
+                                            <Input
+                                                type="number"
+                                                value={formData.child_3_7_price}
+                                                onChange={e => setFormData(p => ({ ...p, child_3_7_price: parseFloat(e.target.value) || 0 }))}
+                                                className="bg-zinc-950 border-zinc-800"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-zinc-500 uppercase font-bold text-emerald-400">Child (0-3y)</label>
+                                            <Input
+                                                type="number"
+                                                value={formData.child_0_3_price}
+                                                onChange={e => setFormData(p => ({ ...p, child_0_3_price: parseFloat(e.target.value) || 0 }))}
+                                                className="bg-zinc-950 border-zinc-800"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-zinc-500 uppercase font-bold">Operating Days</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {DAYS_OF_WEEK.map(day => (
+                                                <button
+                                                    key={day}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const days = formData.operating_days.includes(day)
+                                                            ? formData.operating_days.filter(d => d !== day)
+                                                            : [...formData.operating_days, day]
+                                                        setFormData(p => ({ ...p, operating_days: days }))
+                                                    }}
+                                                    className={cn(
+                                                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                                                        formData.operating_days.includes(day)
+                                                            ? "bg-indigo-600 text-white"
+                                                            : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"
+                                                    )}
+                                                >
+                                                    {day.slice(0, 3)}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                     <div className="flex justify-end gap-2 pt-2">
                                         <Button variant="ghost" onClick={() => { setIsAdding(false); setEditingId(null); }}>Cancel</Button>
@@ -211,26 +269,46 @@ export function TourCatalogue() {
                                     <CardDescription className="text-xs line-clamp-2">{tour.description}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4 pt-2 flex-1 flex flex-col">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {CURRENCIES.map(curr => (
-                                            <div
-                                                key={curr.code}
-                                                onClick={() => handleBook(tour, curr.code.toLowerCase() as keyof TourPrices)}
-                                                className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
-                                            >
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <curr.icon className={cn("w-3 h-3", curr.color)} />
-                                                    <Calendar className="w-3 h-3 text-zinc-700 group-hover/price:text-indigo-400 opacity-0 group-hover/price:opacity-100 transition-all" />
-                                                </div>
-                                                <p className="text-sm font-bold text-white">
-                                                    {tour.prices[curr.code.toLowerCase() as keyof TourPrices]?.toLocaleString()}
-                                                    <span className="text-[10px] text-zinc-500 ml-1 font-normal">{curr.code}</span>
-                                                </p>
-                                            </div>
+                                    <div className="flex flex-wrap gap-1 mb-2">
+                                        {tour.operating_days.map(day => (
+                                            <span key={day} className="text-[9px] px-1.5 py-0.5 bg-zinc-800 text-zinc-400 rounded-md font-bold uppercase">
+                                                {day.slice(0, 3)}
+                                            </span>
                                         ))}
                                     </div>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        <div
+                                            onClick={() => handleBook(tour, 'adult')}
+                                            className="p-3 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
+                                        >
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-[10px] text-zinc-500 uppercase font-bold">Adult Price</span>
+                                                <Calendar className="w-3 h-3 text-zinc-700 group-hover/price:text-indigo-400 opacity-0 group-hover/price:opacity-100 transition-all" />
+                                            </div>
+                                            <p className="text-lg font-bold text-white">
+                                                €{tour.adult_price.toLocaleString()}
+                                                <span className="text-xs text-zinc-500 ml-1 font-normal">(Base: €{tour.base_price_eur})</span>
+                                            </p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div
+                                                onClick={() => handleBook(tour, 'child_3_7')}
+                                                className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
+                                            >
+                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">Child (3-7y)</p>
+                                                <p className="text-sm font-bold text-amber-400">€{tour.child_3_7_price}</p>
+                                            </div>
+                                            <div
+                                                onClick={() => handleBook(tour, 'child_0_3')}
+                                                className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
+                                            >
+                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">Child (0-3y)</p>
+                                                <p className="text-sm font-bold text-emerald-400">€{tour.child_0_3_price}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className="mt-auto pt-4 border-t border-zinc-800/50">
-                                        <p className="text-[10px] text-zinc-600 italic text-center">Click a price to log a sale directly to the calendar.</p>
+                                        <p className="text-[10px] text-zinc-600 italic text-center">Click a category to log a sale directly to the calendar.</p>
                                     </div>
                                 </CardContent>
                             </Card>

@@ -25,6 +25,7 @@ export type CalendarEventType =
     | 'reminder'     // General reminder
     | 'tour'         // Tour sales/booking
     | 'transfer'     // Transfer sales/booking
+    | 'off_day'      // Staff off-day
 
 export interface CalendarEvent {
     id: string
@@ -174,4 +175,5 @@ export const eventTypeInfo: Record<CalendarEventType, { label: string; color: st
     reminder: { label: 'Reminder', color: 'bg-zinc-500', icon: '⏰' },
     tour: { label: 'Tour', color: 'bg-fuchsia-500', icon: '🗺️' },
     transfer: { label: 'Transfer', color: 'bg-sky-500', icon: '🚐' },
+    off_day: { label: 'Off Day', color: 'bg-indigo-500', icon: '🌴' },
 }

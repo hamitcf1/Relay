@@ -10,7 +10,7 @@ import {
     deleteDoc
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { Tour, TourPrices } from '@/types'
+import type { Tour } from '@/types'
 
 interface TourState {
     tours: Tour[]
@@ -46,7 +46,11 @@ export const useTourStore = create<TourStore>((set) => ({
                     id: doc.id,
                     name: data.name,
                     description: data.description,
-                    prices: data.prices as TourPrices,
+                    base_price_eur: data.base_price_eur || 0,
+                    adult_price: data.adult_price || 0,
+                    child_3_7_price: data.child_3_7_price || 0,
+                    child_0_3_price: data.child_0_3_price || 0,
+                    operating_days: data.operating_days || [],
                     is_active: data.is_active ?? true
                 }
             })

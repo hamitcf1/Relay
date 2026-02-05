@@ -24,6 +24,7 @@ interface OffDayState {
 interface OffDayActions {
     subscribeToRequests: (hotelId: string, staffId?: string) => () => void
     submitRequest: (hotelId: string, request: Omit<OffDayRequest, 'id' | 'status' | 'created_at'>) => Promise<void>
+    updateRequest: (hotelId: string, requestId: string, updates: Partial<OffDayRequest>) => Promise<void>
     updateRequestStatus: (hotelId: string, requestId: string, status: OffDayStatus, gmUid: string) => Promise<void>
 }
 
@@ -79,6 +80,19 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
             })
         } catch (error: any) {
             console.error("Error submitting off-day request:", error)
+            throw error
+        }
+    },
+
+    updateRequest: async (hotelId, requestId, updates) => {
+        try {
+            const docRef = doc(db, 'hotels', hotelId, 'off_day_requests', requestId)
+            await updateDoc(docRef, {
+                ...updates,
+                updated_at: serverTimestamp() // Optional: add updated_at field
+            })
+        } catch (error: any) {
+            console.error("Error updating off-day request:", error)
             throw error
         }
     },
