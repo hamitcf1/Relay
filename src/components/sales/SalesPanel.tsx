@@ -12,12 +12,21 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, type SaleType, type Sale } from '@/stores/salesStore'
+import { useTourStore } from '@/stores/tourStore'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import { useCalendarStore } from '@/stores/calendarStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 
 export function SalesPanel() {
     const { sales, loading, subscribeToSales, addSale, collectPayment, deleteSale } = useSalesStore()
+    const { tours, subscribeToTours } = useTourStore()
     const { addEvent } = useCalendarStore()
     const { hotel } = useHotelStore()
     const { user } = useAuthStore()
@@ -41,9 +50,13 @@ export function SalesPanel() {
 
     useEffect(() => {
         if (!hotel?.id) return
-        const unsub = subscribeToSales(hotel.id)
-        return () => unsub()
-    }, [hotel?.id, subscribeToSales])
+        const unsubSales = subscribeToSales(hotel.id)
+        const unsubTours = subscribeToTours(hotel.id)
+        return () => {
+            unsubSales()
+            unsubTours()
+        }
+    }, [hotel?.id, subscribeToSales, subscribeToTours])
 
     const filteredSales = sales.filter(s => s.type === activeTab)
 
@@ -189,12 +202,45 @@ export function SalesPanel() {
                                         <label className="text-[10px] text-zinc-500 font-bold uppercase">
                                             {activeTab === 'tour' ? 'Tur Adı' : activeTab === 'transfer' ? 'Varış Noktası' : 'Açıklama'}
                                         </label>
-                                        <Input
-                                            value={formData.name}
-                                            onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                                            className="bg-zinc-950 border-zinc-700"
-                                            placeholder={activeTab === 'tour' ? 'Pamukkale Turu' : activeTab === 'transfer' ? 'Havalimanı' : 'Çamaşır Yıkama'}
-                                        />
+                                        {activeTab === 'tour' ? (
+                                            <Select
+                                                value={formData.name}
+                                                onValueChange={(value) => {
+                                                    const selectedTour = tours.find(t => t.name === value)
+                                                    setFormData(p => ({
+                                                        ...p,
+                                                        name: value,
+                                                        total_price: selectedTour ? selectedTour.adult_price.toString() : p.total_price
+                                                    }))
+                                                }}
+                                            >
+                                                <SelectTrigger className="bg-zinc-950 border-zinc-700">
+                                                    <SelectValue placeholder="Tur Seçin" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {tours.filter(t => t.is_active).map(t => (
+                                                        <SelectItem key={t.id} value={t.name}>
+                                                            {t.name} ({t.adult_price}€)
+                                                        </SelectItem>
+                                                    ))}
+                                                    <SelectItem value="other">Diğer / Özel</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <Input
+                                                value={formData.name}
+                                                onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                                                className="bg-zinc-950 border-zinc-700"
+                                                placeholder={activeTab === 'transfer' ? 'Havalimanı' : 'Çamaşır Yıkama'}
+                                            />
+                                        )}
+                                        {formData.name === 'other' && activeTab === 'tour' && (
+                                            <Input
+                                                placeholder="Tur adını girin..."
+                                                onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                                                className="mt-2 bg-zinc-950 border-zinc-700"
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="space-y-1">

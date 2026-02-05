@@ -83,7 +83,7 @@ export function OffDayScheduler() {
         setDates(newDates)
     }
 
-    const handleAction = async (request: any, status: 'approved' | 'rejected') => {
+    const handleAction = async (request: any, status: 'approved' | 'rejected' | 'pending') => {
         if (!hotel?.id || !user) return
 
         const wasApproved = request.status === 'approved'
@@ -244,6 +244,7 @@ export function OffDayScheduler() {
                                         </div>
 
                                         <div className="flex items-center gap-2">
+                                            {/* Staff can edit pending requests */}
                                             {!isGM && r.status === 'pending' && (
                                                 <Button
                                                     variant="secondary"
@@ -252,6 +253,19 @@ export function OffDayScheduler() {
                                                     className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 h-8 text-xs"
                                                 >
                                                     Düzenle
+                                                </Button>
+                                            )}
+
+                                            {/* Staff can re-request rejected requests */}
+                                            {!isGM && r.status === 'rejected' && (
+                                                <Button
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    onClick={() => handleAction(r, 'pending')}
+                                                    className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 text-xs"
+                                                >
+                                                    <RefreshCcw className="w-3 h-3 mr-1" />
+                                                    Yeniden Talep Et
                                                 </Button>
                                             )}
 
