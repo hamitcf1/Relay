@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import {
     DropdownMenu,
@@ -26,8 +25,6 @@ import {
     DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
 
-import { LogFeed } from '@/components/logs/LogFeed'
-import { StickyBoard } from '@/components/logs/StickyBoard'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
@@ -46,8 +43,6 @@ import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 
 import { useAuthStore } from '@/stores/authStore'
-import { useLogsStore } from '@/stores/logsStore'
-import type { Log } from '@/types'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useNotesStore } from '@/stores/notesStore'
@@ -57,14 +52,12 @@ import { useSalesStore } from '@/stores/salesStore'
 export function DashboardPage() {
     const navigate = useNavigate()
     const { user, initialize: initAuth, signOut } = useAuthStore()
-    const { logs, pinnedLogs, loading: logsLoading, setHotelId, subscribeToLogs, updateLogStatus, togglePin, archiveLog } = useLogsStore()
     const { hotel, subscribeToHotel } = useHotelStore()
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
     const { subscribeToNotes } = useNotesStore()
     const { t, language, setLanguage } = useLanguageStore()
 
     const [isNewLogOpen, setIsNewLogOpen] = useState(false)
-    const [editingLog, setEditingLog] = useState<Log | null>(null)
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
     const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
 
@@ -91,9 +84,6 @@ export function DashboardPage() {
         return score
     }, [currentShift])
 
-    // Calculate stats
-    const openTickets = logs.filter(l => l.status === 'open').length
-
     // Initialize auth listener
     useEffect(() => {
         const unsubscribe = initAuth()
@@ -112,22 +102,19 @@ export function DashboardPage() {
                 return
             }
 
-            setHotelId(hotelId)
             const unsubHotel = subscribeToHotel(hotelId)
-            const unsubLogs = subscribeToLogs()
             const unsubShift = subscribeToCurrentShift(hotelId)
             const unsubNotes = subscribeToNotes(hotelId)
 
             return () => {
                 unsubHotel()
-                unsubLogs()
                 unsubShift()
                 unsubNotes()
             }
         }
 
         setupHotel()
-    }, [user, navigate, setHotelId, subscribeToHotel, subscribeToLogs, subscribeToCurrentShift, subscribeToNotes])
+    }, [user, navigate, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes])
 
     // Handlers
     const handleKBSCheck = async () => {
@@ -279,32 +266,9 @@ export function DashboardPage() {
                 <AnnouncementBanner />
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
-                    {/* -- LEFT COLUMN: Activity Feed (Full Height) -- */}
+                    {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
                     <div className="lg:col-span-3 h-full flex flex-col min-h-0">
-                        <div className="flex items-center justify-between mb-4 shrink-0">
-                            <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                {t('module.activityFeed')}
-                            </h2>
-                            <Badge variant="outline" className="text-[10px] h-5 border-zinc-700 text-zinc-400">
-                                {openTickets} {t('status.active')}
-                            </Badge>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800 hover:scrollbar-thumb-zinc-700">
-                            <LogFeed
-                                logs={logs}
-                                loading={logsLoading}
-                                onTogglePin={togglePin}
-                                onResolve={(id: string, currentStatus: string) => updateLogStatus(id, currentStatus === 'resolved' ? 'open' : 'resolved')} // Support toggle/reopen
-                                onArchive={archiveLog}
-                                onEdit={(log) => {
-                                    setEditingLog(log)
-                                    setIsNewLogOpen(true)
-                                }}
-                                onRoomClick={(room) => console.log('Room clicked:', room)}
-                            />
-                        </div>
+                        <ShiftNotes hotelId={hotel?.id || ''} />
                     </div>
 
                     {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
@@ -314,23 +278,7 @@ export function DashboardPage() {
                             <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
                         </div>
 
-                        {/* 2. Shift Notes (Moved from right column) */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <ShiftNotes hotelId={hotel?.id || ''} />
-                        </motion.div>
-
-                        {/* 2. Sticky Board (Priority) */}
-                        <StickyBoard
-                            pinnedLogs={pinnedLogs}
-                            onTogglePin={togglePin}
-                            onResolve={(id) => updateLogStatus(id, 'resolved')}
-                        />
-
-                        {/* 3. Compliance Checklist */}
+                        {/* 2. Compliance Checklist */}
                         {currentShift && (
                             <ComplianceChecklist
                                 compliance={currentShift.compliance}
@@ -388,9 +336,7 @@ export function DashboardPage() {
                 isOpen={isNewLogOpen}
                 onClose={() => {
                     setIsNewLogOpen(false)
-                    setEditingLog(null)
                 }}
-                initialLog={editingLog || undefined}
             />
 
             <HandoverWizard
