@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Hotel, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 export function LoginPage() {
     const navigate = useNavigate()
     const { signIn, loading, error, clearError } = useAuthStore()
+    const { t } = useLanguageStore()
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -115,7 +117,7 @@ export function LoginPage() {
                     >
                         {/* Email Field */}
                         <div className="space-y-2">
-                            <label className="text-sm text-zinc-400 ml-1">Email</label>
+                            <label className="text-sm text-zinc-400 ml-1">{t('auth.email')}</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                 <Input
@@ -131,7 +133,7 @@ export function LoginPage() {
 
                         {/* Password Field */}
                         <div className="space-y-2">
-                            <label className="text-sm text-zinc-400 ml-1">Password</label>
+                            <label className="text-sm text-zinc-400 ml-1">{t('auth.password')}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                 <Input
@@ -172,10 +174,10 @@ export function LoginPage() {
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    Signing in...
+                                    {t('common.loading')}
                                 </>
                             ) : (
-                                'Sign In'
+                                t('auth.login')
                             )}
                         </Button>
                     </motion.form>
@@ -188,10 +190,10 @@ export function LoginPage() {
                         transition={{ delay: 0.6, duration: 0.5 }}
                     >
                         <p className="text-zinc-500">
-                            Don't have an account?{' '}
-                            <a href="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                                Register here
-                            </a>
+                            {t('auth.noAccount')}{' '}
+                            <Link to="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                                {t('auth.register')}
+                            </Link>
                         </p>
                         <p className="text-zinc-600 text-xs">
                             Contact your GM for account access

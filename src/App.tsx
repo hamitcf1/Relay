@@ -3,6 +3,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { SetupHotelPage } from '@/pages/SetupHotelPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import ShiftStartPage from '@/pages/ShiftStartPage'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 function App() {
@@ -19,6 +20,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <SetupHotelPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/shift-start"
+                    element={
+                        <ProtectedRoute>
+                            <ShiftStartPage />
                         </ProtectedRoute>
                     }
                 />

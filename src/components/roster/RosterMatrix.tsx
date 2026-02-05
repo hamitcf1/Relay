@@ -60,6 +60,8 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
     // Fetch staff and schedule
     useEffect(() => {
+        if (!hotelId) return
+
         const fetchData = async () => {
             setLoading(true)
 

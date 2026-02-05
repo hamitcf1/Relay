@@ -11,7 +11,7 @@ interface LogFeedProps {
     logs: Log[]
     loading?: boolean
     onTogglePin?: (logId: string, isPinned: boolean) => void
-    onResolve?: (logId: string) => void
+    onResolve?: (logId: string, currentStatus: string) => void
     onArchive?: (logId: string) => void
     onEdit?: (log: Log) => void
     onRoomClick?: (roomNumber: string) => void

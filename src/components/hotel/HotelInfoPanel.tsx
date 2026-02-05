@@ -9,7 +9,8 @@ import {
     Save,
     Loader2,
     Edit2,
-    X
+    X,
+    ShieldCheck
 } from 'lucide-react'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -53,6 +54,8 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
     // Fetch hotel info
     useEffect(() => {
+        if (!hotelId) return
+
         const fetchInfo = async () => {
             setLoading(true)
             try {
@@ -226,6 +229,32 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                     </div>
                                 )
                             })}
+                        </div>
+
+                        {/* Receptionist Toolkit (Quick Actions & Stats) */}
+                        <div className="space-y-3 pb-4 border-b border-zinc-800">
+                            <div className="flex items-center gap-2 mb-1">
+                                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                                <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">Receptionist Toolkit</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/30">
+                                    <p className="text-[10px] text-zinc-500 uppercase font-medium">Expected Arrivals</p>
+                                    <p className="text-lg font-bold text-white">12</p>
+                                </div>
+                                <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/30">
+                                    <p className="text-[10px] text-zinc-500 uppercase font-medium">Current Occupancy</p>
+                                    <p className="text-lg font-bold text-white">84%</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Button variant="outline" size="sm" className="h-8 text-[10px] bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
+                                    Print Registration
+                                </Button>
+                                <Button variant="outline" size="sm" className="h-8 text-[10px] bg-zinc-900 border-zinc-800 hover:bg-zinc-800">
+                                    Guest Directory
+                                </Button>
+                            </div>
                         </div>
 
                         {/* Notes */}

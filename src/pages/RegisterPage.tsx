@@ -7,10 +7,12 @@ import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useLanguageStore } from '@/stores/languageStore'
 import type { UserRole } from '@/types'
 
 export function RegisterPage() {
     const navigate = useNavigate()
+    const { t } = useLanguageStore()
 
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -69,7 +71,6 @@ export function RegisterPage() {
     const roles: { value: UserRole; label: string; desc: string }[] = [
         { value: 'receptionist', label: 'Receptionist', desc: 'Front desk staff' },
         { value: 'housekeeping', label: 'Housekeeping', desc: 'Cleaning & maintenance' },
-        // GM role is assigned manually via Firebase Console
     ]
 
     return (
@@ -112,7 +113,7 @@ export function RegisterPage() {
                         className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-200 transition-colors mb-6"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Back to login
+                        {t('common.back')}
                     </Link>
 
                     {/* Logo */}
@@ -125,7 +126,7 @@ export function RegisterPage() {
                         <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 glow-primary mb-4">
                             <Hotel className="w-8 h-8 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gradient-primary">Create Account</h1>
+                        <h1 className="text-2xl font-bold text-gradient-primary">{t('auth.register')}</h1>
                         <p className="text-zinc-400 mt-1 text-sm">Join your hotel's Relay system</p>
                     </motion.div>
 
@@ -133,7 +134,7 @@ export function RegisterPage() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Name */}
                         <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">Full Name</label>
+                            <label className="text-sm text-zinc-400 ml-1">{t('auth.name')}</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                 <Input
@@ -148,7 +149,7 @@ export function RegisterPage() {
 
                         {/* Email */}
                         <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">Email</label>
+                            <label className="text-sm text-zinc-400 ml-1">{t('auth.email')}</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                 <Input
@@ -164,7 +165,7 @@ export function RegisterPage() {
 
                         {/* Password */}
                         <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">Password</label>
+                            <label className="text-sm text-zinc-400 ml-1">{t('auth.password')}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                 <Input
@@ -187,7 +188,7 @@ export function RegisterPage() {
 
                         {/* Confirm Password */}
                         <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">Confirm Password</label>
+                            <label className="text-sm text-zinc-400 ml-1">{t('common.confirm')} {t('auth.password')}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                 <Input

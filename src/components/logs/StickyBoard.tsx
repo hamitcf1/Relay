@@ -6,7 +6,7 @@ import type { Log } from '@/types'
 interface StickyBoardProps {
     pinnedLogs: Log[]
     onTogglePin?: (logId: string, isPinned: boolean) => void
-    onResolve?: (logId: string) => void
+    onResolve?: (logId: string, currentStatus: string) => void
     onRoomClick?: (roomNumber: string) => void
 }
 

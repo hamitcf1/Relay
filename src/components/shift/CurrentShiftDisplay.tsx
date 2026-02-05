@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useShiftStore } from '@/stores/shiftStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
 import type { ShiftType } from '@/types'
 
@@ -25,6 +26,7 @@ const SHIFT_INFO: Record<string, { label: string; time: string; color: string }>
 export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProps) {
     const { schedule, subscribeToRoster } = useRosterStore()
     const { currentShift } = useShiftStore()
+    const { t } = useLanguageStore()
     const [isRefreshing, setIsRefreshing] = useState(false)
 
     // Ensure we are subscribed
@@ -77,7 +79,7 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                 <div>
                     <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        My Weekly Schedule
+                        {t('dashboard.weeklySchedule')}
                     </CardTitle>
                 </div>
                 <Button
@@ -97,19 +99,19 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                             <Briefcase className="w-4 h-4 text-emerald-500" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Active Hotel Shift</p>
+                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">{t('dashboard.activeHotelShift')}</p>
                             <p className="text-sm font-medium text-white">{activeLabel}</p>
                         </div>
                     </div>
                     <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-zinc-700">
-                        {currentShift ? `Started ${format(new Date(currentShift.date), 'HH:mm')}` : 'No active shift'}
+                        {currentShift ? `${t('status.active')} ${format(new Date(currentShift.date), 'HH:mm')}` : t('status.noActiveShift')}
                     </Badge>
                 </div>
 
                 {/* Today's Shift Highlight */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-zinc-400">Today's Assignment</span>
+                        <span className="text-xs font-medium text-zinc-400">{t('dashboard.todaysAssignment')}</span>
                         {todayShift && todayShift.shift && (
                             <Badge className={cn("text-[10px] px-2 py-0.5", SHIFT_INFO[todayShift.shift]?.color || "bg-zinc-800")}>
                                 {SHIFT_INFO[todayShift.shift]?.time}
@@ -126,13 +128,13 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                                 <Clock className="w-5 h-5 opacity-80" />
                                 <div>
                                     <p className="text-sm font-bold">{SHIFT_INFO[todayShift.shift]?.label}</p>
-                                    <p className="text-xs opacity-70">Assigned Shift</p>
+                                    <p className="text-xs opacity-70">{t('dashboard.assignedShift')}</p>
                                 </div>
                             </div>
                         </div>
                     ) : (
                         <div className="p-3 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 text-center">
-                            <span className="text-xs text-zinc-500">No shift assigned for today</span>
+                            <span className="text-xs text-zinc-500">{t('dashboard.noAssignedShift')}</span>
                         </div>
                     )}
                 </div>

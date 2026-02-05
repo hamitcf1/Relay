@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface HotelOption {
     id: string
@@ -18,6 +19,7 @@ interface HotelOption {
 export function SetupHotelPage() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
+    const { t } = useLanguageStore()
 
     const [mode, setMode] = useState<'choose' | 'create'>('choose')
     const [hotels, setHotels] = useState<HotelOption[]>([])
@@ -166,9 +168,9 @@ export function SetupHotelPage() {
                         <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 glow-primary mb-4">
                             <Hotel className="w-8 h-8 text-white" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gradient-primary">Select Your Hotel</h1>
+                        <h1 className="text-2xl font-bold text-gradient-primary">{t('setup.title')}</h1>
                         <p className="text-zinc-400 mt-1 text-sm text-center">
-                            Join an existing hotel or create a new one
+                            {t('setup.subtitle')}
                         </p>
                     </div>
 
@@ -177,22 +179,22 @@ export function SetupHotelPage() {
                         <button
                             onClick={() => setMode('choose')}
                             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${mode === 'choose'
-                                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500'
-                                    : 'text-zinc-400 border border-zinc-700 hover:border-zinc-600'
+                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500'
+                                : 'text-zinc-400 border border-zinc-700 hover:border-zinc-600'
                                 }`}
                         >
                             <Building2 className="w-4 h-4 inline mr-2" />
-                            Join Existing
+                            {t('setup.joinExisting')}
                         </button>
                         <button
                             onClick={() => setMode('create')}
                             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${mode === 'create'
-                                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500'
-                                    : 'text-zinc-400 border border-zinc-700 hover:border-zinc-600'
+                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500'
+                                : 'text-zinc-400 border border-zinc-700 hover:border-zinc-600'
                                 }`}
                         >
                             <Plus className="w-4 h-4 inline mr-2" />
-                            Create New
+                            {t('setup.createNew')}
                         </button>
                     </div>
 
@@ -202,13 +204,13 @@ export function SetupHotelPage() {
                             {loading ? (
                                 <div className="text-center py-8">
                                     <Loader2 className="w-6 h-6 animate-spin mx-auto text-zinc-500" />
-                                    <p className="text-zinc-500 text-sm mt-2">Loading hotels...</p>
+                                    <p className="text-zinc-500 text-sm mt-2">{t('setup.loading')}</p>
                                 </div>
                             ) : hotels.length === 0 ? (
                                 <div className="text-center py-8">
                                     <Building2 className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-                                    <p className="text-zinc-400">No hotels found</p>
-                                    <p className="text-zinc-500 text-sm mt-1">Create a new hotel to get started</p>
+                                    <p className="text-zinc-400">{t('setup.noHotels')}</p>
+                                    <p className="text-zinc-500 text-sm mt-1">{t('setup.createNew')}</p>
                                 </div>
                             ) : (
                                 <>
@@ -217,8 +219,8 @@ export function SetupHotelPage() {
                                             <Card
                                                 key={hotel.id}
                                                 className={`cursor-pointer transition-all ${selectedHotel === hotel.id
-                                                        ? 'border-indigo-500 bg-indigo-500/10'
-                                                        : 'hover:border-zinc-600'
+                                                    ? 'border-indigo-500 bg-indigo-500/10'
+                                                    : 'hover:border-zinc-600'
                                                     }`}
                                                 onClick={() => setSelectedHotel(hotel.id)}
                                             >
@@ -254,7 +256,7 @@ export function SetupHotelPage() {
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <>
-                                                Join Hotel
+                                                {t('setup.joinSuccess')}
                                                 <ArrowRight className="w-4 h-4 ml-2" />
                                             </>
                                         )}
@@ -268,7 +270,7 @@ export function SetupHotelPage() {
                     {mode === 'create' && (
                         <form onSubmit={handleCreateHotel} className="space-y-4">
                             <div className="space-y-1">
-                                <label className="text-sm text-zinc-400">Hotel Name</label>
+                                <label className="text-sm text-zinc-400">{t('setup.hotelName')}</label>
                                 <div className="relative">
                                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                                     <Input
@@ -283,7 +285,7 @@ export function SetupHotelPage() {
 
                             <div className="space-y-1">
                                 <label className="text-sm text-zinc-400">
-                                    Address <span className="text-zinc-600">(optional)</span>
+                                    {t('setup.address')} <span className="text-zinc-600">({t('setup.optional')})</span>
                                 </label>
                                 <div className="relative">
                                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
@@ -301,7 +303,7 @@ export function SetupHotelPage() {
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
                                     <>
-                                        Create Hotel
+                                        {t('setup.createSuccess')}
                                         <ArrowRight className="w-4 h-4 ml-2" />
                                     </>
                                 )}

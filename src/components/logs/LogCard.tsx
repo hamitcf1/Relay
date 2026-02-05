@@ -17,11 +17,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Log, LogType, LogUrgency } from '@/types'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface LogCardProps {
     log: Log
     onTogglePin?: (logId: string, isPinned: boolean) => void
-    onResolve?: (logId: string) => void
+    onResolve?: (logId: string, currentStatus: string) => void
     onArchive?: (logId: string) => void
     onEdit?: (log: Log) => void
     onRoomClick?: (roomNumber: string) => void
@@ -107,6 +108,7 @@ export function LogCard({
     onRoomClick,
     compact = false
 }: LogCardProps) {
+    const { t } = useLanguageStore()
     const Icon = typeIcons[log.type]
     const isResolved = log.status === 'resolved'
 
@@ -138,7 +140,7 @@ export function LogCard({
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                             <Badge variant="outline" className={cn("text-[10px] h-5 border-zinc-700 font-medium px-2 flex items-center gap-1.5", log.urgency === 'critical' && "bg-rose-500/10 text-rose-400 border-rose-500/20")}>
                                 <Icon className="w-3 h-3" />
-                                {log.type.replace('_', ' ')}
+                                {t(`module.${log.type}` as any)}
                             </Badge>
 
                             <span className={cn(
@@ -147,12 +149,12 @@ export function LogCard({
                                 log.urgency === 'medium' && "text-amber-500 bg-amber-500/10",
                                 log.urgency === 'critical' && "text-rose-500 bg-rose-500/10"
                             )}>
-                                {log.urgency}
+                                {t(`status.${log.urgency}` as any)}
                             </span>
 
                             {log.created_by_name && (
                                 <span className="text-[10px] text-zinc-600 block sm:inline">
-                                    by {log.created_by_name}
+                                    {t('common.by')} {log.created_by_name}
                                 </span>
                             )}
 
@@ -220,7 +222,7 @@ export function LogCard({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => onResolve(log.id)}
+                                    onClick={() => onResolve(log.id, log.status)}
                                     className="h-7 w-7 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-full"
                                     title="Reopen"
                                 >
@@ -230,7 +232,7 @@ export function LogCard({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => onResolve(log.id)}
+                                    onClick={() => onResolve(log.id, log.status)}
                                     className="h-7 w-7 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-full"
                                     title="Resolve"
                                 >

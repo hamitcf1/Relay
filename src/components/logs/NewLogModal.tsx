@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useLogsStore } from '@/stores/logsStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import type { Log, LogType, LogUrgency } from '@/types'
 
 interface NewLogModalProps {
@@ -14,22 +15,23 @@ interface NewLogModalProps {
     initialLog?: Log // If provided, we are in edit mode
 }
 
-const logTypes: { value: LogType; label: string; icon: React.ElementType }[] = [
-    { value: 'maintenance', label: 'Maintenance', icon: Wrench },
-    { value: 'guest_request', label: 'Guest Request', icon: MessageSquare },
-    { value: 'complaint', label: 'Complaint', icon: AlertTriangle },
-    { value: 'system', label: 'System', icon: Settings },
-]
-
-const urgencyLevels: { value: LogUrgency; label: string; color: string }[] = [
-    { value: 'low', label: 'Low', color: 'bg-zinc-700' },
-    { value: 'medium', label: 'Medium', color: 'bg-amber-500' },
-    { value: 'critical', label: 'Critical', color: 'bg-rose-500' },
-]
-
 export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
     const { addLog, editLog } = useLogsStore()
     const { user } = useAuthStore()
+    const { t } = useLanguageStore()
+
+    const logTypes: { value: LogType; label: string; icon: React.ElementType }[] = [
+        { value: 'maintenance', label: t('module.maintenance'), icon: Wrench },
+        { value: 'guest_request', label: t('module.guest_request'), icon: MessageSquare },
+        { value: 'complaint', label: t('module.complaint'), icon: AlertTriangle },
+        { value: 'system', label: t('module.system'), icon: Settings },
+    ]
+
+    const urgencyLevels: { value: LogUrgency; label: string; color: string }[] = [
+        { value: 'low', label: t('status.low'), color: 'bg-zinc-700' },
+        { value: 'medium', label: t('status.medium'), color: 'bg-amber-500' },
+        { value: 'critical', label: t('status.critical'), color: 'bg-rose-500' },
+    ]
 
     const [type, setType] = useState<LogType>('guest_request')
     const [urgency, setUrgency] = useState<LogUrgency>('low')
@@ -130,7 +132,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
                             <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between shrink-0">
                                 <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                                     {initialLog ? <Edit2 className="w-5 h-5 text-indigo-500" /> : <Plus className="w-5 h-5 text-indigo-500" />}
-                                    {initialLog ? 'Edit Log Entry' : 'New Log Entry'}
+                                    {initialLog ? t('log.edit') : t('log.new')}
                                 </h2>
                                 <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-zinc-800">
                                     <X className="w-5 h-5" />
@@ -147,7 +149,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
 
                                     {/* Type Selection */}
                                     <div className="space-y-3">
-                                        <label className="text-sm font-medium text-zinc-400">Log Type</label>
+                                        <label className="text-sm font-medium text-zinc-400">{t('log.typeLabel')}</label>
                                         <div className="grid grid-cols-2 gap-3">
                                             {logTypes.map((t) => (
                                                 <button
@@ -170,7 +172,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
 
                                     {/* Urgency */}
                                     <div className="space-y-3">
-                                        <label className="text-sm font-medium text-zinc-400">Urgency Level</label>
+                                        <label className="text-sm font-medium text-zinc-400">{t('log.urgencyLabel')}</label>
                                         <div className="flex gap-3">
                                             {urgencyLevels.map((u) => (
                                                 <button
@@ -193,7 +195,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
 
                                     {/* Content */}
                                     <div className="space-y-3">
-                                        <label className="text-sm font-medium text-zinc-400">Description</label>
+                                        <label className="text-sm font-medium text-zinc-400">{t('log.contentLabel')}</label>
                                         <textarea
                                             value={content}
                                             onChange={(e) => setContent(e.target.value)}
@@ -204,7 +206,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
 
                                     {/* Room Number (Optional) */}
                                     <div className="space-y-3">
-                                        <label className="text-sm font-medium text-zinc-400">Room Number (Optional)</label>
+                                        <label className="text-sm font-medium text-zinc-400">{t('log.roomNumberLabel')}</label>
                                         <Input
                                             value={roomNumber}
                                             onChange={(e) => setRoomNumber(e.target.value)}
@@ -217,7 +219,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
 
                             <div className="px-6 py-4 border-t border-zinc-800 bg-zinc-900/50 shrink-0 flex justify-end gap-3">
                                 <Button variant="ghost" onClick={onClose} disabled={loading}>
-                                    Cancel
+                                    {t('common.cancel')}
                                 </Button>
                                 <Button
                                     type="submit"
@@ -225,7 +227,7 @@ export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
                                     disabled={loading}
                                     className="bg-indigo-600 hover:bg-indigo-500 text-white"
                                 >
-                                    {loading ? 'Saving...' : (initialLog ? 'Save Changes' : 'Create Log')}
+                                    {loading ? t('common.loading') : (initialLog ? t('log.save') : t('log.create'))}
                                 </Button>
                             </div>
                         </div>

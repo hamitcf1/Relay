@@ -6,7 +6,6 @@ import {
     updateDoc,
     query,
     where,
-    orderBy,
     limit,
     onSnapshot,
     serverTimestamp,
@@ -52,7 +51,6 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
         const activeShiftQuery = query(
             shiftsRef,
             where('status', '==', 'active'),
-            orderBy('date', 'desc'),
             limit(1)
         )
 

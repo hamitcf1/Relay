@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useLogsStore } from '@/stores/logsStore'
 import { useShiftStore } from '@/stores/shiftStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface HandoverWizardProps {
     isOpen: boolean
@@ -26,18 +27,19 @@ interface HandoverWizardProps {
 
 type WizardStep = 'tickets' | 'cash' | 'notes' | 'confirm'
 
-const STEPS: WizardStep[] = ['tickets', 'cash', 'notes', 'confirm']
-
-const stepInfo: Record<WizardStep, { title: string; icon: React.ElementType }> = {
-    tickets: { title: 'Review Open Tickets', icon: ClipboardCheck },
-    cash: { title: 'Cash Count', icon: Wallet },
-    notes: { title: 'Handover Notes', icon: MessageSquare },
-    confirm: { title: 'Confirm & Complete', icon: CheckCircle },
-}
-
 export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete }: HandoverWizardProps) {
     const { logs } = useLogsStore()
     const { currentShift } = useShiftStore()
+    const { t } = useLanguageStore()
+
+    const STEPS: WizardStep[] = ['tickets', 'cash', 'notes', 'confirm']
+
+    const stepInfo: Record<WizardStep, { title: string; icon: React.ElementType }> = {
+        tickets: { title: t('handover.step.tickets'), icon: ClipboardCheck },
+        cash: { title: t('handover.step.cash'), icon: Wallet },
+        notes: { title: t('handover.step.notes'), icon: MessageSquare },
+        confirm: { title: t('handover.step.confirm'), icon: CheckCircle },
+    }
 
     const [currentStep, setCurrentStep] = useState<WizardStep>('tickets')
     const [cashEnd, setCashEnd] = useState('')
@@ -148,7 +150,7 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                         })()}
                                     </div>
                                     <div>
-                                        <h2 className="font-semibold text-lg">Handover Wizard</h2>
+                                        <h2 className="font-semibold text-lg">{t('handover.wizard')}</h2>
                                         <p className="text-sm text-zinc-400">{stepInfo[currentStep].title}</p>
                                     </div>
                                 </div>
@@ -202,13 +204,13 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                                 {openTickets.length === 0 ? (
                                                     <div className="text-center py-8">
                                                         <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                                                        <p className="text-zinc-300">No open tickets!</p>
-                                                        <p className="text-zinc-500 text-sm">All clear for handover</p>
+                                                        <p className="text-zinc-300">{t('handover.noOpenTickets')}</p>
+                                                        <p className="text-zinc-500 text-sm">{t('handover.allClear')}</p>
                                                     </div>
                                                 ) : (
                                                     <>
                                                         <p className="text-zinc-400 text-sm mb-4">
-                                                            Acknowledge each open ticket before proceeding ({acknowledgedTickets.size}/{openTickets.length})
+                                                            {t('handover.tickets.desc')} ({acknowledgedTickets.size}/{openTickets.length})
                                                         </p>
                                                         <div className="space-y-2 max-h-60 overflow-y-auto">
                                                             {openTickets.map((ticket) => (
@@ -234,7 +236,7 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
                                                                         <p className="text-sm text-zinc-200 truncate">{ticket.content}</p>
-                                                                        <p className="text-xs text-zinc-500 capitalize">{ticket.type.replace('_', ' ')} • {ticket.urgency}</p>
+                                                                        <p className="text-xs text-zinc-500 capitalize">{t(`module.${ticket.type}` as any)} • {t(`status.${ticket.urgency}` as any)}</p>
                                                                     </div>
                                                                     {ticket.urgency === 'critical' && (
                                                                         <AlertCircle className="w-4 h-4 text-rose-400" />
@@ -252,21 +254,21 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                             <div className="space-y-6">
                                                 <div className="text-center">
                                                     <Wallet className="w-12 h-12 text-indigo-400 mx-auto mb-3" />
-                                                    <p className="text-zinc-300 mb-1">Enter cash on hand</p>
-                                                    <p className="text-zinc-500 text-sm">Count all cash before handover</p>
+                                                    <p className="text-zinc-300 mb-1">{t('handover.enterCash')}</p>
+                                                    <p className="text-zinc-500 text-sm">{t('handover.countCash')}</p>
                                                 </div>
 
                                                 {currentShift && (
                                                     <div className="flex justify-center gap-8 text-sm">
                                                         <div>
-                                                            <span className="text-zinc-500">Started with:</span>
+                                                            <span className="text-zinc-500">{t('handover.cash.started')}:</span>
                                                             <span className="text-emerald-400 font-bold ml-2">₺{currentShift.cash_start.toLocaleString()}</span>
                                                         </div>
                                                     </div>
                                                 )}
 
                                                 <div className="max-w-xs mx-auto">
-                                                    <label className="text-sm text-zinc-400 mb-2 block">Cash End (₺)</label>
+                                                    <label className="text-sm text-zinc-400 mb-2 block">{t('handover.cashEnd')}</label>
                                                     <Input
                                                         type="number"
                                                         placeholder="0.00"
@@ -278,7 +280,7 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
 
                                                 {currentShift && cashEnd && (
                                                     <div className="text-center">
-                                                        <span className="text-zinc-500">Difference:</span>
+                                                        <span className="text-zinc-500">{t('handover.cash.difference')}:</span>
                                                         <span className={cn(
                                                             'font-bold ml-2',
                                                             parseFloat(cashEnd) - currentShift.cash_start >= 0 ? 'text-emerald-400' : 'text-rose-400'
@@ -296,8 +298,8 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                             <div className="space-y-4">
                                                 <div className="text-center mb-6">
                                                     <MessageSquare className="w-12 h-12 text-indigo-400 mx-auto mb-3" />
-                                                    <p className="text-zinc-300">Handover Notes</p>
-                                                    <p className="text-zinc-500 text-sm">Leave any important notes for the next shift</p>
+                                                    <p className="text-zinc-300">{t('handover.step.notes')}</p>
+                                                    <p className="text-zinc-500 text-sm">{t('handover.notesDesc')}</p>
                                                 </div>
 
                                                 <textarea
@@ -315,22 +317,22 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                             <div className="space-y-6">
                                                 <div className="text-center mb-6">
                                                     <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                                                    <p className="text-zinc-300 text-lg font-semibold">Ready to Complete Handover</p>
-                                                    <p className="text-zinc-500 text-sm">Review your handover summary</p>
+                                                    <p className="text-zinc-300 text-lg font-semibold">{t('handover.readyToComplete')}</p>
+                                                    <p className="text-zinc-500 text-sm">{t('handover.reviewSummary')}</p>
                                                 </div>
 
                                                 <div className="glass rounded-lg p-4 space-y-3">
                                                     <div className="flex justify-between">
-                                                        <span className="text-zinc-400">Open Tickets Reviewed</span>
+                                                        <span className="text-zinc-400">{t('handover.ticketsReviewed')}</span>
                                                         <span className="text-emerald-400">{acknowledgedTickets.size}/{openTickets.length}</span>
                                                     </div>
                                                     <div className="flex justify-between">
-                                                        <span className="text-zinc-400">Cash End</span>
+                                                        <span className="text-zinc-400">{t('handover.cashEnd')}</span>
                                                         <span className="text-zinc-100 font-bold">₺{parseFloat(cashEnd || '0').toLocaleString()}</span>
                                                     </div>
                                                     {handoverNote && (
                                                         <div>
-                                                            <span className="text-zinc-400 block mb-1">Notes</span>
+                                                            <span className="text-zinc-400 block mb-1">{t('handover.notes')}</span>
                                                             <p className="text-zinc-300 text-sm bg-zinc-800/50 p-2 rounded">{handoverNote}</p>
                                                         </div>
                                                     )}
@@ -349,7 +351,7 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                     disabled={isFirstStep}
                                 >
                                     <ChevronLeft className="w-4 h-4" />
-                                    Back
+                                    {t('common.back')}
                                 </Button>
 
                                 {isLastStep ? (
@@ -362,7 +364,7 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <>
-                                                Complete Handover
+                                                {t('handover.complete')}
                                                 <CheckCircle className="w-4 h-4 ml-2" />
                                             </>
                                         )}
@@ -372,7 +374,7 @@ export function HandoverWizard({ isOpen, onClose, hotelId: _hotelId, onComplete 
                                         onClick={handleNext}
                                         disabled={!canProceed()}
                                     >
-                                        Continue
+                                        {t('common.continue')}
                                         <ChevronRight className="w-4 h-4 ml-2" />
                                     </Button>
                                 )}

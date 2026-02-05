@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { ShiftCompliance } from '@/types'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface ComplianceChecklistProps {
     compliance: ShiftCompliance
@@ -25,6 +26,7 @@ export function ComplianceChecklist({
     onAgencyCheck,
     disabled = false
 }: ComplianceChecklistProps) {
+    const { t } = useLanguageStore()
     const [loading, setLoading] = useState<'kbs' | 'agency' | null>(null)
 
     const handleKBSCheck = async () => {
@@ -75,7 +77,7 @@ export function ComplianceChecklist({
             <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-400" />
-                    Compliance Checklist
+                    {t('module.compliance')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">

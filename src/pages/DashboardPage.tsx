@@ -28,6 +28,7 @@ import {
 
 import { LogFeed } from '@/components/logs/LogFeed'
 import { StickyBoard } from '@/components/logs/StickyBoard'
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { NewLogModal } from '@/components/logs/NewLogModal'
 import { RoomManagementModal } from '@/components/rooms/RoomManagementModal'
 import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
@@ -48,7 +49,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 
 export function DashboardPage() {
     const navigate = useNavigate()
-    const { user, initialize: initAuth } = useAuthStore()
+    const { user, initialize: initAuth, signOut } = useAuthStore()
     const { logs, pinnedLogs, loading: logsLoading, setHotelId, subscribeToLogs, updateLogStatus, togglePin, archiveLog } = useLogsStore()
     const { hotel, subscribeToHotel } = useHotelStore()
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
@@ -134,7 +135,8 @@ export function DashboardPage() {
     }
 
     return (
-        <div className="h-screen w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans selection:bg-indigo-500/30">
+            <OnboardingWizard />
             {/* Header */}
             <header className="h-16 border-b border-zinc-800 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
                 <div className="flex items-center gap-4">
@@ -156,7 +158,7 @@ export function DashboardPage() {
                             <div className={cn("w-2 h-2 rounded-full animate-pulse",
                                 compliancePercentage === 100 ? "bg-emerald-500" : "bg-amber-500"
                             )} />
-                            <span className="text-xs text-zinc-400 font-medium">{compliancePercentage}% Compliance</span>
+                            <span className="text-xs text-zinc-400 font-medium">{compliancePercentage}% {t('module.compliance')}</span>
                         </div>
                     )}
 
@@ -184,7 +186,7 @@ export function DashboardPage() {
                         onClick={() => setIsRoomManagerOpen(true)}
                     >
                         <BedDouble className="w-4 h-4 mr-2" />
-                        Rooms
+                        {t('dashboard.rooms')}
                     </Button>
 
                     {/* Actions Menu (Merged) */}
@@ -199,10 +201,10 @@ export function DashboardPage() {
                         <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800">
                             <DropdownMenuLabel className="text-xs text-zinc-500 font-normal uppercase">{t('dashboard.actions')}</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => setIsNewLogOpen(true)} className="text-xs cursor-pointer">
-                                <Plus className="w-3.5 h-3.5 mr-2" /> New Entry
+                                <Plus className="w-3.5 h-3.5 mr-2" /> {t('dashboard.newLog')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="text-xs cursor-pointer">
-                                <LogOut className="w-3.5 h-3.5 mr-2" /> Handover
+                                <LogOut className="w-3.5 h-3.5 mr-2" /> {t('category.handover')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-zinc-800" />
                             {!currentShift ? (
@@ -218,9 +220,20 @@ export function DashboardPage() {
                     </DropdownMenu>
 
                     {/* User Profile */}
-                    <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 ml-2">
-                        <User className="w-4 h-4 text-zinc-400" />
-                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 ml-2 hover:bg-zinc-700 transition-colors">
+                                <User className="w-4 h-4 text-zinc-400" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800">
+                            <DropdownMenuLabel className="text-xs text-zinc-500 font-normal uppercase">{user?.name || 'User'}</DropdownMenuLabel>
+                            <DropdownMenuSeparator className="bg-zinc-800" />
+                            <DropdownMenuItem onClick={() => signOut()} className="text-xs cursor-pointer text-rose-400">
+                                <LogOut className="w-3.5 h-3.5 mr-2" /> Logout
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </header>
 
@@ -236,7 +249,7 @@ export function DashboardPage() {
                                 {t('module.activityFeed')}
                             </h2>
                             <Badge variant="outline" className="text-[10px] h-5 border-zinc-700 text-zinc-400">
-                                {openTickets} Active
+                                {openTickets} {t('status.active')}
                             </Badge>
                         </div>
 
@@ -245,7 +258,7 @@ export function DashboardPage() {
                                 logs={logs}
                                 loading={logsLoading}
                                 onTogglePin={togglePin}
-                                onResolve={(id) => updateLogStatus(id, 'resolved')} // This now behaves as toggle if I implement it right, or I need to handle unresolve
+                                onResolve={(id: string, currentStatus: string) => updateLogStatus(id, currentStatus === 'resolved' ? 'open' : 'resolved')} // Support toggle/reopen
                                 onArchive={archiveLog}
                                 onEdit={(log) => {
                                     setEditingLog(log)
@@ -262,6 +275,15 @@ export function DashboardPage() {
                         <div className="space-y-4">
                             <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
                         </div>
+
+                        {/* 2. Shift Notes (Moved from right column) */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <ShiftNotes hotelId={hotel?.id || ''} />
+                        </motion.div>
 
                         {/* 2. Sticky Board (Priority) */}
                         <StickyBoard
@@ -292,14 +314,7 @@ export function DashboardPage() {
                             <CalendarWidget hotelId={hotel?.id || ''} />
                         </motion.div>
 
-                        {/* 2. Shift Notes */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <ShiftNotes hotelId={hotel?.id || ''} />
-                        </motion.div>
+
 
                         {/* 3. Hotel Info */}
                         <motion.div
@@ -327,7 +342,8 @@ export function DashboardPage() {
             {/* Modals */}
             <RoomManagementModal
                 isOpen={isRoomManagerOpen}
-                onClose={() => setIsRoomManagerOpen(false)}
+                onClose={() => setIsRoomManagerOpen(false)
+                }
             />
 
             <NewLogModal
