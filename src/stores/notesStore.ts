@@ -12,30 +12,10 @@ import {
     Timestamp
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import type { ShiftNote, NoteCategory, NoteStatus } from '@/types'
+import { syncNoteToCalendar, removeNoteFromCalendar } from '@/lib/calendar-sync'
 
-// Note categories
-export type NoteCategory =
-    | 'handover'      // General handover notes
-    | 'damage'        // Property damage (payment collection)
-    | 'early_checkout'// Early checkout info
-    | 'guest_info'    // Guest-specific notes
-    | 'other'
-
-export interface ShiftNote {
-    id: string
-    category: NoteCategory
-    content: string
-    room_number: string | null
-    is_relevant: boolean
-    amount_due: number | null  // For damage notes
-    is_paid: boolean           // For damage notes
-    created_at: Date
-    created_by: string
-    created_by_name: string
-    shift_id: string | null
-    resolved_at: Date | null
-    resolved_by: string | null
-}
+export type { NoteCategory, NoteStatus }
 
 interface NotesState {
     notes: ShiftNote[]
@@ -45,7 +25,8 @@ interface NotesState {
 
 interface NotesActions {
     subscribeToNotes: (hotelId: string) => () => void
-    addNote: (hotelId: string, note: Omit<ShiftNote, 'id' | 'created_at' | 'resolved_at' | 'resolved_by'>) => Promise<void>
+    addNote: (hotelId: string, note: Omit<ShiftNote, 'id' | 'created_at' | 'resolved_at' | 'resolved_by' | 'status'>) => Promise<void>
+    updateNoteStatus: (hotelId: string, noteId: string, status: NoteStatus, resolvedBy?: string) => Promise<void>
     toggleRelevance: (hotelId: string, noteId: string, isRelevant: boolean) => Promise<void>
     markPaid: (hotelId: string, noteId: string) => Promise<void>
     deleteNote: (hotelId: string, noteId: string) => Promise<void>
@@ -81,6 +62,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         content: data.content,
                         room_number: data.room_number || null,
                         is_relevant: data.is_relevant ?? true,
+                        status: data.status || (data.resolved_at ? 'resolved' : 'active'),
                         amount_due: data.amount_due || null,
                         is_paid: data.is_paid || false,
                         created_at: convertTimestamp(data.created_at),
@@ -89,6 +71,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         shift_id: data.shift_id || null,
                         resolved_at: data.resolved_at ? convertTimestamp(data.resolved_at) : null,
                         resolved_by: data.resolved_by || null,
+                        is_anonymous: data.is_anonymous || false
                     }
                 })
 
@@ -106,14 +89,52 @@ export const useNotesStore = create<NotesStore>((set) => ({
     addNote: async (hotelId, noteData) => {
         try {
             const notesRef = collection(db, 'hotels', hotelId, 'shift_notes')
-            await addDoc(notesRef, {
+            const docRef = await addDoc(notesRef, {
                 ...noteData,
+                status: 'active',
                 created_at: serverTimestamp(),
                 resolved_at: null,
                 resolved_by: null,
             })
+
+            // Sync to calendar if relevant
+            if (noteData.is_relevant) {
+                const newNote: ShiftNote = {
+                    id: docRef.id,
+                    ...noteData,
+                    status: 'active',
+                    created_at: new Date(),
+                    resolved_at: null,
+                    resolved_by: null,
+                }
+                await syncNoteToCalendar(hotelId, newNote)
+            }
         } catch (error) {
             console.error('Error adding note:', error)
+            throw error
+        }
+    },
+
+    updateNoteStatus: async (hotelId, noteId, status, resolvedBy) => {
+        try {
+            const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
+            const updates: any = { status }
+            if (status === 'resolved' || status === 'archived') {
+                updates.resolved_at = serverTimestamp()
+                if (resolvedBy) updates.resolved_by = resolvedBy
+                await removeNoteFromCalendar(hotelId, noteId)
+            } else if (status === 'active') {
+                updates.resolved_at = null
+                updates.resolved_by = null
+
+                const note = useNotesStore.getState().notes.find(n => n.id === noteId)
+                if (note && note.is_relevant) {
+                    await syncNoteToCalendar(hotelId, { ...note, status: 'active' })
+                }
+            }
+            await updateDoc(noteRef, updates)
+        } catch (error) {
+            console.error('Error updating note status:', error)
             throw error
         }
     },
@@ -121,10 +142,19 @@ export const useNotesStore = create<NotesStore>((set) => ({
     toggleRelevance: async (hotelId, noteId, isRelevant) => {
         try {
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
+            const status = isRelevant ? 'active' : 'resolved'
             await updateDoc(noteRef, {
                 is_relevant: isRelevant,
+                status,
                 resolved_at: isRelevant ? null : serverTimestamp(),
             })
+
+            if (isRelevant) {
+                const note = useNotesStore.getState().notes.find(n => n.id === noteId)
+                if (note) await syncNoteToCalendar(hotelId, { ...note, is_relevant: true, status: 'active' })
+            } else {
+                await removeNoteFromCalendar(hotelId, noteId)
+            }
         } catch (error) {
             console.error('Error toggling relevance:', error)
             throw error
@@ -136,8 +166,10 @@ export const useNotesStore = create<NotesStore>((set) => ({
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
             await updateDoc(noteRef, {
                 is_paid: true,
+                status: 'resolved',
                 resolved_at: serverTimestamp(),
             })
+            await removeNoteFromCalendar(hotelId, noteId)
         } catch (error) {
             console.error('Error marking paid:', error)
             throw error
@@ -148,6 +180,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
         try {
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
             await deleteDoc(noteRef)
+            await removeNoteFromCalendar(hotelId, noteId)
         } catch (error) {
             console.error('Error deleting note:', error)
             throw error
@@ -161,5 +194,6 @@ export const categoryInfo: Record<NoteCategory, { label: string; color: string; 
     damage: { label: 'Damage', color: 'bg-rose-500', icon: '⚠️' },
     early_checkout: { label: 'Early Checkout', color: 'bg-amber-500', icon: '🚪' },
     guest_info: { label: 'Guest Info', color: 'bg-emerald-500', icon: '👤' },
+    feedback: { label: 'Feedback', color: 'bg-purple-500', icon: '💬' },
     other: { label: 'Other', color: 'bg-zinc-500', icon: '📝' },
 }

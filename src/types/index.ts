@@ -131,6 +131,35 @@ export interface AuthState {
     loading: boolean
     error: string | null
 }
+// Note categories
+export type NoteCategory =
+    | 'handover'       // General handover notes
+    | 'damage'         // Property damage (payment collection)
+    | 'early_checkout' // Early checkout info
+    | 'guest_info'     // Guest-specific notes
+    | 'feedback'       // Merged Live Feedback
+    | 'other'
+
+export type NoteStatus = 'active' | 'resolved' | 'archived'
+
+export interface ShiftNote {
+    id: string
+    category: NoteCategory
+    content: string
+    room_number: string | null
+    is_relevant: boolean
+    status: NoteStatus
+    amount_due: number | null  // For damage notes
+    is_paid: boolean           // For damage notes
+    created_at: Date
+    created_by: string | 'anonymous'
+    created_by_name: string
+    shift_id: string | null
+    resolved_at: Date | null
+    resolved_by: string | null
+    is_anonymous?: boolean
+}
+
 // Room Types
 export type RoomStatus = 'clean' | 'dirty' | 'inspect' | 'dnd'
 export type RoomOccupancy = 'vacant' | 'occupied'

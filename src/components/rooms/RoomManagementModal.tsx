@@ -63,6 +63,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
         addRoom,
         updateRoomStatus,
         updateRoomOccupancy,
+        updateRoom,
         deleteRoom,
         updateMultipleRooms
     } = useRoomStore()
@@ -131,6 +132,12 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
         const flow: RoomStatus[] = ['clean', 'dirty', 'inspect', 'dnd']
         const nextIndex = (flow.indexOf(room.status) + 1) % flow.length
         await updateRoomStatus(hotelId, room.id, flow[nextIndex])
+    }
+
+    const toggleBedConfig = async (room: Room) => {
+        if (!hotelId || room.type !== 'standard') return
+        const newConfig: BedConfig = room.bed_config === 'together' ? 'separated' : 'together'
+        await updateRoom(hotelId, room.id, { bed_config: newConfig })
     }
 
     const toggleRoomSelection = (roomId: string) => {
@@ -235,20 +242,39 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                         >
                                             {/* Header */}
                                             <div className="flex justify-between items-start mb-3">
-                                                <span className="text-lg font-bold text-zinc-200">
-                                                    {room.number}
-                                                </span>
-                                                <div
-                                                    onClick={(e) => { e.stopPropagation(); toggleOccupancy(room); }}
-                                                    className={cn(
-                                                        "p-1.5 rounded-full transition-colors",
-                                                        room.occupancy === 'occupied'
-                                                            ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                                                            : "bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700"
+                                                <div className="flex flex-col">
+                                                    <span className="text-lg font-bold text-zinc-200">
+                                                        {room.number}
+                                                    </span>
+                                                    <span className="text-[10px] text-zinc-600 uppercase font-medium">{roomTypeLabels[room.type]}</span>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    {room.type === 'standard' && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); toggleBedConfig(room); }}
+                                                            className={cn(
+                                                                "p-1.5 rounded-full transition-colors",
+                                                                room.bed_config === 'together'
+                                                                    ? "bg-amber-500/20 text-amber-500"
+                                                                    : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"
+                                                            )}
+                                                            title={room.bed_config === 'together' ? 'Birleşik Yatak' : 'Ayrık Yataklar'}
+                                                        >
+                                                            <BedDouble className="w-3.5 h-3.5" />
+                                                        </button>
                                                     )}
-                                                    title={room.occupancy}
-                                                >
-                                                    {room.occupancy === 'occupied' ? <User className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5 opacity-50" />}
+                                                    <div
+                                                        onClick={(e) => { e.stopPropagation(); toggleOccupancy(room); }}
+                                                        className={cn(
+                                                            "p-1.5 rounded-full transition-colors",
+                                                            room.occupancy === 'occupied'
+                                                                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                                                                : "bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700"
+                                                        )}
+                                                        title={room.occupancy}
+                                                    >
+                                                        {room.occupancy === 'occupied' ? <User className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5 opacity-50" />}
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -269,11 +295,6 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     {statusLabels[room.status]}
                                                 </div>
                                             </Button>
-
-                                            {/* Type Hint */}
-                                            <div className="mt-2 flex justify-end">
-                                                <span className="text-[10px] text-zinc-600 uppercase font-medium">{roomTypeLabels[room.type]}</span>
-                                            </div>
 
                                         </motion.div>
                                     ))}

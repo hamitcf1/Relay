@@ -8,6 +8,7 @@ import {
     doc,
     serverTimestamp,
     updateDoc,
+    deleteDoc,
     Timestamp,
     limit
 } from 'firebase/firestore'
@@ -24,6 +25,7 @@ interface MessageActions {
     subscribeToMessages: (hotelId: string, userId: string) => () => void
     sendMessage: (hotelId: string, message: Omit<PrivateMessage, 'id' | 'timestamp' | 'is_read'>) => Promise<void>
     markAsRead: (hotelId: string, messageId: string) => Promise<void>
+    deleteMessage: (hotelId: string, messageId: string) => Promise<void>
 }
 
 type MessageStore = MessageState & MessageActions
@@ -98,6 +100,14 @@ export const useMessageStore = create<MessageStore>((set) => ({
             await updateDoc(docRef, { is_read: true })
         } catch (error: any) {
             console.error("Error marking message as read:", error)
+        }
+    },
+    deleteMessage: async (hotelId, messageId) => {
+        try {
+            const docRef = doc(db, 'hotels', hotelId, 'messages', messageId)
+            await deleteDoc(docRef)
+        } catch (error: any) {
+            console.error("Error deleting message:", error)
         }
     }
 }))

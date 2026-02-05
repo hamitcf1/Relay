@@ -61,6 +61,7 @@ type Translations = {
     'category.damage': string
     'category.guestInfo': string
     'category.earlyCheckout': string
+    'category.feedback': string
     'category.maintenance': string
     'category.guest_request': string
     'category.complaint': string
@@ -208,6 +209,7 @@ const translations: Record<Language, Translations> = {
         'category.damage': 'Damage',
         'category.guestInfo': 'Guest Info',
         'category.earlyCheckout': 'Early Checkout',
+        'category.feedback': 'Live Feedback',
         'category.maintenance': 'Maintenance',
         'category.guest_request': 'Guest Request',
         'category.complaint': 'Complaint',
@@ -341,6 +343,7 @@ const translations: Record<Language, Translations> = {
         'category.damage': 'Hasar / Ödeme',
         'category.guestInfo': 'Misafir Bilgi',
         'category.earlyCheckout': 'Erken Çıkış',
+        'category.feedback': 'Canlı Geri Bildirim',
         'category.maintenance': 'Teknik Servis',
         'category.guest_request': 'Misafir Talebi',
         'category.complaint': 'Şikayet',

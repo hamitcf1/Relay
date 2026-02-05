@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { formatDistanceToNow, format } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import {
     Plus,
     Check,
-    X,
     DollarSign,
     Clock,
     User,
@@ -15,8 +14,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { useNotesStore, categoryInfo, type NoteCategory } from '@/stores/notesStore'
+import { useNotesStore, categoryInfo, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
@@ -27,7 +27,7 @@ interface ShiftNotesProps {
 }
 
 export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
-    const { notes, addNote, toggleRelevance, markPaid, deleteNote } = useNotesStore()
+    const { notes, addNote, markPaid, deleteNote } = useNotesStore()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
 
@@ -36,18 +36,19 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [newContent, setNewContent] = useState('')
     const [newRoom, setNewRoom] = useState('')
     const [newAmount, setNewAmount] = useState('')
-    const [filter, setFilter] = useState<NoteCategory | 'all' | 'relevant'>('relevant')
     const [loading, setLoading] = useState(false)
     const [isAIModalOpen, setIsAIModalOpen] = useState(false)
+    const [statusFilter, setStatusFilter] = useState<NoteStatus | 'all'>('active')
+    const [filter, setFilter] = useState<NoteCategory | 'all'>('all')
 
     // Filter notes
     const filteredNotes = useMemo(() => {
         return notes.filter((note) => {
-            if (filter === 'all') return true
-            if (filter === 'relevant') return note.is_relevant
-            return note.category === filter
+            const matchesCategory = filter === 'all' || note.category === filter
+            const matchesStatus = statusFilter === 'all' || note.status === statusFilter
+            return matchesCategory && matchesStatus
         })
-    }, [notes, filter])
+    }, [notes, filter, statusFilter])
 
     const handleAddNote = async () => {
         if (!newContent.trim() || !user) return
@@ -76,8 +77,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         }
     }
 
-    const handleToggleRelevance = async (noteId: string, isRelevant: boolean) => {
-        await toggleRelevance(hotelId, noteId, isRelevant)
+    const handleStatusChange = async (noteId: string, status: NoteStatus) => {
+        if (!user) return
+        await useNotesStore.getState().updateNoteStatus(hotelId, noteId, status, user.uid)
     }
 
     const handleMarkPaid = async (noteId: string) => {
@@ -90,38 +92,26 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         }
     }
 
-    // Calculate unread counts per category
-    const categoryCounts = useMemo(() => {
-        const counts: Record<string, number> = { all: 0, relevant: 0 }
+    // Calculate unread counts per category and status
+    const counts = useMemo(() => {
+        const c: Record<string, number> = { all: 0 }
         notes.forEach(note => {
-            counts[note.category] = (counts[note.category] || 0) + 1
-            if (note.is_relevant) counts.relevant++
-            counts.all++
+            c[note.category] = (c[note.category] || 0) + 1
+            c[note.status] = (c[note.status] || 0) + 1
+            c.all++
         })
-        return counts
+        return c
     }, [notes])
 
     return (
         <Card className="glass border-zinc-800/50">
-            <CardHeader className="pb-3 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                    {t('module.shiftNotes')}
-                </CardTitle>
-                <div className="flex gap-2">
-                    {showAddButton && (
-                        <div className="flex gap-1">
-                            {/* ... */}
-                        </div>
-                    )}
-                </div>
-            </CardHeader>
             <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-3">
                     <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                        📋 Shift Notes
-                        {notes.filter(n => n.is_relevant).length > 0 && (
+                        📋 {t('module.shiftNotes')}
+                        {counts.active > 0 && (
                             <Badge variant="secondary" className="text-xs">
-                                {notes.filter(n => n.is_relevant).length} active
+                                {counts.active} active
                             </Badge>
                         )}
                     </CardTitle>
@@ -138,12 +128,38 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                     )}
                 </div>
 
+                {/* Status Tabs */}
+                <div className="flex gap-1 mb-4 p-1 bg-zinc-950/50 rounded-lg border border-zinc-800/50">
+                    {[
+                        { key: 'active' as const, label: 'Active', color: 'bg-emerald-500' },
+                        { key: 'resolved' as const, label: 'Resolved', color: 'bg-indigo-500' },
+                        { key: 'archived' as const, label: 'Archived', color: 'bg-zinc-600' },
+                        { key: 'all' as const, label: 'All', color: 'bg-zinc-400' }
+                    ].map((tab) => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setStatusFilter(tab.key)}
+                            className={cn(
+                                'flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded transition-all',
+                                statusFilter === tab.key
+                                    ? 'bg-zinc-800 text-white shadow-sm'
+                                    : 'text-zinc-500 hover:text-zinc-300'
+                            )}
+                        >
+                            {tab.label}
+                            {counts[tab.key] > 0 && (
+                                <span className="ml-1 opacity-60">({counts[tab.key]})</span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+
                 {/* Category Tabs */}
                 <div className="flex flex-wrap gap-1.5">
                     {[
+                        { key: 'all' as const, label: 'All Issues', color: 'bg-indigo-500', icon: '📁' },
                         { key: 'handover' as const, ...categoryInfo.handover, label: t('category.handover') },
-                        { key: 'relevant' as const, label: t('status.active'), color: 'bg-emerald-500', icon: '✓' },
-                        { key: 'all' as const, label: t('common.viewAll'), color: 'bg-zinc-600', icon: '📁' },
+                        { key: 'feedback' as const, ...categoryInfo.feedback, label: t('category.feedback') },
                         { key: 'damage' as const, ...categoryInfo.damage, label: t('category.damage') },
                         { key: 'guest_info' as const, ...categoryInfo.guest_info, label: t('category.guestInfo') },
                         { key: 'early_checkout' as const, ...categoryInfo.early_checkout, label: t('category.earlyCheckout') },
@@ -152,7 +168,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             key={tab.key}
                             onClick={() => setFilter(tab.key)}
                             className={cn(
-                                'text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all',
+                                'text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all',
                                 filter === tab.key
                                     ? `${tab.color} text-white shadow-lg`
                                     : 'bg-zinc-800/70 text-zinc-400 hover:bg-zinc-700/70 hover:text-zinc-200'
@@ -160,11 +176,6 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         >
                             <span>{tab.icon}</span>
                             <span>{tab.label}</span>
-                            {categoryCounts[tab.key] > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
-                                    {categoryCounts[tab.key]}
-                                </span>
-                            )}
                         </button>
                     ))}
                 </div>
@@ -273,20 +284,20 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
                 {/* Notes List */}
                 {filteredNotes.length === 0 ? (
-                    <p className="text-zinc-500 text-sm text-center py-4">No notes found</p>
+                    <p className="text-zinc-500 text-sm text-center py-8">No notes to show.</p>
                 ) : (
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    <div className="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar">
                         {filteredNotes.map((note) => (
                             <motion.div
                                 key={note.id}
                                 layout
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
                                 className={cn(
-                                    'p-3 rounded-lg border transition-all',
-                                    note.is_relevant
-                                        ? 'border-zinc-700 bg-zinc-800/50'
-                                        : 'border-zinc-800 bg-zinc-900/30 opacity-60'
+                                    'p-3 rounded-lg border transition-all group',
+                                    note.status === 'active'
+                                        ? 'border-zinc-800 bg-zinc-900/50'
+                                        : 'border-zinc-800/30 bg-zinc-900/20 opacity-60'
                                 )}
                             >
                                 <div className="flex items-start justify-between gap-2">
@@ -294,7 +305,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         {/* Header */}
                                         <div className="flex items-center gap-2 flex-wrap mb-1">
                                             <span className={cn(
-                                                'text-xs px-1.5 py-0.5 rounded',
+                                                'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded',
                                                 categoryInfo[note.category].color,
                                                 'text-white'
                                             )}>
@@ -302,12 +313,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             </span>
 
                                             {note.room_number && (
-                                                <Badge variant="room" className="text-xs">#{note.room_number}</Badge>
+                                                <Badge variant="outline" className="text-[10px] h-4 bg-zinc-800 text-zinc-400 border-zinc-700">#{note.room_number}</Badge>
                                             )}
 
                                             {note.category === 'damage' && note.amount_due && (
                                                 <span className={cn(
-                                                    'text-xs font-bold',
+                                                    'text-[10px] font-bold',
                                                     note.is_paid ? 'text-emerald-400' : 'text-rose-400'
                                                 )}>
                                                     ₺{note.amount_due.toLocaleString()}
@@ -315,67 +326,69 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 </span>
                                             )}
 
-                                            {!note.is_relevant && (
-                                                <span className="text-xs text-zinc-500">Resolved</span>
-                                            )}
+                                            <Badge variant="outline" className={cn(
+                                                "text-[9px] h-4 px-1 border-none",
+                                                note.status === 'active' ? "text-emerald-500 bg-emerald-500/10" :
+                                                    note.status === 'resolved' ? "text-indigo-500 bg-indigo-500/10" :
+                                                        "text-zinc-500 bg-zinc-500/10"
+                                            )}>
+                                                {note.status.toUpperCase()}
+                                            </Badge>
                                         </div>
 
                                         {/* Content */}
-                                        <p className="text-sm text-zinc-200 mb-2">{note.content}</p>
+                                        <p className="text-sm text-zinc-300 mb-2 leading-relaxed">{note.content}</p>
 
                                         {/* Footer */}
-                                        <div className="flex items-center gap-3 text-xs text-zinc-500">
+                                        <div className="flex items-center gap-3 text-[10px] text-zinc-500">
                                             <span className="flex items-center gap-1">
-                                                <User className="w-3 h-3" />
-                                                {note.created_by_name}
+                                                <User className="w-2.5 h-2.5" />
+                                                {note.is_anonymous ? 'Anonymous' : note.created_by_name}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
+                                                <Clock className="w-2.5 h-2.5" />
                                                 {formatDistanceToNow(note.created_at, { addSuffix: true })}
-                                            </span>
-                                            <span className="text-zinc-600">
-                                                {format(note.created_at, 'MMM d, HH:mm')}
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         {note.category === 'damage' && !note.is_paid && note.amount_due && (
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
                                                 onClick={() => handleMarkPaid(note.id)}
-                                                title="Mark as Paid"
-                                                className="h-7 w-7"
+                                                className="h-6 w-6 text-emerald-500 hover:bg-emerald-500/10"
                                             >
-                                                <DollarSign className="w-3 h-3 text-emerald-400" />
+                                                <DollarSign className="w-3.5 h-3.5" />
                                             </Button>
                                         )}
 
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={() => handleToggleRelevance(note.id, !note.is_relevant)}
-                                            title={note.is_relevant ? 'Mark as Resolved' : 'Mark as Relevant'}
-                                            className="h-7 w-7"
+                                        <Select
+                                            value={note.status}
+                                            onValueChange={(v) => handleStatusChange(note.id, v as NoteStatus)}
                                         >
-                                            {note.is_relevant ? (
-                                                <Check className="w-3 h-3 text-zinc-400" />
-                                            ) : (
-                                                <X className="w-3 h-3 text-zinc-400" />
-                                            )}
-                                        </Button>
+                                            <SelectTrigger className="h-6 w-24 bg-zinc-950 border-zinc-800 text-[10px] px-2">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-zinc-900 border-zinc-800">
+                                                <SelectItem value="active" className="text-xs">Active</SelectItem>
+                                                <SelectItem value="resolved" className="text-xs">Resolved</SelectItem>
+                                                <SelectItem value="archived" className="text-xs">Archived</SelectItem>
+                                            </SelectContent>
+                                        </Select>
 
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            onClick={() => handleDelete(note.id)}
-                                            title="Delete"
-                                            className="h-7 w-7"
-                                        >
-                                            <Trash2 className="w-3 h-3 text-zinc-500" />
-                                        </Button>
+                                        {user?.role === 'gm' && (
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                onClick={() => handleDelete(note.id)}
+                                                className="h-6 w-6 text-rose-500 hover:bg-rose-500/10"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Send, MessageSquare, Megaphone, Loader2, Mail, Bell } from 'lucide-react'
+import { Send, MessageSquare, Megaphone, Loader2, Mail, Bell, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMessageStore } from '@/stores/messageStore'
 import { useRosterStore } from '@/stores/rosterStore'
@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
 export function MessagingPanel() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
-    const { messages, subscribeToMessages, sendMessage, loading } = useMessageStore()
+    const { messages, subscribeToMessages, sendMessage, deleteMessage, loading } = useMessageStore()
     const { staff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
 
@@ -63,6 +63,22 @@ export function MessagingPanel() {
                     content: content.trim(),
                     target_role: 'all'
                 })
+            } else if (recipient !== 'gm' && hotel?.id) {
+                // If specific user, notify them
+                await addNotification(hotel.id, {
+                    type: 'message',
+                    title: `Yeni Mesaj: ${user.name}`,
+                    content: content.trim().substring(0, 50) + (content.length > 50 ? '...' : ''),
+                    target_uid: recipient
+                })
+            } else if (recipient === 'gm' && !isGM && hotel?.id) {
+                // If staff sending to GM, notify GM role
+                await addNotification(hotel.id, {
+                    type: 'message',
+                    title: `Personel Mesajı: ${user.name}`,
+                    content: content.trim().substring(0, 50) + (content.length > 50 ? '...' : ''),
+                    target_role: 'gm'
+                })
             }
 
             setContent('')
@@ -70,6 +86,13 @@ export function MessagingPanel() {
             console.error("Message send error:", error)
         } finally {
             setSubmitting(false)
+        }
+    }
+
+    const handleDeleteMessage = async (id: string) => {
+        if (!hotel?.id) return
+        if (window.confirm('Bu mesajı silmek istediğinize emin misiniz?')) {
+            await deleteMessage(hotel.id, id)
         }
     }
 
@@ -112,29 +135,47 @@ export function MessagingPanel() {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         className={cn(
-                                            "flex flex-col max-w-[80%]",
+                                            "flex flex-col max-w-[80%] group",
                                             isOwn ? "ml-auto items-end" : "items-start",
                                             isAnnouncement && "max-w-full w-full items-center mx-auto"
                                         )}
                                     >
-                                        <div className={cn(
-                                            "rounded-2xl px-4 py-2.5 text-sm",
-                                            isAnnouncement
-                                                ? "bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 w-full text-center"
-                                                : isOwn
-                                                    ? "bg-indigo-600 text-white rounded-tr-none"
-                                                    : "bg-zinc-800 text-zinc-200 rounded-tl-none border border-zinc-700"
-                                        )}>
-                                            {isAnnouncement && (
-                                                <div className="flex items-center justify-center gap-2 mb-1 text-[10px] font-bold uppercase tracking-wider text-indigo-400">
-                                                    <Megaphone className="w-3 h-3" />
-                                                    Announcement
-                                                </div>
+                                        <div className="flex items-start gap-2 max-w-full">
+                                            {isOwn && (
+                                                <button
+                                                    onClick={() => handleDeleteMessage(m.id)}
+                                                    className="opacity-0 group-hover:opacity-100 p-1 text-zinc-600 hover:text-rose-500 transition-all mt-2"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
                                             )}
-                                            {!isOwn && !isAnnouncement && (
-                                                <p className="text-[10px] font-bold text-indigo-400 mb-1">{m.sender_name}</p>
+                                            <div className={cn(
+                                                "rounded-2xl px-4 py-2.5 text-sm",
+                                                isAnnouncement
+                                                    ? "bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 w-full text-center"
+                                                    : isOwn
+                                                        ? "bg-indigo-600 text-white rounded-tr-none"
+                                                        : "bg-zinc-800 text-zinc-200 rounded-tl-none border border-zinc-700"
+                                            )}>
+                                                {isAnnouncement && (
+                                                    <div className="flex items-center justify-center gap-2 mb-1 text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+                                                        <Megaphone className="w-3 h-3" />
+                                                        Announcement
+                                                    </div>
+                                                )}
+                                                {!isOwn && !isAnnouncement && (
+                                                    <p className="text-[10px] font-bold text-indigo-400 mb-1">{m.sender_name}</p>
+                                                )}
+                                                {m.content}
+                                            </div>
+                                            {!isOwn && isGM && !isAnnouncement && (
+                                                <button
+                                                    onClick={() => handleDeleteMessage(m.id)}
+                                                    className="opacity-0 group-hover:opacity-100 p-1 text-zinc-600 hover:text-rose-500 transition-all mt-2"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
                                             )}
-                                            {m.content}
                                         </div>
                                         <span className="text-[10px] text-zinc-600 mt-1 px-1">
                                             {formatDistanceToNow(m.timestamp, { addSuffix: true })}

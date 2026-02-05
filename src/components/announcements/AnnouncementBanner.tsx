@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, X } from 'lucide-react'
+import { AlertTriangle, X, Trash2 } from 'lucide-react'
 import { useMessageStore } from '@/stores/messageStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -14,8 +14,34 @@ import { formatDistanceToNow } from 'date-fns'
 export function AnnouncementBanner() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
-    const { messages, subscribeToMessages } = useMessageStore()
+    const { messages, subscribeToMessages, deleteMessage } = useMessageStore()
     const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+
+    // Load dismissed IDs from localStorage on mount
+    useEffect(() => {
+        const stored = localStorage.getItem('relay_dismissed_announcements')
+        if (stored) {
+            try {
+                setDismissed(new Set(JSON.parse(stored)))
+            } catch (e) {
+                console.error("Error parsing dismissed announcements", e)
+            }
+        }
+    }, [])
+
+    // Persist dismissed IDs whenever they change
+    const handleDismiss = (id: string) => {
+        const newDismissed = new Set([...dismissed, id])
+        setDismissed(newDismissed)
+        localStorage.setItem('relay_dismissed_announcements', JSON.stringify(Array.from(newDismissed)))
+    }
+
+    const handleDelete = async (id: string) => {
+        if (!hotel?.id) return
+        if (window.confirm('Bu duyuruyu silmek istediğinize emin misiniz?')) {
+            await deleteMessage(hotel.id, id)
+        }
+    }
 
     useEffect(() => {
         if (hotel?.id && user?.uid) {
@@ -58,14 +84,26 @@ export function AnnouncementBanner() {
                             <p className="text-sm text-amber-100">{a.content}</p>
                             <p className="text-[10px] text-amber-500/50 mt-1">— {a.sender_name}</p>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDismissed(prev => new Set([...prev, a.id]))}
-                            className="h-6 w-6 p-0 text-amber-500 hover:text-amber-300 hover:bg-amber-500/10"
-                        >
-                            <X className="w-4 h-4" />
-                        </Button>
+                        <div className="flex flex-col gap-1">
+                            {user?.role === 'gm' && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDelete(a.id)}
+                                    className="h-6 w-6 p-0 text-rose-500 hover:text-rose-300 hover:bg-rose-500/10"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            )}
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDismiss(a.id)}
+                                className="h-6 w-6 p-0 text-amber-500 hover:text-amber-300 hover:bg-amber-500/10"
+                            >
+                                <X className="w-4 h-4" />
+                            </Button>
+                        </div>
                     </motion.div>
                 ))}
             </AnimatePresence>
