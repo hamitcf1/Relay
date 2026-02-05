@@ -25,11 +25,13 @@ import { ComplianceChecklist } from '@/components/compliance/ComplianceChecklist
 import { ShiftNotes } from '@/components/notes/ShiftNotes'
 import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
+import { CalendarWidget } from '@/components/calendar/CalendarWidget'
 import { HandoverWizard } from '@/components/handover/HandoverWizard'
 import { useAuthStore } from '@/stores/authStore'
 import { useLogsStore } from '@/stores/logsStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useShiftStore } from '@/stores/shiftStore'
+import { useNotesStore } from '@/stores/notesStore'
 
 export function DashboardPage() {
     const navigate = useNavigate()
@@ -37,6 +39,7 @@ export function DashboardPage() {
     const { logs, pinnedLogs, loading: logsLoading, setHotelId, subscribeToLogs, updateLogStatus, togglePin } = useLogsStore()
     const { hotel, subscribeToHotel } = useHotelStore()
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
+    const { subscribeToNotes } = useNotesStore()
 
     const [isNewLogOpen, setIsNewLogOpen] = useState(false)
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
@@ -85,16 +88,18 @@ export function DashboardPage() {
             const unsubHotel = subscribeToHotel(hotelId)
             const unsubLogs = subscribeToLogs()
             const unsubShift = subscribeToCurrentShift(hotelId)
+            const unsubNotes = subscribeToNotes(hotelId)
 
             return () => {
                 unsubHotel()
                 unsubLogs()
                 unsubShift()
+                unsubNotes()
             }
         }
 
         setupHotel()
-    }, [user, navigate, setHotelId, subscribeToHotel, subscribeToLogs, subscribeToCurrentShift])
+    }, [user, navigate, setHotelId, subscribeToHotel, subscribeToLogs, subscribeToCurrentShift, subscribeToNotes])
 
     const handleSignOut = async () => {
         await signOut()
@@ -396,6 +401,15 @@ export function DashboardPage() {
                             transition={{ duration: 0.5, delay: 0.4 }}
                         >
                             <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={isGM} />
+                        </motion.div>
+
+                        {/* Calendar Widget */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5, delay: 0.42 }}
+                        >
+                            <CalendarWidget hotelId={hotel?.id || ''} />
                         </motion.div>
 
                         {/* Roster (GM Only) */}

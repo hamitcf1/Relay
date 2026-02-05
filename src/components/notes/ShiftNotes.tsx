@@ -85,33 +85,71 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         }
     }
 
-    return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-300">
-                    📋 Shift Notes
-                </CardTitle>
+    // Calculate unread counts per category
+    const categoryCounts = useMemo(() => {
+        const counts: Record<string, number> = { all: 0, relevant: 0 }
+        notes.forEach(note => {
+            counts[note.category] = (counts[note.category] || 0) + 1
+            if (note.is_relevant) counts.relevant++
+            counts.all++
+        })
+        return counts
+    }, [notes])
 
-                <div className="flex items-center gap-2">
-                    {/* Filter */}
-                    <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value as typeof filter)}
-                        className="text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-zinc-300"
-                    >
-                        <option value="relevant">Relevant Only</option>
-                        <option value="all">All Notes</option>
-                        <option value="handover">Handover</option>
-                        <option value="damage">Damage</option>
-                        <option value="early_checkout">Early Checkout</option>
-                        <option value="guest_info">Guest Info</option>
-                    </select>
+    return (
+        <Card className="glass border-zinc-800/50">
+            <CardHeader className="pb-3">
+                <div className="flex items-center justify-between mb-3">
+                    <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                        📋 Shift Notes
+                        {notes.filter(n => n.is_relevant).length > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                                {notes.filter(n => n.is_relevant).length} active
+                            </Badge>
+                        )}
+                    </CardTitle>
 
                     {showAddButton && (
-                        <Button size="sm" variant="ghost" onClick={() => setIsAdding(!isAdding)}>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setIsAdding(!isAdding)}
+                            className="hover:bg-indigo-500/10 hover:text-indigo-400"
+                        >
                             <Plus className="w-4 h-4" />
                         </Button>
                     )}
+                </div>
+
+                {/* Category Tabs */}
+                <div className="flex flex-wrap gap-1.5">
+                    {[
+                        { key: 'handover' as const, ...categoryInfo.handover },
+                        { key: 'damage' as const, ...categoryInfo.damage },
+                        { key: 'early_checkout' as const, ...categoryInfo.early_checkout },
+                        { key: 'guest_info' as const, ...categoryInfo.guest_info },
+                        { key: 'relevant' as const, label: 'Active', color: 'bg-emerald-500', icon: '✓' },
+                        { key: 'all' as const, label: 'All', color: 'bg-zinc-600', icon: '📁' },
+                    ].map((tab) => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setFilter(tab.key)}
+                            className={cn(
+                                'text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all',
+                                filter === tab.key
+                                    ? `${tab.color} text-white shadow-lg`
+                                    : 'bg-zinc-800/70 text-zinc-400 hover:bg-zinc-700/70 hover:text-zinc-200'
+                            )}
+                        >
+                            <span>{tab.icon}</span>
+                            <span>{tab.label}</span>
+                            {categoryCounts[tab.key] > 0 && (
+                                <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
+                                    {categoryCounts[tab.key]}
+                                </span>
+                            )}
+                        </button>
+                    ))}
                 </div>
             </CardHeader>
 
