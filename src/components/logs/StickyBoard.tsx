@@ -6,10 +6,11 @@ import type { Log } from '@/types'
 interface StickyBoardProps {
     pinnedLogs: Log[]
     onTogglePin?: (logId: string, isPinned: boolean) => void
+    onResolve?: (logId: string) => void
     onRoomClick?: (roomNumber: string) => void
 }
 
-export function StickyBoard({ pinnedLogs, onTogglePin, onRoomClick }: StickyBoardProps) {
+export function StickyBoard({ pinnedLogs, onTogglePin, onResolve, onRoomClick }: StickyBoardProps) {
     if (pinnedLogs.length === 0) {
         return null
     }
@@ -49,6 +50,7 @@ export function StickyBoard({ pinnedLogs, onTogglePin, onRoomClick }: StickyBoar
                             <LogCard
                                 log={log}
                                 onTogglePin={onTogglePin}
+                                onResolve={onResolve}
                                 onRoomClick={onRoomClick}
                                 compact
                             />

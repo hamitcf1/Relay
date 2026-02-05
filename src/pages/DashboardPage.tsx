@@ -1,49 +1,64 @@
 import { useEffect, useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
-    Hotel,
-    Bell,
     User,
     LogOut,
     Plus,
     Play,
     StopCircle,
-    Menu,
-    X
+    Globe,
+    ChevronDown,
+    Check,
+    BedDouble
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
+
 import { LogFeed } from '@/components/logs/LogFeed'
 import { StickyBoard } from '@/components/logs/StickyBoard'
 import { NewLogModal } from '@/components/logs/NewLogModal'
+import { RoomManagementModal } from '@/components/rooms/RoomManagementModal'
 import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
-import { CompliancePulse } from '@/components/compliance/CompliancePulse'
+import { HandoverWizard } from '@/components/handover/HandoverWizard'
 import { ComplianceChecklist } from '@/components/compliance/ComplianceChecklist'
 import { ShiftNotes } from '@/components/notes/ShiftNotes'
 import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
 import { CalendarWidget } from '@/components/calendar/CalendarWidget'
-import { HandoverWizard } from '@/components/handover/HandoverWizard'
+
 import { useAuthStore } from '@/stores/authStore'
 import { useLogsStore } from '@/stores/logsStore'
+import type { Log } from '@/types'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useNotesStore } from '@/stores/notesStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 export function DashboardPage() {
     const navigate = useNavigate()
-    const { user, signOut, initialize: initAuth } = useAuthStore()
-    const { logs, pinnedLogs, loading: logsLoading, setHotelId, subscribeToLogs, updateLogStatus, togglePin } = useLogsStore()
+    const { user, initialize: initAuth } = useAuthStore()
+    const { logs, pinnedLogs, loading: logsLoading, setHotelId, subscribeToLogs, updateLogStatus, togglePin, archiveLog } = useLogsStore()
     const { hotel, subscribeToHotel } = useHotelStore()
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
     const { subscribeToNotes } = useNotesStore()
+    const { t, language, setLanguage } = useLanguageStore()
 
     const [isNewLogOpen, setIsNewLogOpen] = useState(false)
+    const [editingLog, setEditingLog] = useState<Log | null>(null)
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
 
     // Calculate compliance percentage
     const compliancePercentage = useMemo(() => {
@@ -56,7 +71,6 @@ export function DashboardPage() {
 
     // Calculate stats
     const openTickets = logs.filter(l => l.status === 'open').length
-    const criticalTickets = logs.filter(l => l.urgency === 'critical' && l.status === 'open').length
 
     // Initialize auth listener
     useEffect(() => {
@@ -101,31 +115,7 @@ export function DashboardPage() {
         setupHotel()
     }, [user, navigate, setHotelId, subscribeToHotel, subscribeToLogs, subscribeToCurrentShift, subscribeToNotes])
 
-    const handleSignOut = async () => {
-        await signOut()
-        navigate('/login')
-    }
-
-    const handleResolve = async (logId: string) => {
-        await updateLogStatus(logId, 'resolved')
-    }
-
-    const handleTogglePin = async (logId: string, isPinned: boolean) => {
-        await togglePin(logId, isPinned)
-    }
-
-    const handleRoomClick = (roomNumber: string) => {
-        console.log('Room clicked:', roomNumber)
-    }
-
-    const handleShiftAction = () => {
-        if (currentShift) {
-            setIsHandoverOpen(true)
-        } else {
-            console.log('Start shift clicked')
-        }
-    }
-
+    // Handlers
     const handleKBSCheck = async () => {
         if (!hotel?.id || !currentShift) return
         await updateCompliance(hotel.id, 'kbs_checked', true)
@@ -133,318 +123,227 @@ export function DashboardPage() {
 
     const handleAgencyCheck = async () => {
         if (!hotel?.id || !currentShift) return
-        await updateCompliance(hotel.id, 'agency_msg_checked_count', currentShift.compliance.agency_msg_checked_count + 1)
+        await updateCompliance(hotel.id, 'agency_msg_checked_count', 1)
     }
 
-    const onHandoverComplete = async (cashEnd: number, notes: string) => {
-        if (!hotel?.id || !currentShift) return
+    const handleHandoverComplete = async (cashEnd: number, notes: string) => {
+        if (!hotel?.id) return
         await endShift(hotel.id, cashEnd, notes)
+        setIsHandoverOpen(false)
+        navigate('/shift-start') // Or wherever appropriate
     }
-
-    const isGM = user?.role === 'gm'
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100">
-            {/* Ambient Background Effect */}
-            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent rounded-full blur-3xl" />
-                <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-500/10 via-transparent to-transparent rounded-full blur-3xl" />
-            </div>
+        <div className="h-screen w-full bg-black text-white flex flex-col overflow-hidden font-sans selection:bg-indigo-500/30">
+            {/* Header */}
+            <header className="h-16 border-b border-zinc-800 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                            <span className="font-bold text-white">R</span>
+                        </div>
+                        <div>
+                            <h1 className="font-semibold text-lg tracking-tight">Relay</h1>
+                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{hotel?.info.name}</p>
+                        </div>
+                    </div>
+                </div>
 
-            {/* ═══════════════════════════════════════════════════════════════════
-                HEADER - Premium Glass Navigation
-               ═══════════════════════════════════════════════════════════════════ */}
-            <header className="sticky top-0 z-50 glass border-b border-zinc-800/50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        {/* Logo */}
-                        <motion.div
-                            className="flex items-center gap-3"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 glow-primary">
-                                <Hotel className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="text-xl font-bold text-gradient-primary">
-                                Relay
-                            </span>
-                        </motion.div>
+                <div className="flex items-center gap-3">
+                    {/* Compliance Pulse (Mini) */}
+                    {currentShift && (
+                        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
+                            <div className={cn("w-2 h-2 rounded-full animate-pulse",
+                                compliancePercentage === 100 ? "bg-emerald-500" : "bg-amber-500"
+                            )} />
+                            <span className="text-xs text-zinc-400 font-medium">{compliancePercentage}% Compliance</span>
+                        </div>
+                    )}
 
-                        {/* Center: Compliance Pulse */}
-                        <motion.div
-                            className="hidden md:flex items-center gap-4"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                        >
-                            <CompliancePulse percentage={compliancePercentage} size="sm" />
-                        </motion.div>
-
-                        {/* Right: User Menu */}
-                        <motion.div
-                            className="flex items-center gap-3"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                        >
-                            {/* Notification Bell */}
-                            <button className="p-2 rounded-lg hover:bg-zinc-800 transition-colors relative">
-                                <Bell className="w-5 h-5 text-zinc-400" />
-                                {criticalTickets > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-xs flex items-center justify-center font-bold animate-pulse">
-                                        {criticalTickets}
-                                    </span>
-                                )}
-                            </button>
-
-                            {/* User Profile */}
-                            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50">
-                                <User className="w-4 h-4 text-zinc-400" />
-                                <span className="text-sm text-zinc-300">{user?.name}</span>
-                                <Badge variant="secondary" className="text-xs">
-                                    {user?.role?.toUpperCase()}
-                                </Badge>
-                            </div>
-
-                            {/* Sign Out */}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleSignOut}
-                                title="Sign Out"
-                                className="hover:bg-rose-500/10 hover:text-rose-400"
-                            >
-                                <LogOut className="w-5 h-5" />
+                    {/* Language Toggle */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-zinc-400 hover:text-white">
+                                <Globe className="w-4 h-4" />
                             </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-32 bg-zinc-900 border-zinc-800">
+                            <DropdownMenuItem onClick={() => setLanguage('en')} className="text-xs">
+                                🇺🇸 English {language === 'en' && <Check className="ml-auto w-3 h-3" />}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-xs">
+                                🇹🇷 Türkçe {language === 'tr' && <Check className="ml-auto w-3 h-3" />}
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                            {/* Mobile Menu Toggle */}
-                            <button
-                                className="p-2 rounded-lg hover:bg-zinc-800 transition-colors md:hidden"
-                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            >
-                                {isMobileMenuOpen ? (
-                                    <X className="w-5 h-5 text-zinc-400" />
-                                ) : (
-                                    <Menu className="w-5 h-5 text-zinc-400" />
-                                )}
-                            </button>
-                        </motion.div>
+                    {/* Rooms Manager Button */}
+                    <Button
+                        variant="secondary"
+                        className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 h-9 hidden sm:flex"
+                        onClick={() => setIsRoomManagerOpen(true)}
+                    >
+                        <BedDouble className="w-4 h-4 mr-2" />
+                        Rooms
+                    </Button>
+
+                    {/* Actions Menu (Merged) */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 h-9">
+                                <Plus className="w-4 h-4 mr-2" />
+                                {t('dashboard.actions')}
+                                <ChevronDown className="w-3 h-3 ml-2 opacity-50" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800">
+                            <DropdownMenuLabel className="text-xs text-zinc-500 font-normal uppercase">{t('dashboard.actions')}</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => setIsNewLogOpen(true)} className="text-xs cursor-pointer">
+                                <Plus className="w-3.5 h-3.5 mr-2" /> New Entry
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="text-xs cursor-pointer">
+                                <LogOut className="w-3.5 h-3.5 mr-2" /> Handover
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-zinc-800" />
+                            {!currentShift ? (
+                                <DropdownMenuItem onClick={() => navigate('/shift-start')} className="text-xs cursor-pointer text-emerald-400">
+                                    <Play className="w-3.5 h-3.5 mr-2" /> {t('dashboard.startShift')}
+                                </DropdownMenuItem>
+                            ) : (
+                                <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="text-xs cursor-pointer text-rose-400">
+                                    <StopCircle className="w-3.5 h-3.5 mr-2" /> {t('dashboard.endShift')}
+                                </DropdownMenuItem>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* User Profile */}
+                    <div className="h-8 w-8 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 ml-2">
+                        <User className="w-4 h-4 text-zinc-400" />
                     </div>
                 </div>
             </header>
 
-            {/* ═══════════════════════════════════════════════════════════════════
-                MAIN CONTENT
-               ═══════════════════════════════════════════════════════════════════ */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
+            {/* Main Layout - 3 Columns */}
+            <main className="flex-1 overflow-hidden p-4 lg:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
-                {/* Welcome Banner */}
-                <motion.div
-                    className="mb-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <div className="glass rounded-2xl p-6 border border-zinc-800/50">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                            <div>
-                                <h1 className="text-3xl font-bold mb-2">
-                                    Welcome back, <span className="text-gradient-primary">{user?.name}</span>
-                                </h1>
-                                <p className="text-zinc-400">
-                                    {hotel?.info.name || 'Loading...'} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                                </p>
-                            </div>
-
-                            {/* Quick Actions */}
-                            <div className="flex items-center gap-3">
-                                <Button
-                                    onClick={() => setIsNewLogOpen(true)}
-                                    className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25"
-                                >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    New Entry
-                                </Button>
-                                <Button
-                                    variant={currentShift ? "destructive" : "outline"}
-                                    onClick={handleShiftAction}
-                                    className={currentShift ? "shadow-lg shadow-rose-500/25" : ""}
-                                >
-                                    {currentShift ? (
-                                        <>
-                                            <StopCircle className="w-4 h-4 mr-2" />
-                                            End Shift
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Play className="w-4 h-4 mr-2" />
-                                            Start Shift
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-
-                {/* Stats Row */}
-                <motion.div
-                    className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                    {[
-                        { label: 'Active Shift', value: currentShift?.type || '—', color: 'indigo' },
-                        { label: 'Open Tickets', value: openTickets.toString(), color: 'amber' },
-                        { label: 'Critical', value: criticalTickets.toString(), color: criticalTickets > 0 ? 'rose' : 'zinc' },
-                        { label: 'Pinned', value: pinnedLogs.length.toString(), color: 'purple' },
-                    ].map((stat, i) => (
-                        <motion.div
-                            key={stat.label}
-                            className="glass rounded-xl p-4 glass-hover"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
-                        >
-                            <div className="text-zinc-400 text-xs mb-1">{stat.label}</div>
-                            <div className={`text-2xl font-bold text-${stat.color}-400`}>
-                                {stat.value}
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
-
-                {/* Current Shift Display */}
-                <motion.div
-                    className="mb-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.15 }}
-                >
-                    <CurrentShiftDisplay
-                        hotelId={hotel?.id || ''}
-                        userId={user?.uid || ''}
-                    />
-                </motion.div>
-
-                {/* Main Grid: Operations + Management */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-                    {/* Left Column: Operations (2/3 width) */}
-                    <div className="xl:col-span-2 space-y-6">
-                        {/* Sticky Board */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                        >
-                            <StickyBoard
-                                pinnedLogs={pinnedLogs}
-                                onTogglePin={handleTogglePin}
-                                onRoomClick={handleRoomClick}
-                            />
-                        </motion.div>
-
-                        {/* Activity Feed */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.25 }}
-                            className="space-y-4"
-                        >
-                            <h2 className="text-lg font-semibold text-zinc-300 flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                Live Activity Feed
+                    {/* -- LEFT COLUMN: Activity Feed (Full Height) -- */}
+                    <div className="lg:col-span-3 h-full flex flex-col min-h-0">
+                        <div className="flex items-center justify-between mb-4 shrink-0">
+                            <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                {t('module.activityFeed')}
                             </h2>
+                            <Badge variant="outline" className="text-[10px] h-5 border-zinc-700 text-zinc-400">
+                                {openTickets} Active
+                            </Badge>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800 hover:scrollbar-thumb-zinc-700">
                             <LogFeed
                                 logs={logs}
                                 loading={logsLoading}
-                                onTogglePin={handleTogglePin}
-                                onResolve={handleResolve}
-                                onRoomClick={handleRoomClick}
+                                onTogglePin={togglePin}
+                                onResolve={(id) => updateLogStatus(id, 'resolved')} // This now behaves as toggle if I implement it right, or I need to handle unresolve
+                                onArchive={archiveLog}
+                                onEdit={(log) => {
+                                    setEditingLog(log)
+                                    setIsNewLogOpen(true)
+                                }}
+                                onRoomClick={(room) => console.log('Room clicked:', room)}
                             />
-                        </motion.div>
+                        </div>
                     </div>
 
-                    {/* Right Column: Management (1/3 width) */}
-                    <div className="space-y-6">
-                        {/* Compliance Checklist */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.3 }}
-                        >
+                    {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
+                    <div className="lg:col-span-5 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                        {/* 1. Current Shift & Pulse */}
+                        <div className="space-y-4">
+                            <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
+                        </div>
+
+                        {/* 2. Sticky Board (Priority) */}
+                        <StickyBoard
+                            pinnedLogs={pinnedLogs}
+                            onTogglePin={togglePin}
+                            onResolve={(id) => updateLogStatus(id, 'resolved')}
+                        />
+
+                        {/* 3. Compliance Checklist */}
+                        {currentShift && (
                             <ComplianceChecklist
-                                compliance={currentShift?.compliance || { kbs_checked: false, agency_msg_checked_count: 0 }}
+                                compliance={currentShift.compliance}
                                 onKBSCheck={handleKBSCheck}
                                 onAgencyCheck={handleAgencyCheck}
-                                disabled={!currentShift}
+                                disabled={false}
                             />
-                        </motion.div>
+                        )}
+                    </div>
 
-                        {/* Shift Notes */}
+                    {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
+                    <div className="lg:col-span-4 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                        {/* 1. Calendar Widget */}
                         <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.35 }}
-                        >
-                            <ShiftNotes hotelId={hotel?.id || ''} />
-                        </motion.div>
-
-                        {/* Hotel Info Panel */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.4 }}
-                        >
-                            <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={isGM} />
-                        </motion.div>
-
-                        {/* Calendar Widget */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.42 }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
                         >
                             <CalendarWidget hotelId={hotel?.id || ''} />
                         </motion.div>
 
-                        {/* Roster (GM Only) */}
-                        <AnimatePresence>
-                            {isGM && (
-                                <motion.div
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 20 }}
-                                    transition={{ duration: 0.5, delay: 0.45 }}
-                                >
-                                    <RosterMatrix hotelId={hotel?.id || ''} canEdit={true} />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        {/* 2. Shift Notes */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <ShiftNotes hotelId={hotel?.id || ''} />
+                        </motion.div>
+
+                        {/* 3. Hotel Info */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                        </motion.div>
+
+                        {/* 4. Roster (Only for GM) */}
+                        {(user?.role === 'gm' || user?.role === 'receptionist') && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.5 }}
+                            >
+                                <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                            </motion.div>
+                        )}
                     </div>
                 </div>
             </main>
 
-            {/* Footer */}
-            <footer className="text-center py-6 text-zinc-600 text-sm border-t border-zinc-800/50">
-                Relay Hotel Operations System • {new Date().getFullYear()}
-            </footer>
-
             {/* Modals */}
+            <RoomManagementModal
+                isOpen={isRoomManagerOpen}
+                onClose={() => setIsRoomManagerOpen(false)}
+            />
+
             <NewLogModal
                 isOpen={isNewLogOpen}
-                onClose={() => setIsNewLogOpen(false)}
+                onClose={() => {
+                    setIsNewLogOpen(false)
+                    setEditingLog(null)
+                }}
+                initialLog={editingLog || undefined}
             />
 
             <HandoverWizard
                 isOpen={isHandoverOpen}
                 onClose={() => setIsHandoverOpen(false)}
                 hotelId={hotel?.id || ''}
-                onComplete={onHandoverComplete}
+                onComplete={handleHandoverComplete}
             />
         </div>
     )

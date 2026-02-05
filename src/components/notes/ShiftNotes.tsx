@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useNotesStore, categoryInfo, type NoteCategory } from '@/stores/notesStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -26,6 +27,7 @@ interface ShiftNotesProps {
 export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const { notes, addNote, toggleRelevance, markPaid, deleteNote } = useNotesStore()
     const { user } = useAuthStore()
+    const { t } = useLanguageStore()
 
     const [isAdding, setIsAdding] = useState(false)
     const [newCategory, setNewCategory] = useState<NoteCategory>('handover')
@@ -98,6 +100,18 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
     return (
         <Card className="glass border-zinc-800/50">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                    {t('module.shiftNotes')}
+                </CardTitle>
+                <div className="flex gap-2">
+                    {showAddButton && (
+                        <div className="flex gap-1">
+                            {/* ... */}
+                        </div>
+                    )}
+                </div>
+            </CardHeader>
             <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-3">
                     <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
@@ -124,12 +138,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 {/* Category Tabs */}
                 <div className="flex flex-wrap gap-1.5">
                     {[
-                        { key: 'handover' as const, ...categoryInfo.handover },
-                        { key: 'damage' as const, ...categoryInfo.damage },
-                        { key: 'early_checkout' as const, ...categoryInfo.early_checkout },
-                        { key: 'guest_info' as const, ...categoryInfo.guest_info },
-                        { key: 'relevant' as const, label: 'Active', color: 'bg-emerald-500', icon: '✓' },
-                        { key: 'all' as const, label: 'All', color: 'bg-zinc-600', icon: '📁' },
+                        { key: 'handover' as const, ...categoryInfo.handover, label: t('category.handover') },
+                        { key: 'relevant' as const, label: t('status.active'), color: 'bg-emerald-500', icon: '✓' },
+                        { key: 'all' as const, label: t('common.viewAll'), color: 'bg-zinc-600', icon: '📁' },
+                        { key: 'damage' as const, ...categoryInfo.damage, label: t('category.damage') },
+                        { key: 'guest_info' as const, ...categoryInfo.guest_info, label: t('category.guestInfo') },
+                        { key: 'early_checkout' as const, ...categoryInfo.early_checkout, label: t('category.earlyCheckout') },
                     ].map((tab) => (
                         <button
                             key={tab.key}
@@ -161,65 +175,72 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
+                            className="space-y-3 p-3 bg-zinc-900/50 rounded-lg border border-zinc-700"
                         >
-                            <div className="p-3 border border-zinc-700 rounded-lg space-y-3 bg-zinc-900/50">
-                                {/* Category selector */}
-                                <div className="flex flex-wrap gap-2">
-                                    {(Object.keys(categoryInfo) as NoteCategory[]).map((cat) => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setNewCategory(cat)}
-                                            className={cn(
-                                                'text-xs px-2 py-1 rounded flex items-center gap-1',
-                                                newCategory === cat
-                                                    ? `${categoryInfo[cat].color} text-white`
-                                                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-                                            )}
-                                        >
-                                            <span>{categoryInfo[cat].icon}</span>
-                                            {categoryInfo[cat].label}
-                                        </button>
-                                    ))}
-                                </div>
+                            {/* Category Selection */}
+                            <div className="flex flex-wrap gap-2">
+                                {(Object.keys(categoryInfo) as NoteCategory[]).map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setNewCategory(cat)}
+                                        className={cn(
+                                            'text-xs px-2 py-1 rounded-full flex items-center gap-1.5 transition-all',
+                                            newCategory === cat
+                                                ? `${categoryInfo[cat].color} text-white shadow-sm`
+                                                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                        )}
+                                    >
+                                        {categoryInfo[cat].icon}
+                                        {t(`category.${cat === 'guest_info' ? 'guestInfo' : cat === 'early_checkout' ? 'earlyCheckout' : cat}` as any)}
+                                    </button>
+                                ))}
+                            </div>
 
-                                {/* Room & Amount (for damage) */}
-                                <div className="flex gap-2">
-                                    <Input
-                                        placeholder="Room #"
-                                        value={newRoom}
-                                        onChange={(e) => setNewRoom(e.target.value)}
-                                        className="w-24"
-                                    />
-                                    {newCategory === 'damage' && (
-                                        <Input
-                                            placeholder="Amount ₺"
-                                            type="number"
-                                            value={newAmount}
-                                            onChange={(e) => setNewAmount(e.target.value)}
-                                            className="w-28"
-                                        />
-                                    )}
-                                </div>
-
-                                {/* Content */}
-                                <textarea
-                                    placeholder="Note content..."
-                                    value={newContent}
-                                    onChange={(e) => setNewContent(e.target.value)}
-                                    rows={2}
-                                    className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            {/* Room & Amount (for damage) */}
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder={t('common.room') + " #"}
+                                    value={newRoom}
+                                    onChange={(e) => setNewRoom(e.target.value)}
+                                    className="w-24 text-sm bg-zinc-800/50"
                                 />
+                                {newCategory === 'damage' && (
+                                    <Input
+                                        placeholder={t('common.amount') + " ₺"}
+                                        type="number"
+                                        value={newAmount}
+                                        onChange={(e) => setNewAmount(e.target.value)}
+                                        className="w-28 text-sm bg-zinc-800/50"
+                                    />
+                                )}
+                            </div>
 
-                                {/* Actions */}
-                                <div className="flex gap-2">
-                                    <Button size="sm" onClick={handleAddNote} disabled={loading || !newContent.trim()}>
-                                        {loading ? 'Saving...' : 'Add Note'}
-                                    </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>
-                                        Cancel
-                                    </Button>
-                                </div>
+                            {/* Content */}
+                            <Input
+                                placeholder={t('module.shiftNotes') + "..."}
+                                value={newContent}
+                                onChange={(e) => setNewContent(e.target.value)}
+                                className="text-sm bg-zinc-800/50"
+                            />
+
+                            {/* Actions */}
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    onClick={handleAddNote}
+                                    disabled={!newContent.trim() || loading}
+                                    className="flex-1 bg-white text-black hover:bg-zinc-200"
+                                >
+                                    {loading ? <Clock className="w-3 h-3 animate-spin mr-2" /> : <Check className="w-3 h-3 mr-2" />}
+                                    {t('common.save')}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setIsAdding(false)}
+                                >
+                                    {t('common.cancel')}
+                                </Button>
                             </div>
                         </motion.div>
                     )}

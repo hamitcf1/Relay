@@ -1,16 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, AlertTriangle, MessageSquare, Wrench, Settings } from 'lucide-react'
+import { X, Plus, AlertTriangle, MessageSquare, Wrench, Settings, Edit2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useLogsStore } from '@/stores/logsStore'
 import { useAuthStore } from '@/stores/authStore'
-import type { LogType, LogUrgency } from '@/types'
+import type { Log, LogType, LogUrgency } from '@/types'
 
 interface NewLogModalProps {
     isOpen: boolean
     onClose: () => void
+    initialLog?: Log // If provided, we are in edit mode
 }
 
 const logTypes: { value: LogType; label: string; icon: React.ElementType }[] = [
@@ -26,8 +27,8 @@ const urgencyLevels: { value: LogUrgency; label: string; color: string }[] = [
     { value: 'critical', label: 'Critical', color: 'bg-rose-500' },
 ]
 
-export function NewLogModal({ isOpen, onClose }: NewLogModalProps) {
-    const { addLog } = useLogsStore()
+export function NewLogModal({ isOpen, onClose, initialLog }: NewLogModalProps) {
+    const { addLog, editLog } = useLogsStore()
     const { user } = useAuthStore()
 
     const [type, setType] = useState<LogType>('guest_request')
@@ -36,6 +37,22 @@ export function NewLogModal({ isOpen, onClose }: NewLogModalProps) {
     const [roomNumber, setRoomNumber] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // Pre-fill if editing
+    useEffect(() => {
+        if (initialLog) {
+            setType(initialLog.type)
+            setUrgency(initialLog.urgency)
+            setContent(initialLog.content)
+            setRoomNumber(initialLog.room_number || '')
+        } else {
+            // Reset if adding new
+            setType('guest_request')
+            setUrgency('low')
+            setContent('')
+            setRoomNumber('')
+        }
+    }, [initialLog, isOpen])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -50,38 +67,44 @@ export function NewLogModal({ isOpen, onClose }: NewLogModalProps) {
             return
         }
 
-        setLoading(true)
         setError(null)
+        setLoading(true)
 
         try {
-            await addLog({
-                type,
-                urgency,
-                content: content.trim(),
-                room_number: roomNumber.trim() || null,
-                status: 'open',
-                created_by: user.uid,
-                is_pinned: false,
-            })
+            if (initialLog) {
+                // Edit Mode
+                await editLog(initialLog.id, {
+                    type,
+                    urgency,
+                    content,
+                    room_number: roomNumber || null
+                })
+            } else {
+                // Add Mode
+                await addLog({
+                    type,
+                    content,
+                    urgency,
+                    room_number: roomNumber || null,
+                    status: 'open',
+                    created_by: user.uid,
+                    created_by_name: user.name || 'Staff', // Pass creator name
+                    is_pinned: false
+                })
+            }
 
-            // Reset form
-            setContent('')
-            setRoomNumber('')
-            setType('guest_request')
-            setUrgency('low')
             onClose()
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create log')
+            // Cleanup form is handled by useEffect when isOpen changes or when re-opened
+        } catch (err: any) {
+            setError(err.message)
         } finally {
             setLoading(false)
         }
     }
 
-    const handleClose = () => {
-        if (!loading) {
-            onClose()
-        }
-    }
+    // Reset state on close if not editing (to clear fields for next "New Log")
+    // But if editing, we want to reset to initialLog or clear. 
+    // The useEffect above handles strict sync with initialLog.
 
     return (
         <AnimatePresence>
@@ -89,146 +112,123 @@ export function NewLogModal({ isOpen, onClose }: NewLogModalProps) {
                 <>
                     {/* Backdrop */}
                     <motion.div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={handleClose}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+                        onClick={onClose}
                     />
 
                     {/* Modal */}
                     <motion.div
-                        className="fixed inset-0 flex items-center justify-center z-50 p-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none p-4"
                     >
-                        <motion.div
-                            className="glass rounded-2xl w-full max-w-lg overflow-hidden"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            transition={{ type: 'spring', duration: 0.3 }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Header */}
-                            <div className="flex items-center justify-between p-4 border-b border-zinc-800">
-                                <div className="flex items-center gap-2">
-                                    <Plus className="w-5 h-5 text-indigo-400" />
-                                    <h2 className="text-lg font-semibold">New Log Entry</h2>
-                                </div>
-                                <button
-                                    onClick={handleClose}
-                                    className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
-                                >
-                                    <X className="w-5 h-5 text-zinc-400" />
-                                </button>
+                        <div className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[90vh]">
+                            <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between shrink-0">
+                                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                                    {initialLog ? <Edit2 className="w-5 h-5 text-indigo-500" /> : <Plus className="w-5 h-5 text-indigo-500" />}
+                                    {initialLog ? 'Edit Log Entry' : 'New Log Entry'}
+                                </h2>
+                                <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-zinc-800">
+                                    <X className="w-5 h-5" />
+                                </Button>
                             </div>
 
-                            {/* Form */}
-                            <form onSubmit={handleSubmit} className="p-4 space-y-4">
-                                {/* Log Type */}
-                                <div>
-                                    <label className="text-sm text-zinc-400 mb-2 block">Type</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {logTypes.map((t) => {
-                                            const Icon = t.icon
-                                            return (
+                            <div className="p-6 overflow-y-auto">
+                                <form id="log-form" onSubmit={handleSubmit} className="space-y-6">
+                                    {error && (
+                                        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-lg text-sm">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    {/* Type Selection */}
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-medium text-zinc-400">Log Type</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {logTypes.map((t) => (
                                                 <button
                                                     key={t.value}
                                                     type="button"
                                                     onClick={() => setType(t.value)}
                                                     className={cn(
-                                                        'flex items-center gap-2 px-3 py-2 rounded-lg border transition-all',
+                                                        "flex items-center gap-3 p-3 rounded-lg border text-sm transition-all",
                                                         type === t.value
-                                                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                                                            : 'border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                                            ? "bg-indigo-500/10 border-indigo-500 text-indigo-400"
+                                                            : "bg-zinc-800/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300"
                                                     )}
                                                 >
-                                                    <Icon className="w-4 h-4" />
-                                                    <span className="text-sm">{t.label}</span>
+                                                    <t.icon className="w-4 h-4" />
+                                                    {t.label}
                                                 </button>
-                                            )
-                                        })}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Urgency */}
-                                <div>
-                                    <label className="text-sm text-zinc-400 mb-2 block">Urgency</label>
-                                    <div className="flex gap-2">
-                                        {urgencyLevels.map((u) => (
-                                            <button
-                                                key={u.value}
-                                                type="button"
-                                                onClick={() => setUrgency(u.value)}
-                                                className={cn(
-                                                    'flex items-center gap-2 px-4 py-2 rounded-lg border transition-all',
-                                                    urgency === u.value
-                                                        ? 'border-indigo-500 bg-indigo-500/10'
-                                                        : 'border-zinc-700 hover:border-zinc-600'
-                                                )}
-                                            >
-                                                <div className={cn('w-2 h-2 rounded-full', u.color)} />
-                                                <span className="text-sm">{u.label}</span>
-                                            </button>
-                                        ))}
+                                    {/* Urgency */}
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-medium text-zinc-400">Urgency Level</label>
+                                        <div className="flex gap-3">
+                                            {urgencyLevels.map((u) => (
+                                                <button
+                                                    key={u.value}
+                                                    type="button"
+                                                    onClick={() => setUrgency(u.value)}
+                                                    className={cn(
+                                                        "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium border transition-all",
+                                                        urgency === u.value
+                                                            ? "border-transparent text-white ring-2 ring-indigo-500/50"
+                                                            : "bg-zinc-800/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300",
+                                                        urgency === u.value ? u.color : ""
+                                                    )}
+                                                >
+                                                    {u.label}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Room Number */}
-                                <div>
-                                    <label className="text-sm text-zinc-400 mb-2 block">
-                                        Room Number <span className="text-zinc-600">(optional)</span>
-                                    </label>
-                                    <Input
-                                        placeholder="e.g. 204"
-                                        value={roomNumber}
-                                        onChange={(e) => setRoomNumber(e.target.value)}
-                                        className="w-32"
-                                    />
-                                </div>
-
-                                {/* Description */}
-                                <div>
-                                    <label className="text-sm text-zinc-400 mb-2 block">Description</label>
-                                    <textarea
-                                        placeholder="Describe the issue or request... Use #204 to link rooms"
-                                        value={content}
-                                        onChange={(e) => setContent(e.target.value)}
-                                        rows={3}
-                                        className="w-full rounded-lg border border-zinc-700 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 resize-none transition-all"
-                                    />
-                                </div>
-
-                                {/* Error */}
-                                {error && (
-                                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">
-                                        {error}
+                                    {/* Content */}
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-medium text-zinc-400">Description</label>
+                                        <textarea
+                                            value={content}
+                                            onChange={(e) => setContent(e.target.value)}
+                                            placeholder="What happened? Use #101 to link a room."
+                                            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none min-h-[100px]"
+                                        />
                                     </div>
-                                )}
 
-                                {/* Actions */}
-                                <div className="flex gap-3 pt-2">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={handleClose}
-                                        disabled={loading}
-                                        className="flex-1"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="flex-1"
-                                    >
-                                        {loading ? 'Creating...' : 'Create Log'}
-                                    </Button>
-                                </div>
-                            </form>
-                        </motion.div>
+                                    {/* Room Number (Optional) */}
+                                    <div className="space-y-3">
+                                        <label className="text-sm font-medium text-zinc-400">Room Number (Optional)</label>
+                                        <Input
+                                            value={roomNumber}
+                                            onChange={(e) => setRoomNumber(e.target.value)}
+                                            placeholder="e.g. 101"
+                                            className="bg-zinc-800/50 border-zinc-700"
+                                        />
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div className="px-6 py-4 border-t border-zinc-800 bg-zinc-900/50 shrink-0 flex justify-end gap-3">
+                                <Button variant="ghost" onClick={onClose} disabled={loading}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    form="log-form"
+                                    disabled={loading}
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                                >
+                                    {loading ? 'Saving...' : (initialLog ? 'Save Changes' : 'Create Log')}
+                                </Button>
+                            </div>
+                        </div>
                     </motion.div>
                 </>
             )}

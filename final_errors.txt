@@ -1,0 +1,9 @@
+﻿src/components/rooms/RoomManagementModal.tsx(4,5): error TS6133: 'X' is declared but its value is never read.
+src/components/rooms/RoomManagementModal.tsx(7,5): error TS6133: 'Check' is declared but its value is never read.
+src/components/rooms/RoomManagementModal.tsx(10,5): error TS6133: 'Users' is declared but its value is never read.
+src/components/rooms/RoomManagementModal.tsx(15,5): error TS6133: 'Filter' is declared but its value is never read.
+src/components/rooms/RoomManagementModal.tsx(16,5): error TS6133: 'Settings' is declared but its value is never read.
+src/components/rooms/RoomManagementModal.tsx(22,1): error TS6133: 'Badge' is declared but its value is never read.
+src/components/rooms/RoomManagementModal.tsx(56,9): error TS6133: 'loading' is declared but its value is never read.
+src/components/shift/CurrentShiftDisplay.tsx(26,51): error TS6133: 'rosterLoading' is declared but its value is never read.
+src/components/shift/CurrentShiftDisplay.tsx(27,27): error TS6133: 'subscribeToCurrentShift' is declared but its value is never read.

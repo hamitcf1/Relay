@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
-import { motion } from 'framer-motion'
-import { Clock, Calendar } from 'lucide-react'
-import { collection, query, where, getDocs, limit } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { Clock, Calendar, RefreshCcw, Briefcase } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useRosterStore } from '@/stores/rosterStore'
+import { useShiftStore } from '@/stores/shiftStore'
+import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
 import type { ShiftType } from '@/types'
 
 interface CurrentShiftDisplayProps {
@@ -13,189 +14,165 @@ interface CurrentShiftDisplayProps {
     userId: string
 }
 
-interface WeekShift {
-    day: string
-    date: string
-    shift: ShiftType | 'OFF' | null
-    isToday: boolean
-}
-
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
 const SHIFT_INFO: Record<string, { label: string; time: string; color: string }> = {
-    'A': { label: 'Morning', time: '08:00 - 16:00', color: 'bg-indigo-500 text-white' },
-    'B': { label: 'Afternoon', time: '16:00 - 00:00', color: 'bg-purple-500 text-white' },
-    'C': { label: 'Night', time: '00:00 - 08:00', color: 'bg-rose-500 text-white' },
-    'E': { label: 'Extra', time: '10:00 - 18:00', color: 'bg-amber-500 text-white' },
-    'OFF': { label: 'Off', time: '-', color: 'bg-zinc-700 text-zinc-400' },
+    'A': { label: 'Morning', time: '08:00 - 16:00', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+    'B': { label: 'Afternoon', time: '16:00 - 00:00', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+    'C': { label: 'Night', time: '00:00 - 08:00', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+    'E': { label: 'Extra', time: '10:00 - 18:00', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+    'OFF': { label: 'Off', time: '-', color: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
 }
 
 export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProps) {
-    const [weekShifts, setWeekShifts] = useState<WeekShift[]>([])
-    const [loading, setLoading] = useState(true)
+    const { schedule, subscribeToRoster } = useRosterStore()
+    const { currentShift } = useShiftStore()
+    const [isRefreshing, setIsRefreshing] = useState(false)
 
-    // Get current week dates
-    const getWeekDates = () => {
-        const now = new Date()
-        const dayOfWeek = now.getDay()
-        const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
-        const monday = new Date(now.setDate(diff))
+    // Ensure we are subscribed
+    useEffect(() => {
+        if (!hotelId) return
+        const unsub = subscribeToRoster(hotelId)
+        return () => unsub()
+    }, [hotelId])
 
-        const dates: { day: string; date: string }[] = []
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(monday)
-            d.setDate(monday.getDate() + i)
-            dates.push({
-                day: DAYS[i],
-                date: d.toISOString().split('T')[0],
-            })
-        }
-        return dates
+    const handleRefresh = async () => {
+        setIsRefreshing(true)
+        // Re-subscribe briefly to force fetch logic if needed, or just simulate visual feedback
+        // Since it's a listener, it's always live, but we can animate the user intent
+        subscribeToRoster(hotelId)
+        setTimeout(() => setIsRefreshing(false), 800)
     }
 
-    const weekStart = useMemo(() => {
-        const dates = getWeekDates()
-        return dates[0].date
-    }, [])
+    // Calculate this week's shifts locally from user store
+    const userWeekShifts = useMemo(() => {
+        const today = new Date()
+        const start = startOfWeek(today, { weekStartsOn: 1 }) // Monday start
+        const shifts = []
 
-    const todayStr = new Date().toISOString().split('T')[0]
+        const userSchedule = schedule[userId] || {}
 
-    // Fetch user's schedule for the week
-    useEffect(() => {
-        const fetchSchedule = async () => {
-            setLoading(true)
-            try {
-                const rosterRef = collection(db, 'hotels', hotelId, 'roster')
-                const rosterDoc = await getDocs(query(rosterRef, where('week_start', '==', weekStart), limit(1)))
+        for (let i = 0; i < 7; i++) {
+            const date = addDays(start, i)
+            const dateKey = format(date, 'yyyy-MM-dd')
+            const shiftCode = userSchedule[dateKey] as ShiftType | 'OFF' || null
 
-                const weekDates = getWeekDates()
-                let schedule: Record<string, ShiftType | 'OFF' | null> = {}
-
-                if (!rosterDoc.empty) {
-                    const data = rosterDoc.docs[0].data()
-                    schedule = data.schedule?.[userId] || {}
-                }
-
-                const shifts: WeekShift[] = weekDates.map((d) => ({
-                    day: d.day,
-                    date: d.date,
-                    shift: schedule[d.day] || null,
-                    isToday: d.date === todayStr,
-                }))
-
-                setWeekShifts(shifts)
-            } catch (error) {
-                console.error('Error fetching schedule:', error)
-            } finally {
-                setLoading(false)
-            }
+            shifts.push({
+                date,
+                dayName: format(date, 'EEE'),
+                shift: shiftCode,
+                isToday: isSameDay(date, today)
+            })
         }
+        return shifts
+    }, [schedule, userId])
 
-        fetchSchedule()
-    }, [hotelId, userId, weekStart, todayStr])
+    const todayShift = userWeekShifts.find(s => s.isToday)
+    const activeShiftType = currentShift?.type
 
-    const todayShift = weekShifts.find((s) => s.isToday)
+    // Determine active shift label
+    const activeLabel = activeShiftType ? SHIFT_INFO[activeShiftType]?.label : 'None'
 
     return (
-        <Card>
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-indigo-400" />
-                    My Weekly Schedule
-                </CardTitle>
+        <Card className="bg-zinc-900 border-zinc-800">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        My Weekly Schedule
+                    </CardTitle>
+                </div>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn("h-6 w-6 text-zinc-500", isRefreshing && "animate-spin")}
+                    onClick={handleRefresh}
+                >
+                    <RefreshCcw className="w-3.5 h-3.5" />
+                </Button>
             </CardHeader>
-
-            <CardContent>
-                {loading ? (
-                    <div className="animate-pulse space-y-2">
-                        <div className="h-8 bg-zinc-800 rounded" />
-                        <div className="h-12 bg-zinc-800 rounded" />
+            <CardContent className="space-y-5">
+                {/* Active Hotel Status Context */}
+                <div className="flex items-center justify-between bg-zinc-800/50 p-3 rounded-lg border border-zinc-800">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-emerald-500/10 rounded-md">
+                            <Briefcase className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">Active Hotel Shift</p>
+                            <p className="text-sm font-medium text-white">{activeLabel}</p>
+                        </div>
                     </div>
-                ) : (
-                    <div className="space-y-4">
-                        {/* Today's Shift Highlight */}
+                    <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-zinc-700">
+                        {currentShift ? `Started ${format(new Date(currentShift.date), 'HH:mm')}` : 'No active shift'}
+                    </Badge>
+                </div>
+
+                {/* Today's Shift Highlight */}
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-zinc-400">Today's Assignment</span>
                         {todayShift && todayShift.shift && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className={cn(
-                                    'p-4 rounded-lg',
-                                    todayShift.shift !== 'OFF'
-                                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30'
-                                        : 'bg-zinc-800/50'
-                                )}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs text-zinc-400 mb-1">Today's Shift</p>
-                                        <div className="flex items-center gap-2">
-                                            <span className={cn(
-                                                'text-2xl font-bold px-3 py-1 rounded',
-                                                SHIFT_INFO[todayShift.shift].color
-                                            )}>
-                                                {todayShift.shift}
-                                            </span>
-                                            <div>
-                                                <p className="font-medium text-zinc-200">{SHIFT_INFO[todayShift.shift].label}</p>
-                                                <p className="text-xs text-zinc-400 flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {SHIFT_INFO[todayShift.shift].time}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {todayShift.shift !== 'OFF' && (
-                                        <Badge variant="success" className="animate-pulse">
-                                            Active
-                                        </Badge>
-                                    )}
-                                </div>
-                            </motion.div>
+                            <Badge className={cn("text-[10px] px-2 py-0.5", SHIFT_INFO[todayShift.shift]?.color || "bg-zinc-800")}>
+                                {SHIFT_INFO[todayShift.shift]?.time}
+                            </Badge>
                         )}
-
-                        {/* Week Overview */}
-                        <div className="flex gap-1 overflow-x-auto pb-2">
-                            {weekShifts.map((ws) => (
-                                <motion.div
-                                    key={ws.day}
-                                    className={cn(
-                                        'flex-1 min-w-[48px] p-2 rounded-lg text-center transition-all',
-                                        ws.isToday
-                                            ? 'ring-2 ring-indigo-500 bg-indigo-500/10'
-                                            : 'bg-zinc-800/30'
-                                    )}
-                                    whileHover={{ scale: 1.05 }}
-                                >
-                                    <p className={cn(
-                                        'text-xs mb-1',
-                                        ws.isToday ? 'text-indigo-300 font-bold' : 'text-zinc-500'
-                                    )}>
-                                        {ws.day}
-                                    </p>
-                                    <div className={cn(
-                                        'text-sm font-bold py-1 rounded',
-                                        ws.shift ? SHIFT_INFO[ws.shift].color : 'text-zinc-600'
-                                    )}>
-                                        {ws.shift || '—'}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        {/* Legend */}
-                        <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-800">
-                            {Object.entries(SHIFT_INFO).map(([key, info]) => (
-                                <div key={key} className="flex items-center gap-1">
-                                    <span className={cn('w-4 h-4 rounded text-[10px] flex items-center justify-center font-bold', info.color)}>
-                                        {key}
-                                    </span>
-                                    <span className="text-xs text-zinc-500">{info.time}</span>
-                                </div>
-                            ))}
-                        </div>
                     </div>
-                )}
+
+                    {todayShift?.shift ? (
+                        <div className={cn(
+                            "flex items-center justify-between p-3 rounded-lg border",
+                            SHIFT_INFO[todayShift.shift]?.color || "bg-zinc-800 border-zinc-700"
+                        )}>
+                            <div className="flex items-center gap-3">
+                                <Clock className="w-5 h-5 opacity-80" />
+                                <div>
+                                    <p className="text-sm font-bold">{SHIFT_INFO[todayShift.shift]?.label}</p>
+                                    <p className="text-xs opacity-70">Assigned Shift</p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="p-3 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 text-center">
+                            <span className="text-xs text-zinc-500">No shift assigned for today</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Week Grid */}
+                <div className="grid grid-cols-7 gap-1">
+                    {userWeekShifts.map((day) => (
+                        <div
+                            key={day.dayName}
+                            className={cn(
+                                "flex flex-col items-center gap-1 p-2 rounded-lg border transition-all",
+                                day.isToday ? "bg-zinc-800 border-zinc-700 ring-1 ring-indigo-500/20" : "bg-transparent border-transparent hover:bg-zinc-800/50"
+                            )}
+                        >
+                            <span className={cn(
+                                "text-[10px] font-medium uppercase",
+                                day.isToday ? "text-indigo-400" : "text-zinc-500"
+                            )}>
+                                {day.dayName}
+                            </span>
+
+                            {day.shift ? (
+                                <div className={cn(
+                                    "w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold",
+                                    SHIFT_INFO[day.shift]?.color.split(' ')[0], // Use just the bg color
+                                    SHIFT_INFO[day.shift]?.color.includes('text-white') ? 'text-white' : 'text-zinc-300'
+                                )}>
+                                    {day.shift === 'OFF' ? '-' : day.shift}
+                                </div>
+                            ) : (
+                                <div className="w-6 h-6 rounded bg-zinc-800/50 flex items-center justify-center text-[10px] text-zinc-600">
+                                    -
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </CardContent>
         </Card>
     )
 }
+
+

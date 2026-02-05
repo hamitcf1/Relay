@@ -12,7 +12,7 @@ export type ShiftType = 'A' | 'B' | 'C' | 'E'
 // Log Types & Urgency
 export type LogType = 'maintenance' | 'guest_request' | 'complaint' | 'system'
 export type LogUrgency = 'low' | 'medium' | 'critical'
-export type LogStatus = 'open' | 'resolved'
+export type LogStatus = 'open' | 'resolved' | 'archived'
 
 // Incident Types & Status
 export type IncidentType = 'damage' | 'theft'
@@ -62,6 +62,7 @@ export interface Log {
     status: LogStatus
     created_at: Date
     created_by: string // user uid
+    created_by_name: string // user display name
     is_pinned: boolean
 }
 
@@ -125,6 +126,25 @@ export interface AuthState {
     loading: boolean
     error: string | null
 }
+
+// ... (previous types)
+
+// Room Types
+export type RoomStatus = 'clean' | 'dirty' | 'inspect' | 'dnd'
+export type RoomOccupancy = 'vacant' | 'occupied'
+export type RoomType = 'standard' | 'deluxe' | 'suite' | 'family'
+
+export interface Room {
+    id: string
+    number: string
+    type: RoomType
+    status: RoomStatus
+    occupancy: RoomOccupancy
+    floor: number
+    notes?: string
+}
+
+// ... (UI State Types)
 
 export interface AppState {
     currentHotelId: string | null
