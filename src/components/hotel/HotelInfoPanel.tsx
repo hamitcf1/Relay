@@ -14,6 +14,9 @@ import {
 } from 'lucide-react'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { useRoomStore } from '@/stores/roomStore'
+import { useCalendarStore } from '@/stores/calendarStore'
+import { startOfDay, endOfDay } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -52,6 +55,16 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     const [isEditing, setIsEditing] = useState(false)
     const [editInfo, setEditInfo] = useState<HotelInfoData>(defaultInfo)
 
+    const { rooms, subscribeToRooms } = useRoomStore()
+    const { events, subscribeToEvents } = useCalendarStore()
+
+    // Calculate real stats
+    const totalRooms = rooms.length
+    const occupiedRooms = rooms.filter(r => r.occupancy === 'occupied').length
+    const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0
+
+    const todayArrivals = events.filter(e => e.type === 'arrival').length
+
     // Fetch hotel info
     useEffect(() => {
         if (!hotelId) return
@@ -74,6 +87,20 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
         fetchInfo()
     }, [hotelId])
+
+    // Subscribe to rooms for occupancy stats
+    useEffect(() => {
+        if (!hotelId) return
+        const unsub = subscribeToRooms(hotelId)
+        return () => unsub()
+    }, [hotelId, subscribeToRooms])
+
+    // Subscribe to calendar events for arrivals
+    useEffect(() => {
+        if (!hotelId) return
+        const unsub = subscribeToEvents(hotelId, startOfDay(new Date()), endOfDay(new Date()))
+        return () => unsub()
+    }, [hotelId, subscribeToEvents])
 
     const handleEdit = () => {
         setEditInfo(info)
@@ -240,11 +267,11 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/30">
                                     <p className="text-[10px] text-zinc-500 uppercase font-medium">Expected Arrivals</p>
-                                    <p className="text-lg font-bold text-white">12</p>
+                                    <p className="text-lg font-bold text-white">{todayArrivals}</p>
                                 </div>
                                 <div className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/30">
                                     <p className="text-[10px] text-zinc-500 uppercase font-medium">Current Occupancy</p>
-                                    <p className="text-lg font-bold text-white">84%</p>
+                                    <p className="text-lg font-bold text-white">{occupancyRate}%</p>
                                 </div>
                             </div>
                             <div className="flex flex-wrap gap-2">

@@ -134,7 +134,7 @@ export interface AuthState {
 // Room Types
 export type RoomStatus = 'clean' | 'dirty' | 'inspect' | 'dnd'
 export type RoomOccupancy = 'vacant' | 'occupied'
-export type RoomType = 'standard' | 'deluxe' | 'suite' | 'family'
+export type RoomType = 'standard' | 'corner' | 'corner_jacuzzi' | 'triple' | 'teras_suite'
 
 export interface Room {
     id: string
@@ -146,7 +146,70 @@ export interface Room {
     notes?: string
 }
 
-// ... (UI State Types)
+// Notification types
+export type NotificationType = 'compliance' | 'message' | 'announcement' | 'off_day' | 'system'
+
+export interface Notification {
+    id: string
+    type: NotificationType
+    title: string
+    content: string
+    timestamp: Date
+    is_read: boolean
+    target_role?: UserRole | 'all'
+    target_uid?: string
+    link?: string
+}
+
+// Private Message
+export interface PrivateMessage {
+    id: string
+    sender_id: string
+    sender_name: string
+    receiver_id: string // 'gm' or specific uid
+    content: string
+    timestamp: Date
+    is_read: boolean
+}
+
+// Anonymous Complaint
+export interface AnonymousComplaint {
+    id: string
+    hotel_id: string
+    content: string
+    timestamp: Date
+}
+
+// Off Day Request
+export type OffDayStatus = 'pending' | 'approved' | 'rejected'
+export interface OffDayRequest {
+    id: string
+    staff_id: string
+    staff_name: string
+    date: string // yyyy-MM-dd
+    reason: string
+    status: OffDayStatus
+    created_at: Date
+    processed_at?: Date
+    processed_by?: string
+}
+
+// Tour Currency Prices
+export interface TourPrices {
+    try: number
+    eur: number
+    usd: number
+    gbp: number
+}
+
+// Tour
+export interface Tour {
+    id: string
+    name: string
+    description: string
+    prices: TourPrices
+    is_active: boolean
+}
 
 export interface AppState {
     currentHotelId: string | null

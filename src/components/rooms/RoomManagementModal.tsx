@@ -41,6 +41,14 @@ const statusLabels: Record<RoomStatus, string> = {
     dnd: 'DND'
 }
 
+const roomTypeLabels: Record<RoomType, string> = {
+    standard: 'Standard',
+    corner: 'Corner',
+    corner_jacuzzi: 'Corner Jakuzzi',
+    triple: 'Triple',
+    teras_suite: 'Teras Suite'
+}
+
 export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProps) {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
@@ -225,7 +233,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
 
                                             {/* Type Hint */}
                                             <div className="mt-2 flex justify-end">
-                                                <span className="text-[10px] text-zinc-600 uppercase font-medium">{room.type}</span>
+                                                <span className="text-[10px] text-zinc-600 uppercase font-medium">{roomTypeLabels[room.type]}</span>
                                             </div>
 
                                         </motion.div>
@@ -281,9 +289,10 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="standard">Standard</SelectItem>
-                                                        <SelectItem value="deluxe">Deluxe</SelectItem>
-                                                        <SelectItem value="suite">Suite</SelectItem>
-                                                        <SelectItem value="family">Family</SelectItem>
+                                                        <SelectItem value="corner">Corner</SelectItem>
+                                                        <SelectItem value="corner_jacuzzi">Corner Jakuzzi</SelectItem>
+                                                        <SelectItem value="triple">Triple</SelectItem>
+                                                        <SelectItem value="teras_suite">Teras Suite</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -307,7 +316,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                 {rooms.map((room) => (
                                                     <tr key={room.id} className="bg-zinc-900/30 hover:bg-zinc-800/50 transition-colors">
                                                         <td className="p-3 font-medium">{room.number}</td>
-                                                        <td className="p-3 capitalize text-zinc-400">{room.type}</td>
+                                                        <td className="p-3 text-zinc-400">{roomTypeLabels[room.type]}</td>
                                                         <td className="p-3 text-zinc-400">{room.floor}</td>
                                                         <td className="p-3 text-right">
                                                             <Button

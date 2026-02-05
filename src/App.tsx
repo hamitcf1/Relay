@@ -3,6 +3,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { SetupHotelPage } from '@/pages/SetupHotelPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { OperationsPage } from '@/pages/OperationsPage'
 import ShiftStartPage from '@/pages/ShiftStartPage'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
@@ -28,6 +29,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <ShiftStartPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/operations"
+                    element={
+                        <ProtectedRoute>
+                            <OperationsPage />
                         </ProtectedRoute>
                     }
                 />

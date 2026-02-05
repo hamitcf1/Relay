@@ -23,6 +23,8 @@ export type CalendarEventType =
     | 'delivery'     // Supply delivery
     | 'maintenance'  // Scheduled maintenance
     | 'reminder'     // General reminder
+    | 'tour'         // Tour sales/booking
+    | 'transfer'     // Transfer sales/booking
 
 export interface CalendarEvent {
     id: string
@@ -32,6 +34,8 @@ export interface CalendarEvent {
     date: Date
     time: string | null  // Optional time (HH:MM format)
     room_number: string | null
+    price?: number
+    currency?: string
     created_by: string
     created_by_name: string
     created_at: Date
@@ -89,6 +93,8 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
                         date: convertTimestamp(data.date),
                         time: data.time || null,
                         room_number: data.room_number || null,
+                        price: data.price,
+                        currency: data.currency,
                         created_by: data.created_by,
                         created_by_name: data.created_by_name || 'Unknown',
                         created_at: convertTimestamp(data.created_at),
@@ -166,4 +172,6 @@ export const eventTypeInfo: Record<CalendarEventType, { label: string; color: st
     delivery: { label: 'Delivery', color: 'bg-purple-500', icon: '📦' },
     maintenance: { label: 'Maintenance', color: 'bg-orange-500', icon: '🔧' },
     reminder: { label: 'Reminder', color: 'bg-zinc-500', icon: '⏰' },
+    tour: { label: 'Tour', color: 'bg-fuchsia-500', icon: '🗺️' },
+    transfer: { label: 'Transfer', color: 'bg-sky-500', icon: '🚐' },
 }

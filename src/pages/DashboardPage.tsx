@@ -10,9 +10,10 @@ import {
     ChevronDown,
     Check,
     BedDouble,
-    Sparkles
+    Sparkles,
+    LayoutGrid
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
@@ -32,6 +33,7 @@ import { StickyBoard } from '@/components/logs/StickyBoard'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 import { NewLogModal } from '@/components/logs/NewLogModal'
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
 import { RoomManagementModal } from '@/components/rooms/RoomManagementModal'
 import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
 import { HandoverWizard } from '@/components/handover/HandoverWizard'
@@ -180,6 +182,12 @@ export function DashboardPage() {
                             <span className="text-xs text-zinc-400 font-medium">{compliancePercentage}% {t('module.compliance')}</span>
                         </div>
                     )}
+
+                    <Link to="/operations" className="p-2 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white">
+                        <LayoutGrid className="w-5 h-5" />
+                    </Link>
+
+                    <NotificationDropdown />
 
                     {/* Language Toggle */}
                     <DropdownMenu>

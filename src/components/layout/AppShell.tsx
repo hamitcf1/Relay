@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
-import { Hotel, Bell, Menu, User } from 'lucide-react'
+import { Hotel, Menu, User, LayoutGrid } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { NotificationDropdown } from '../notifications/NotificationDropdown'
 
 interface AppShellProps {
     children?: React.ReactNode
@@ -43,9 +45,10 @@ export function AppShell({ children }: AppShellProps) {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 }}
                         >
-                            <button className="p-2 rounded-lg hover:bg-zinc-800 transition-colors">
-                                <Bell className="w-5 h-5 text-zinc-400" />
-                            </button>
+                            <Link to="/operations" className="p-2 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white">
+                                <LayoutGrid className="w-5 h-5" />
+                            </Link>
+                            <NotificationDropdown />
                             <button className="p-2 rounded-lg hover:bg-zinc-800 transition-colors">
                                 <User className="w-5 h-5 text-zinc-400" />
                             </button>
