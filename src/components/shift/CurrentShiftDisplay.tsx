@@ -23,10 +23,10 @@ interface WeekShift {
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const SHIFT_INFO: Record<string, { label: string; time: string; color: string }> = {
-    'A': { label: 'Morning', time: '07:00 - 15:00', color: 'bg-indigo-500 text-white' },
-    'B': { label: 'Afternoon', time: '15:00 - 23:00', color: 'bg-purple-500 text-white' },
-    'C': { label: 'Night', time: '23:00 - 07:00', color: 'bg-rose-500 text-white' },
-    'E': { label: 'Extra', time: 'Varies', color: 'bg-amber-500 text-white' },
+    'A': { label: 'Morning', time: '08:00 - 16:00', color: 'bg-indigo-500 text-white' },
+    'B': { label: 'Afternoon', time: '16:00 - 00:00', color: 'bg-purple-500 text-white' },
+    'C': { label: 'Night', time: '00:00 - 08:00', color: 'bg-rose-500 text-white' },
+    'E': { label: 'Extra', time: '10:00 - 18:00', color: 'bg-amber-500 text-white' },
     'OFF': { label: 'Off', time: '-', color: 'bg-zinc-700 text-zinc-400' },
 }
 
