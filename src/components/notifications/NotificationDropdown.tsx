@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -37,6 +39,7 @@ const notificationColors: Record<NotificationType, string> = {
 export function NotificationDropdown() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
+    const navigate = useNavigate()
     const {
         notifications,
         unreadCount,
@@ -55,6 +58,14 @@ export function NotificationDropdown() {
 
     const handleMarkAllRead = () => {
         if (hotel?.id) markAllAsRead(hotel.id)
+    }
+
+    const handleNotificationClick = (n: any) => {
+        if (!hotel?.id) return
+        markAsRead(hotel.id, n.id)
+        if (n.link) {
+            navigate(n.link)
+        }
     }
 
     return (
@@ -103,11 +114,11 @@ export function NotificationDropdown() {
                             {notifications.map((n) => {
                                 const Icon = notificationIcons[n.type]
                                 return (
-                                    <div
+                                    <DropdownMenuItem
                                         key={n.id}
-                                        onClick={() => hotel?.id && markAsRead(hotel.id, n.id)}
+                                        onSelect={() => handleNotificationClick(n)}
                                         className={cn(
-                                            "flex gap-3 p-4 transition-all cursor-pointer hover:bg-zinc-800/50 relative group",
+                                            "flex gap-3 p-4 transition-all cursor-pointer focus:bg-zinc-800/50 relative group outline-none",
                                             !n.is_read && "bg-indigo-500/[0.03]"
                                         )}
                                     >
@@ -130,7 +141,7 @@ export function NotificationDropdown() {
                                                 {n.content}
                                             </p>
                                         </div>
-                                    </div>
+                                    </DropdownMenuItem>
                                 )
                             })}
                         </div>
@@ -138,13 +149,14 @@ export function NotificationDropdown() {
                 </div>
 
                 <DropdownMenuSeparator className="bg-zinc-800 m-0" />
-                <Button
-                    variant="ghost"
-                    className="w-full rounded-none h-11 text-xs text-zinc-500 hover:text-white transition-colors"
+                <DropdownMenuItem
+                    onSelect={() => navigate('/operations')}
+                    className="w-full rounded-none h-11 text-xs text-zinc-500 hover:text-white focus:text-white transition-colors flex items-center justify-center cursor-pointer focus:bg-zinc-800"
                 >
                     {t('notifications.viewAll')}
-                </Button>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )
 }
+

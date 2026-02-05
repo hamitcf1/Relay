@@ -45,7 +45,7 @@ export const useMessageStore = create<MessageStore>((set) => ({
         // or just subscribe to messages where receiver is global 'gm' or the user.
         const q = query(
             messagesRef,
-            orderBy('timestamp', 'asc'),
+            orderBy('timestamp', 'desc'),
             limit(100)
         )
 
@@ -71,7 +71,8 @@ export const useMessageStore = create<MessageStore>((set) => ({
                 m.receiver_id === 'gm'
             )
 
-            set({ messages: filtered, loading: false })
+            // Reverse to show oldest first (chronological order)
+            set({ messages: filtered.reverse(), loading: false })
         }, (err) => {
             console.error("Message subscription error:", err)
             set({ error: err.message, loading: false })

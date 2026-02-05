@@ -66,6 +66,7 @@ type Translations = {
 
     // Status & Urgency
     'status.active': string
+    'status.ongoing': string
     'status.resolved': string
     'status.archived': string
     'status.open': string
@@ -121,6 +122,9 @@ type Translations = {
     'category.guestInfo': string
     'category.earlyCheckout': string
     'category.feedback': string
+    'category.upgrade': string
+    'category.upsell': string
+    'category.restaurant': string
     'category.maintenance': string
     'category.guest_request': string
     'category.complaint': string
@@ -377,6 +381,7 @@ const translations: Record<Language, Translations> = {
         'dashboard.userProfile': 'User Profile',
 
         'status.active': 'Active',
+        'status.ongoing': 'Shift Ongoing',
         'status.resolved': 'Resolved',
         'status.archived': 'Archived',
         'status.open': 'Open',
@@ -538,6 +543,9 @@ const translations: Record<Language, Translations> = {
         'category.guestInfo': 'Guest Info',
         'category.earlyCheckout': 'Early Checkout',
         'category.feedback': 'Feedback',
+        'category.upgrade': 'Upgrade (Room)',
+        'category.upsell': 'Upsell',
+        'category.restaurant': 'Restaurant/Bar',
         'category.maintenance': 'Maintenance',
         'category.guest_request': 'Guest Request',
         'category.complaint': 'Complaint',
@@ -683,6 +691,7 @@ const translations: Record<Language, Translations> = {
         'dashboard.userProfile': 'Kullanıcı Profili',
 
         'status.active': 'Aktif',
+        'status.ongoing': 'Vardiya Devam Ediyor',
         'status.resolved': 'Çözüldü',
         'status.archived': 'Arşiv',
         'status.open': 'Açık',
@@ -844,6 +853,9 @@ const translations: Record<Language, Translations> = {
         'category.guestInfo': 'Misafir Bilgisi',
         'category.earlyCheckout': 'Erken Çıkış',
         'category.feedback': 'Geri Bildirim',
+        'category.upgrade': 'Upgrade (Oda)',
+        'category.upsell': 'Ekstra Satış',
+        'category.restaurant': 'Restoran',
         'category.maintenance': 'Bakım',
         'category.guest_request': 'Misafir İsteği',
         'category.complaint': 'Şikayet',

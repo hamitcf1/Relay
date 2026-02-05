@@ -32,6 +32,14 @@ function App() {
                     }
                 />
                 <Route
+                    path="/operations"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
                     path="/"
                     element={
                         <ProtectedRoute>

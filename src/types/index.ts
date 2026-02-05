@@ -145,6 +145,9 @@ export type NoteCategory =
     | 'early_checkout' // Early checkout info
     | 'guest_info'     // Guest-specific notes
     | 'feedback'       // Merged Live Feedback
+    | 'upgrade'        // Room Upgrades (financial)
+    | 'upsell'         // Upselling services (financial)
+    | 'restaurant'     // Restaurant/Bar payments (financial)
     | 'other'
 
 export type NoteStatus = 'active' | 'resolved' | 'archived'
@@ -166,10 +169,10 @@ export interface ShiftNote {
     resolved_by: string | null
     is_anonymous?: boolean
     // Expanded properties for calendar sync & detailed tracking
-    time?: string // HH:MM
-    guest_name?: string
-    assigned_staff_uid?: string
-    assigned_staff_name?: string
+    time?: string | null // HH:MM
+    guest_name?: string | null
+    assigned_staff_uid?: string | null
+    assigned_staff_name?: string | null
 }
 
 // Room Types
@@ -185,7 +188,7 @@ export interface Room {
     status: RoomStatus
     occupancy: RoomOccupancy
     floor: number
-    bed_config?: BedConfig  // Only for standard rooms
+    bed_config?: BedConfig | null  // Only for standard rooms
     notes?: string
 }
 

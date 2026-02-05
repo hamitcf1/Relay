@@ -108,7 +108,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                 status: 'clean',
                 occupancy: 'vacant', // Default to vacant
                 floor: parseInt(newRoomFloor) || 1,
-                bed_config: newRoomType === 'standard' ? newRoomBedConfig : undefined
+                bed_config: newRoomType === 'standard' ? newRoomBedConfig : null
             })
             setNewRoomNumber('')
             setNewRoomFloor('')

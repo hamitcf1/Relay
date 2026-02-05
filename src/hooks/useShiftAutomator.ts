@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { format, isWithinInterval, parse, addDays } from 'date-fns'
+import { format, isWithinInterval } from 'date-fns'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useNotificationStore } from '@/stores/notificationStore'
@@ -38,15 +38,16 @@ export function useShiftAutomator(hotelId: string | null) {
                     const end = new Date(now)
                     end.setHours(endH, endM, 0, 0)
 
-                    // Handle night shift end (00:00)
+                    // If end time is 00:00, it actually means the start of the next day
                     if (config.end === '00:00') {
-                        end.setHours(23, 59, 59, 999)
+                        end.setDate(end.getDate() + 1)
                     }
 
+                    // If current time is past the end time of the active shift, close it
                     if (now >= end) {
                         console.log(`[Automator] Shift ${currentShift.type} ended at ${config.end}. Auto-closing...`)
                         await endShift(hotelId, currentShift.cash_start, 'Automatically closed by system roster.')
-                        return // Let state update then we start the next in next interval
+                        return 
                     }
                 }
             }
@@ -59,11 +60,18 @@ export function useShiftAutomator(hotelId: string | null) {
                     const config = SHIFT_TIMES[shiftInfo.shift as keyof typeof SHIFT_TIMES]
                     if (!config) continue
 
-                    const startTime = parse(config.start, 'HH:mm', now)
-                    let endTime = parse(config.end, 'HH:mm', now)
+                    const [startH, startM] = config.start.split(':').map(Number)
+                    const [endH, endM] = config.end.split(':').map(Number)
 
+                    const startTime = new Date(now)
+                    startTime.setHours(startH, startM, 0, 0)
+
+                    let endTime = new Date(now)
+                    endTime.setHours(endH, endM, 0, 0)
+
+                    // If end time is 00:00, it's the start of the next day
                     if (config.end === '00:00') {
-                        endTime = addDays(endTime, 1)
+                        endTime.setDate(endTime.getDate() + 1)
                     }
 
                     if (isWithinInterval(now, { start: startTime, end: endTime })) {

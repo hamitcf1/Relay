@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale } from '@/lib/utils'
@@ -37,9 +37,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const { staff, subscribeToRoster } = useRosterStore()
 
     // Ensure we have staff list
-    useState(() => {
-        if (hotelId) subscribeToRoster(hotelId)
-    })
+    useEffect(() => {
+        if (hotelId) {
+            const unsub = subscribeToRoster(hotelId)
+            return () => unsub()
+        }
+    }, [hotelId, subscribeToRoster])
 
     const [isAdding, setIsAdding] = useState(false)
     const [newCategory, setNewCategory] = useState<NoteCategory>('handover')
@@ -53,6 +56,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editContent, setEditContent] = useState('')
     const [editCategory, setEditCategory] = useState<NoteCategory>('handover') // Default, will update on edit click
+    const [editAmount, setEditAmount] = useState('')
 
     const [loading, setLoading] = useState(false)
     const [isAIModalOpen, setIsAIModalOpen] = useState(false)
@@ -68,6 +72,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         })
     }, [notes, filter, statusFilter])
 
+    const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'upsell', 'restaurant'].includes(cat)
+
     const handleAddNote = async () => {
         if (!newContent.trim() || !user) return
 
@@ -78,16 +84,16 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 content: newContent.trim(),
                 room_number: newRoom.trim() || null,
                 is_relevant: true,
-                amount_due: newCategory === 'damage' && newAmount ? parseFloat(newAmount) : null,
+                amount_due: isFinancialCategory(newCategory) && newAmount ? parseFloat(newAmount) : null,
                 is_paid: false,
                 created_by: user.uid,
                 created_by_name: user.name || 'Unknown',
                 shift_id: null,
                 // New Fields
-                time: newTime || undefined,
-                guest_name: newGuest.trim() || undefined,
-                assigned_staff_uid: (newAssignedStaff && newAssignedStaff !== 'none') ? newAssignedStaff : undefined,
-                assigned_staff_name: (newAssignedStaff && newAssignedStaff !== 'none') ? staff.find(s => s.uid === newAssignedStaff)?.name : undefined
+                time: newTime || null,
+                guest_name: newGuest.trim() || null,
+                assigned_staff_uid: (newAssignedStaff && newAssignedStaff !== 'none') ? newAssignedStaff : null,
+                assigned_staff_name: (newAssignedStaff && newAssignedStaff !== 'none') ? (staff.find(s => s.uid === newAssignedStaff)?.name || null) : null
             })
 
             // Reset form
@@ -122,6 +128,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         setEditingId(note.id)
         setEditContent(note.content)
         setEditCategory(note.category)
+        setEditAmount(note.amount_due?.toString() || '')
     }
 
     const handleUpdateNote = async () => {
@@ -130,7 +137,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
             setLoading(true)
             await updateNote(hotelId, editingId, {
                 content: editContent,
-                category: editCategory
+                category: editCategory,
+                amount_due: isFinancialCategory(editCategory) && editAmount ? parseFloat(editAmount) : null
             })
             setEditingId(null)
         } finally {
@@ -207,6 +215,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         { key: 'handover' as const, ...categoryInfo.handover, label: t('category.handover') },
                         { key: 'feedback' as const, ...categoryInfo.feedback, label: t('category.feedback') },
                         { key: 'damage' as const, ...categoryInfo.damage, label: t('category.damage') },
+                        { key: 'upgrade' as const, ...categoryInfo.upgrade, label: t('category.upgrade') },
+                        { key: 'upsell' as const, ...categoryInfo.upsell, label: t('category.upsell') },
+                        { key: 'restaurant' as const, ...categoryInfo.restaurant, label: t('category.restaurant') },
                         { key: 'guest_info' as const, ...categoryInfo.guest_info, label: t('category.guestInfo') },
                         { key: 'early_checkout' as const, ...categoryInfo.early_checkout, label: t('category.earlyCheckout') },
                     ].map((tab) => (
@@ -269,7 +280,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                     onChange={(e) => setNewTime(e.target.value)}
                                     className="w-24 text-sm bg-zinc-800/50"
                                 />
-                                {newCategory === 'damage' && (
+                                {isFinancialCategory(newCategory) && (
                                     <Input
                                         placeholder={t('common.amount') + " ₺"}
                                         type="number"
@@ -387,7 +398,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 <Badge variant="outline" className="text-[10px] h-4 bg-zinc-800 text-zinc-400 border-zinc-700">#{note.room_number}</Badge>
                                             )}
 
-                                            {note.category === 'damage' && note.amount_due && (
+                                            {isFinancialCategory(note.category) && note.amount_due && (
                                                 <span className={cn(
                                                     'text-[10px] font-bold',
                                                     note.is_paid ? 'text-emerald-400' : 'text-rose-400'
@@ -426,12 +437,23 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                         </button>
                                                     ))}
                                                 </div>
-                                                <Input
-                                                    value={editContent}
-                                                    onChange={(e) => setEditContent(e.target.value)}
-                                                    className="h-8 text-sm bg-zinc-950 border-zinc-700"
-                                                    autoFocus
-                                                />
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        value={editContent}
+                                                        onChange={(e) => setEditContent(e.target.value)}
+                                                        className="h-8 text-sm bg-zinc-950 border-zinc-700 flex-1"
+                                                        autoFocus
+                                                    />
+                                                    {isFinancialCategory(editCategory) && (
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="₺"
+                                                            value={editAmount}
+                                                            onChange={(e) => setEditAmount(e.target.value)}
+                                                            className="h-8 w-20 text-sm bg-zinc-950 border-zinc-700"
+                                                        />
+                                                    )}
+                                                </div>
                                                 <div className="flex gap-2">
                                                     <Button size="sm" onClick={handleUpdateNote} disabled={loading} className="h-6 text-xs bg-emerald-600 hover:bg-emerald-500 text-white">
                                                         {t('common.save')}
@@ -460,7 +482,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
                                     {/* Actions */}
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {note.category === 'damage' && !note.is_paid && note.amount_due && (
+                                        {isFinancialCategory(note.category) && !note.is_paid && note.amount_due && (
                                             <Button
                                                 size="icon"
                                                 variant="ghost"

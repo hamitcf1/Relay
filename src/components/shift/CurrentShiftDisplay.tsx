@@ -104,7 +104,7 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                         </div>
                     </div>
                     <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-zinc-700">
-                        {currentShift ? `${t('status.active')} ${format(new Date(currentShift.date), 'HH:mm')}` : t('status.noActiveShift')}
+                        {currentShift ? t('status.ongoing') : t('status.noActiveShift')}
                     </Badge>
                 </div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Send, MessageSquare, Megaphone, Search, Check, CheckCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMessageStore } from '@/stores/messageStore'
@@ -20,11 +21,20 @@ export function MessagingPanel() {
     const { messages, subscribeToMessages, sendMessage, markAsRead } = useMessageStore()
     const { staff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
+    const [searchParams] = useSearchParams()
 
     const [activeConversation, setActiveConversation] = useState<string>('all') // 'all' or user uid
     const [newMessage, setNewMessage] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
     const scrollRef = useRef<HTMLDivElement>(null)
+
+    // Handle Deep Linking via URL query params
+    useEffect(() => {
+        const chatParam = searchParams.get('chat')
+        if (chatParam) {
+            setActiveConversation(chatParam)
+        }
+    }, [searchParams])
 
     // Subscribe to data
     useEffect(() => {
@@ -137,7 +147,8 @@ export function MessagingPanel() {
                     type: 'message',
                     title: `Message from ${user.name}`,
                     content: content,
-                    target_uid: activeConversation
+                    target_uid: activeConversation,
+                    link: `/operations?chat=${user.uid}`
                 })
             }
         } catch (error) {

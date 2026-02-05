@@ -90,8 +90,15 @@ export const useNotesStore = create<NotesStore>((set) => ({
     addNote: async (hotelId, noteData) => {
         try {
             const notesRef = collection(db, 'hotels', hotelId, 'shift_notes')
+
+            // Clean undefined
+            const cleanData = Object.entries(noteData).reduce((acc, [k, v]) => {
+                if (v !== undefined) acc[k] = v
+                return acc
+            }, {} as any)
+
             const docRef = await addDoc(notesRef, {
-                ...noteData,
+                ...cleanData,
                 status: 'active',
                 created_at: serverTimestamp(),
                 resolved_at: null,
@@ -222,8 +229,11 @@ export const useNotesStore = create<NotesStore>((set) => ({
 export const categoryInfo: Record<NoteCategory, { label: string; color: string; icon: string }> = {
     handover: { label: 'Handover', color: 'bg-indigo-500', icon: '📋' },
     damage: { label: 'Damage', color: 'bg-rose-500', icon: '⚠️' },
+    upgrade: { label: 'Upgrade', color: 'bg-emerald-600', icon: '⬆️' },
+    upsell: { label: 'Upsell', color: 'bg-green-500', icon: '💰' },
+    restaurant: { label: 'Restaurant', color: 'bg-orange-500', icon: '🍽️' },
     early_checkout: { label: 'Early Checkout', color: 'bg-amber-500', icon: '🚪' },
-    guest_info: { label: 'Guest Info', color: 'bg-emerald-500', icon: '👤' },
+    guest_info: { label: 'Guest Info', color: 'bg-cyan-500', icon: '👤' },
     feedback: { label: 'Feedback', color: 'bg-purple-500', icon: '💬' },
     other: { label: 'Other', color: 'bg-zinc-500', icon: '📝' },
 }

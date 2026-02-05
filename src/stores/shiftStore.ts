@@ -8,6 +8,7 @@ import {
     getDocs,
     query,
     where,
+    orderBy,
     limit,
     onSnapshot,
     serverTimestamp,
@@ -122,6 +123,7 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
         const q = query(
             shiftsRef,
             where('status', '==', 'closed'),
+            orderBy('ended_at', 'desc'),
             limit(1)
         )
         try {

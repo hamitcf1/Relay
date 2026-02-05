@@ -64,7 +64,12 @@ export const useRoomStore = create<RoomState>((set) => ({
     addRoom: async (hotelId, roomData) => {
         try {
             const roomsRef = collection(db, 'hotels', hotelId, 'rooms')
-            await addDoc(roomsRef, roomData)
+            // Clean undefined
+            const cleanData = Object.entries(roomData).reduce((acc, [k, v]) => {
+                if (v !== undefined) acc[k] = v
+                return acc
+            }, {} as any)
+            await addDoc(roomsRef, cleanData)
         } catch (error: any) {
             set({ error: error.message })
             throw error
@@ -92,7 +97,12 @@ export const useRoomStore = create<RoomState>((set) => ({
     updateRoom: async (hotelId, roomId, updates) => {
         try {
             const roomRef = doc(db, 'hotels', hotelId, 'rooms', roomId)
-            await updateDoc(roomRef, updates)
+            // Clean undefined
+            const cleanUpdates = Object.entries(updates).reduce((acc, [k, v]) => {
+                if (v !== undefined) acc[k] = v
+                return acc
+            }, {} as any)
+            await updateDoc(roomRef, cleanUpdates)
         } catch (error: any) {
             set({ error: error.message })
         }
@@ -112,9 +122,15 @@ export const useRoomStore = create<RoomState>((set) => ({
             const { writeBatch } = await import('firebase/firestore')
             const batch = writeBatch(db)
 
+            // Clean undefined
+            const cleanUpdates = Object.entries(updates).reduce((acc, [k, v]) => {
+                if (v !== undefined) acc[k] = v
+                return acc
+            }, {} as any)
+
             for (const roomId of roomIds) {
                 const roomRef = doc(db, 'hotels', hotelId, 'rooms', roomId)
-                batch.update(roomRef, updates)
+                batch.update(roomRef, cleanUpdates)
             }
 
             await batch.commit()

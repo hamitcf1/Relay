@@ -10,7 +10,7 @@ import {
     BedDouble,
     Sparkles
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -55,6 +55,7 @@ import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard } from 'lucid
 
 export function DashboardPage() {
     const navigate = useNavigate()
+    const location = useLocation()
     const { user, initialize: initAuth, signOut } = useAuthStore()
     const { hotel, subscribeToHotel } = useHotelStore()
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
@@ -64,7 +65,16 @@ export function DashboardPage() {
 
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
     const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
-    const [activeTab, setActiveTab] = useState('overview')
+    const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
+
+    // Update activeTab when location changes (e.g. via navigate('/operations'))
+    useEffect(() => {
+        if (location.pathname === '/operations') {
+            setActiveTab('operations')
+        } else if (location.pathname === '/') {
+            setActiveTab('overview')
+        }
+    }, [location.pathname])
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)

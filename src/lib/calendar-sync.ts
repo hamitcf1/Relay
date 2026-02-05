@@ -75,3 +75,76 @@ export async function removeNoteFromCalendar(hotelId: string, noteId: string) {
         console.error('Error removing note from calendar:', error)
     }
 }
+
+/**
+ * Syncs roster changes to calendar. Specifically handles 'OFF' days.
+ */
+export async function syncRosterToCalendar(
+    hotelId: string,
+    userId: string,
+    userName: string,
+    dateStr: string, // YYYY-MM-DD
+    shift: string
+) {
+    try {
+        const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
+
+        // We look for existing "Off Day" events for this user on this date
+        // Note: Ideally we store some metadata on the event like "roster_sync: true" or "related_user: uid"
+        // For now, we'll query by type 'off_day' and description containing the user name or some unique tag if possible.
+        // Actually, let's verify if we can add a 'user_id' field to events schema? 
+        // Based on previous code, we can just use the note_id field or add a new one. 
+        // Let's rely on type='off_day' and check the start_date matching the roster date.
+
+        const targetDate = new Date(dateStr)
+        targetDate.setHours(0, 0, 0, 0) // Start of day
+
+        // This query might be broad if multiple people are off, so we filter in memory if needed
+        // or better, let's look for events created by system for this user
+        // We will assume title contains "Off Day: [Name]"
+
+        const q = query(
+            eventsRef,
+            where('type', '==', 'off_day'),
+            where('start_date', '==', targetDate)
+        )
+
+        const snapshot = await getDocs(q)
+        let existingEvent = snapshot.docs.find(d => d.data().description?.includes(`User ID: ${userId}`))
+
+        if (shift === 'OFF') {
+            if (!existingEvent) {
+                // Create Off Day Event
+                await addDoc(eventsRef, {
+                    title: `Off Day: ${userName}`,
+                    description: `Scheduled Off Day for ${userName}\nUser ID: ${userId}`,
+                    start_date: targetDate,
+                    end_date: targetDate,
+                    all_day: true,
+                    type: 'off_day',
+                    status: 'confirmed',
+                    created_at: serverTimestamp(),
+                    updated_at: serverTimestamp(),
+                })
+            } else {
+                // Ensure it's confirmed
+                if (existingEvent.data().status !== 'confirmed') {
+                    await updateDoc(doc(db, 'hotels', hotelId, 'calendar_events', existingEvent.id), {
+                        status: 'confirmed',
+                        updated_at: serverTimestamp()
+                    })
+                }
+            }
+        } else {
+            // If shift is NOT OFF, ensure no Off Day event exists
+            if (existingEvent) {
+                await updateDoc(doc(db, 'hotels', hotelId, 'calendar_events', existingEvent.id), {
+                    status: 'cancelled',
+                    updated_at: serverTimestamp()
+                })
+            }
+        }
+    } catch (error) {
+        console.error('Error syncing roster to calendar:', error)
+    }
+}

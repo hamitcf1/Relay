@@ -11,6 +11,7 @@ import {
     getDocs
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { syncRosterToCalendar } from '@/lib/calendar-sync'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -51,13 +52,22 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
 
-    // Get week start date
+    // Get week start date (Monday)
     const getWeekStart = (offset: number = 0): string => {
         const now = new Date()
-        const dayOfWeek = now.getDay()
+        const dayOfWeek = now.getDay() // 0 (Sun) - 6 (Sat)
+        // Calculate difference to get to Monday (1)
+        // If Sunday (0), we need to subtract 6 days. If Monday (1), subtract 0. If Tuesday (2), subtract 1.
         const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) + (offset * 7)
+
         const monday = new Date(now.setDate(diff))
-        return monday.toISOString().split('T')[0]
+
+        // Return YYYY-MM-DD in local time
+        const year = monday.getFullYear()
+        const month = String(monday.getMonth() + 1).padStart(2, '0')
+        const day = String(monday.getDate()).padStart(2, '0')
+
+        return `${year}-${month}-${day}`
     }
 
     const weekStart = getWeekStart(weekOffset)
@@ -70,7 +80,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             date.setDate(start.getDate() + i)
             return {
                 day: DAYS[i],
-                dateStr: date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) // DD/MM
+                dateStr: `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}` // DD/MM
             }
         })
     }, [weekStart])
@@ -189,6 +199,24 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                 },
                 updated_at: new Date(),
             }, { merge: true })
+
+            // Sync to Calendar
+            const dayIndex = DAYS.indexOf(day)
+            if (dayIndex !== -1) {
+                const start = new Date(weekStart)
+                const targetDate = new Date(start)
+                targetDate.setDate(start.getDate() + dayIndex)
+
+                const year = targetDate.getFullYear()
+                const month = String(targetDate.getMonth() + 1).padStart(2, '0')
+                const dateDay = String(targetDate.getDate()).padStart(2, '0')
+                const dateStr = `${year}-${month}-${dateDay}`
+
+                const user = staff.find(s => s.uid === userId)
+                if (user) {
+                    await syncRosterToCalendar(hotelId, userId, user.name, dateStr, nextValue)
+                }
+            }
         } catch (error) {
             console.error('Error saving roster:', error)
         } finally {
