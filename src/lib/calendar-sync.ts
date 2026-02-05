@@ -106,7 +106,7 @@ export async function syncRosterToCalendar(
         const q = query(
             eventsRef,
             where('type', '==', 'off_day'),
-            where('start_date', '==', targetDate)
+            where('date', '==', targetDate)
         )
 
         const snapshot = await getDocs(q)
@@ -118,11 +118,11 @@ export async function syncRosterToCalendar(
                 await addDoc(eventsRef, {
                     title: `Off Day: ${userName}`,
                     description: `Scheduled Off Day for ${userName}\nUser ID: ${userId}`,
-                    start_date: targetDate,
-                    end_date: targetDate,
-                    all_day: true,
+                    date: targetDate,
                     type: 'off_day',
                     status: 'confirmed',
+                    created_by: 'system',
+                    created_by_name: 'System',
                     created_at: serverTimestamp(),
                     updated_at: serverTimestamp(),
                 })

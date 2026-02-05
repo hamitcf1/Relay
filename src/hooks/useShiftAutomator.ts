@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { format, isWithinInterval } from 'date-fns'
+import { format, isWithinInterval, parse, addDays } from 'date-fns'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useNotificationStore } from '@/stores/notificationStore'
@@ -13,10 +13,18 @@ const SHIFT_TIMES = {
 }
 
 export function useShiftAutomator(hotelId: string | null) {
-    const { getShiftsForDate } = useRosterStore()
+    const { getShiftsForDate, subscribeToRoster } = useRosterStore()
     const { currentShift, startShift, endShift, getLastClosedShift } = useShiftStore()
     const lastCheckRef = useRef<string | null>(null)
     const lastComplianceNotificationRef = useRef<number>(0)
+
+    // Ensure Roster is subscribed for the automator to work
+    useEffect(() => {
+        if (hotelId) {
+            const unsub = subscribeToRoster(hotelId)
+            return () => unsub()
+        }
+    }, [hotelId, subscribeToRoster])
 
     useEffect(() => {
         if (!hotelId) return
@@ -35,17 +43,20 @@ export function useShiftAutomator(hotelId: string | null) {
                 const config = SHIFT_TIMES[currentShift.type as keyof typeof SHIFT_TIMES]
                 if (config) {
                     const [endH, endM] = config.end.split(':').map(Number)
-                    const end = new Date(now)
+                    
+                    // CRITICAL: Use the shift's own date as the base for end time
+                    const shiftDate = parse(currentShift.date, 'yyyy-MM-dd', new Date())
+                    const end = new Date(shiftDate)
                     end.setHours(endH, endM, 0, 0)
 
-                    // If end time is 00:00, it actually means the start of the next day
-                    if (config.end === '00:00') {
+                    // If end time is 00:00 or less than start time, it rolls over to next day
+                    if (config.end === '00:00' || config.end < config.start) {
                         end.setDate(end.getDate() + 1)
                     }
 
                     // If current time is past the end time of the active shift, close it
                     if (now >= end) {
-                        console.log(`[Automator] Shift ${currentShift.type} ended at ${config.end}. Auto-closing...`)
+                        console.log(`[Automator] Shift ${currentShift.type} (${currentShift.date}) ended at ${config.end}. Auto-closing...`)
                         await endShift(hotelId, currentShift.cash_start, 'Automatically closed by system roster.')
                         return 
                     }
@@ -55,23 +66,21 @@ export function useShiftAutomator(hotelId: string | null) {
             // 2. Check if we need to AUTO-START a shift
             if (!currentShift) {
                 const todayShifts = getShiftsForDate(now)
+                const yesterdayShifts = getShiftsForDate(addDays(now, -1))
 
-                for (const shiftInfo of todayShifts) {
+                // Check both today's and yesterday's shifts (in case of midnight rollover shifts)
+                const candidateShifts = [...yesterdayShifts, ...todayShifts]
+
+                for (const shiftInfo of candidateShifts) {
                     const config = SHIFT_TIMES[shiftInfo.shift as keyof typeof SHIFT_TIMES]
                     if (!config) continue
 
-                    const [startH, startM] = config.start.split(':').map(Number)
-                    const [endH, endM] = config.end.split(':').map(Number)
+                    const startTime = parse(config.start, 'HH:mm', now)
+                    let endTime = parse(config.end, 'HH:mm', now)
 
-                    const startTime = new Date(now)
-                    startTime.setHours(startH, startM, 0, 0)
-
-                    let endTime = new Date(now)
-                    endTime.setHours(endH, endM, 0, 0)
-
-                    // If end time is 00:00, it's the start of the next day
-                    if (config.end === '00:00') {
-                        endTime.setDate(endTime.getDate() + 1)
+                    // If end time is 00:00 or before start time, it rolls over
+                    if (config.end === '00:00' || config.end < config.start) {
+                        endTime = addDays(endTime, 1)
                     }
 
                     if (isWithinInterval(now, { start: startTime, end: endTime })) {
@@ -81,6 +90,8 @@ export function useShiftAutomator(hotelId: string | null) {
                         const staffIds = todayShifts
                             .filter(s => s.shift === shiftInfo.shift)
                             .map(s => s.uid)
+
+                        if (staffIds.length === 0) continue
 
                         // Attempt to carry over cash from last closed shift
                         const lastShift = await getLastClosedShift(hotelId)
@@ -115,5 +126,5 @@ export function useShiftAutomator(hotelId: string | null) {
         checkShift() // Initial check
 
         return () => clearInterval(timer)
-    }, [hotelId, currentShift, getShiftsForDate, startShift, endShift, getLastClosedShift])
+    }, [hotelId, currentShift, getShiftsForDate, startShift, endShift, getLastClosedShift, subscribeToRoster])
 }

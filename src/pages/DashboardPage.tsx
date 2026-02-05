@@ -44,6 +44,7 @@ import { useShiftStore } from '@/stores/shiftStore'
 import { useNotesStore } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useSalesStore } from '@/stores/salesStore'
+import { useRosterStore } from '@/stores/rosterStore'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessagingPanel } from '@/components/messaging/MessagingPanel'
@@ -60,6 +61,7 @@ export function DashboardPage() {
     const { hotel, subscribeToHotel } = useHotelStore()
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
     const { subscribeToNotes } = useNotesStore()
+    const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
     const { t, language, setLanguage } = useLanguageStore()
 
 
@@ -120,11 +122,13 @@ export function DashboardPage() {
             const unsubHotel = subscribeToHotel(hotelId)
             const unsubShift = subscribeToCurrentShift(hotelId)
             const unsubNotes = subscribeToNotes(hotelId)
+            const unsubRoster = subscribeToRoster(hotelId)
 
             return () => {
                 unsubHotel()
                 unsubShift()
                 unsubNotes()
+                unsubRoster()
             }
         }
 
