@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   RELAY - Cyber-Concierge Theme
+   ============================================ */
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 346 87% 57%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 9%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 239 84% 67%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ============================================
+   Glassmorphism Utilities
+   ============================================ */
+
+@layer utilities {
+  .glass {
+    @apply bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/50;
+  }
+
+  .glass-hover {
+    @apply hover:bg-zinc-800/60 hover:border-zinc-700/50 transition-all duration-300;
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px theme('colors.indigo.500' / 25%),
+                0 0 40px theme('colors.indigo.500' / 10%);
+  }
+
+  .glow-critical {
+    box-shadow: 0 0 20px theme('colors.rose.500' / 35%),
+                0 0 40px theme('colors.rose.500' / 15%);
+  }
+
+  .glow-success {
+    box-shadow: 0 0 20px theme('colors.emerald.400' / 30%),
+                0 0 40px theme('colors.emerald.400' / 10%);
+  }
+
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-critical {
+    @apply bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent;
+  }
+}
+
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.zinc.700') transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-zinc-700 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-600;
+  }
+}
+
+/* ============================================
+   Animation Utilities
+   ============================================ */
+
+@layer utilities {
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    50% {
+      opacity: 0.8;
+      filter: brightness(1.2);
+    }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

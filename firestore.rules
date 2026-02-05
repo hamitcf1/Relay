@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user's role from their document
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    // Helper function to check if user is GM
+    function isGM() {
+      return isAuthenticated() && getUserRole() == 'gm';
+    }
+    
+    // Helper function to check if user belongs to the hotel
+    function belongsToHotel(hotelId) {
+      let userData = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return userData.hotel_id == hotelId;
+    }
+    
+    // ==========================================
+    // USERS COLLECTION
+    // ==========================================
+    match /users/{userId} {
+      // Users can read their own document
+      // GMs can read any user in their hotel
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isGM()
+      );
+      
+      // Users can only be created during registration (by themselves)
+      allow create: if isAuthenticated() && 
+        request.auth.uid == userId &&
+        request.resource.data.role in ['receptionist', 'housekeeping'];
+      
+      // Users can update their own non-role fields
+      // Only GMs can update role field
+      allow update: if isAuthenticated() && (
+        (request.auth.uid == userId && 
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
+        isGM()
+      );
+      
+      // Only GMs can delete users
+      allow delete: if isGM();
+    }
+    
+    // ==========================================
+    // HOTELS COLLECTION
+    // ==========================================
+    match /hotels/{hotelId} {
+      // Anyone authenticated can read hotel info
+      allow read: if isAuthenticated();
+      
+      // Anyone can create a hotel (during registration)
+      allow create: if isAuthenticated();
+      
+      // Only GM or hotel creator can update hotel
+      allow update: if isAuthenticated() && (
+        isGM() ||
+        resource.data.created_by == request.auth.uid
+      );
+      
+      // Only GMs can delete hotels
+      allow delete: if isGM();
+      
+      // ----------------------------------------
+      // HOTEL SUBCOLLECTIONS
+      // ----------------------------------------
+      
+      // LOGS - Real-time activity logs
+      match /logs/{logId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isGM();
+      }
+      
+      // SHIFTS - Shift records
+      match /shifts/{shiftId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isGM();
+      }
+      
+      // ROSTER - Weekly schedules (GM can edit, all can read)
+      match /roster/{weekId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isGM();
+      }
+      
+      // INCIDENTS - Incident reports
+      match /incidents/{incidentId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isGM();
+      }
+      
+      // SHIFT_NOTES - Notes for all shifts
+      match /shift_notes/{noteId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isAuthenticated() && (
+          isGM() ||
+          resource.data.created_by == request.auth.uid
+        );
+      }
+      
+      // SETTINGS - Hotel settings (GM only write)
+      match /settings/{settingId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isGM();
+      }
+    }
+  }
+}
