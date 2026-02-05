@@ -22,6 +22,7 @@ interface RoomState {
     updateRoomOccupancy: (hotelId: string, roomId: string, occupancy: RoomOccupancy) => Promise<void>
     updateRoom: (hotelId: string, roomId: string, updates: Partial<Room>) => Promise<void>
     deleteRoom: (hotelId: string, roomId: string) => Promise<void>
+    updateMultipleRooms: (hotelId: string, roomIds: string[], updates: Partial<Room>) => Promise<void>
 }
 
 export const useRoomStore = create<RoomState>((set) => ({
@@ -101,6 +102,22 @@ export const useRoomStore = create<RoomState>((set) => ({
         try {
             const roomRef = doc(db, 'hotels', hotelId, 'rooms', roomId)
             await deleteDoc(roomRef)
+        } catch (error: any) {
+            set({ error: error.message })
+        }
+    },
+
+    updateMultipleRooms: async (hotelId, roomIds, updates) => {
+        try {
+            const { writeBatch } = await import('firebase/firestore')
+            const batch = writeBatch(db)
+
+            for (const roomId of roomIds) {
+                const roomRef = doc(db, 'hotels', hotelId, 'rooms', roomId)
+                batch.update(roomRef, updates)
+            }
+
+            await batch.commit()
         } catch (error: any) {
             set({ error: error.message })
         }

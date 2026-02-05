@@ -45,6 +45,7 @@ import { RosterMatrix } from '@/components/roster/RosterMatrix'
 import { CalendarWidget } from '@/components/calendar/CalendarWidget'
 import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
+import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useLogsStore } from '@/stores/logsStore'
@@ -285,6 +286,7 @@ export function DashboardPage() {
 
             {/* Main Layout - 3 Columns */}
             <main className="flex-1 overflow-hidden p-4 lg:p-6">
+                <AnnouncementBanner />
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
                     {/* -- LEFT COLUMN: Activity Feed (Full Height) -- */}

@@ -135,6 +135,7 @@ export interface AuthState {
 export type RoomStatus = 'clean' | 'dirty' | 'inspect' | 'dnd'
 export type RoomOccupancy = 'vacant' | 'occupied'
 export type RoomType = 'standard' | 'corner' | 'corner_jacuzzi' | 'triple' | 'teras_suite'
+export type BedConfig = 'separated' | 'together'
 
 export interface Room {
     id: string
@@ -143,6 +144,7 @@ export interface Room {
     status: RoomStatus
     occupancy: RoomOccupancy
     floor: number
+    bed_config?: BedConfig  // Only for standard rooms
     notes?: string
 }
 
@@ -173,11 +175,13 @@ export interface PrivateMessage {
 }
 
 // Anonymous Complaint
+export type ComplaintStatus = 'new' | 'reviewing' | 'resolved' | 'dismissed'
 export interface AnonymousComplaint {
     id: string
     hotel_id: string
     content: string
     timestamp: Date
+    status: ComplaintStatus
 }
 
 // Off Day Request

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Send, Shield, Loader2 } from 'lucide-react'
+import { Send, Shield, Loader2, Eye, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFeedbackStore } from '@/stores/feedbackStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -7,18 +7,36 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDistanceToNow } from 'date-fns'
+import type { ComplaintStatus } from '@/types'
+import { cn } from '@/lib/utils'
 
 export function FeedbackSection() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
-    const { complaints, subscribeToComplaints, submitComplaint, loading } = useFeedbackStore()
+    const { complaints, subscribeToComplaints, submitComplaint, updateComplaintStatus, loading } = useFeedbackStore()
 
     const [content, setContent] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const [success, setSuccess] = useState(false)
 
     const isGM = user?.role === 'gm'
+
+    const getStatusConfig = (status: ComplaintStatus) => {
+        switch (status) {
+            case 'new': return { label: 'Yeni', icon: Clock, color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' }
+            case 'reviewing': return { label: 'İnceleniyor', icon: Eye, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' }
+            case 'resolved': return { label: 'Çözüldü', icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' }
+            case 'dismissed': return { label: 'Reddedildi', icon: XCircle, color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' }
+            default: return { label: status, icon: Clock, color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' }
+        }
+    }
+
+    const handleStatusChange = async (complaintId: string, newStatus: ComplaintStatus) => {
+        if (!hotel?.id) return
+        await updateComplaintStatus(hotel.id, complaintId, newStatus)
+    }
 
     useEffect(() => {
         if (hotel?.id && isGM) {
@@ -135,20 +153,41 @@ export function FeedbackSection() {
                                 ) : complaints.length === 0 ? (
                                     <p className="text-xs text-zinc-600 text-center py-4 bg-zinc-800/20 rounded-lg">No complaints to show.</p>
                                 ) : (
-                                    complaints.map(c => (
-                                        <motion.div
-                                            key={c.id}
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-2 hover:border-zinc-700 transition-colors"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-bold text-indigo-400 uppercase">Complaint</span>
-                                                <span className="text-[10px] text-zinc-500">{formatDistanceToNow(c.timestamp, { addSuffix: true })}</span>
-                                            </div>
-                                            <p className="text-xs text-zinc-300 leading-normal">{c.content}</p>
-                                        </motion.div>
-                                    ))
+                                    complaints.map(c => {
+                                        const statusConfig = getStatusConfig(c.status)
+                                        const StatusIcon = statusConfig.icon
+                                        return (
+                                            <motion.div
+                                                key={c.id}
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-2 hover:border-zinc-700 transition-colors"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-indigo-400 uppercase">Complaint</span>
+                                                        <Badge className={cn("text-[10px] px-1.5 h-4", statusConfig.color)}>
+                                                            <StatusIcon className="w-2.5 h-2.5 mr-1" />
+                                                            {statusConfig.label}
+                                                        </Badge>
+                                                    </div>
+                                                    <span className="text-[10px] text-zinc-500">{formatDistanceToNow(c.timestamp, { addSuffix: true })}</span>
+                                                </div>
+                                                <p className="text-xs text-zinc-300 leading-normal">{c.content}</p>
+                                                <Select value={c.status} onValueChange={(v) => handleStatusChange(c.id, v as ComplaintStatus)}>
+                                                    <SelectTrigger className="h-7 bg-zinc-950 border-zinc-700 text-xs w-32">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="new">Yeni</SelectItem>
+                                                        <SelectItem value="reviewing">İnceleniyor</SelectItem>
+                                                        <SelectItem value="resolved">Çözüldü</SelectItem>
+                                                        <SelectItem value="dismissed">Reddedildi</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </motion.div>
+                                        )
+                                    })
                                 )}
                             </div>
                         </div>

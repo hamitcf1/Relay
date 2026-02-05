@@ -9,6 +9,9 @@ import {
     Sparkles,
     SprayCan,
     Search,
+    Layers,
+    CheckSquare,
+    Square
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog'
 import { Button } from '../ui/button'
@@ -20,7 +23,7 @@ import { useRoomStore } from '@/stores/roomStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { cn } from '@/lib/utils'
-import type { Room, RoomStatus, RoomType } from '@/types'
+import type { Room, RoomStatus, RoomType, BedConfig } from '@/types'
 
 interface RoomManagementModalProps {
     isOpen: boolean
@@ -59,7 +62,8 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
         addRoom,
         updateRoomStatus,
         updateRoomOccupancy,
-        deleteRoom
+        deleteRoom,
+        updateMultipleRooms
     } = useRoomStore()
 
     const [activeTab, setActiveTab] = useState<'overview' | 'setup'>('overview')
@@ -70,6 +74,10 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
     const [newRoomNumber, setNewRoomNumber] = useState('')
     const [newRoomType, setNewRoomType] = useState<RoomType>('standard')
     const [newRoomFloor, setNewRoomFloor] = useState('')
+
+    // Bulk Setup State
+    const [selectedRoomIds, setSelectedRoomIds] = useState<Set<string>>(new Set())
+    const [bulkBedConfig, setBulkBedConfig] = useState<BedConfig>('separated')
 
     useEffect(() => {
         if (isOpen && hotelId) {
@@ -120,6 +128,33 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
         const nextIndex = (flow.indexOf(room.status) + 1) % flow.length
         await updateRoomStatus(hotelId, room.id, flow[nextIndex])
     }
+
+    const toggleRoomSelection = (roomId: string) => {
+        setSelectedRoomIds(prev => {
+            const newSet = new Set(prev)
+            if (newSet.has(roomId)) {
+                newSet.delete(roomId)
+            } else {
+                newSet.add(roomId)
+            }
+            return newSet
+        })
+    }
+
+    const selectAllStandardRooms = () => {
+        const standardRoomIds = rooms.filter(r => r.type === 'standard').map(r => r.id)
+        setSelectedRoomIds(new Set(standardRoomIds))
+    }
+
+    const clearSelection = () => setSelectedRoomIds(new Set())
+
+    const handleBulkUpdate = async () => {
+        if (!hotelId || selectedRoomIds.size === 0) return
+        await updateMultipleRooms(hotelId, Array.from(selectedRoomIds), { bed_config: bulkBedConfig })
+        clearSelection()
+    }
+
+    const standardRooms = rooms.filter(r => r.type === 'standard')
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -300,6 +335,73 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                 Add Room
                                             </Button>
                                         </form>
+                                    </Card>
+
+                                    {/* Bulk Setup Section */}
+                                    <Card className="bg-zinc-900/50 border-zinc-800 p-6">
+                                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                            <Layers className="w-5 h-5 text-indigo-400" />
+                                            Bulk Room Setup
+                                        </h3>
+                                        <p className="text-sm text-zinc-400 mb-4">Select standard rooms to update their bed configuration.</p>
+
+                                        <div className="flex gap-2 mb-4">
+                                            <Button variant="outline" size="sm" onClick={selectAllStandardRooms} className="border-zinc-700">
+                                                Select All Standard ({standardRooms.length})
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={clearSelection} disabled={selectedRoomIds.size === 0}>
+                                                Clear ({selectedRoomIds.size})
+                                            </Button>
+                                        </div>
+
+                                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 mb-4 max-h-32 overflow-y-auto p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                                            {standardRooms.map(room => (
+                                                <button
+                                                    key={room.id}
+                                                    onClick={() => toggleRoomSelection(room.id)}
+                                                    className={cn(
+                                                        'p-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1',
+                                                        selectedRoomIds.has(room.id)
+                                                            ? 'bg-indigo-600 text-white'
+                                                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                                    )}
+                                                >
+                                                    {selectedRoomIds.has(room.id) ? <CheckSquare className="w-3 h-3" /> : <Square className="w-3 h-3" />}
+                                                    {room.number}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="flex items-center gap-4">
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-zinc-500">Bed Configuration</Label>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        variant={bulkBedConfig === 'separated' ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        onClick={() => setBulkBedConfig('separated')}
+                                                        className={bulkBedConfig === 'separated' ? 'bg-indigo-600' : 'border-zinc-700'}
+                                                    >
+                                                        Ayrık Yataklar
+                                                    </Button>
+                                                    <Button
+                                                        variant={bulkBedConfig === 'together' ? 'default' : 'outline'}
+                                                        size="sm"
+                                                        onClick={() => setBulkBedConfig('together')}
+                                                        className={bulkBedConfig === 'together' ? 'bg-indigo-600' : 'border-zinc-700'}
+                                                    >
+                                                        Birleşik Yatak
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                onClick={handleBulkUpdate}
+                                                disabled={selectedRoomIds.size === 0}
+                                                className="bg-emerald-600 hover:bg-emerald-500 ml-auto"
+                                            >
+                                                Update {selectedRoomIds.size} Rooms
+                                            </Button>
+                                        </div>
                                     </Card>
 
                                     <div className="rounded-lg border border-zinc-800 overflow-hidden">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Calendar as CalendarIcon, Check, X, Clock, Loader2, Send } from 'lucide-react'
+import { Calendar as CalendarIcon, Check, X, Clock, Loader2, Send, Plus, Trash2, RefreshCcw } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useOffDayStore } from '@/stores/offDayStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -18,7 +18,7 @@ export function OffDayScheduler() {
     const { requests, subscribeToRequests, submitRequest, updateRequest, updateRequestStatus, loading } = useOffDayStore()
     const { addEvent } = useCalendarStore()
 
-    const [date, setDate] = useState('')
+    const [dates, setDates] = useState<string[]>([''])
     const [reason, setReason] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [submitting, setSubmitting] = useState(false)
@@ -34,25 +34,29 @@ export function OffDayScheduler() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!date || !reason.trim() || !hotel?.id || !user) return
+        const validDates = dates.filter(d => d.trim())
+        if (validDates.length === 0 || !reason.trim() || !hotel?.id || !user) return
 
         setSubmitting(true)
         try {
             if (editingId) {
                 await updateRequest(hotel.id, editingId, {
-                    date,
+                    date: validDates[0],
                     reason: reason.trim()
                 })
                 setEditingId(null)
             } else {
-                await submitRequest(hotel.id, {
-                    staff_id: user.uid,
-                    staff_name: user.name,
-                    date,
-                    reason: reason.trim()
-                })
+                // Submit multiple requests if multiple dates
+                for (const d of validDates) {
+                    await submitRequest(hotel.id, {
+                        staff_id: user.uid,
+                        staff_name: user.name,
+                        date: d,
+                        reason: reason.trim()
+                    })
+                }
             }
-            setDate('')
+            setDates([''])
             setReason('')
         } catch (error) {
             console.error("Submission error:", error)
@@ -63,18 +67,33 @@ export function OffDayScheduler() {
 
     const handleEdit = (request: any) => {
         setEditingId(request.id)
-        setDate(request.date)
+        setDates([request.date])
         setReason(request.reason)
+    }
+
+    const addDateField = () => setDates([...dates, ''])
+    const removeDateField = (index: number) => {
+        if (dates.length > 1) {
+            setDates(dates.filter((_, i) => i !== index))
+        }
+    }
+    const updateDate = (index: number, value: string) => {
+        const newDates = [...dates]
+        newDates[index] = value
+        setDates(newDates)
     }
 
     const handleAction = async (request: any, status: 'approved' | 'rejected') => {
         if (!hotel?.id || !user) return
+
+        const wasApproved = request.status === 'approved'
         await updateRequestStatus(hotel.id, request.id, status, user.uid)
 
-        if (status === 'approved') {
+        if (status === 'approved' && !wasApproved) {
+            // Only add calendar event if not already approved before
             await addEvent(hotel.id, {
                 type: 'off_day',
-                title: `İSİNLİ: ${request.staff_name}`,
+                title: `İZİNLİ: ${request.staff_name}`,
                 description: request.reason,
                 date: parseISO(request.date),
                 time: null,
@@ -85,6 +104,7 @@ export function OffDayScheduler() {
                 created_by_name: user.name
             })
         }
+        // Note: Deleting calendar event on rejection would require tracking event IDs
     }
 
     return (
@@ -112,14 +132,32 @@ export function OffDayScheduler() {
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase">Seçilen Tarih</label>
-                                    <Input
-                                        type="date"
-                                        required
-                                        value={date}
-                                        onChange={(e) => setDate(e.target.value)}
-                                        className="bg-zinc-950 border-zinc-800 focus:ring-indigo-500"
-                                    />
+                                    <label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
+                                        Seçilen Tarih{dates.length > 1 ? 'ler' : ''}
+                                        {!editingId && (
+                                            <Button type="button" variant="ghost" size="sm" onClick={addDateField} className="h-5 px-1 text-indigo-400">
+                                                <Plus className="w-3 h-3" />
+                                            </Button>
+                                        )}
+                                    </label>
+                                    <div className="space-y-2">
+                                        {dates.map((d, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <Input
+                                                    type="date"
+                                                    required
+                                                    value={d}
+                                                    onChange={(e) => updateDate(i, e.target.value)}
+                                                    className="bg-zinc-950 border-zinc-800 focus:ring-indigo-500"
+                                                />
+                                                {dates.length > 1 && (
+                                                    <Button type="button" variant="ghost" size="sm" onClick={() => removeDateField(i)} className="h-9 px-2 text-rose-500">
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-zinc-500 uppercase">Sebep / Not</label>
@@ -138,7 +176,7 @@ export function OffDayScheduler() {
                                             variant="ghost"
                                             onClick={() => {
                                                 setEditingId(null)
-                                                setDate('')
+                                                setDates([''])
                                                 setReason('')
                                             }}
                                             className="flex-1 text-zinc-400 hover:text-white"
@@ -147,7 +185,7 @@ export function OffDayScheduler() {
                                         </Button>
                                     )}
                                     <Button
-                                        disabled={submitting || !date || !reason.trim()}
+                                        disabled={submitting || dates.every(d => !d.trim()) || !reason.trim()}
                                         className="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white gap-2"
                                     >
                                         {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -236,9 +274,23 @@ export function OffDayScheduler() {
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <p className="text-[10px] text-zinc-600 italic">
-                                                    ID: {r.id.slice(0, 8)}
-                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-[10px] text-zinc-600 italic">
+                                                        ID: {r.id.slice(0, 8)}
+                                                    </p>
+                                                    {isGM && r.status !== 'pending' && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="h-6 px-2 text-[10px] text-zinc-500 hover:text-zinc-300"
+                                                            onClick={() => handleAction(r, r.status === 'approved' ? 'rejected' : 'approved')}
+                                                            title={r.status === 'approved' ? 'Reddet' : 'Onayla'}
+                                                        >
+                                                            <RefreshCcw className="w-3 h-3 mr-1" />
+                                                            {r.status === 'approved' ? 'Reddet' : 'Onayla'}
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     </motion.div>

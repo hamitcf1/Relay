@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
-import { Send, MessageSquare, Megaphone, Loader2, Mail } from 'lucide-react'
+import { Send, MessageSquare, Megaphone, Loader2, Mail, Bell } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMessageStore } from '@/stores/messageStore'
+import { useRosterStore } from '@/stores/rosterStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
 
@@ -15,13 +17,23 @@ export function MessagingPanel() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
     const { messages, subscribeToMessages, sendMessage, loading } = useMessageStore()
+    const { staff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
 
     const [content, setContent] = useState('')
     const [submitting, setSubmitting] = useState(false)
-    const [recipient, setRecipient] = useState<'gm' | 'all'>('gm')
+    const [recipient, setRecipient] = useState<string>('gm') // 'gm', 'all', or specific uid
+    const [isBanner, setIsBanner] = useState(false)
 
     const isGM = user?.role === 'gm'
+    const staffMembers = staff.filter(s => s.role !== 'gm') // Exclude GM from staff list
+
+    useEffect(() => {
+        if (hotel?.id) {
+            const unsubRoster = subscribeToRoster(hotel.id)
+            return () => unsubRoster()
+        }
+    }, [hotel?.id, subscribeToRoster])
 
     useEffect(() => {
         if (hotel?.id && user?.uid) {
@@ -47,7 +59,7 @@ export function MessagingPanel() {
             if (recipient === 'all' && hotel?.id) {
                 await addNotification(hotel.id, {
                     type: 'announcement',
-                    title: 'Yeni GM Duyurusu',
+                    title: isBanner ? '⚠️ ÖNEMLİ DUYURU' : 'Yeni GM Duyurusu',
                     content: content.trim(),
                     target_role: 'all'
                 })
@@ -139,7 +151,7 @@ export function MessagingPanel() {
                                     <div className="flex gap-1 bg-zinc-900 border border-zinc-800 rounded-lg p-1">
                                         <button
                                             type="button"
-                                            onClick={() => setRecipient('all')}
+                                            onClick={() => { setRecipient('all'); setIsBanner(false); }}
                                             className={cn(
                                                 "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
                                                 recipient === 'all' ? "bg-indigo-600 text-white" : "text-zinc-500 hover:text-zinc-300"
@@ -147,16 +159,29 @@ export function MessagingPanel() {
                                         >
                                             ALL
                                         </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setRecipient('gm')}
-                                            className={cn(
-                                                "px-3 py-1 text-[10px] font-bold rounded-md transition-all",
-                                                recipient === 'gm' ? "bg-indigo-600 text-white" : "text-zinc-500 hover:text-zinc-300"
-                                            )}
-                                        >
-                                            STAFF
-                                        </button>
+                                        <Select value={recipient === 'gm' || recipient === 'all' ? '' : recipient} onValueChange={(v) => setRecipient(v)}>
+                                            <SelectTrigger className="h-6 w-24 bg-transparent border-0 text-[10px] font-bold">
+                                                <SelectValue placeholder="STAFF" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {staffMembers.map(s => (
+                                                    <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {recipient === 'all' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsBanner(!isBanner)}
+                                                className={cn(
+                                                    "px-2 py-1 text-[10px] font-bold rounded-md transition-all flex items-center gap-1",
+                                                    isBanner ? "bg-amber-600 text-white" : "text-zinc-500 hover:text-amber-400"
+                                                )}
+                                                title="Banner (Important)"
+                                            >
+                                                <Bell className="w-3 h-3" />
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                                 <Input
