@@ -19,6 +19,7 @@ import { Input } from '../ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { Label } from '../ui/label'
+import { Badge } from '../ui/badge'
 import { useRoomStore } from '@/stores/roomStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -74,6 +75,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
     const [newRoomNumber, setNewRoomNumber] = useState('')
     const [newRoomType, setNewRoomType] = useState<RoomType>('standard')
     const [newRoomFloor, setNewRoomFloor] = useState('')
+    const [newRoomBedConfig, setNewRoomBedConfig] = useState<BedConfig>('separated')
 
     // Bulk Setup State
     const [selectedRoomIds, setSelectedRoomIds] = useState<Set<string>>(new Set())
@@ -104,10 +106,12 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                 type: newRoomType,
                 status: 'clean',
                 occupancy: 'vacant', // Default to vacant
-                floor: parseInt(newRoomFloor) || 1
+                floor: parseInt(newRoomFloor) || 1,
+                bed_config: newRoomType === 'standard' ? newRoomBedConfig : undefined
             })
             setNewRoomNumber('')
             setNewRoomFloor('')
+            setNewRoomBedConfig('separated')
         } catch (error) {
             console.error(error)
         }
@@ -331,6 +335,21 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+
+                                            {newRoomType === 'standard' && (
+                                                <div className="space-y-2 w-40">
+                                                    <Label>Bed Config</Label>
+                                                    <Select value={newRoomBedConfig} onValueChange={(v: string) => setNewRoomBedConfig(v as BedConfig)}>
+                                                        <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="separated">Ayrık</SelectItem>
+                                                            <SelectItem value="together">Birleşik</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            )}
                                             <Button type="submit" disabled={!newRoomNumber} className="bg-indigo-600 hover:bg-indigo-700">
                                                 Add Room
                                             </Button>
@@ -410,6 +429,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                 <tr>
                                                     <th className="p-3 text-left">Room</th>
                                                     <th className="p-3 text-left">Type</th>
+                                                    <th className="p-3 text-left">Bed</th>
                                                     <th className="p-3 text-left">Floor</th>
                                                     <th className="p-3 text-right">Actions</th>
                                                 </tr>
@@ -419,6 +439,13 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     <tr key={room.id} className="bg-zinc-900/30 hover:bg-zinc-800/50 transition-colors">
                                                         <td className="p-3 font-medium">{room.number}</td>
                                                         <td className="p-3 text-zinc-400">{roomTypeLabels[room.type]}</td>
+                                                        <td className="p-3 text-zinc-400">
+                                                            {room.type === 'standard' && room.bed_config && (
+                                                                <Badge variant="outline" className="text-[10px] border-zinc-700 text-zinc-500">
+                                                                    {room.bed_config === 'separated' ? 'Ayrık' : 'Birleşik'}
+                                                                </Badge>
+                                                            )}
+                                                        </td>
                                                         <td className="p-3 text-zinc-400">{room.floor}</td>
                                                         <td className="p-3 text-right">
                                                             <Button
