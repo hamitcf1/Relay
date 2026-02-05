@@ -35,7 +35,8 @@ export interface CalendarEvent {
     date: Date
     time: string | null  // Optional time (HH:MM format)
     room_number: string | null
-    price?: number
+    total_price: number | null
+    collected_amount: number | null
     currency?: string
     created_by: string
     created_by_name: string
@@ -94,7 +95,8 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
                         date: convertTimestamp(data.date),
                         time: data.time || null,
                         room_number: data.room_number || null,
-                        price: data.price,
+                        total_price: data.total_price ?? data.price ?? null, // Fallback for migration
+                        collected_amount: data.collected_amount ?? 0,
                         currency: data.currency,
                         created_by: data.created_by,
                         created_by_name: data.created_by_name || 'Unknown',
@@ -136,6 +138,10 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
             if (updates.date) {
                 updateData.date = Timestamp.fromDate(updates.date)
             }
+            // Ensure numeric fields are preserved correctly if passed
+            if (updates.total_price !== undefined) updateData.total_price = updates.total_price
+            if (updates.collected_amount !== undefined) updateData.collected_amount = updates.collected_amount
+
             await updateDoc(eventRef, updateData)
         } catch (error) {
             console.error('Error updating event:', error)

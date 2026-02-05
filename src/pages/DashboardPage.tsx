@@ -44,6 +44,7 @@ import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
 import { CalendarWidget } from '@/components/calendar/CalendarWidget'
 import { useShiftAutomator } from '@/hooks/useShiftAutomator'
+import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useLogsStore } from '@/stores/logsStore'
@@ -52,6 +53,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useNotesStore } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useSalesStore } from '@/stores/salesStore'
 
 export function DashboardPage() {
     const navigate = useNavigate()
@@ -69,6 +71,17 @@ export function DashboardPage() {
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
+
+    // Due payment notifications
+    useDuePaymentNotifier()
+
+    // Subscribe to sales for dashboard visibility
+    const { subscribeToSales } = useSalesStore()
+    useEffect(() => {
+        if (!hotel?.id) return
+        const unsub = subscribeToSales(hotel.id)
+        return () => unsub()
+    }, [hotel?.id, subscribeToSales])
 
     // Calculate compliance percentage
     const compliancePercentage = useMemo(() => {

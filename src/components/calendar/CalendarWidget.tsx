@@ -41,6 +41,10 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
     const [newEventTitle, setNewEventTitle] = useState('')
     const [newEventTime, setNewEventTime] = useState('')
     const [newEventRoom, setNewEventRoom] = useState('')
+    const [newEventTotalPrice, setNewEventTotalPrice] = useState<string>('')
+    const [newEventCollected, setNewEventCollected] = useState<string>('0')
+    const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null)
+    const [tempCollected, setTempCollected] = useState<string>('')
 
     // Subscribe to events for current month view
     useEffect(() => {
@@ -94,6 +98,8 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
             date: selectedDate,
             time: newEventTime || null,
             room_number: newEventRoom || null,
+            total_price: newEventTotalPrice ? parseFloat(newEventTotalPrice) : null,
+            collected_amount: newEventCollected ? parseFloat(newEventCollected) : null,
             created_by: user.uid,
             created_by_name: user.name || 'Unknown',
         })
@@ -102,7 +108,19 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
         setNewEventTitle('')
         setNewEventTime('')
         setNewEventRoom('')
+        setNewEventTotalPrice('')
+        setNewEventCollected('0')
         setIsAdding(false)
+    }
+
+    const handleUpdatePayment = async (eventId: string) => {
+        if (!tempCollected || isNaN(parseFloat(tempCollected))) return
+
+        const newCollected = parseFloat(tempCollected)
+        await useCalendarStore.getState().updateEvent(hotelId, eventId, {
+            collected_amount: newCollected
+        })
+        setUpdatingPaymentId(null)
     }
 
     const handleToggleComplete = async (eventId: string, isCompleted: boolean) => {
@@ -277,37 +295,65 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                 </div>
 
                                                 <Input
-                                                    placeholder="Event title..."
+                                                    placeholder="Etkinlik Başlığı..."
                                                     value={newEventTitle}
                                                     onChange={(e) => setNewEventTitle(e.target.value)}
-                                                    className="h-8 text-xs"
+                                                    className="h-8 text-xs bg-zinc-950 border-zinc-700"
                                                 />
 
-                                                <div className="flex gap-2">
-                                                    <Input
-                                                        placeholder="Time (optional)"
-                                                        value={newEventTime}
-                                                        onChange={(e) => setNewEventTime(e.target.value)}
-                                                        className="h-7 text-xs flex-1"
-                                                        type="time"
-                                                    />
-                                                    <Input
-                                                        placeholder="Room #"
-                                                        value={newEventRoom}
-                                                        onChange={(e) => setNewEventRoom(e.target.value)}
-                                                        className="h-7 text-xs w-20"
-                                                    />
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Zaman</label>
+                                                        <Input
+                                                            value={newEventTime}
+                                                            onChange={(e) => setNewEventTime(e.target.value)}
+                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                            type="time"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Oda #</label>
+                                                        <Input
+                                                            placeholder="Oda"
+                                                            value={newEventRoom}
+                                                            onChange={(e) => setNewEventRoom(e.target.value)}
+                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                        />
+                                                    </div>
                                                 </div>
 
-                                                <div className="flex gap-2">
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Toplam Ücret (€)</label>
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="0"
+                                                            value={newEventTotalPrice}
+                                                            onChange={(e) => setNewEventTotalPrice(e.target.value)}
+                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">Alınan Ödeme (€)</label>
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="0"
+                                                            value={newEventCollected}
+                                                            onChange={(e) => setNewEventCollected(e.target.value)}
+                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-2 pt-1">
                                                     <Button
                                                         size="sm"
-                                                        className="flex-1 h-7 text-xs"
+                                                        className="flex-1 h-8 text-xs bg-indigo-600 hover:bg-indigo-500"
                                                         onClick={handleAddEvent}
                                                         disabled={!newEventTitle.trim()}
                                                     >
                                                         <Check className="w-3 h-3 mr-1" />
-                                                        Save
+                                                        Kaydet
                                                     </Button>
                                                     <Button
                                                         size="sm"
@@ -362,13 +408,61 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                                 {event.title}
                                                             </span>
                                                         </div>
-                                                        {(event.time || event.room_number) && (
-                                                            <div className="text-[10px] text-zinc-500 mt-0.5">
-                                                                {event.time && <span>{event.time}</span>}
-                                                                {event.time && event.room_number && <span> • </span>}
-                                                                {event.room_number && <span>Room {event.room_number}</span>}
-                                                            </div>
-                                                        )}
+                                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
+                                                            {(event.time || event.room_number) && (
+                                                                <div className="text-[10px] text-zinc-500">
+                                                                    {event.time && <span>{event.time}</span>}
+                                                                    {event.time && event.room_number && <span> • </span>}
+                                                                    {event.room_number && <span>Oda {event.room_number}</span>}
+                                                                </div>
+                                                            )}
+                                                            {event.total_price !== null && (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <div className="text-[10px] font-bold text-zinc-400">
+                                                                        Ödeme:
+                                                                        <span className={cn(
+                                                                            "ml-1",
+                                                                            (event.collected_amount || 0) >= (event.total_price || 0)
+                                                                                ? "text-emerald-400"
+                                                                                : "text-amber-400"
+                                                                        )}>
+                                                                            {event.collected_amount || 0} / {event.total_price} €
+                                                                        </span>
+                                                                    </div>
+                                                                    {updatingPaymentId === event.id ? (
+                                                                        <div className="flex items-center gap-1">
+                                                                            <Input
+                                                                                className="h-5 w-14 text-[9px] px-1 bg-zinc-950 border-zinc-700"
+                                                                                value={tempCollected}
+                                                                                onChange={e => setTempCollected(e.target.value)}
+                                                                                autoFocus
+                                                                            />
+                                                                            <button onClick={() => handleUpdatePayment(event.id)} className="text-emerald-500 hover:text-emerald-400">
+                                                                                <Check className="w-3 h-3" />
+                                                                            </button>
+                                                                            <button onClick={() => setUpdatingPaymentId(null)} className="text-zinc-500">
+                                                                                <X className="w-3 h-3" />
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setUpdatingPaymentId(event.id)
+                                                                                setTempCollected((event.collected_amount || 0).toString())
+                                                                            }}
+                                                                            className="text-[9px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
+                                                                        >
+                                                                            Güncelle
+                                                                        </button>
+                                                                    )}
+                                                                    {(event.total_price - (event.collected_amount || 0)) > 0 && (
+                                                                        <Badge variant="outline" className="text-[8px] h-3 px-1 border-rose-500/30 text-rose-400 lowercase leading-none">
+                                                                            Kalan: {event.total_price - (event.collected_amount || 0)} €
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
 
                                                     <button

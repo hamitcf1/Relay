@@ -79,6 +79,8 @@ export function OffDayScheduler() {
                 date: parseISO(request.date),
                 time: null,
                 room_number: null,
+                total_price: null,
+                collected_amount: null,
                 created_by: user.uid,
                 created_by_name: user.name
             })

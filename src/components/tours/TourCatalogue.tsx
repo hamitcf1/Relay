@@ -83,7 +83,8 @@ export function TourCatalogue() {
                 date: new Date(),
                 time: null,
                 room_number: null,
-                price,
+                total_price: price,
+                collected_amount: 0,
                 currency: 'EUR',
                 created_by: user.uid,
                 created_by_name: user.name

@@ -5,6 +5,7 @@ import {
     ShieldAlert,
     CalendarDays,
     Map,
+    CreditCard,
     ChevronLeft
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -15,6 +16,7 @@ import { MessagingPanel } from '@/components/messaging/MessagingPanel'
 import { FeedbackSection } from '@/components/feedback/FeedbackSection'
 import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
 import { TourCatalogue } from '@/components/tours/TourCatalogue'
+import { SalesPanel } from '@/components/sales/SalesPanel'
 
 export function OperationsPage() {
     const navigate = useNavigate()
@@ -62,6 +64,10 @@ export function OperationsPage() {
                                 <Map className="w-4 h-4" />
                                 <span className="hidden sm:inline">Tours</span>
                             </TabsTrigger>
+                            <TabsTrigger value="sales" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                <CreditCard className="w-4 h-4" />
+                                <span className="hidden sm:inline">Satışlar</span>
+                            </TabsTrigger>
                         </TabsList>
                     </div>
 
@@ -82,6 +88,9 @@ export function OperationsPage() {
                         </TabsContent>
                         <TabsContent value="tours" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
                             <TourCatalogue />
+                        </TabsContent>
+                        <TabsContent value="sales" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                            <SalesPanel />
                         </TabsContent>
                     </motion.div>
                 </Tabs>
