@@ -14,8 +14,6 @@ import {
     LayoutGrid
 } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -107,15 +105,7 @@ export function DashboardPage() {
         const setupHotel = async () => {
             if (!user) return
 
-            let hotelId = localStorage.getItem('relay_hotel_id')
-
-            if (!hotelId) {
-                const userDoc = await getDoc(doc(db, 'users', user.uid))
-                if (userDoc.exists()) {
-                    hotelId = userDoc.data().hotel_id || null
-                    if (hotelId) localStorage.setItem('relay_hotel_id', hotelId)
-                }
-            }
+            const hotelId = user.hotel_id
 
             if (!hotelId) {
                 navigate('/setup-hotel')

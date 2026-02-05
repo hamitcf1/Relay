@@ -34,7 +34,13 @@ export interface User {
     email: string
     name: string
     role: UserRole
+    hotel_id?: string | null
     current_shift_type: ShiftType | null
+    settings?: {
+        language?: 'en' | 'tr'
+        onboarding_seen?: boolean
+        dismissed_announcements?: string[]
+    }
 }
 
 export interface HotelInfo {

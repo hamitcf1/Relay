@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useAuthStore } from './authStore'
 
 type Language = 'en' | 'tr'
 
@@ -427,7 +428,14 @@ export const useLanguageStore = create<LanguageState>()(
     persist(
         (set, get) => ({
             language: 'tr',
-            setLanguage: (lang) => set({ language: lang }),
+            setLanguage: (lang) => {
+                set({ language: lang })
+                // Also update Firestore if logged in
+                const { user, updateSettings } = useAuthStore.getState()
+                if (user) {
+                    updateSettings({ language: lang })
+                }
+            },
             t: (key, params) => {
                 const lang = get().language
                 // Fallback to English if translation missing in TR
@@ -448,3 +456,12 @@ export const useLanguageStore = create<LanguageState>()(
         }
     )
 )
+
+// Sync language with Firestore if logged in
+useAuthStore.subscribe((state) => {
+    const firestoreLang = state.user?.settings?.language
+    if (firestoreLang && firestoreLang !== useLanguageStore.getState().language) {
+        // Use a flag or check to avoid infinite loop since setLanguage updates Firestore
+        useLanguageStore.setState({ language: firestoreLang })
+    }
+})

@@ -11,6 +11,7 @@ import {
     Globe
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/stores/authStore'
 
 interface Step {
     title: string
@@ -20,16 +21,16 @@ interface Step {
 }
 
 export function OnboardingWizard() {
+    const { user, updateSettings } = useAuthStore()
     // const { t } = useLanguageStore() // t is currently unused, uncomment when needed
     const [isOpen, setIsOpen] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
 
     useEffect(() => {
-        const hasSeenOnboarding = localStorage.getItem('relay_onboarding_seen')
-        if (!hasSeenOnboarding) {
+        if (user && !user.settings?.onboarding_seen) {
             setIsOpen(true)
         }
-    }, [])
+    }, [user])
 
     const steps: Step[] = [
         {
@@ -78,8 +79,10 @@ export function OnboardingWizard() {
         }
     }
 
-    const handleComplete = () => {
-        localStorage.setItem('relay_onboarding_seen', 'true')
+    const handleComplete = async () => {
+        if (user) {
+            await updateSettings({ onboarding_seen: true })
+        }
         setIsOpen(false)
     }
 

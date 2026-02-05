@@ -5,7 +5,7 @@ import {
     onAuthStateChanged,
     type User as FirebaseUser
 } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import type { User, UserRole } from '@/types'
 
@@ -22,6 +22,7 @@ interface AuthActions {
     signOut: () => Promise<void>
     clearError: () => void
     initialize: () => () => void
+    updateSettings: (settings: Partial<NonNullable<User['settings']>>) => Promise<void>
 }
 
 type AuthStore = AuthState & AuthActions
@@ -52,7 +53,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
                         email: credential.user.email || '',
                         name: userData.name || 'User',
                         role: (userData.role as UserRole) || 'receptionist',
+                        hotel_id: userData.hotel_id || null,
                         current_shift_type: userData.current_shift_type || null,
+                        settings: userData.settings || {},
                     },
                     firebaseUser: credential.user,
                     loading: false,
@@ -66,7 +69,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
                         email: credential.user.email || '',
                         name: credential.user.email?.split('@')[0] || 'User',
                         role: 'receptionist',
+                        hotel_id: null,
                         current_shift_type: null,
+                        settings: {},
                     },
                     firebaseUser: credential.user,
                     loading: false,
@@ -109,7 +114,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
                                 email: firebaseUser.email || '',
                                 name: userData.name || 'User',
                                 role: (userData.role as UserRole) || 'receptionist',
+                                hotel_id: userData.hotel_id || null,
                                 current_shift_type: userData.current_shift_type || null,
+                                settings: userData.settings || {},
                             },
                             firebaseUser,
                             initialized: true,
@@ -122,7 +129,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
                                 email: firebaseUser.email || '',
                                 name: firebaseUser.email?.split('@')[0] || 'User',
                                 role: 'receptionist',
+                                hotel_id: null,
                                 current_shift_type: null,
+                                settings: {},
                             },
                             firebaseUser,
                             initialized: true,
@@ -150,4 +159,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
         return unsubscribe
     },
+
+    updateSettings: async (settings) => {
+        const { user } = useAuthStore.getState()
+        if (!user) return
+
+        try {
+            const userRef = doc(db, 'users', user.uid)
+            const newSettings = { ...user.settings, ...settings }
+            await updateDoc(userRef, { settings: newSettings })
+
+            set({
+                user: {
+                    ...user,
+                    settings: newSettings
+                }
+            })
+        } catch (error) {
+            console.error("Error updating user settings:", error)
+        }
+    }
 }))

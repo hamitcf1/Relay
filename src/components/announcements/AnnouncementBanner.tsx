@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, X, Trash2 } from 'lucide-react'
 import { useMessageStore } from '@/stores/messageStore'
@@ -12,28 +12,26 @@ import { formatDistanceToNow } from 'date-fns'
  * Only shows messages that are marked as 'all' (broadcast) and are recent (< 24 hours).
  */
 export function AnnouncementBanner() {
-    const { user } = useAuthStore()
+    const { user, updateSettings } = useAuthStore()
     const { hotel } = useHotelStore()
     const { messages, subscribeToMessages, deleteMessage } = useMessageStore()
-    const [dismissed, setDismissed] = useState<Set<string>>(new Set())
 
-    // Load dismissed IDs from localStorage on mount
-    useEffect(() => {
-        const stored = localStorage.getItem('relay_dismissed_announcements')
-        if (stored) {
-            try {
-                setDismissed(new Set(JSON.parse(stored)))
-            } catch (e) {
-                console.error("Error parsing dismissed announcements", e)
-            }
-        }
-    }, [])
+    // Filter for important announcements (receiver_id === 'all' and recent)
+    const now = new Date()
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
-    // Persist dismissed IDs whenever they change
-    const handleDismiss = (id: string) => {
-        const newDismissed = new Set([...dismissed, id])
-        setDismissed(newDismissed)
-        localStorage.setItem('relay_dismissed_announcements', JSON.stringify(Array.from(newDismissed)))
+    const announcements = messages.filter(m =>
+        m.receiver_id === 'all' &&
+        m.timestamp > oneDayAgo &&
+        !(user?.settings?.dismissed_announcements || []).includes(m.id)
+    ).slice(0, 3) // Show max 3 banners
+
+    const handleDismiss = async (id: string) => {
+        if (!user) return
+        const dismissed = user.settings?.dismissed_announcements || []
+        await updateSettings({
+            dismissed_announcements: [...dismissed, id]
+        })
     }
 
     const handleDelete = async (id: string) => {
@@ -49,16 +47,6 @@ export function AnnouncementBanner() {
             return () => unsub()
         }
     }, [hotel?.id, user?.uid, subscribeToMessages])
-
-    // Filter for important announcements (receiver_id === 'all' and recent)
-    const now = new Date()
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-
-    const announcements = messages.filter(m =>
-        m.receiver_id === 'all' &&
-        m.timestamp > oneDayAgo &&
-        !dismissed.has(m.id)
-    ).slice(0, 3) // Show max 3 banners
 
     if (announcements.length === 0) return null
 

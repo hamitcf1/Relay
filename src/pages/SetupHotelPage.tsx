@@ -80,9 +80,6 @@ export function SetupHotelPage() {
                 hotel_id: selectedHotel
             }, { merge: true })
 
-            // Store in localStorage for quick access
-            localStorage.setItem('relay_hotel_id', selectedHotel)
-
             navigate('/')
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to join hotel')
@@ -126,9 +123,6 @@ export function SetupHotelPage() {
             await setDoc(userRef, {
                 hotel_id: hotelId
             }, { merge: true })
-
-            // Store in localStorage
-            localStorage.setItem('relay_hotel_id', hotelId)
 
             navigate('/')
         } catch (err) {
