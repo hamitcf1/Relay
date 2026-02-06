@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     X,
@@ -12,10 +12,13 @@ import {
     Wand2,
     Settings2,
     ChevronDown,
-    Loader2
+    Loader2,
+    Brain as BrainIcon
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAIStore, AIModelType, AITaskType } from '@/stores/aiStore'
+import { useHotelStore } from '@/stores/hotelStore'
+import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 
 interface AIAssistantModalProps {
@@ -44,6 +47,8 @@ const TASKS = [
 
 export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', initialPrompt = '' }: AIAssistantModalProps) {
     const { generate, loading, result, error } = useAIStore()
+    const { hotel, updateHotelSettings } = useHotelStore()
+    const { user } = useAuthStore()
 
     const [task, setTask] = useState<AITaskType>(initialTask)
     const [prompt, setPrompt] = useState(initialPrompt)
@@ -51,9 +56,31 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
     const [copied, setCopied] = useState(false)
     const [showModels, setShowModels] = useState(false)
 
+    // Knowledge Base State
+    const [showKbEditor, setShowKbEditor] = useState(false)
+    const [kbContent, setKbContent] = useState('')
+
+    // Initialize KB content when opening editor
+    useEffect(() => {
+        if (showKbEditor && hotel?.settings?.knowledge_base) {
+            setKbContent(hotel.settings.knowledge_base)
+        }
+    }, [showKbEditor, hotel])
+
     const handleGenerate = async () => {
         if (!prompt.trim()) return
-        await generate(prompt, selectedModel, task)
+        // Pass hotel knowledge base context
+        await generate(prompt, selectedModel, task, hotel?.settings?.knowledge_base)
+    }
+
+    const handleSaveKb = async () => {
+        if (!hotel?.id) return
+        try {
+            await updateHotelSettings(hotel.id, { knowledge_base: kbContent })
+            setShowKbEditor(false)
+        } catch (error) {
+            console.error("Failed to save knowledge base:", error)
+        }
     }
 
     const handleCopy = () => {
@@ -64,6 +91,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
     }
 
     if (!isOpen) return null
+    const isGM = user?.role === 'gm'
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -83,12 +111,62 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                             <p className="text-xs text-zinc-500">Powered by Gemini & Gemma</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-500 hover:text-white">
-                        <X className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {isGM && (
+                            <button
+                                onClick={() => setShowKbEditor(!showKbEditor)}
+                                className={cn(
+                                    "p-2 rounded-full transition-colors flex items-center gap-2 px-3",
+                                    showKbEditor ? "bg-emerald-500/20 text-emerald-400" : "hover:bg-white/5 text-zinc-500 hover:text-white"
+                                )}
+                                title="Edit Hotel Knowledge Base"
+                            >
+                                <BrainIcon className="w-4 h-4" />
+                                {showKbEditor && <span className="text-xs font-bold">Knowledge Base</span>}
+                            </button>
+                        )}
+                        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-500 hover:text-white">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
+
+                    {/* Knowledge Base Editor Overlay or Section */}
+                    <AnimatePresence>
+                        {showKbEditor && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-2xl p-4 mb-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                                            <BrainIcon className="w-4 h-4" /> Hotel Knowledge Base
+                                        </h3>
+                                        <div className="flex gap-2">
+                                            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowKbEditor(false)}>Cancel</Button>
+                                            <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500" onClick={handleSaveKb}>Save Context</Button>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-zinc-400 mb-3">
+                                        Enter facts about your hotel (breakfast hours, wifi password, policies).
+                                        The AI will use this to generate accurate answers.
+                                    </p>
+                                    <textarea
+                                        value={kbContent}
+                                        onChange={e => setKbContent(e.target.value)}
+                                        className="w-full h-32 bg-black/40 border border-emerald-500/20 rounded-xl p-3 text-xs text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                                        placeholder="e.g. Breakfast is served 07:00-10:00. Pool closes at 20:00. Checkout is 12:00..."
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {/* Model & Task Selector */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">

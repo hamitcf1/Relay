@@ -643,7 +643,7 @@ const translations: Record<Language, Translations> = {
         'menu.noMenuToday': 'No menu shared for today yet.',
         'menu.hours': 'Service Hours',
         'menu.breakfastTime': 'Breakfast: 07:00 - 09:00',
-        'menu.lunchTime': 'Lunch: 12:00 - 13:00',
+        'menu.lunchTime': 'Lunch: 12:00 - 13:30',
         'menu.dinnerTime': 'Dinner: 17:00 - 18:30',
     },
     tr: {
@@ -935,7 +935,7 @@ const translations: Record<Language, Translations> = {
         'menu.noMenuToday': 'Bugün için henüz menü paylaşılmadı.',
         'menu.hours': 'Servis Saatleri',
         'menu.breakfastTime': 'Kahvaltı: 07:00 - 09:00',
-        'menu.lunchTime': 'Öğle Yemeği: 12:00 - 13:00',
+        'menu.lunchTime': 'Öğle Yemeği: 12:00 - 13:30',
         'menu.dinnerTime': 'Akşam Yemeği: 17:00 - 18:30',
 
         'compliance.kbs.required': 'KBS Kontrolü Gerekli!',

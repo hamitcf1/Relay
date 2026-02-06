@@ -53,6 +53,7 @@ export interface HotelSettings {
     check_agency_intervals: number[]
     staff_order?: string[]
     safe_password?: string
+    knowledge_base?: string // AI Knowledge Base context
     secret_info?: {
         agency_logins?: string
         kbs_logins?: string

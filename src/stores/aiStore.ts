@@ -23,7 +23,7 @@ interface AIState {
 }
 
 interface AIActions {
-    generate: (prompt: string, modelType: AIModelType, task: AITaskType) => Promise<string | null>
+    generate: (prompt: string, modelType: AIModelType, task: AITaskType, context?: string) => Promise<string | null>
     clearResult: () => void
 }
 
@@ -59,7 +59,7 @@ export const useAIStore = create<AIStore>((set, get) => ({
 
     clearResult: () => set({ result: null, error: null }),
 
-    generate: async (prompt, modelType, task) => {
+    generate: async (prompt, modelType, task, context?: string) => {
         const { currentKeyIndex } = get()
 
         if (API_KEYS.length === 0) {
@@ -87,9 +87,19 @@ export const useAIStore = create<AIStore>((set, get) => ({
                 if (!officialModel.endsWith('-it')) officialModel += "-it"
             }
 
+            let systemInstruction = SYSTEM_PROMPTS[task]
+
+            // Add Context Injection
+            if (context) {
+                systemInstruction += `\n\n[HOTEL KNOWLEDGE BASE]\nUse the following information to answer factual questions about the hotel:\n${context}`
+            }
+
+            // Add Translation Rule
+            systemInstruction += `\n\n[TRANSLATION RULE]\nIf you generate content in any language OTHER than Turkish, you MUST append a Turkish translation at the very bottom.\nUse this format:\n\n[Original Content]\n\n--- TÜRKÇE ÇEVİRİSİ ---\n[Turkish Translation]`
+
             const model = genAI.getGenerativeModel({
                 model: officialModel,
-                systemInstruction: SYSTEM_PROMPTS[task]
+                systemInstruction: systemInstruction
             })
 
             const result = await model.generateContent(prompt)
