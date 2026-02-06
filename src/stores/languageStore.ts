@@ -11,6 +11,7 @@ type Translations = {
     'auth.email': string
     'auth.password': string
     'auth.name': string
+    'auth.confirmPassword': string
     'auth.noAccount': string
     'auth.haveAccount': string
     'auth.contactGM': string
@@ -340,6 +341,7 @@ const translations: Record<Language, Translations> = {
         'auth.email': 'Email Address',
         'auth.password': 'Password',
         'auth.name': 'Full Name',
+        'auth.confirmPassword': 'Confirm Password',
         'auth.noAccount': "Don't have an account?",
         'auth.haveAccount': 'Already have an account?',
         'auth.contactGM': 'Contact your GM for account access',
@@ -662,6 +664,7 @@ const translations: Record<Language, Translations> = {
         'auth.email': 'E-posta Adresi',
         'auth.password': 'Şifre',
         'auth.name': 'Ad Soyad',
+        'auth.confirmPassword': 'Şifreyi Onayla',
         'auth.noAccount': 'Hesabınız yok mu?',
         'auth.haveAccount': 'Zaten hesabınız var mı?',
         'auth.contactGM': 'Hesap erişimi için yöneticinizle (GM) iletişime geçin',

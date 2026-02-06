@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronRight, ChevronLeft, MapPin } from 'lucide-react'
+import { X, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/authStore'
 
 interface Step {
     target: string // ID of expectation element
