@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
-import { Map, Plus, Save, Trash2, Calendar, Euro, Loader2, Edit3, X } from 'lucide-react'
+import { Map, Plus, Save, Trash2, Calendar, Euro, Loader2, Edit3, X, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTourStore } from '@/stores/tourStore'
-import { useCalendarStore } from '@/stores/calendarStore'
+import { useSalesStore } from '@/stores/salesStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import type { Tour } from '@/types'
+import { format } from 'date-fns'
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -18,7 +20,7 @@ export function TourCatalogue() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
     const { tours, subscribeToTours, addTour, updateTour, deleteTour, loading } = useTourStore()
-    const { addEvent } = useCalendarStore()
+    const { addSale } = useSalesStore()
 
     const [isAdding, setIsAdding] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
@@ -31,6 +33,17 @@ export function TourCatalogue() {
         child_0_3_price: 0,
         operating_days: [],
         is_active: true
+    })
+
+    // Booking Modal State
+    const [bookingTour, setBookingTour] = useState<Tour | null>(null)
+    const [bookingType, setBookingType] = useState<'adult' | 'child_3_7' | 'child_0_3'>('adult')
+    const [bookingForm, setBookingForm] = useState({
+        guest_name: '',
+        room_number: '',
+        pax: 1,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        pickup_time: ''
     })
 
     const isGM = user?.role === 'gm'
@@ -52,6 +65,7 @@ export function TourCatalogue() {
                 await addTour(hotel.id, formData)
                 setIsAdding(false)
             }
+            // Reset form
             setFormData({
                 name: '',
                 description: '',
@@ -67,29 +81,43 @@ export function TourCatalogue() {
         }
     }
 
-    const handleBook = async (tour: Tour, type: 'adult' | 'child_3_7' | 'child_0_3') => {
-        if (!hotel?.id || !user) return
+    const openBookingModal = (tour: Tour, type: 'adult' | 'child_3_7' | 'child_0_3') => {
+        setBookingTour(tour)
+        setBookingType(type)
+        setBookingForm({
+            guest_name: '',
+            room_number: '',
+            pax: 1,
+            date: format(new Date(), 'yyyy-MM-dd'),
+            pickup_time: ''
+        })
+    }
 
-        let price = tour.adult_price
-        let label = 'Adult'
-        if (type === 'child_3_7') { price = tour.child_3_7_price; label = 'Child (3-7)' }
-        if (type === 'child_0_3') { price = tour.child_0_3_price; label = 'Child (0-3)' }
+    const confirmBooking = async () => {
+        if (!hotel?.id || !user || !bookingTour) return
+
+        let pricePerPax = bookingTour.adult_price
+        if (bookingType === 'child_3_7') pricePerPax = bookingTour.child_3_7_price
+        if (bookingType === 'child_0_3') pricePerPax = bookingTour.child_0_3_price
+
+        const totalPrice = pricePerPax * bookingForm.pax
 
         try {
-            await addEvent(hotel.id, {
+            await addSale(hotel.id, {
                 type: 'tour',
-                title: `Tour: ${tour.name} (${label})`,
-                description: `Booked by ${user.name}. Price: ${price} EUR`,
-                date: new Date(),
-                time: null,
-                room_number: null,
-                total_price: price,
-                collected_amount: 0,
+                name: `${bookingTour.name} (${bookingType === 'adult' ? 'Adult' : bookingType === 'child_3_7' ? 'Child 3-7' : 'Child 0-3'})`,
+                customer_name: bookingForm.guest_name,
+                room_number: bookingForm.room_number,
+                pax: bookingForm.pax,
+                date: new Date(bookingForm.date),
+                pickup_time: bookingForm.pickup_time || undefined,
+                total_price: totalPrice,
                 currency: 'EUR',
                 created_by: user.uid,
-                created_by_name: user.name
+                created_by_name: user.name,
+                notes: `Quick booking from Catalogue`
             })
-            alert(`Tour ${tour.name} (${label}) added to calendar!`)
+            setBookingTour(null)
         } catch (error) {
             console.error("Booking error:", error)
         }
@@ -279,7 +307,7 @@ export function TourCatalogue() {
                                     </div>
                                     <div className="grid grid-cols-1 gap-2">
                                         <div
-                                            onClick={() => handleBook(tour, 'adult')}
+                                            onClick={() => openBookingModal(tour, 'adult')}
                                             className="p-3 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
                                         >
                                             <div className="flex items-center justify-between mb-1">
@@ -293,14 +321,14 @@ export function TourCatalogue() {
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div
-                                                onClick={() => handleBook(tour, 'child_3_7')}
+                                                onClick={() => openBookingModal(tour, 'child_3_7')}
                                                 className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
                                             >
                                                 <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">Child (3-7y)</p>
                                                 <p className="text-sm font-bold text-amber-400">€{tour.child_3_7_price}</p>
                                             </div>
                                             <div
-                                                onClick={() => handleBook(tour, 'child_0_3')}
+                                                onClick={() => openBookingModal(tour, 'child_0_3')}
                                                 className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
                                             >
                                                 <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">Child (0-3y)</p>
@@ -309,13 +337,78 @@ export function TourCatalogue() {
                                         </div>
                                     </div>
                                     <div className="mt-auto pt-4 border-t border-zinc-800/50">
-                                        <p className="text-[10px] text-zinc-600 italic text-center">Click a category to log a sale directly to the calendar.</p>
+                                        <p className="text-[10px] text-zinc-600 italic text-center">Click a category to log a sale.</p>
                                     </div>
                                 </CardContent>
                             </Card>
                         </motion.div>
                     ))
                 )}
+
+                {/* Booking Modal */}
+                <Dialog open={!!bookingTour} onOpenChange={(open) => !open && setBookingTour(null)}>
+                    <DialogContent className="bg-zinc-950 border-zinc-800">
+                        <DialogHeader>
+                            <DialogTitle className="text-white">New Booking: {bookingTour?.name}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs text-zinc-500">Guest Name</label>
+                                    <Input
+                                        value={bookingForm.guest_name}
+                                        onChange={e => setBookingForm(p => ({ ...p, guest_name: e.target.value }))}
+                                        className="bg-zinc-900 border-zinc-800"
+                                        placeholder="Full Name"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs text-zinc-500">Room #</label>
+                                    <Input
+                                        value={bookingForm.room_number}
+                                        onChange={e => setBookingForm(p => ({ ...p, room_number: e.target.value }))}
+                                        className="bg-zinc-900 border-zinc-800"
+                                        placeholder="101"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs text-zinc-500">Pax</label>
+                                    <Input
+                                        type="number"
+                                        value={bookingForm.pax}
+                                        onChange={e => setBookingForm(p => ({ ...p, pax: parseInt(e.target.value) || 1 }))}
+                                        className="bg-zinc-900 border-zinc-800"
+                                        min={1}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs text-zinc-500">Date</label>
+                                    <Input
+                                        type="date"
+                                        value={bookingForm.date}
+                                        onChange={e => setBookingForm(p => ({ ...p, date: e.target.value }))}
+                                        className="bg-zinc-900 border-zinc-800"
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+                                <p className="text-xs text-indigo-300">
+                                    Total Price: <span className="font-bold text-white">€{bookingTour ? (
+                                        (bookingType === 'adult' ? bookingTour.adult_price :
+                                            bookingType === 'child_3_7' ? bookingTour.child_3_7_price :
+                                                bookingTour.child_0_3_price) * bookingForm.pax
+                                    ) : 0}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="ghost" onClick={() => setBookingTour(null)}>Cancel</Button>
+                            <Button className="bg-indigo-600 hover:bg-indigo-500" onClick={confirmBooking} disabled={!bookingForm.guest_name || !bookingForm.room_number}>
+                                <Check className="w-4 h-4 mr-1" /> Confirm Booking
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     )

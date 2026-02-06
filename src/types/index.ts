@@ -272,6 +272,47 @@ export interface DailyMenu {
     updated_by_name: string
 }
 
+// ============================================
+// Sales & Payments
+// ============================================
+
+export type SaleType = 'tour' | 'transfer' | 'laundry' | 'other'
+export type PaymentStatus = 'pending' | 'partial' | 'paid'
+export type Currency = 'EUR' | 'TRY' | 'USD' | 'GBP'
+
+export interface PaymentEntry {
+    amount: number
+    currency: Currency
+    timestamp: Date
+    method?: string // 'cash', 'card', 'room_charge'
+    recorded_by?: string
+}
+
+export interface Sale {
+    id: string
+    hotel_id: string
+    type: SaleType
+    name: string              // Tour name, Transfer destination, etc.
+    customer_name: string     // Guest name
+    room_number: string
+    pax: number               // Number of people
+    date: Date                // Date of service
+    pickup_time?: string      // HH:MM
+    ticket_number?: string    // External ticket #
+    total_price: number
+    collected_amount: number
+    currency: Currency
+    payment_status: PaymentStatus
+    notes?: string
+    payments?: PaymentEntry[]
+    created_by: string
+    created_by_name: string
+    created_at: Date
+    calendar_event_id?: string  // Link to auto-created calendar event
+    updated_at?: Date
+    updated_by?: string
+}
+
 export interface AppState {
     currentHotelId: string | null
     currentShift: Shift | null

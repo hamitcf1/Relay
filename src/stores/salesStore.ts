@@ -12,36 +12,20 @@ import {
     Timestamp
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import type { Sale, SaleType, PaymentStatus, Currency, PaymentEntry } from '@/types'
 
-export type SaleType = 'tour' | 'transfer' | 'laundry'
-export type PaymentStatus = 'pending' | 'partial' | 'paid'
-export type Currency = 'EUR' | 'TRY' | 'USD' | 'GBP'
-
-export interface PaymentEntry {
-    amount: number
-    currency: Currency
-    timestamp: Date
-    method?: string
+// Helper to get display info for sale types
+export const saleTypeInfo: Record<SaleType, { label: string; icon: string; color: string }> = {
+    tour: { label: 'Tour', icon: '🗺️', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
+    transfer: { label: 'Transfer', icon: '🚐', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+    laundry: { label: 'Laundry', icon: '🧺', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+    other: { label: 'Other', icon: '📦', color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' }
 }
 
-export interface Sale {
-    id: string
-    type: SaleType
-    name: string              // Tour name, Transfer destination, or "Laundry"
-    customer_name: string     // Guest name
-    room_number: string
-    pax: number               // Number of people
-    date: Date                // Date of service
-    total_price: number
-    collected_amount: number
-    currency: Currency
-    payment_status: PaymentStatus
-    notes?: string
-    payments?: PaymentEntry[]
-    created_by: string
-    created_by_name: string
-    created_at: Date
-    calendar_event_id?: string  // Link to auto-created calendar event
+export const paymentStatusInfo: Record<PaymentStatus, { label: string; color: string }> = {
+    pending: { label: 'Pending', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
+    partial: { label: 'Partial', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+    paid: { label: 'Paid', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
 }
 
 interface SalesState {
@@ -52,10 +36,10 @@ interface SalesState {
 
 interface SalesActions {
     subscribeToSales: (hotelId: string) => () => void
-    addSale: (hotelId: string, saleData: Omit<Sale, 'id' | 'created_at' | 'payment_status'>) => Promise<string>
+    addSale: (hotelId: string, saleData: Omit<Sale, 'id' | 'created_at' | 'payment_status' | 'collected_amount' | 'hotel_id'>) => Promise<string>
     updateSale: (hotelId: string, saleId: string, updates: Partial<Sale>) => Promise<void>
     deleteSale: (hotelId: string, saleId: string) => Promise<void>
-    collectPayment: (hotelId: string, saleId: string, amount: number, currency?: Currency) => Promise<void>
+    collectPayment: (hotelId: string, saleId: string, amount: number, currency?: Currency, targetAmount?: number) => Promise<void>
     getDueSales: () => Sale[]
     getSalesByType: (type: SaleType) => Sale[]
 }
@@ -86,12 +70,15 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                 const data = doc.data()
                 return {
                     id: doc.id,
+                    hotel_id: hotelId,
                     type: data.type as SaleType,
                     name: data.name,
                     customer_name: data.customer_name,
                     room_number: data.room_number,
                     pax: data.pax || 1,
                     date: convertTimestamp(data.date),
+                    pickup_time: data.pickup_time,
+                    ticket_number: data.ticket_number,
                     total_price: data.total_price || 0,
                     collected_amount: data.collected_amount || 0,
                     currency: data.currency || 'EUR',
@@ -122,19 +109,48 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     addSale: async (hotelId, saleData) => {
         const salesRef = collection(db, 'hotels', hotelId, 'sales')
 
-        // Calculate initial payment status
-        const paymentStatus: PaymentStatus =
-            saleData.collected_amount >= saleData.total_price ? 'paid' :
-                saleData.collected_amount > 0 ? 'partial' : 'pending'
-
-        const docRef = await addDoc(salesRef, {
+        // 1. Prepare Sale Data
+        const saleDocData = {
             ...saleData,
+            collected_amount: 0,
+            payment_status: 'pending' as PaymentStatus,
             date: Timestamp.fromDate(saleData.date),
-            payment_status: paymentStatus,
             created_at: serverTimestamp()
-        })
+        }
 
-        return docRef.id
+        // 2. Add Sale First to get ID
+        const docRef = await addDoc(salesRef, saleDocData)
+        const saleId = docRef.id
+
+        // 3. If Tour/Transfer, create Calendar Event automatically
+        if (saleData.type === 'tour' || saleData.type === 'transfer') {
+            try {
+                const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
+                const eventData = {
+                    type: saleData.type,
+                    title: `${saleTypeInfo[saleData.type].icon} ${saleData.name} - ${saleData.room_number}`,
+                    description: `Guest: ${saleData.customer_name}\nPax: ${saleData.pax}\nPrice: ${saleData.total_price} ${saleData.currency}`,
+                    date: Timestamp.fromDate(saleData.date),
+                    time: saleData.pickup_time || null, // Use pickup time if available
+                    room_number: saleData.room_number,
+                    total_price: saleData.total_price,
+                    collected_amount: 0,
+                    currency: saleData.currency,
+                    created_by: saleData.created_by,
+                    created_by_name: saleData.created_by_name,
+                    sale_id: saleId, // Link back to sale
+                    created_at: serverTimestamp()
+                }
+                const eventRef = await addDoc(eventsRef, eventData)
+
+                // 4. Update Sale with Event ID
+                await updateDoc(docRef, { calendar_event_id: eventRef.id })
+            } catch (error) {
+                console.error("Failed to auto-create calendar event:", error)
+            }
+        }
+
+        return saleId
     },
 
     updateSale: async (hotelId, saleId, updates) => {
@@ -146,33 +162,73 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         }
 
         // Recalculate payment status if amounts changed
-        if (updates.collected_amount !== undefined || updates.total_price !== undefined) {
+        if (updates.total_price !== undefined) {
             const currentSale = get().sales.find(s => s.id === saleId)
             if (currentSale) {
-                const collected = updates.collected_amount ?? currentSale.collected_amount
-                const total = updates.total_price ?? currentSale.total_price
+                const collected = currentSale.collected_amount
+                const total = updates.total_price
                 updateData.payment_status =
                     collected >= total ? 'paid' :
                         collected > 0 ? 'partial' : 'pending'
             }
         }
 
+        updateData.updated_at = serverTimestamp()
         await updateDoc(saleRef, updateData)
+
+        // Sync to calendar if critical fields changed
+        const currentSale = get().sales.find(s => s.id === saleId)
+        if (currentSale?.calendar_event_id) {
+            const syncUpdates: any = {}
+            if (updates.date) syncUpdates.date = Timestamp.fromDate(updates.date)
+            if (updates.pickup_time) syncUpdates.time = updates.pickup_time
+            if (updates.total_price !== undefined) syncUpdates.total_price = updates.total_price
+            if (updates.name) syncUpdates.title = `${saleTypeInfo[currentSale.type].icon} ${updates.name} - Room ${currentSale.room_number}`
+            if (updates.room_number) syncUpdates.room_number = updates.room_number
+            if (updates.notes) syncUpdates.description = `Guest: ${currentSale.customer_name}\nPax: ${currentSale.pax}\nPrice: ${currentSale.total_price} ${currentSale.currency}\nNotes: ${updates.notes}`
+
+            if (Object.keys(syncUpdates).length > 0) {
+                try {
+                    const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', currentSale.calendar_event_id)
+                    await updateDoc(eventRef, syncUpdates)
+                } catch (err) {
+                    console.error("Failed to sync calendar event:", err)
+                }
+            }
+        }
     },
 
     deleteSale: async (hotelId, saleId) => {
+        const sale = get().sales.find(s => s.id === saleId)
         const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
         await deleteDoc(saleRef)
+
+        // Also delete calendar event if exists
+        if (sale?.calendar_event_id) {
+            try {
+                const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
+                await deleteDoc(eventRef)
+            } catch (err) {
+                console.error("Failed to delete calendar event:", err)
+            }
+        }
     },
 
-    collectPayment: async (hotelId: string, saleId: string, amount: number, currency?: Currency) => {
+    collectPayment: async (hotelId: string, saleId: string, amount: number, currency?: Currency, targetAmount?: number) => {
         const sale = get().sales.find(s => s.id === saleId)
         if (!sale) return
 
         const paymentCurrency = currency || sale.currency
-        const newTotalCollected = sale.collected_amount + (paymentCurrency === sale.currency ? amount : 0)
-        // Note: Simple logic for now, we only increment collected_amount if it's in the same currency.
-        // In a real app we might convert. But the requirement is to track them.
+        // Use targetAmount if provided (for cross-currency), otherwise use straight amount if matching currency
+        const effectiveCollectedAmount = targetAmount !== undefined
+            ? targetAmount
+            : (paymentCurrency === sale.currency ? amount : 0) // Fallback: if no target amount and mismatch, don't increment (or handle differently)
+
+        // Safety check: if no target amount and currency differs, we can't calculate balance update accurately without a rate. 
+        // For now, we assume if targetAmount is missing, currency matches OR user didn't specify exchange value (which is bad).
+        // But the UI will ensure targetAmount is passed if currencies differ.
+
+        const newTotalCollected = sale.collected_amount + effectiveCollectedAmount
 
         const newPayment: PaymentEntry = {
             amount,
@@ -182,9 +238,6 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 
         const payments = [...(sale.payments || []), newPayment]
 
-        // Recalculate status - for simplicity we assume paid if total_collected >= total_price
-        // This only works if all payments are in the same currency. 
-        // If not, we might need manual control or exchange rates.
         const paymentStatus: PaymentStatus =
             newTotalCollected >= sale.total_price ? 'paid' :
                 newTotalCollected > 0 ? 'partial' : 'pending'
@@ -221,16 +274,3 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         return get().sales.filter(sale => sale.type === type)
     }
 }))
-
-// Helper to get display info for sale types
-export const saleTypeInfo: Record<SaleType, { label: string; icon: string; color: string }> = {
-    tour: { label: 'Tur', icon: '🗺️', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
-    transfer: { label: 'Transfer', icon: '🚐', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    laundry: { label: 'Çamaşır', icon: '🧺', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
-}
-
-export const paymentStatusInfo: Record<PaymentStatus, { label: string; color: string }> = {
-    pending: { label: 'Bekliyor', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
-    partial: { label: 'Kısmi', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    paid: { label: 'Ödendi', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
-}
