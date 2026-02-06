@@ -12,7 +12,7 @@ import {
     Timestamp
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { Sale, SaleType, PaymentStatus, Currency, PaymentEntry } from '@/types'
+import type { Sale, SaleType, PaymentStatus, Currency, PaymentEntry, SaleStatus } from '@/types'
 
 // Helper to get display info for sale types
 export const saleTypeInfo: Record<SaleType, { label: string; icon: string; color: string }> = {
@@ -20,6 +20,15 @@ export const saleTypeInfo: Record<SaleType, { label: string; icon: string; color
     transfer: { label: 'Transfer', icon: '🚐', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
     laundry: { label: 'Laundry', icon: '🧺', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
     other: { label: 'Other', icon: '📦', color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' }
+}
+
+export const saleStatusInfo: Record<SaleStatus, { label: string; color: string }> = {
+    waiting: { label: 'Waiting', color: 'bg-zinc-500/20 text-zinc-400' },
+    confirmed: { label: 'Confirmed', color: 'bg-blue-500/20 text-blue-400' },
+    pickup_pending: { label: 'Pickup Pending', color: 'bg-amber-500/20 text-amber-400' },
+    realized: { label: 'Realized', color: 'bg-emerald-500/20 text-emerald-400' },
+    delivered: { label: 'Delivered', color: 'bg-purple-500/20 text-purple-400' },
+    cancelled: { label: 'Cancelled', color: 'bg-rose-500/20 text-rose-400' },
 }
 
 export const paymentStatusInfo: Record<PaymentStatus, { label: string; color: string }> = {

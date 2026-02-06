@@ -6,6 +6,7 @@ import {
     onSnapshot,
     addDoc,
     updateDoc,
+    deleteDoc,
     doc,
     serverTimestamp,
     Timestamp,
@@ -27,6 +28,7 @@ interface NotificationActions {
     addNotification: (hotelId: string, notification: Omit<Notification, 'id' | 'timestamp' | 'is_read'>) => Promise<void>
     markAsRead: (hotelId: string, notificationId: string) => Promise<void>
     markAllAsRead: (hotelId: string) => Promise<void>
+    removeNotification: (hotelId: string, notificationId: string) => Promise<void>
 }
 
 type NotificationStore = NotificationState & NotificationActions
@@ -138,6 +140,15 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
             await batch.commit()
         } catch (error: any) {
             console.error("Error marking all notifications as read:", error)
+        }
+    },
+
+    removeNotification: async (hotelId, notificationId) => {
+        try {
+            const docRef = doc(db, 'hotels', hotelId, 'notifications', notificationId)
+            await deleteDoc(docRef)
+        } catch (error) {
+            console.error("Error removing notification:", error)
         }
     }
 }))

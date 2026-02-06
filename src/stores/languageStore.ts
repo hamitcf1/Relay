@@ -253,6 +253,7 @@ type Translations = {
     'common.finish': string
     'common.reopen': string
     'common.resolve': string
+    'common.dismiss': string
 
     // Calendar
     'calendar.noShifts': string
@@ -585,6 +586,8 @@ const translations: Record<Language, Translations> = {
         'app.cashBalance': 'Cash Balance',
         'app.systemTitle': 'Relay Hotel Operations System',
 
+        'common.dismiss': 'Dismiss',
+
         'common.add': 'Add',
         'common.cancel': 'Cancel',
         'common.save': 'Save',
@@ -747,6 +750,9 @@ const translations: Record<Language, Translations> = {
 
 
         'handover.title': 'Devir Teslim Sihirbazı',
+
+        'common.dismiss': 'Gizle',
+
         'handover.step.tickets': 'Açık Kayıtları İncele',
         'handover.step.cash': 'Kasa Sayımı',
         'handover.step.notes': 'Devir Notları',

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn, formatDisplayDate } from '@/lib/utils'
-import { useSalesStore, saleTypeInfo, paymentStatusInfo } from '@/stores/salesStore'
+import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
 import { SalesDetailModal } from './SalesDetailModal'
 import {
@@ -315,7 +315,6 @@ export function SalesPanel() {
                     <div className="space-y-2">
                         {filteredSales.map(sale => {
                             const remaining = sale.total_price - sale.collected_amount
-                            const statusInfo = paymentStatusInfo[sale.payment_status]
 
                             return (
                                 <motion.div
@@ -351,9 +350,18 @@ export function SalesPanel() {
 
                                         <div className="text-right">
                                             <div className="text-sm font-bold text-white">€{sale.total_price}</div>
-                                            <div className={cn("text-[10px] font-medium", statusInfo.color.replace('bg-', 'text-').split(' ')[1])}>
-                                                {statusInfo.label}
+                                            <div className={cn("text-[10px] font-medium", paymentStatusInfo[sale.payment_status].color.replace('bg-', 'text-').split(' ')[1])}>
+                                                {paymentStatusInfo[sale.payment_status].label}
                                             </div>
+                                            {/* Detailed Status Badge */}
+                                            {sale.status && (
+                                                <div className={cn(
+                                                    "mt-1 text-[9px] px-1.5 py-0.5 rounded border inline-block",
+                                                    saleStatusInfo[sale.status]?.color || "bg-zinc-800 text-zinc-400 border-zinc-700"
+                                                )}>
+                                                    {saleStatusInfo[sale.status]?.label || sale.status}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </motion.div>

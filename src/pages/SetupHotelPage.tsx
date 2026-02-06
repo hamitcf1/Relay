@@ -1,322 +1,184 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Hotel, Plus, Building2, MapPin, Loader2, ArrowRight } from 'lucide-react'
+import { Building2, KeyRound, Loader2, ArrowRight, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { collection, getDocs, doc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/authStore'
+import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
-
-interface HotelOption {
-    id: string
-    name: string
-    address: string
-}
 
 export function SetupHotelPage() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
+    const { joinHotelByCode, createNewHotel } = useHotelStore()
 
-    const [mode, setMode] = useState<'choose' | 'create'>('choose')
-    const [hotels, setHotels] = useState<HotelOption[]>([])
-    const [loading, setLoading] = useState(true)
-    const [selectedHotel, setSelectedHotel] = useState<string | null>(null)
-
-    // Create hotel form
-    const [hotelName, setHotelName] = useState('')
-    const [hotelAddress, setHotelAddress] = useState('')
-    const [creating, setCreating] = useState(false)
+    const [mode, setMode] = useState<'join' | 'create'>('join')
+    const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    // Fetch available hotels
-    useEffect(() => {
-        const fetchHotels = async () => {
-            try {
-                const hotelsSnap = await getDocs(collection(db, 'hotels'))
-                const hotelsList: HotelOption[] = []
+    // Form states
+    const [joinCode, setJoinCode] = useState('')
+    const [hotelName, setHotelName] = useState('')
+    const [hotelAddress, setHotelAddress] = useState('')
 
-                hotelsSnap.forEach((doc) => {
-                    const data = doc.data()
-                    if (data.info) {
-                        hotelsList.push({
-                            id: doc.id,
-                            name: data.info.name || t('setup.unnamedHotel'),
-                            address: data.info.address || '',
-                        })
-                    }
-                })
+    const handleJoin = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!joinCode.trim() || !user) return
 
-                setHotels(hotelsList)
-            } catch (err) {
-                console.error('Error fetching hotels:', err)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchHotels()
-    }, [])
-
-    const handleJoinHotel = async () => {
-        if (!selectedHotel || !user) return
-
-        setCreating(true)
+        setLoading(true)
         setError(null)
 
         try {
-            // Add user to hotel's staff list
-            const hotelRef = doc(db, 'hotels', selectedHotel)
-            await updateDoc(hotelRef, {
-                staff_list: arrayUnion(user.uid)
-            })
-
-            // Update user's assigned hotel (safe for missing documents)
-            const userRef = doc(db, 'users', user.uid)
-            await setDoc(userRef, {
-                hotel_id: selectedHotel
-            }, { merge: true })
-
-            navigate('/')
+            const success = await joinHotelByCode(joinCode.trim().toUpperCase(), user)
+            if (success) {
+                navigate('/')
+            } else {
+                setError(t('setup.error.joinFailed') || 'Invalid hotel code')
+            }
         } catch (err) {
-            setError(err instanceof Error ? err.message : t('setup.error.joinFailed'))
+            setError(t('setup.error.joinFailed'))
         } finally {
-            setCreating(false)
+            setLoading(false)
         }
     }
 
-    const handleCreateHotel = async (e: React.FormEvent) => {
+    const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (!hotelName.trim() || !user) return
 
-        if (!hotelName.trim() || !user) {
-            setError(t('setup.error.enterName'))
-            return
-        }
-
-        setCreating(true)
+        setLoading(true)
         setError(null)
 
         try {
-            // Generate a simple hotel ID
-            const hotelId = hotelName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now().toString(36)
+            const hotelId = await createNewHotel({
+                name: hotelName.trim(),
+                address: hotelAddress.trim()
+            }, user)
 
-            // Create hotel document
-            await setDoc(doc(db, 'hotels', hotelId), {
-                info: {
-                    name: hotelName.trim(),
-                    address: hotelAddress.trim(),
-                },
-                settings: {
-                    kbs_time: '23:00',
-                    check_agency_intervals: [9, 12, 15, 18, 21],
-                },
-                staff_list: [user.uid],
-                created_by: user.uid,
-                created_at: new Date(),
-            })
-
-            // Update user's assigned hotel (safe for missing documents)
-            const userRef = doc(db, 'users', user.uid)
-            await setDoc(userRef, {
-                hotel_id: hotelId
-            }, { merge: true })
-
-            navigate('/')
+            if (hotelId) {
+                navigate('/')
+            } else {
+                setError(t('setup.error.createFailed'))
+            }
         } catch (err) {
-            setError(err instanceof Error ? err.message : t('setup.error.createFailed'))
+            setError(t('setup.error.createFailed'))
         } finally {
-            setCreating(false)
+            setLoading(false)
         }
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center relative overflow-hidden p-4">
-            {/* Background */}
-            <div className="absolute inset-0 overflow-hidden">
-                <motion.div
-                    className="absolute w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl"
-                    animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
-                    transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{ top: '10%', left: '10%' }}
-                />
-                <motion.div
-                    className="absolute w-80 h-80 rounded-full bg-purple-500/20 blur-3xl"
-                    animate={{ x: [0, -80, 0], y: [0, 80, 0] }}
-                    transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{ bottom: '10%', right: '10%' }}
-                />
-            </div>
-
-            <motion.div
-                className="relative z-10 w-full max-w-lg"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-            >
-                <div className="glass rounded-3xl p-8 shadow-2xl">
-                    {/* Header */}
-                    <div className="flex flex-col items-center mb-8">
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 glow-primary mb-4">
-                            <Hotel className="w-8 h-8 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-gradient-primary">{t('setup.title')}</h1>
-                        <p className="text-zinc-400 mt-1 text-sm text-center">
-                            {t('setup.subtitle')}
-                        </p>
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+            <div className="w-full max-w-md space-y-8">
+                <div className="text-center space-y-2">
+                    <div className="w-12 h-12 bg-indigo-600 rounded-xl mx-auto flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <Building2 className="w-6 h-6 text-white" />
                     </div>
+                    <h1 className="text-2xl font-bold text-white">{t('setup.title')}</h1>
+                    <p className="text-zinc-400 text-sm">{t('setup.subtitle')}</p>
+                </div>
 
-                    {/* Mode Tabs */}
-                    <div className="flex gap-2 mb-6">
-                        <button
-                            onClick={() => setMode('choose')}
-                            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${mode === 'choose'
-                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500'
-                                : 'text-zinc-400 border border-zinc-700 hover:border-zinc-600'
-                                }`}
-                        >
-                            <Building2 className="w-4 h-4 inline mr-2" />
-                            {t('setup.joinExisting')}
-                        </button>
-                        <button
-                            onClick={() => setMode('create')}
-                            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${mode === 'create'
-                                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500'
-                                : 'text-zinc-400 border border-zinc-700 hover:border-zinc-600'
-                                }`}
-                        >
-                            <Plus className="w-4 h-4 inline mr-2" />
-                            {t('setup.createNew')}
-                        </button>
-                    </div>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-900 rounded-lg border border-zinc-800">
+                    <button
+                        onClick={() => setMode('join')}
+                        className={`py-2 text-sm font-medium rounded-md transition-all ${mode === 'join' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    >
+                        {t('setup.joinExisting') || 'Join Hotel'}
+                    </button>
+                    <button
+                        onClick={() => setMode('create')}
+                        className={`py-2 text-sm font-medium rounded-md transition-all ${mode === 'create' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    >
+                        {t('setup.createNew') || 'Create Hotel'}
+                    </button>
+                </div>
 
-                    {/* Join Existing Hotel */}
-                    {mode === 'choose' && (
-                        <div className="space-y-4">
-                            {loading ? (
-                                <div className="text-center py-8">
-                                    <Loader2 className="w-6 h-6 animate-spin mx-auto text-zinc-500" />
-                                    <p className="text-zinc-500 text-sm mt-2">{t('setup.loading')}</p>
-                                </div>
-                            ) : hotels.length === 0 ? (
-                                <div className="text-center py-8">
-                                    <Building2 className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
-                                    <p className="text-zinc-400">{t('setup.noHotels')}</p>
-                                    <p className="text-zinc-500 text-sm mt-1">{t('setup.createNew')}</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-thin">
-                                        {hotels.map((hotel) => (
-                                            <Card
-                                                key={hotel.id}
-                                                className={`cursor-pointer transition-all ${selectedHotel === hotel.id
-                                                    ? 'border-indigo-500 bg-indigo-500/10'
-                                                    : 'hover:border-zinc-600'
-                                                    }`}
-                                                onClick={() => setSelectedHotel(hotel.id)}
-                                            >
-                                                <CardContent className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 rounded-lg bg-zinc-800">
-                                                            <Building2 className="w-5 h-5 text-zinc-400" />
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="font-medium text-zinc-200">{hotel.name}</div>
-                                                            {hotel.address && (
-                                                                <div className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5">
-                                                                    <MapPin className="w-3 h-3" />
-                                                                    {hotel.address}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        {selectedHotel === hotel.id && (
-                                                            <div className="w-4 h-4 rounded-full bg-indigo-500" />
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
+                <Card className="bg-zinc-900 border-zinc-800">
+                    <CardContent className="p-6">
+                        {mode === 'join' ? (
+                            <form onSubmit={handleJoin} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                        Hotel Code
+                                    </label>
+                                    <div className="relative">
+                                        <KeyRound className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                                        <Input
+                                            value={joinCode}
+                                            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                                            placeholder="RELAY-XXXX"
+                                            className="pl-9 bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 uppercase font-mono tracking-widest"
+                                            maxLength={10}
+                                        />
                                     </div>
+                                    <p className="text-[10px] text-zinc-500">
+                                        Ask your General Manager for the 6-character hotel code.
+                                    </p>
+                                </div>
 
-                                    <Button
-                                        onClick={handleJoinHotel}
-                                        disabled={!selectedHotel || creating}
-                                        className="w-full"
-                                    >
-                                        {creating ? (
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                        ) : (
-                                            <>
-                                                {t('setup.joinSuccess')}
-                                                <ArrowRight className="w-4 h-4 ml-2" />
-                                            </>
-                                        )}
-                                    </Button>
-                                </>
-                            )}
-                        </div>
-                    )}
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+                                        {error}
+                                    </div>
+                                )}
 
-                    {/* Create New Hotel */}
-                    {mode === 'create' && (
-                        <form onSubmit={handleCreateHotel} className="space-y-4">
-                            <div className="space-y-1">
-                                <label className="text-sm text-zinc-400">{t('setup.hotelName')}</label>
-                                <div className="relative">
-                                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <Button
+                                    type="submit"
+                                    disabled={loading || !joinCode.trim()}
+                                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium"
+                                >
+                                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ArrowRight className="w-4 h-4 mr-2" />}
+                                    {t('setup.joinSuccess') || 'Join Hotel'}
+                                </Button>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleCreate} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                        {t('setup.hotelName')}
+                                    </label>
                                     <Input
-                                        placeholder={t('setup.hotelNamePlaceholder')}
                                         value={hotelName}
                                         onChange={(e) => setHotelName(e.target.value)}
-                                        className="pl-11"
-                                        required
+                                        placeholder={t('setup.hotelNamePlaceholder') || 'e.g. Grand Hotel'}
+                                        className="bg-zinc-950 border-zinc-800 text-white"
                                     />
                                 </div>
-                            </div>
 
-                            <div className="space-y-1">
-                                <label className="text-sm text-zinc-400">
-                                    {t('setup.address')} <span className="text-zinc-600">({t('setup.optional')})</span>
-                                </label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <div className="space-y-2">
+                                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                        {t('setup.address')} <span className="text-zinc-600 lowercase">({t('setup.optional')})</span>
+                                    </label>
                                     <Input
-                                        placeholder={t('setup.addressPlaceholder')}
                                         value={hotelAddress}
                                         onChange={(e) => setHotelAddress(e.target.value)}
-                                        className="pl-11"
+                                        placeholder={t('setup.addressPlaceholder') || 'City, Country'}
+                                        className="bg-zinc-950 border-zinc-800 text-white"
                                     />
                                 </div>
-                            </div>
 
-                            <Button type="submit" className="w-full" disabled={creating}>
-                                {creating ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <>
-                                        {t('setup.createSuccess')}
-                                        <ArrowRight className="w-4 h-4 ml-2" />
-                                    </>
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+                                        {error}
+                                    </div>
                                 )}
-                            </Button>
-                        </form>
-                    )}
 
-                    {/* Error */}
-                    {error && (
-                        <motion.div
-                            className="mt-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                        >
-                            {error}
-                        </motion.div>
-                    )}
-                </div>
-            </motion.div>
+                                <Button
+                                    type="submit"
+                                    disabled={loading || !hotelName.trim()}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium"
+                                >
+                                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                                    {t('setup.createSuccess') || 'Create Hotel'}
+                                </Button>
+                            </form>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     )
 }

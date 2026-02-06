@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Send, MessageSquare, Megaphone, Search, Check, CheckCheck } from 'lucide-react'
+import { Send, MessageSquare, Megaphone, Search, Check, CheckCheck, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMessageStore } from '@/stores/messageStore'
 import { useRosterStore } from '@/stores/rosterStore'
@@ -18,7 +18,7 @@ import { type PrivateMessage } from '@/types'
 export function MessagingPanel() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
-    const { messages, subscribeToMessages, sendMessage, markAsRead } = useMessageStore()
+    const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat } = useMessageStore()
     const { staff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
     const [searchParams] = useSearchParams()
@@ -265,6 +265,24 @@ export function MessagingPanel() {
                             </>
                         )}
                     </div>
+
+                    {activeConversation !== 'all' && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 ml-2"
+                            title="Clear Chat History"
+                            onClick={async () => {
+                                if (window.confirm("Are you sure you want to clear this conversation? This action cannot be undone.")) {
+                                    if (hotel?.id && user?.uid) {
+                                        await clearChat(hotel.id, user.uid, activeConversation)
+                                    }
+                                }
+                            }}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </Button>
+                    )}
                 </div>
 
                 {/* Messages */}

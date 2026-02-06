@@ -12,7 +12,8 @@ import {
     X,
     Lock,
     LockOpen,
-    ShieldCheck
+    ShieldCheck,
+    KeyRound
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -263,6 +264,16 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                 ) : (
                     <div className="space-y-4">
                         {/* IBAN Display */}
+                        {isGM && hotel?.code && (
+                            <div className="p-3 bg-zinc-800/50 rounded-lg flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <KeyRound className="w-4 h-4 text-indigo-400" />
+                                    <span className="text-xs text-zinc-400">Hotel Code:</span>
+                                    <span className="font-mono text-lg font-bold text-white tracking-widest">{hotel.code}</span>
+                                </div>
+                            </div>
+                        )}
+
                         {info.iban && (
                             <div className="p-3 bg-zinc-800/50 rounded-lg">
                                 <div className="flex items-center gap-2 mb-1">

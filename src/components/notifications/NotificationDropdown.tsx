@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck } from 'lucide-react'
+import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { useNotificationStore } from '@/stores/notificationStore'
-import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale } from '@/lib/utils'
@@ -130,7 +130,7 @@ export function NotificationDropdown() {
                                         </div>
                                         <div className="flex-1 min-w-0 space-y-1">
                                             <div className="flex items-center justify-between gap-2">
-                                                <p className={cn("text-xs font-bold truncate", n.is_read ? "text-zinc-400" : "text-white")}>
+                                                <p className={cn("text-xs font-bold truncate pr-6", n.is_read ? "text-zinc-400" : "text-white")}>
                                                     {n.title}
                                                 </p>
                                                 <span className="text-[10px] text-zinc-600 whitespace-nowrap">
@@ -141,6 +141,20 @@ export function NotificationDropdown() {
                                                 {n.content}
                                             </p>
                                         </div>
+
+                                        {/* Dismiss Button */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                if (hotel?.id) {
+                                                    removeNotification(hotel.id, n.id)
+                                                }
+                                            }}
+                                            className="absolute top-2 right-2 p-1 text-zinc-600 hover:text-white hover:bg-zinc-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                                            title={t('common.dismiss') as string}
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
                                     </DropdownMenuItem>
                                 )
                             })}

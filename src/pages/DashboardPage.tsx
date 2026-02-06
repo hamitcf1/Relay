@@ -166,9 +166,11 @@ export function DashboardPage() {
         setIsAIModalOpen(true)
     }
 
+    const [showTutorial, setShowTutorial] = useState(false)
+
     return (
         <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans selection:bg-indigo-500/30">
-            <OnboardingWizard />
+            <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <AIAssistantModal
                 isOpen={isAIModalOpen}
                 onClose={() => setIsAIModalOpen(false)}
@@ -248,6 +250,11 @@ export function DashboardPage() {
                             </DropdownMenuLabel>
 
                             <DropdownMenuSeparator className="bg-zinc-800 my-2" />
+
+                            <DropdownMenuItem onClick={() => setShowTutorial(true)} className="gap-2 cursor-pointer">
+                                <Sparkles className="w-4 h-4 text-amber-400" />
+                                <span className="text-zinc-300">Tutorial</span>
+                            </DropdownMenuItem>
 
                             <div className="space-y-1">
                                 <DropdownMenuLabel className="text-[10px] text-zinc-500 font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>

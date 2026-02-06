@@ -42,7 +42,9 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
         let q = query(requestsRef, orderBy('created_at', 'desc'), limit(100))
 
         if (staffId) {
-            q = query(requestsRef, where('staff_id', '==', staffId), orderBy('created_at', 'desc'), limit(50))
+            // Remove orderBy to avoid needing a composite index (staff_id + created_at)
+            // We will sort client-side in the snapshot listener
+            q = query(requestsRef, where('staff_id', '==', staffId), limit(50))
         }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -61,6 +63,10 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
                 }
             })
 
+            // Sort client-side (descending)
+            list.sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+
+            set({ requests: list, loading: false })
             set({ requests: list, loading: false })
         }, (err) => {
             console.error("Off-day subscription error:", err)

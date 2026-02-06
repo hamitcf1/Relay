@@ -14,6 +14,8 @@ interface HotelActions {
     subscribeToHotel: (hotelId: string) => () => void
     createHotelIfNotExists: (hotelId: string, info: HotelInfo) => Promise<void>
     updateHotelSettings: (hotelId: string, settings: Partial<HotelSettings>) => Promise<void>
+    joinHotelByCode: (code: string, user: any) => Promise<boolean>
+    createNewHotel: (info: HotelInfo, user: any) => Promise<string | null>
 }
 
 type HotelStore = HotelState & HotelActions
@@ -132,4 +134,67 @@ export const useHotelStore = create<HotelStore>((set) => ({
             throw error
         }
     },
+
+    joinHotelByCode: async (code, user) => {
+        try {
+            const hotelsRef = import('firebase/firestore').then(m => m.collection(db, 'hotels'))
+            const q = import('firebase/firestore').then(m => m.query(m.collection(db, 'hotels'), m.where('code', '==', code)))
+
+            const snapshot = await import('firebase/firestore').then(async m => m.getDocs(await q))
+
+            if (snapshot.empty) {
+                return false
+            }
+
+            const hotelDoc = snapshot.docs[0]
+            const hotelId = hotelDoc.id
+
+            const hotelRef = doc(db, 'hotels', hotelId)
+            await import('firebase/firestore').then(m => m.updateDoc(hotelRef, {
+                staff_list: m.arrayUnion(user.uid)
+            }))
+
+            const userRef = doc(db, 'users', user.uid)
+            await setDoc(userRef, { hotel_id: hotelId }, { merge: true })
+
+            return true
+        } catch (error) {
+            console.error("Error joining hotel:", error)
+            throw error
+        }
+    },
+
+    createNewHotel: async (info, user) => {
+        try {
+            const generateCode = () => {
+                const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+                let result = ''
+                for (let i = 0; i < 6; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length))
+                }
+                return result
+            }
+
+            const code = generateCode()
+
+            // Create hotel document
+            const hotelRef = await import('firebase/firestore').then(m => m.addDoc(m.collection(db, 'hotels'), {
+                info,
+                code,
+                settings: defaultSettings,
+                staff_list: [user.uid],
+                owner_id: user.uid,
+                created_at: m.serverTimestamp()
+            }))
+
+            // Update user
+            const userRef = doc(db, 'users', user.uid)
+            await setDoc(userRef, { hotel_id: hotelRef.id }, { merge: true })
+
+            return hotelRef.id
+        } catch (error) {
+            console.error("Error creating hotel:", error)
+            return null
+        }
+    }
 }))

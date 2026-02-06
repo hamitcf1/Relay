@@ -63,6 +63,7 @@ export interface HotelSettings {
 
 export interface Hotel {
     id: string
+    code?: string
     info: HotelInfo
     settings: HotelSettings
 }
@@ -312,7 +313,10 @@ export interface Sale {
     calendar_event_id?: string  // Link to auto-created calendar event
     updated_at?: Date
     updated_by?: string
+    status?: SaleStatus       // New status field
 }
+
+export type SaleStatus = 'waiting' | 'confirmed' | 'cancelled' | 'pickup_pending' | 'realized' | 'delivered'
 
 export interface AppState {
     currentHotelId: string | null

@@ -21,17 +21,25 @@ interface Step {
     color: string
 }
 
-export function OnboardingWizard() {
+interface OnboardingWizardProps {
+    forceOpen?: boolean
+    onClose?: () => void
+}
+
+export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) {
     const { user, updateSettings } = useAuthStore()
     const { t } = useLanguageStore()
     const [isOpen, setIsOpen] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
 
     useEffect(() => {
-        if (user && !user.settings?.onboarding_seen) {
+        if (forceOpen) {
+            setIsOpen(true)
+            setCurrentStep(0)
+        } else if (user && !user.settings?.onboarding_seen) {
             setIsOpen(true)
         }
-    }, [user])
+    }, [user, forceOpen])
 
     const steps: Step[] = [
         {
@@ -81,10 +89,11 @@ export function OnboardingWizard() {
     }
 
     const handleComplete = async () => {
-        if (user) {
+        if (user && !forceOpen) {
             await updateSettings({ onboarding_seen: true })
         }
         setIsOpen(false)
+        if (onClose) onClose()
     }
 
     if (!isOpen) return null

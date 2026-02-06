@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-    X, Calendar, Users, MapPin,
+    Calendar, Users, MapPin,
     MessageSquare, Edit3, Check, Trash2, Clock, Ticket
 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { useSalesStore, saleTypeInfo, paymentStatusInfo } from '@/stores/salesStore'
+import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
-import type { Sale, Currency } from '@/types'
+import type { Sale, Currency, SaleStatus } from '@/types'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import {
     Select,
@@ -58,7 +58,8 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                 ticket_number: sale.ticket_number || '',
                 date: sale.date,
                 name: sale.name,
-                room_number: sale.room_number
+                room_number: sale.room_number,
+                status: sale.status || 'waiting'
             })
             // Reset payment currency to sale currency by default
             setPaymentCurrency(sale.currency)
@@ -137,9 +138,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                     <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
                                 </>
                             )}
-                            <Button size="icon" variant="ghost" onClick={onClose} className="ml-2">
-                                <X className="w-5 h-5" />
-                            </Button>
+
                         </div>
 
                         <div className="flex items-center gap-3 mb-2">
@@ -150,6 +149,34 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                             <Badge variant="outline" className={cn(paymentStatusInfo[sale.payment_status].color)}>
                                 {paymentStatusInfo[sale.payment_status].label}
                             </Badge>
+
+                            {/* Status Selector */}
+                            {isEditing ? (
+                                <Select
+                                    value={editForm.status || 'waiting'}
+                                    onValueChange={(v: SaleStatus) => setEditForm(prev => ({ ...prev, status: v }))}
+                                >
+                                    <SelectTrigger className="h-6 w-[120px] text-xs bg-zinc-900 border-zinc-700">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="waiting">Waiting</SelectItem>
+                                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                                        <SelectItem value="pickup_pending">Pickup Pending</SelectItem>
+                                        <SelectItem value="realized">Realized</SelectItem>
+                                        <SelectItem value="delivered">Delivered</SelectItem>
+                                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                sale.status && (
+                                    <Badge variant="outline" className={cn(
+                                        saleStatusInfo[sale.status]?.color || "bg-zinc-800 text-zinc-400 border-zinc-700"
+                                    )}>
+                                        {saleStatusInfo[sale.status]?.label || sale.status}
+                                    </Badge>
+                                )
+                            )}
                         </div>
 
                         {isEditing ? (

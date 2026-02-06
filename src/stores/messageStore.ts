@@ -26,6 +26,7 @@ interface MessageActions {
     sendMessage: (hotelId: string, message: Omit<PrivateMessage, 'id' | 'timestamp' | 'is_read'>) => Promise<void>
     markAsRead: (hotelId: string, messageId: string) => Promise<void>
     deleteMessage: (hotelId: string, messageId: string) => Promise<void>
+    clearChat: (hotelId: string, currentUserId: string, otherUserId: string) => Promise<void>
 }
 
 type MessageStore = MessageState & MessageActions
@@ -110,6 +111,39 @@ export const useMessageStore = create<MessageStore>((set) => ({
             await deleteDoc(docRef)
         } catch (error: any) {
             console.error("Error deleting message:", error)
+        }
+    },
+
+    clearChat: async (hotelId, currentUserId, otherUserId) => {
+        try {
+            const messagesRef = collection(db, 'hotels', hotelId, 'messages')
+            const q = query(messagesRef, orderBy('timestamp', 'desc'), limit(500)) // Fetch enough to clear recent history
+            const snapshot = await import('firebase/firestore').then(m => m.getDocs(q))
+
+            const batch = import('firebase/firestore').then(m => m.writeBatch(db))
+            const resolvedBatch = await batch
+
+            let count = 0
+
+            snapshot.docs.forEach(doc => {
+                const data = doc.data()
+                // Check if message belongs to this conversation
+                const isConversation =
+                    (data.sender_id === currentUserId && data.receiver_id === otherUserId) ||
+                    (data.sender_id === otherUserId && data.receiver_id === currentUserId)
+
+                if (isConversation) {
+                    resolvedBatch.delete(doc.ref)
+                    count++
+                }
+            })
+
+            if (count > 0) {
+                await resolvedBatch.commit()
+            }
+        } catch (error) {
+            console.error("Error clearing chat:", error)
+            throw error
         }
     }
 }))

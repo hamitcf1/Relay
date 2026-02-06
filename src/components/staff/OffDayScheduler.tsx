@@ -292,16 +292,28 @@ export function OffDayScheduler() {
                                                         ID: {r.id.slice(0, 8)}
                                                     </p>
                                                     {isGM && r.status !== 'pending' && (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            className="h-6 px-2 text-[10px] text-zinc-500 hover:text-zinc-300"
-                                                            onClick={() => handleAction(r, r.status === 'approved' ? 'rejected' : 'approved')}
-                                                            title={r.status === 'approved' ? 'Reddet' : 'Onayla'}
-                                                        >
-                                                            <RefreshCcw className="w-3 h-3 mr-1" />
-                                                            {r.status === 'approved' ? 'Reddet' : 'Onayla'}
-                                                        </Button>
+                                                        <>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-6 px-2 text-[10px] text-zinc-500 hover:text-zinc-300"
+                                                                onClick={() => handleAction(r, r.status === 'approved' ? 'rejected' : 'approved')}
+                                                                title={r.status === 'approved' ? 'Reddet' : 'Onayla'}
+                                                            >
+                                                                {r.status === 'approved' ? <X className="w-3 h-3 mr-1" /> : <Check className="w-3 h-3 mr-1" />}
+                                                                {r.status === 'approved' ? 'Reddet' : 'Onayla'}
+                                                            </Button>
+
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-6 px-2 text-[10px] text-zinc-500 hover:text-amber-400"
+                                                                onClick={() => handleAction(r, 'pending')}
+                                                                title="Sıfırla (Bekliyor)"
+                                                            >
+                                                                <RefreshCcw className="w-3 h-3" />
+                                                            </Button>
+                                                        </>
                                                     )}
                                                 </div>
                                             )}

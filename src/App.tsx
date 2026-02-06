@@ -6,9 +6,12 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import ShiftStartPage from '@/pages/ShiftStartPage'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
+import { TabNotifications } from '@/components/ui/TabNotifications'
+
 function App() {
     return (
         <BrowserRouter>
+            <TabNotifications />
             <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={<LoginPage />} />

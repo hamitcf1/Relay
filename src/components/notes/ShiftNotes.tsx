@@ -56,8 +56,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editContent, setEditContent] = useState('')
-    const [editCategory, setEditCategory] = useState<NoteCategory>('handover') // Default, will update on edit click
+    const [editCategory, setEditCategory] = useState<NoteCategory>('handover')
     const [editAmount, setEditAmount] = useState('')
+    const [editRoom, setEditRoom] = useState('')
+    const [editTime, setEditTime] = useState('')
+    const [editGuest, setEditGuest] = useState('')
+    const [editAssignedStaff, setEditAssignedStaff] = useState('none')
 
     const [loading, setLoading] = useState(false)
     const [isAIModalOpen, setIsAIModalOpen] = useState(false)
@@ -130,6 +134,10 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         setEditContent(note.content)
         setEditCategory(note.category)
         setEditAmount(note.amount_due?.toString() || '')
+        setEditRoom(note.room_number || '')
+        setEditTime(note.time || '')
+        setEditGuest(note.guest_name || '')
+        setEditAssignedStaff(note.assigned_staff_uid || 'none')
     }
 
     const handleUpdateNote = async () => {
@@ -139,7 +147,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
             await updateNote(hotelId, editingId, {
                 content: editContent,
                 category: editCategory,
-                amount_due: isFinancialCategory(editCategory) && editAmount ? parseFloat(editAmount) : null
+                room_number: editRoom.trim() || null,
+                amount_due: isFinancialCategory(editCategory) && editAmount ? parseFloat(editAmount) : null,
+                time: editTime || null,
+                guest_name: editGuest.trim() || null,
+                assigned_staff_uid: (editAssignedStaff && editAssignedStaff !== 'none') ? editAssignedStaff : null,
+                assigned_staff_name: (editAssignedStaff && editAssignedStaff !== 'none') ? (staff.find(s => s.uid === editAssignedStaff)?.name || null) : null
             })
             setEditingId(null)
         } finally {
@@ -451,6 +464,20 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                         className="h-8 text-sm bg-zinc-950 border-zinc-700 flex-1"
                                                         autoFocus
                                                     />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        placeholder="Room #"
+                                                        value={editRoom}
+                                                        onChange={(e) => setEditRoom(e.target.value)}
+                                                        className="h-8 w-20 text-sm bg-zinc-950 border-zinc-700"
+                                                    />
+                                                    <Input
+                                                        type="time"
+                                                        value={editTime}
+                                                        onChange={(e) => setEditTime(e.target.value)}
+                                                        className="h-8 w-24 text-sm bg-zinc-950 border-zinc-700"
+                                                    />
                                                     {isFinancialCategory(editCategory) && (
                                                         <Input
                                                             type="number"
@@ -462,10 +489,29 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button size="sm" onClick={handleUpdateNote} disabled={loading} className="h-6 text-xs bg-emerald-600 hover:bg-emerald-500 text-white">
+                                                    <Input
+                                                        placeholder="Guest Name"
+                                                        value={editGuest}
+                                                        onChange={(e) => setEditGuest(e.target.value)}
+                                                        className="flex-1 h-8 text-sm bg-zinc-950 border-zinc-700"
+                                                    />
+                                                    <Select value={editAssignedStaff} onValueChange={setEditAssignedStaff}>
+                                                        <SelectTrigger className="w-[120px] h-8 text-xs bg-zinc-950 border-zinc-700">
+                                                            <SelectValue placeholder="Staff" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">Unassigned</SelectItem>
+                                                            {staff.map(s => (
+                                                                <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="flex gap-2 justify-end">
+                                                    <Button size="sm" onClick={handleUpdateNote} disabled={loading} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3">
                                                         {t('common.save')}
                                                     </Button>
-                                                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-6 text-xs">
+                                                    <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-7 text-xs px-3">
                                                         {t('common.cancel')}
                                                     </Button>
                                                 </div>
@@ -476,15 +522,22 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
                                         {/* Footer */}
                                         <div className="flex items-center gap-3 text-[10px] text-zinc-500">
-                                            <span className="flex items-center gap-1">
-                                                <User className="w-2.5 h-2.5" />
-                                                {note.is_anonymous ? t('notes.anonymous') : note.created_by_name}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-2.5 h-2.5" />
-                                                {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
-                                                <span className="opacity-50 ml-1">({formatDisplayDateTime(note.created_at)})</span>
-                                            </span>
+                                            {/* Author - Hide for non-GMs if feedback */}
+                                            {(user?.role === 'gm' || note.category !== 'feedback') && (
+                                                <span className="flex items-center gap-1">
+                                                    <User className="w-2.5 h-2.5" />
+                                                    {note.is_anonymous ? t('notes.anonymous') : note.created_by_name}
+                                                </span>
+                                            )}
+
+                                            {/* Time - Hide for non-GMs if feedback */}
+                                            {(user?.role === 'gm' || note.category !== 'feedback') && (
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-2.5 h-2.5" />
+                                                    {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
+                                                    <span className="opacity-50 ml-1">({formatDisplayDateTime(note.created_at)})</span>
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
