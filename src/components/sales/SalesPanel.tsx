@@ -94,7 +94,7 @@ export function SalesPanel() {
             total_price: totalPrice,
             collected_amount: collectedAmount,
             currency: formData.currency,
-            notes: formData.notes.trim() || undefined,
+            notes: formData.notes.trim() || '',
             created_by: user.uid,
             created_by_name: user.name || 'Unknown'
         })
