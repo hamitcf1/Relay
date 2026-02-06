@@ -46,7 +46,7 @@ const SHIFT_CYCLE: (ShiftType | 'OFF')[] = ['A', 'B', 'C', 'E', 'OFF']
 
 export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const { t } = useLanguageStore()
-    const { hotel, updateStaffOrder } = useHotelStore()
+    const { hotel, updateHotelSettings } = useHotelStore()
     const [staff, setStaff] = useState<StaffMember[]>([])
     const [schedule, setSchedule] = useState<Record<string, Record<string, ShiftValue>>>({})
     const [weekOffset, setWeekOffset] = useState(0)
@@ -109,7 +109,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         setStaff(newOrder);
         if (canEdit && hotelId) {
             try {
-                await updateStaffOrder(hotelId, newOrder.map(s => s.uid));
+                await updateHotelSettings(hotelId, { staff_order: newOrder.map(s => s.uid) });
             } catch (error) {
                 console.error('Failed to save staff order:', error);
             }
