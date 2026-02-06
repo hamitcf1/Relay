@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { isSameDay, format } from 'date-fns'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { type PrivateMessage } from '@/types'
 
 export function MessagingPanel() {
@@ -279,7 +279,7 @@ export function MessagingPanel() {
                                 <div className="flex items-center gap-4">
                                     <div className="h-px bg-zinc-800 flex-1" />
                                     <span className="text-[10px] uppercase font-bold text-zinc-600 bg-zinc-950 px-2 rounded-full border border-zinc-800">
-                                        {format(group.date, 'MMMM d, yyyy')}
+                                        {formatDisplayDate(group.date)}
                                     </span>
                                     <div className="h-px bg-zinc-800 flex-1" />
                                 </div>

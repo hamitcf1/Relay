@@ -34,6 +34,7 @@ import { ShiftNotes } from '@/components/notes/ShiftNotes'
 import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
 import { CalendarWidget } from '@/components/calendar/CalendarWidget'
+import { StaffMealCard } from '@/components/hotel/StaffMealCard'
 import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
@@ -45,6 +46,7 @@ import { useNotesStore } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useSalesStore } from '@/stores/salesStore'
 import { useRosterStore } from '@/stores/rosterStore'
+import { useStaffMealStore } from '@/stores/staffMealStore'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessagingPanel } from '@/components/messaging/MessagingPanel'
@@ -62,6 +64,7 @@ export function DashboardPage() {
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
     const { subscribeToNotes } = useNotesStore()
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
+    const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
     const { t, language, setLanguage } = useLanguageStore()
 
 
@@ -123,12 +126,14 @@ export function DashboardPage() {
             const unsubShift = subscribeToCurrentShift(hotelId)
             const unsubNotes = subscribeToNotes(hotelId)
             const unsubRoster = subscribeToRoster(hotelId)
+            const unsubMenu = subscribeToTodayMenu(hotelId)
 
             return () => {
                 unsubHotel()
                 unsubShift()
                 unsubNotes()
                 unsubRoster()
+                unsubMenu()
             }
         }
 
@@ -302,20 +307,12 @@ export function DashboardPage() {
                 <AnnouncementBanner />
                 <Tabs value={activeTab} className="h-full border-none p-0 bg-transparent shadow-none">
                     <TabsContent value="overview" className="h-full m-0 border-none p-0 outline-none">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
                             {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
-                            <div className="lg:col-span-3 h-full flex flex-col min-h-0">
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
                                 <ShiftNotes hotelId={hotel?.id || ''} />
-                            </div>
 
-                            {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
-                            <div className="lg:col-span-5 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
-                                {/* 1. Current Shift & Pulse */}
-                                <div className="space-y-4">
-                                    <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
-                                </div>
-
-                                {/* 2. Compliance Checklist */}
+                                {/* Compliance Checklist */}
                                 {currentShift && (
                                     <ComplianceChecklist
                                         compliance={currentShift.compliance}
@@ -326,17 +323,27 @@ export function DashboardPage() {
                                 )}
                             </div>
 
-                            {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
-                            <div className="lg:col-span-4 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
-                                {/* 1. Calendar Widget */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1 }}
-                                >
-                                    <CalendarWidget hotelId={hotel?.id || ''} />
-                                </motion.div>
+                            {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                                {/* 1. Current Shift & Pulse */}
+                                <div className="space-y-4">
+                                    <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
+                                </div>
 
+                                {/* 2. Roster (Weekly Program) */}
+                                {(user?.role === 'gm' || user?.role === 'receptionist') && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5, delay: 0.2 }}
+                                    >
+                                        <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                    </motion.div>
+                                )}
+                            </div>
+
+                            {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
                                 {/* 3. Hotel Info */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
@@ -346,16 +353,23 @@ export function DashboardPage() {
                                     <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                 </motion.div>
 
-                                {/* 4. Roster (Only for GM) */}
-                                {(user?.role === 'gm' || user?.role === 'receptionist') && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: 0.5 }}
-                                    >
-                                        <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                    </motion.div>
-                                )}
+                                {/* 3. Daily Menu */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                >
+                                    <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                </motion.div>
+
+                                {/* 1. Calendar Widget */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                >
+                                    <CalendarWidget hotelId={hotel?.id || ''} />
+                                </motion.div>
                             </div>
                         </div>
                     </TabsContent>

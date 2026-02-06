@@ -8,10 +8,11 @@ import {
     AlertTriangle,
     Loader2
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { ShiftCompliance } from '@/types'
 import { useLanguageStore } from '@/stores/languageStore'
+import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 
 interface ComplianceChecklistProps {
     compliance: ShiftCompliance
@@ -73,14 +74,16 @@ export function ComplianceChecklist({
     ]
 
     return (
-        <Card>
-            <CardHeader className="pb-3">
+        <CollapsibleCard
+            id="compliance"
+            title={
                 <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-400" />
                     {t('module.compliance')}
                 </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+            }
+        >
+            <div className="space-y-2 pt-2">
                 {checks.map((check) => (
                     <motion.button
                         key={check.key}
@@ -136,7 +139,7 @@ export function ComplianceChecklist({
                         )}
                     </motion.button>
                 ))}
-            </CardContent>
-        </Card>
+            </div>
+        </CollapsibleCard>
     )
 }

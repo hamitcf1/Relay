@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Clock, Calendar, RefreshCcw, Briefcase } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
 import { getDateLocale } from '@/lib/utils'
 import type { ShiftType } from '@/types'
+import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 
 interface CurrentShiftDisplayProps {
     hotelId: string
@@ -74,24 +75,30 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
     const activeLabel = activeShiftType ? SHIFT_INFO[activeShiftType]?.label : t('shift.none')
 
     return (
-        <Card className="bg-zinc-900 border-zinc-800">
-            <CardHeader className="pb-3 flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        {t('dashboard.weeklySchedule')}
-                    </CardTitle>
-                </div>
+        <CollapsibleCard
+            id="current-shift"
+            title={
+                <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    {t('dashboard.weeklySchedule')}
+                </CardTitle>
+            }
+            headerActions={
                 <Button
                     variant="ghost"
                     size="icon"
                     className={cn("h-6 w-6 text-zinc-500", isRefreshing && "animate-spin")}
-                    onClick={handleRefresh}
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        handleRefresh()
+                    }}
                 >
                     <RefreshCcw className="w-3.5 h-3.5" />
                 </Button>
-            </CardHeader>
-            <CardContent className="space-y-5">
+            }
+            className="bg-zinc-900 border-zinc-800"
+        >
+            <div className="space-y-5 pt-2">
                 {/* Active Hotel Status Context */}
                 <div className="flex items-center justify-between bg-zinc-800/50 p-3 rounded-lg border border-zinc-800">
                     <div className="flex items-center gap-2">
@@ -172,8 +179,8 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                         </div>
                     ))}
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </CollapsibleCard>
     )
 }
 

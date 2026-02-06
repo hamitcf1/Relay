@@ -18,8 +18,9 @@ import { ChevronLeft, ChevronRight, Plus, X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { CardTitle } from '@/components/ui/card'
+import { cn, formatDisplayDate } from '@/lib/utils'
+import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { useCalendarStore, eventTypeInfo, type CalendarEventType } from '@/stores/calendarStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRosterStore } from '@/stores/rosterStore'
@@ -135,38 +136,45 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
     }
 
     return (
-        <Card className="glass border-zinc-800/50">
-            <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                        {t('module.calendar')}
-                    </CardTitle>
-
-                    <div className="flex items-center gap-1">
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-6 w-6"
-                            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                        >
-                            <ChevronLeft className="w-4 h-4" />
-                        </Button>
-                        <span className="text-xs text-zinc-400 min-w-[80px] text-center">
-                            {format(currentMonth, 'MMM yyyy', { locale: getDateLocale() })}
-                        </span>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-6 w-6"
-                            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                        >
-                            <ChevronRight className="w-4 h-4" />
-                        </Button>
-                    </div>
+        <CollapsibleCard
+            id="calendar-widget"
+            title={
+                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                    {t('module.calendar')}
+                </CardTitle>
+            }
+            headerActions={
+                <div className="flex items-center gap-1">
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setCurrentMonth(subMonths(currentMonth, 1))
+                        }}
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <span className="text-[10px] text-zinc-400 min-w-[70px] text-center font-mono">
+                        {format(currentMonth, 'MMM yyyy', { locale: getDateLocale() })}
+                    </span>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setCurrentMonth(addMonths(currentMonth, 1))
+                        }}
+                    >
+                        <ChevronRight className="w-4 h-4" />
+                    </Button>
                 </div>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
+            }
+            className="glass border-zinc-800/50"
+        >
+            <div className="space-y-3 pt-2">
                 {/* Weekday headers */}
                 <div className="grid grid-cols-7 gap-1">
                     {[
@@ -263,7 +271,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs text-zinc-400">
-                                            {format(selectedDate, 'EEEE, MMM d', { locale: getDateLocale() })}
+                                            {format(selectedDate, 'EEEE', { locale: getDateLocale() })}, {formatDisplayDate(selectedDate)}
                                         </span>
                                         <Button
                                             size="sm"
@@ -489,7 +497,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </CardContent>
-        </Card>
+            </div>
+        </CollapsibleCard>
     )
 }

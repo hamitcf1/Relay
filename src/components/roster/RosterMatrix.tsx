@@ -13,11 +13,12 @@ import {
 import { db } from '@/lib/firebase'
 import { syncRosterToCalendar } from '@/lib/calendar-sync'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import type { ShiftType } from '@/types'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 
 interface RosterMatrixProps {
     hotelId: string
@@ -80,7 +81,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             date.setDate(start.getDate() + i)
             return {
                 day: DAYS[i],
-                dateStr: `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}` // DD/MM
+                dateStr: formatDisplayDate(date)
             }
         })
     }, [weekStart])
@@ -235,36 +236,46 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     }
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CollapsibleCard
+            id="roster-matrix"
+            title={
                 <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-indigo-400" />
                     {t('roster.title')}
                     {saving && <Loader2 className="w-3 h-3 animate-spin text-zinc-500" />}
                 </CardTitle>
-
+            }
+            headerActions={
                 <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setWeekOffset((prev) => prev - 1)}
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setWeekOffset((prev) => prev - 1)
+                        }}
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <span className="text-xs text-zinc-400 min-w-[80px] text-center">
-                        {weekStart}
+                    <span className="text-[10px] text-zinc-400 min-w-[70px] text-center font-mono">
+                        {formatDisplayDate(weekStart)}
                     </span>
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setWeekOffset((prev) => prev + 1)}
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setWeekOffset((prev) => prev + 1)
+                        }}
                     >
                         <ChevronRight className="w-4 h-4" />
                     </Button>
                 </div>
-            </CardHeader>
-
-            <CardContent className="overflow-x-auto">
+            }
+        >
+            <div className="overflow-x-auto pt-2">
                 {staff.length === 0 ? (
                     <p className="text-zinc-500 text-sm text-center py-8">
                         {t('roster.noStaff')}
@@ -274,13 +285,13 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                         <thead>
                             <tr className="border-b border-zinc-800">
                                 {canEdit && <th className="w-8"></th>}
-                                <th className="text-left py-2 px-2 text-zinc-400 font-medium">{t('common.staff')}</th>
+                                <th className="text-left py-2 px-1 text-zinc-400 font-medium text-[10px] uppercase tracking-wider">{t('common.staff')}</th>
                                 {weekDates.map(({ day, dateStr }) => {
                                     const dayKey = `day.${day.toLowerCase()}` as any
                                     return (
-                                        <th key={day} className="text-center py-2 px-1 text-zinc-400 font-medium w-12">
-                                            <div className="text-[10px] opacity-50 mb-0.5 font-mono">{dateStr}</div>
-                                            <div>{t(dayKey)}</div>
+                                        <th key={day} className="text-center py-2 px-0.5 text-zinc-400 font-medium w-10">
+                                            <div className="text-[9px] opacity-50 mb-0.5 font-mono">{dateStr}</div>
+                                            <div className="text-[10px]">{t(dayKey)}</div>
                                         </th>
                                     )
                                 })}
@@ -304,18 +315,18 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                             <GripVertical className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" />
                                         </td>
                                     )}
-                                    <td className="py-2 px-2 text-zinc-300 whitespace-nowrap">
+                                    <td className="py-2 px-1 text-zinc-300 whitespace-nowrap text-xs">
                                         {member.name}
                                     </td>
                                     {DAYS.map((day) => {
                                         const shift = schedule[member.uid]?.[day]
                                         return (
-                                            <td key={day} className="py-2 px-1 text-center">
+                                            <td key={day} className="py-2 px-0.5 text-center">
                                                 <motion.button
                                                     onClick={() => cycleShift(member.uid, day)}
                                                     disabled={!canEdit}
                                                     className={cn(
-                                                        'w-10 h-8 rounded-md text-xs font-bold transition-all',
+                                                        'w-9 h-7 rounded text-[10px] font-bold transition-all',
                                                         shift ? SHIFT_COLORS[shift] : 'bg-zinc-800/50 text-zinc-600',
                                                         canEdit && 'hover:opacity-80 cursor-pointer',
                                                         !canEdit && 'cursor-default'
@@ -350,7 +361,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                         </div>
                     ))}
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </CollapsibleCard>
     )
 }

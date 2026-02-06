@@ -319,6 +319,17 @@ type Translations = {
     'onboarding.localization.title': string
     'onboarding.localization.desc': string
     'onboarding.stepOf': string
+
+    // Daily Menu
+    'menu.title': string
+    'menu.content': string
+    'menu.edit': string
+    'menu.updateSuccess': string
+    'menu.noMenuToday': string
+    'menu.hours': string
+    'menu.breakfastTime': string
+    'menu.lunchTime': string
+    'menu.dinnerTime': string
 }
 
 const translations: Record<Language, Translations> = {
@@ -624,6 +635,16 @@ const translations: Record<Language, Translations> = {
         'onboarding.localization.title': 'Localization',
         'onboarding.localization.desc': 'Use the globe icon in the header to switch between Turkish and English anytime.',
         'onboarding.stepOf': 'Step {current} of {total}',
+
+        'menu.title': 'Staff Daily Menu',
+        'menu.content': 'Today\'s Menu',
+        'menu.edit': 'Edit Menu',
+        'menu.updateSuccess': 'Menu updated successfully',
+        'menu.noMenuToday': 'No menu shared for today yet.',
+        'menu.hours': 'Service Hours',
+        'menu.breakfastTime': 'Breakfast: 07:00 - 09:00',
+        'menu.lunchTime': 'Lunch: 12:00 - 13:00',
+        'menu.dinnerTime': 'Dinner: 17:00 - 18:30',
     },
     tr: {
         'app.welcome': 'Relay\'e Hoşgeldiniz',
@@ -906,6 +927,16 @@ const translations: Record<Language, Translations> = {
 
         'roster.title': 'Haftalık Çizelge',
         'roster.noStaff': 'Personel bulunamadı',
+
+        'menu.title': 'Personel Günlük Menüsü',
+        'menu.content': 'Günün Menüsü',
+        'menu.edit': 'Menüyü Düzenle',
+        'menu.updateSuccess': 'Menü başarıyla güncellendi',
+        'menu.noMenuToday': 'Bugün için henüz menü paylaşılmadı.',
+        'menu.hours': 'Servis Saatleri',
+        'menu.breakfastTime': 'Kahvaltı: 07:00 - 09:00',
+        'menu.lunchTime': 'Öğle Yemeği: 12:00 - 13:00',
+        'menu.dinnerTime': 'Akşam Yemeği: 17:00 - 18:30',
 
         'compliance.kbs.required': 'KBS Kontrolü Gerekli!',
         'compliance.kbs.pastTime': 'Saat 23:00\'ü geçti',

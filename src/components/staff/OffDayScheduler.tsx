@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { format, parseISO } from 'date-fns'
-import { cn } from '@/lib/utils'
+import { parseISO } from 'date-fns'
+import { cn, formatDisplayDate } from '@/lib/utils'
 
 export function OffDayScheduler() {
     const { user } = useAuthStore()
@@ -223,9 +223,8 @@ export function OffDayScheduler() {
                                         className="p-4 flex items-center justify-between group hover:bg-zinc-800/30 transition-colors"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-zinc-800/50 flex flex-col items-center justify-center border border-zinc-700/50">
-                                                <span className="text-[10px] font-bold text-zinc-500 uppercase">{format(parseISO(r.date), 'MMM')}</span>
-                                                <span className="text-lg font-bold text-white leading-none">{format(parseISO(r.date), 'dd')}</span>
+                                            <div className="px-2 h-10 rounded-lg bg-zinc-800/50 flex flex-col items-center justify-center border border-zinc-700/50 min-w-[80px]">
+                                                <span className="text-[10px] font-bold text-white font-mono">{formatDisplayDate(parseISO(r.date))}</span>
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { tr } from 'date-fns/locale'
+// tr removed as unused
 import {
     Plus, X, Check, MapPin, Truck, ShoppingBag,
     CreditCard, AlertCircle, Loader2
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { cn, formatDisplayDate } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, type SaleType, type Sale } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
 import {
@@ -383,7 +383,7 @@ export function SalesPanel() {
                                                 <span>•</span>
                                                 <span>{sale.pax} kişi</span>
                                                 <span>•</span>
-                                                <span>{format(sale.date, 'd MMM', { locale: tr })}</span>
+                                                <span>{formatDisplayDate(sale.date)}</span>
                                             </div>
 
                                             <div className="mt-2 flex items-center gap-3">

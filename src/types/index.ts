@@ -255,6 +255,17 @@ export interface Tour {
     is_active: boolean
 }
 
+// Daily Menu (Staff Meal)
+export interface DailyMenu {
+    id: string
+    hotel_id: string
+    date: string // yyyy-MM-dd
+    menu: string
+    updated_at: Date
+    updated_by: string
+    updated_by_name: string
+}
+
 export interface AppState {
     currentHotelId: string | null
     currentShift: Shift | null

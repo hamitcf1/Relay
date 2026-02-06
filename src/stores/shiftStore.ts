@@ -88,7 +88,7 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
     },
 
     startShift: async (hotelId: string, staffIds: string[], type: ShiftType, cashStart: number, date?: string) => {
-        const today = date || new Date().toISOString().split('T')[0]
+        const today = date || new Date().toLocaleDateString('sv-SE')
         const shiftId = `${today}_SHIFT_${type}`
 
         try {

@@ -15,8 +15,9 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { useLanguageStore } from '@/stores/languageStore'
+import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 
 interface HotelInfoData {
     iban: string
@@ -115,21 +116,31 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     ]
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CollapsibleCard
+            id="hotel-info"
+            title={
                 <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                     <Settings className="w-4 h-4 text-indigo-400" />
                     {t('module.hotelInfo')}
                 </CardTitle>
-
-                {canEdit && !isEditing && (
-                    <Button size="sm" variant="ghost" onClick={handleEdit}>
+            }
+            headerActions={
+                canEdit && !isEditing && (
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleEdit()
+                        }}
+                        className="h-8 w-8 p-0"
+                    >
                         <Edit2 className="w-4 h-4" />
                     </Button>
-                )}
-            </CardHeader>
-
-            <CardContent>
+                )
+            }
+        >
+            <div className="pt-2">
                 {isEditing ? (
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -244,7 +255,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         )}
                     </div>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </CollapsibleCard>
     )
 }

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
-import { getDateLocale } from '@/lib/utils'
+import { getDateLocale, formatDisplayDateTime } from '@/lib/utils'
 import {
     Plus,
     Check,
@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { useNotesStore, categoryInfo, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
@@ -24,6 +24,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
+import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -158,30 +159,36 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     }, [notes])
 
     return (
-        <Card className="glass border-zinc-800/50">
-            <CardHeader className="pb-3">
-                <div className="flex items-center justify-between mb-3">
-                    <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                        📋 {t('module.shiftNotes')}
-                        {counts.active > 0 && (
-                            <Badge variant="secondary" className="text-xs">
-                                {counts.active} {t('status.active')}
-                            </Badge>
-                        )}
-                    </CardTitle>
-
-                    {showAddButton && (
-                        <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setIsAdding(!isAdding)}
-                            className="hover:bg-indigo-500/10 hover:text-indigo-400"
-                        >
-                            <Plus className="w-4 h-4" />
-                        </Button>
+        <CollapsibleCard
+            id="shift-notes"
+            title={
+                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                    📋 {t('module.shiftNotes')}
+                    {counts.active > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                            {counts.active} {t('status.active')}
+                        </Badge>
                     )}
-                </div>
-
+                </CardTitle>
+            }
+            headerActions={
+                showAddButton && (
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setIsAdding(!isAdding)
+                        }}
+                        className="hover:bg-indigo-500/10 hover:text-indigo-400 h-8 w-8 p-0"
+                    >
+                        <Plus className="w-4 h-4" />
+                    </Button>
+                )
+            }
+            className="glass border-zinc-800/50"
+        >
+            <div className="pt-2">
                 {/* Status Tabs */}
                 <div className="flex gap-1 mb-4 p-1 bg-zinc-950/50 rounded-lg border border-zinc-800/50">
                     {[
@@ -236,9 +243,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         </button>
                     ))}
                 </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="space-y-4">
+            <div className="space-y-4 pt-4">
                 {/* Add Note Form */}
                 <AnimatePresence>
                     {isAdding && (
@@ -476,6 +483,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             <span className="flex items-center gap-1">
                                                 <Clock className="w-2.5 h-2.5" />
                                                 {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
+                                                <span className="opacity-50 ml-1">({formatDisplayDateTime(note.created_at)})</span>
                                             </span>
                                         </div>
                                     </div>
@@ -532,7 +540,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         ))}
                     </div>
                 )}
-            </CardContent>
-        </Card>
+            </div>
+        </CollapsibleCard>
     )
 }
