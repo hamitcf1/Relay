@@ -22,7 +22,7 @@ interface StaffMealCardProps {
 }
 
 export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const { user } = useAuthStore()
     const { todayMenu, updateMenu, loading } = useStaffMealStore()
 
@@ -54,20 +54,17 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
 
     if (loading && !todayMenu) {
         return (
-            <CollapsibleCard
-                id="staff-meal"
-                title={
+            <div className="glass glass-hover rounded-2xl border border-zinc-800/50 flex flex-col">
+                <div className="p-6 pb-3">
                     <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                         <Utensils className="w-4 h-4 text-indigo-400" />
                         {t('menu.title')}
                     </CardTitle>
-                }
-                className="glass border-zinc-800/50"
-            >
-                <div className="flex items-center justify-center py-12">
+                </div>
+                <div className="p-6 pt-0 flex items-center justify-center py-12">
                     <Loader2 className="w-6 h-6 animate-spin text-indigo-500/50" />
                 </div>
-            </CollapsibleCard>
+            </div>
         )
     }
 
@@ -81,7 +78,7 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                 </CardTitle>
             }
             headerActions={
-                canEdit && (
+                canEdit && !isEditing && (
                     <Button
                         size="sm"
                         variant="ghost"
@@ -95,7 +92,7 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                     </Button>
                 )
             }
-            className="glass border-zinc-800/50"
+            className="bg-zinc-900 border-zinc-800"
         >
             <div className="pt-2">
                 <AnimatePresence mode="wait">
@@ -122,7 +119,7 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                             exit={{ opacity: 0, x: 20 }}
                             className="space-y-5"
                         >
-                            {todayMenu ? (
+                            {todayMenu && todayMenu.menu.trim() !== '' ? (
                                 <div className="space-y-4">
                                     <div className="p-3 bg-zinc-800/30 rounded-xl border border-zinc-800/50 group">
                                         <div className="flex items-center gap-2 mb-3 px-1">
@@ -135,7 +132,7 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                                             {todayMenu.menu.split('\n').filter(line => line.trim() !== '').map((item, index) => (
                                                 <li key={index} className="text-sm text-zinc-200 leading-relaxed flex items-start gap-2 group/item">
                                                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500/40 group-hover/item:bg-indigo-400 transition-colors shrink-0" />
-                                                    {item}
+                                                    {item.trim()}
                                                 </li>
                                             ))}
                                             {(!todayMenu.menu || todayMenu.menu.trim() === '') && (
@@ -146,7 +143,9 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
 
                                     <div className="flex items-center justify-between pt-1 px-1">
                                         <span className="text-[9px] text-zinc-600 uppercase tracking-tighter">
-                                            {t('common.by')} {todayMenu.updated_by_name}
+                                            {language === 'tr'
+                                                ? `${todayMenu.updated_by_name || t('common.staff')} ${t('common.by')}`
+                                                : `${t('common.by')} ${todayMenu.updated_by_name || t('common.staff')}`}
                                         </span>
                                         <span className="text-[9px] text-zinc-600 uppercase tracking-tighter">
                                             {formatDisplayDateTime(todayMenu.updated_at)}
