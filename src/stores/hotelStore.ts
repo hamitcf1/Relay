@@ -15,6 +15,7 @@ interface HotelActions {
     createHotelIfNotExists: (hotelId: string, info: HotelInfo) => Promise<void>
     updateHotelSettings: (hotelId: string, settings: Partial<HotelSettings>) => Promise<void>
     joinHotelByCode: (code: string, user: any) => Promise<boolean>
+    validateHotelCode: (code: string) => Promise<string | null>
     createNewHotel: (info: HotelInfo, user: any) => Promise<string | null>
 }
 
@@ -45,6 +46,7 @@ export const useHotelStore = create<HotelStore>((set) => ({
                 set({
                     hotel: {
                         id: hotelId,
+                        code: data.code,
                         info: data.info || { name: 'Hotel', address: '' },
                         settings: data.settings || defaultSettings,
                     },
@@ -79,6 +81,7 @@ export const useHotelStore = create<HotelStore>((set) => ({
                     set({
                         hotel: {
                             id: hotelId,
+                            code: data.code,
                             info: data.info || { name: 'Hotel', address: '' },
                             settings: data.settings || defaultSettings,
                         },
@@ -137,10 +140,11 @@ export const useHotelStore = create<HotelStore>((set) => ({
 
     joinHotelByCode: async (code, user) => {
         try {
-            const hotelsRef = import('firebase/firestore').then(m => m.collection(db, 'hotels'))
-            const q = import('firebase/firestore').then(m => m.query(m.collection(db, 'hotels'), m.where('code', '==', code)))
+            const { collection, query, where, getDocs, updateDoc, arrayUnion, doc: firestoreDoc } = await import('firebase/firestore')
 
-            const snapshot = await import('firebase/firestore').then(async m => m.getDocs(await q))
+            const hotelsRef = collection(db, 'hotels')
+            const q = query(hotelsRef, where('code', '==', code))
+            const snapshot = await getDocs(q)
 
             if (snapshot.empty) {
                 return false
@@ -149,18 +153,36 @@ export const useHotelStore = create<HotelStore>((set) => ({
             const hotelDoc = snapshot.docs[0]
             const hotelId = hotelDoc.id
 
-            const hotelRef = doc(db, 'hotels', hotelId)
-            await import('firebase/firestore').then(m => m.updateDoc(hotelRef, {
-                staff_list: m.arrayUnion(user.uid)
-            }))
+            const hotelRef = firestoreDoc(db, 'hotels', hotelId)
+            await updateDoc(hotelRef, {
+                staff_list: arrayUnion(user.uid)
+            })
 
-            const userRef = doc(db, 'users', user.uid)
+            const userRef = firestoreDoc(db, 'users', user.uid)
             await setDoc(userRef, { hotel_id: hotelId }, { merge: true })
 
             return true
         } catch (error) {
             console.error("Error joining hotel:", error)
             throw error
+        }
+    },
+
+    validateHotelCode: async (code: string) => {
+        try {
+            const { collection, query, where, getDocs } = await import('firebase/firestore')
+            const hotelsRef = collection(db, 'hotels')
+            const q = query(hotelsRef, where('code', '==', code))
+            const snapshot = await getDocs(q)
+
+            if (snapshot.empty) {
+                return null
+            }
+
+            return snapshot.docs[0].id
+        } catch (error) {
+            console.error("Error validating hotel code:", error)
+            return null
         }
     },
 

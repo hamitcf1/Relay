@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
 import {
     Plus, X, Check, MapPin, Truck, ShoppingBag,
-    CreditCard, Loader2
+    CreditCard, Loader2, ArrowRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,10 +21,10 @@ import {
 } from '@/components/ui/select'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
-import type { SaleType, Currency } from '@/types'
+import type { SaleType, Currency, SaleStatus } from '@/types'
 
 export function SalesPanel() {
-    const { sales, loading, subscribeToSales, addSale } = useSalesStore()
+    const { sales, loading, subscribeToSales, addSale, updateSale } = useSalesStore()
     const { tours, subscribeToTours } = useTourStore()
     const { hotel } = useHotelStore()
     const { user } = useAuthStore()
@@ -354,14 +354,31 @@ export function SalesPanel() {
                                                 {paymentStatusInfo[sale.payment_status].label}
                                             </div>
                                             {/* Detailed Status Badge */}
-                                            {sale.status && (
-                                                <div className={cn(
-                                                    "mt-1 text-[9px] px-1.5 py-0.5 rounded border inline-block",
-                                                    saleStatusInfo[sale.status]?.color || "bg-zinc-800 text-zinc-400 border-zinc-700"
-                                                )}>
-                                                    {saleStatusInfo[sale.status]?.label || sale.status}
-                                                </div>
-                                            )}
+                                            {/* Detailed Status Select */}
+                                            <div onClick={(e) => e.stopPropagation()} className="mt-1">
+                                                <Select
+                                                    value={sale.status || 'waiting'}
+                                                    onValueChange={(val: any) => {
+                                                        if (hotel?.id) {
+                                                            updateSale(hotel.id, sale.id, { status: val })
+                                                        }
+                                                    }}
+                                                >
+                                                    <SelectTrigger className={cn(
+                                                        "h-5 text-[9px] px-1.5 py-0 border-none min-w-[70px] justify-between gap-1 transition-colors",
+                                                        saleStatusInfo[sale.status as SaleStatus]?.color || "bg-zinc-800 text-zinc-400"
+                                                    )}>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent align="end">
+                                                        {(Object.keys(saleStatusInfo) as SaleStatus[]).map((status) => (
+                                                            <SelectItem key={status} value={status} className="text-xs">
+                                                                {saleStatusInfo[status].label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>

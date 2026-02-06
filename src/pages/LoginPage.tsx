@@ -14,17 +14,70 @@ export function LoginPage() {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [hotelCode, setHotelCode] = useState('')
     const [showPassword, setShowPassword] = useState(false)
+    const [loginError, setLoginError] = useState<string | null>(null) // Local error state
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         clearError()
+        setLoginError(null)
+
+        // removed pre-check for hotelCode to allow fetching hotel data first
 
         await signIn(email, password)
 
-        // Navigate on success (auth state will update)
+        // Post-login verification
         const user = useAuthStore.getState().user
         if (user) {
+            try {
+                const { doc, getDoc } = await import('firebase/firestore')
+                const { db } = await import('@/lib/firebase')
+
+                if (user.hotel_id) {
+                    const hotelRef = doc(db, 'hotels', user.hotel_id)
+                    const hotelSnap = await getDoc(hotelRef)
+
+                    if (hotelSnap.exists()) {
+                        const hotelData = hotelSnap.data()
+                        const actualCode = hotelData.code
+
+                        // CASE 1: Hotel HAS a code (Standard Security)
+                        if (actualCode) {
+                            if (!hotelCode.trim()) {
+                                setLoginError("Hotel Code is required for this hotel.")
+                                await useAuthStore.getState().signOut()
+                                return
+                            }
+                            if (actualCode !== hotelCode.trim().toUpperCase()) {
+                                setLoginError("Invalid Hotel Code.")
+                                await useAuthStore.getState().signOut()
+                                return
+                            }
+                        }
+                        // CASE 2: Hotel has NO code (Legacy Support)
+                        // Allow login so GM can generate one.
+                        // Ideally, we restrict this to GM only, but for now allow all to avoid lockout.
+                    } else {
+                        // Hotel doesn't exist?
+                        setLoginError("Account configuration error: Hotel not found.")
+                        await useAuthStore.getState().signOut()
+                        return
+                    }
+                } else if (!user.hotel_id && location.pathname !== '/setup-hotel') {
+                    // Allow login if no hotel (will redirect to setup)
+                    // But wait, user said "requirement for logging into correct hotel"
+                    // If they have NO hotel, they probably are a new GM who signed up via some other way?
+                    // Or maybe a broken state.
+                    // Let's assume if NO hotel_id, we bypass code check (nothing to check against) and let ProtectedRoute handle redirect.
+                }
+            } catch (err) {
+                console.error("Error verifying hotel code:", err)
+                setLoginError("Verification failed. Please try again.")
+                await useAuthStore.getState().signOut()
+                return
+            }
+
             navigate('/')
         }
     }
@@ -116,53 +169,54 @@ export function LoginPage() {
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
                         {/* Email Field */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-zinc-400 ml-1">{t('auth.email')}</label>
+                        <div className="space-y-4">
+                            {/* Hotel Code (Optional but recommended) */}
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <Hotel className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
                                 <Input
-                                    type="email"
-                                    placeholder="your@email.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-11"
-                                    required
+                                    value={hotelCode}
+                                    onChange={(e) => setHotelCode(e.target.value.toUpperCase())}
+                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600 uppercase tracking-widest font-mono"
+                                    placeholder="HOTEL CODE"
+                                    maxLength={10}
                                 />
                             </div>
-                        </div>
 
-                        {/* Password Field */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-zinc-400 ml-1">{t('auth.password')}</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
                                 <Input
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="••••••••"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    placeholder={t('auth.email')}
+                                />
+                            </div>
+
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                                <Input
+                                    type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-11 pr-11"
-                                    required
+                                    className="pl-9 pr-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    placeholder={t('auth.password')}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                                    className="absolute right-3 top-2.5 text-zinc-500 hover:text-white"
                                 >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
                         </div>
 
                         {/* Error Message */}
-                        {error && (
-                            <motion.div
-                                className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm"
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                            >
-                                {error}
-                            </motion.div>
+                        {(error || loginError) && (
+                            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center">
+                                {loginError || error}
+                            </div>
                         )}
 
                         {/* Submit Button */}

@@ -45,7 +45,8 @@ export function NotificationDropdown() {
         unreadCount,
         subscribeToNotifications,
         markAsRead,
-        markAllAsRead
+        markAllAsRead,
+        removeNotification
     } = useNotificationStore()
     const { t } = useLanguageStore()
 
@@ -150,7 +151,7 @@ export function NotificationDropdown() {
                                                     removeNotification(hotel.id, n.id)
                                                 }
                                             }}
-                                            className="absolute top-2 right-2 p-1 text-zinc-600 hover:text-white hover:bg-zinc-700/50 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                                            className="absolute top-2 right-2 p-1 text-zinc-600 hover:text-white hover:bg-zinc-700/50 rounded-full opacity-50 hover:opacity-100 transition-all"
                                             title={t('common.dismiss') as string}
                                         >
                                             <X className="w-3 h-3" />

@@ -264,12 +264,74 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                 ) : (
                     <div className="space-y-4">
                         {/* IBAN Display */}
-                        {isGM && hotel?.code && (
+                        {/* Hotel Code Display or Generation */}
+                        {isGM && (
                             <div className="p-3 bg-zinc-800/50 rounded-lg flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <KeyRound className="w-4 h-4 text-indigo-400" />
                                     <span className="text-xs text-zinc-400">Hotel Code:</span>
-                                    <span className="font-mono text-lg font-bold text-white tracking-widest">{hotel.code}</span>
+                                    <div className="flex items-center gap-2">
+                                        {hotel?.code ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="bg-black/40 px-3 py-1.5 rounded border border-indigo-500/30 flex items-center gap-2">
+                                                    <span className="font-mono text-xl font-bold text-indigo-300 tracking-[0.2em]">{hotel.code}</span>
+                                                </div>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 p-0 text-zinc-400 hover:text-white"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(hotel.code || '')
+                                                        // Ideally show a toast here, but for now simple feedback
+                                                        const btn = document.activeElement as HTMLElement
+                                                        if (btn) {
+                                                            const originalHTML = btn.innerHTML
+                                                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 text-emerald-400"><path d="M20 6 9 17l-5-5"/></svg>'
+                                                            setTimeout(() => { btn.innerHTML = originalHTML }, 2000)
+                                                        }
+                                                    }}
+                                                    title="Copy Code"
+                                                >
+                                                    <div className="relative">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                                                    </div>
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={async (e) => {
+                                                    e.preventDefault() // Prevent form submission if inside one
+                                                    if (!hotel?.id) return
+
+                                                    setSaving(true)
+
+                                                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+                                                    let result = ''
+                                                    for (let i = 0; i < 6; i++) {
+                                                        result += chars.charAt(Math.floor(Math.random() * chars.length))
+                                                    }
+
+                                                    try {
+                                                        const { doc, updateDoc } = await import('firebase/firestore')
+                                                        const { db } = await import('@/lib/firebase')
+                                                        await updateDoc(doc(db, 'hotels', hotel.id), { code: result })
+                                                    } catch (e) {
+                                                        console.error("Code generation failed:", e)
+                                                        alert("Failed to generate code. Please try again.")
+                                                    } finally {
+                                                        setSaving(false)
+                                                    }
+                                                }}
+                                                className="h-7 text-xs bg-indigo-600/10 text-indigo-300 border-indigo-500/30 hover:bg-indigo-600/20"
+                                                disabled={saving}
+                                            >
+                                                {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <KeyRound className="w-3 h-3 mr-1" />}
+                                                Generate Hotel Code
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}

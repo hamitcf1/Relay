@@ -38,6 +38,7 @@ import { StaffMealCard } from '@/components/hotel/StaffMealCard'
 import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
+import { TourOverlay } from '@/components/onboarding/TourOverlay'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -70,6 +71,7 @@ export function DashboardPage() {
 
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
     const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
+    const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
 
     // Update activeTab when location changes (e.g. via navigate('/operations'))
@@ -171,6 +173,7 @@ export function DashboardPage() {
     return (
         <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans selection:bg-indigo-500/30">
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
+            <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
             <AIAssistantModal
                 isOpen={isAIModalOpen}
                 onClose={() => setIsAIModalOpen(false)}
@@ -213,7 +216,9 @@ export function DashboardPage() {
                         </div>
                     )}
 
-                    <NotificationDropdown />
+                    <div id="tour-notifications">
+                        <NotificationDropdown />
+                    </div>
 
                     {/* Language Toggle */}
                     <DropdownMenu>
@@ -233,65 +238,67 @@ export function DashboardPage() {
                     </DropdownMenu>
 
                     {/* User Profile - Consolidated Actions */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className="h-9 w-9 rounded-full bg-indigo-600 flex items-center justify-center border border-indigo-500/50 shadow-lg shadow-indigo-500/20 ml-2 hover:bg-indigo-500 transition-colors overflow-hidden">
-                                <span className="text-xs font-bold text-white">
-                                    {user?.name?.charAt(0).toUpperCase() || <User className="w-4 h-4 text-white" />}
-                                </span>
-                            </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 bg-zinc-900 border-zinc-800 p-2">
-                            <DropdownMenuLabel className="px-2 py-1.5">
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-semibold text-white">{user?.name || t('common.unknown')}</span>
-                                    <span className="text-[10px] text-zinc-500 uppercase">{user?.role}</span>
+                    <div id="tour-profile">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="h-9 w-9 rounded-full bg-indigo-600 flex items-center justify-center border border-indigo-500/50 shadow-lg shadow-indigo-500/20 ml-2 hover:bg-indigo-500 transition-colors overflow-hidden">
+                                    <span className="text-xs font-bold text-white">
+                                        {user?.name?.charAt(0).toUpperCase() || <User className="w-4 h-4 text-white" />}
+                                    </span>
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-zinc-900 border-zinc-800 p-2">
+                                <DropdownMenuLabel className="px-2 py-1.5">
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-semibold text-white">{user?.name || t('common.unknown')}</span>
+                                        <span className="text-[10px] text-zinc-500 uppercase">{user?.role}</span>
+                                    </div>
+                                </DropdownMenuLabel>
+
+                                <DropdownMenuSeparator className="bg-zinc-800 my-2" />
+
+                                <DropdownMenuItem onClick={() => setShowTour(true)} className="gap-2 cursor-pointer">
+                                    <Sparkles className="w-4 h-4 text-amber-400" />
+                                    <span className="text-zinc-300">Start Tour</span>
+                                </DropdownMenuItem>
+
+                                <div className="space-y-1">
+                                    <DropdownMenuLabel className="text-[10px] text-zinc-500 font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
+
+                                    <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-indigo-500/10 transition-colors">
+                                        <Sparkles className="w-4 h-4 text-indigo-400" />
+                                        <span className="text-xs font-medium">Assistant AI</span>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem onClick={() => setIsRoomManagerOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-amber-500/10 transition-colors">
+                                        <BedDouble className="w-4 h-4 text-amber-400" />
+                                        <span className="text-xs font-medium">{t('dashboard.rooms')}</span>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuSeparator className="bg-zinc-800" />
+
+                                    {!currentShift ? (
+                                        <DropdownMenuItem onClick={() => navigate('/shift-start')} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
+                                            <Play className="w-4 h-4" />
+                                            <span className="text-xs font-medium">{t('dashboard.startShift')}</span>
+                                        </DropdownMenuItem>
+                                    ) : (
+                                        <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-rose-500/10 transition-colors">
+                                            <StopCircle className="w-4 h-4" />
+                                            <span className="text-xs font-medium">{t('dashboard.endShift')}</span>
+                                        </DropdownMenuItem>
+                                    )}
                                 </div>
-                            </DropdownMenuLabel>
 
-                            <DropdownMenuSeparator className="bg-zinc-800 my-2" />
+                                <DropdownMenuSeparator className="bg-zinc-800 my-2" />
 
-                            <DropdownMenuItem onClick={() => setShowTutorial(true)} className="gap-2 cursor-pointer">
-                                <Sparkles className="w-4 h-4 text-amber-400" />
-                                <span className="text-zinc-300">Tutorial</span>
-                            </DropdownMenuItem>
-
-                            <div className="space-y-1">
-                                <DropdownMenuLabel className="text-[10px] text-zinc-500 font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
-
-                                <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-indigo-500/10 transition-colors">
-                                    <Sparkles className="w-4 h-4 text-indigo-400" />
-                                    <span className="text-xs font-medium">Assistant AI</span>
+                                <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-zinc-400 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-zinc-800 transition-colors">
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="text-xs font-medium">{t('auth.logout')}</span>
                                 </DropdownMenuItem>
-
-                                <DropdownMenuItem onClick={() => setIsRoomManagerOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-amber-500/10 transition-colors">
-                                    <BedDouble className="w-4 h-4 text-amber-400" />
-                                    <span className="text-xs font-medium">{t('dashboard.rooms')}</span>
-                                </DropdownMenuItem>
-
-                                <DropdownMenuSeparator className="bg-zinc-800" />
-
-                                {!currentShift ? (
-                                    <DropdownMenuItem onClick={() => navigate('/shift-start')} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
-                                        <Play className="w-4 h-4" />
-                                        <span className="text-xs font-medium">{t('dashboard.startShift')}</span>
-                                    </DropdownMenuItem>
-                                ) : (
-                                    <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-rose-500/10 transition-colors">
-                                        <StopCircle className="w-4 h-4" />
-                                        <span className="text-xs font-medium">{t('dashboard.endShift')}</span>
-                                    </DropdownMenuItem>
-                                )}
-                            </div>
-
-                            <DropdownMenuSeparator className="bg-zinc-800 my-2" />
-
-                            <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-zinc-400 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-zinc-800 transition-colors">
-                                <LogOut className="w-4 h-4" />
-                                <span className="text-xs font-medium">{t('auth.logout')}</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             </header>
 
@@ -317,16 +324,20 @@ export function DashboardPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
                             {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
                             <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
-                                <ShiftNotes hotelId={hotel?.id || ''} />
+                                <div id="tour-logs">
+                                    <ShiftNotes hotelId={hotel?.id || ''} />
+                                </div>
 
                                 {/* Compliance Checklist */}
                                 {currentShift && (
-                                    <ComplianceChecklist
-                                        compliance={currentShift.compliance}
-                                        onKBSCheck={handleKBSCheck}
-                                        onAgencyCheck={handleAgencyCheck}
-                                        disabled={false}
-                                    />
+                                    <div id="tour-shift-start">
+                                        <ComplianceChecklist
+                                            compliance={currentShift.compliance}
+                                            onKBSCheck={handleKBSCheck}
+                                            onAgencyCheck={handleAgencyCheck}
+                                            disabled={false}
+                                        />
+                                    </div>
                                 )}
                             </div>
 
@@ -406,7 +417,7 @@ export function DashboardPage() {
                                         <Map className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.tours')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="sales" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                    <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
                                         <CreditCard className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.sales')}</span>
                                     </TabsTrigger>

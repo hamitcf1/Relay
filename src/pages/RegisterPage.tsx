@@ -7,6 +7,7 @@ import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import type { UserRole } from '@/types'
 
@@ -19,9 +20,14 @@ export function RegisterPage() {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [role, setRole] = useState<UserRole>('receptionist')
+    const [hotelCode, setHotelCode] = useState('')
+    const [isGM, setIsGM] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // Helper to validate code
+    const { validateHotelCode } = useHotelStore()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -43,6 +49,22 @@ export function RegisterPage() {
             return
         }
 
+        // Hotel Code Validation for non-GMs
+        let validatedHotelId: string | null = null
+        if (!isGM) {
+            if (!hotelCode.trim()) {
+                setError("Please enter a Hotel Code to join your team.")
+                return
+            }
+            setLoading(true)
+            validatedHotelId = await validateHotelCode(hotelCode.trim().toUpperCase())
+            if (!validatedHotelId) {
+                setLoading(false)
+                setError("Invalid Hotel Code. Please check with your manager.")
+                return
+            }
+        }
+
         setLoading(true)
 
         try {
@@ -53,17 +75,29 @@ export function RegisterPage() {
             await setDoc(doc(db, 'users', credential.user.uid), {
                 email: email,
                 name: name.trim(),
-                role: role,
+                role: isGM ? 'gm' : role,
                 current_shift_type: null,
+                hotel_id: validatedHotelId, // Will be null for GMs, valid ID for staff
                 created_at: new Date(),
             })
 
-            // Navigate to hotel setup
-            navigate('/setup-hotel')
+            // Update hotel staff list if joining
+            if (validatedHotelId) {
+                const { updateDoc, arrayUnion, doc: firestoreDoc } = await import('firebase/firestore')
+                await updateDoc(firestoreDoc(db, 'hotels', validatedHotelId), {
+                    staff_list: arrayUnion(credential.user.uid)
+                })
+            }
+
+            // Navigate based on role
+            if (isGM) {
+                navigate('/setup-hotel')
+            } else {
+                navigate('/')
+            }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : t('auth.error.regFailed')
             setError(errorMessage.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim())
-        } finally {
             setLoading(false)
         }
     }
@@ -132,96 +166,135 @@ export function RegisterPage() {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Name */}
-                        <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">{t('auth.name')}</label>
+                        {/* Role Selection & GM Toggle */}
+                        <div className="flex flex-col gap-3">
+                            <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">I am a...</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsGM(false)}
+                                    className={`p-3 rounded-xl border text-left transition-all ${!isGM ? 'bg-indigo-600/10 border-indigo-500/50 text-indigo-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                                >
+                                    <div className="font-semibold text-sm mb-1">Staff Member</div>
+                                    <div className="text-[10px] opacity-70">Joining a team</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsGM(true)}
+                                    className={`p-3 rounded-xl border text-left transition-all ${isGM ? 'bg-indigo-600/10 border-indigo-500/50 text-indigo-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                                >
+                                    <div className="font-semibold text-sm mb-1">Manager</div>
+                                    <div className="text-[10px] opacity-70">Creating a hotel</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Hotel Code (Only for Staff) */}
+                        {!isGM && (
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Hotel className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                                    <Input
+                                        value={hotelCode}
+                                        onChange={(e) => setHotelCode(e.target.value.toUpperCase())}
+                                        className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600 uppercase tracking-widest font-mono"
+                                        placeholder="HOTEL CODE (e.g. RELAY-X)"
+                                        maxLength={10}
+                                        required
+                                    />
+                                </div>
+                                <p className="text-[10px] text-zinc-500 ml-1">
+                                    Ask your manager for the hotel code.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Standard Fields */}
+                        <div className="space-y-3">
                             <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <User className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
                                 <Input
-                                    placeholder="John Doe"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="pl-11"
+                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    placeholder={t('auth.fullName')}
                                     required
                                 />
                             </div>
-                        </div>
 
-                        {/* Email */}
-                        <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">{t('auth.email')}</label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
                                 <Input
                                     type="email"
-                                    placeholder="your@email.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-11"
+                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    placeholder={t('auth.email')}
                                     required
                                 />
                             </div>
-                        </div>
 
-                        {/* Password */}
-                        <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">{t('auth.password')}</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
                                 <Input
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="••••••••"
+                                    type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-11 pr-11"
+                                    className="pl-9 pr-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    placeholder={t('auth.password')}
                                     required
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                                    className="absolute right-3 top-2.5 text-zinc-500 hover:text-white"
                                 >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
-                        </div>
 
-                        {/* Confirm Password */}
-                        <div className="space-y-1">
-                            <label className="text-sm text-zinc-400 ml-1">{t('common.confirm')} {t('auth.password')}</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
                                 <Input
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="••••••••"
+                                    type={showPassword ? "text" : "password"}
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="pl-11"
+                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    placeholder={t('auth.confirmPassword')}
                                     required
                                 />
                             </div>
                         </div>
 
-                        {/* Role Selection */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-zinc-400 ml-1">{t('auth.roleLabel')}</label>
-                            <div className="grid gap-2">
+                        {/* Staff Role Selection (Only if not GM) */}
+                        {!isGM && (
+                            <div className="grid grid-cols-2 gap-2 mt-4">
                                 {roles.map((r) => (
-                                    <button
+                                    <div
                                         key={r.value}
-                                        type="button"
                                         onClick={() => setRole(r.value)}
-                                        className={`p-3 rounded-lg border text-left transition-all ${role === r.value
-                                            ? 'border-indigo-500 bg-indigo-500/10'
-                                            : 'border-zinc-700 hover:border-zinc-600'
+                                        className={`cursor-pointer p-3 rounded-xl border transition-all ${role === r.value
+                                            ? 'bg-zinc-800 border-zinc-700'
+                                            : 'bg-black/20 border-zinc-800/50 hover:bg-zinc-900'
                                             }`}
                                     >
-                                        <div className="font-medium text-sm">{r.label}</div>
-                                        <div className="text-xs text-zinc-500">{r.desc}</div>
-                                    </button>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className={`text-xs font-semibold ${role === r.value ? 'text-white' : 'text-zinc-400'}`}>
+                                                {r.label}
+                                            </span>
+                                            {role === r.value && (
+                                                <motion.div layoutId="check">
+                                                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                                                </motion.div>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] text-zinc-500 leading-tight">
+                                            {r.desc}
+                                        </p>
+                                    </div>
                                 ))}
                             </div>
-                        </div>
+                        )}
 
                         {/* Error */}
                         {error && (
@@ -246,9 +319,9 @@ export function RegisterPage() {
                             )}
                         </Button>
                     </form>
-                </div>
 
-                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-20 bg-indigo-500/20 blur-3xl rounded-full" />
+                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-20 bg-indigo-500/20 blur-3xl rounded-full" />
+                </div>
             </motion.div>
         </div>
     )

@@ -57,5 +57,10 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
         )
     }
 
+    // Redirect to setup if no hotel assigned (and not already on setup)
+    if (!user.hotel_id && location.pathname !== '/setup-hotel') {
+        return <Navigate to="/setup-hotel" replace />
+    }
+
     return <>{children}</>
 }
