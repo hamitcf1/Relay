@@ -15,6 +15,14 @@ import { db } from '@/lib/firebase'
 
 export type SaleType = 'tour' | 'transfer' | 'laundry'
 export type PaymentStatus = 'pending' | 'partial' | 'paid'
+export type Currency = 'EUR' | 'TRY' | 'USD' | 'GBP'
+
+export interface PaymentEntry {
+    amount: number
+    currency: Currency
+    timestamp: Date
+    method?: string
+}
 
 export interface Sale {
     id: string
@@ -26,9 +34,10 @@ export interface Sale {
     date: Date                // Date of service
     total_price: number
     collected_amount: number
-    currency: 'EUR' | 'TRY'
+    currency: Currency
     payment_status: PaymentStatus
     notes?: string
+    payments?: PaymentEntry[]
     created_by: string
     created_by_name: string
     created_at: Date
@@ -46,7 +55,7 @@ interface SalesActions {
     addSale: (hotelId: string, saleData: Omit<Sale, 'id' | 'created_at' | 'payment_status'>) => Promise<string>
     updateSale: (hotelId: string, saleId: string, updates: Partial<Sale>) => Promise<void>
     deleteSale: (hotelId: string, saleId: string) => Promise<void>
-    collectPayment: (hotelId: string, saleId: string, amount: number) => Promise<void>
+    collectPayment: (hotelId: string, saleId: string, amount: number, currency?: Currency) => Promise<void>
     getDueSales: () => Sale[]
     getSalesByType: (type: SaleType) => Sale[]
 }
@@ -91,7 +100,13 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     created_by: data.created_by,
                     created_by_name: data.created_by_name || 'Unknown',
                     created_at: convertTimestamp(data.created_at),
-                    calendar_event_id: data.calendar_event_id
+                    calendar_event_id: data.calendar_event_id,
+                    payments: data.payments?.map((p: any) => ({
+                        amount: p.amount,
+                        currency: p.currency,
+                        timestamp: convertTimestamp(p.timestamp),
+                        method: p.method
+                    })) || []
                 }
             })
 
@@ -150,20 +165,52 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         await deleteDoc(saleRef)
     },
 
-    collectPayment: async (hotelId, saleId, amount) => {
+    collectPayment: async (hotelId: string, saleId: string, amount: number, currency?: Currency) => {
         const sale = get().sales.find(s => s.id === saleId)
         if (!sale) return
 
-        const newCollected = sale.collected_amount + amount
+        const paymentCurrency = currency || sale.currency
+        const newTotalCollected = sale.collected_amount + (paymentCurrency === sale.currency ? amount : 0)
+        // Note: Simple logic for now, we only increment collected_amount if it's in the same currency.
+        // In a real app we might convert. But the requirement is to track them.
+
+        const newPayment: PaymentEntry = {
+            amount,
+            currency: paymentCurrency,
+            timestamp: new Date()
+        }
+
+        const payments = [...(sale.payments || []), newPayment]
+
+        // Recalculate status - for simplicity we assume paid if total_collected >= total_price
+        // This only works if all payments are in the same currency. 
+        // If not, we might need manual control or exchange rates.
         const paymentStatus: PaymentStatus =
-            newCollected >= sale.total_price ? 'paid' :
-                newCollected > 0 ? 'partial' : 'pending'
+            newTotalCollected >= sale.total_price ? 'paid' :
+                newTotalCollected > 0 ? 'partial' : 'pending'
 
         const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
         await updateDoc(saleRef, {
-            collected_amount: newCollected,
-            payment_status: paymentStatus
+            collected_amount: newTotalCollected,
+            payment_status: paymentStatus,
+            payments: payments.map(p => ({
+                ...p,
+                timestamp: Timestamp.fromDate(p.timestamp)
+            }))
         })
+
+        // Sync to calendar
+        if (sale.calendar_event_id) {
+            try {
+                const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
+                await updateDoc(eventRef, {
+                    collected_amount: newTotalCollected,
+                    updated_at: serverTimestamp()
+                })
+            } catch (error) {
+                console.error('Error updating calendar event for sale:', error)
+            }
+        }
     },
 
     getDueSales: () => {

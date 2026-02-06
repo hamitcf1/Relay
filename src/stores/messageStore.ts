@@ -68,7 +68,8 @@ export const useMessageStore = create<MessageStore>((set) => ({
             const filtered = allMessages.filter(m =>
                 m.sender_id === userId ||
                 m.receiver_id === userId ||
-                m.receiver_id === 'gm'
+                m.receiver_id === 'gm' ||
+                m.receiver_id === 'all'
             )
 
             // Reverse to show oldest first (chronological order)

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn, formatDisplayDate } from '@/lib/utils'
-import { useSalesStore, saleTypeInfo, paymentStatusInfo, type SaleType, type Sale } from '@/stores/salesStore'
+import { useSalesStore, saleTypeInfo, paymentStatusInfo, type SaleType, type Sale, type Currency } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
 import {
     Select,
@@ -44,6 +44,7 @@ export function SalesPanel() {
         pax: 1,
         date: format(new Date(), 'yyyy-MM-dd'),
         total_price: '',
+        currency: 'EUR' as Currency,
         collected_amount: '0',
         notes: ''
     })
@@ -68,6 +69,7 @@ export function SalesPanel() {
             pax: 1,
             date: format(new Date(), 'yyyy-MM-dd'),
             total_price: '',
+            currency: 'EUR',
             collected_amount: '0',
             notes: ''
         })
@@ -91,7 +93,7 @@ export function SalesPanel() {
             date: saleDate,
             total_price: totalPrice,
             collected_amount: collectedAmount,
-            currency: 'EUR',
+            currency: formData.currency,
             notes: formData.notes.trim() || undefined,
             created_by: user.uid,
             created_by_name: user.name || 'Unknown'
@@ -107,6 +109,7 @@ export function SalesPanel() {
             room_number: formData.room_number,
             total_price: totalPrice,
             collected_amount: collectedAmount,
+            currency: formData.currency,
             created_by: user.uid,
             created_by_name: user.name || 'Unknown'
         })
@@ -114,12 +117,12 @@ export function SalesPanel() {
         resetForm()
     }
 
-    const handleCollect = async (sale: Sale) => {
+    const handleCollect = async (sale: Sale, currency: Currency) => {
         if (!hotel?.id || !collectAmount) return
         const amount = parseFloat(collectAmount)
         if (isNaN(amount) || amount <= 0) return
 
-        await collectPayment(hotel.id, sale.id, amount)
+        await collectPayment(hotel.id, sale.id, amount, currency)
         setCollectingId(null)
         setCollectAmount('')
     }
@@ -218,7 +221,7 @@ export function SalesPanel() {
                                                     <SelectValue placeholder="Tur Seçin" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {tours.filter(t => t.is_active).map(t => (
+                                                    {[...tours].filter(t => t.is_active).sort((a, b) => a.name.localeCompare(b.name)).map(t => (
                                                         <SelectItem key={t.id} value={t.name}>
                                                             {t.name} ({t.adult_price}€)
                                                         </SelectItem>
@@ -296,7 +299,25 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Alınan Ödeme (€)</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">PB</label>
+                                        <Select
+                                            value={formData.currency}
+                                            onValueChange={(value: Currency) => setFormData(p => ({ ...p, currency: value }))}
+                                        >
+                                            <SelectTrigger className="bg-zinc-950 border-zinc-700">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="EUR">EUR</SelectItem>
+                                                <SelectItem value="TRY">TRY</SelectItem>
+                                                <SelectItem value="USD">USD</SelectItem>
+                                                <SelectItem value="GBP">GBP</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Alınan Ödeme</label>
                                         <Input
                                             type="number"
                                             value={formData.collected_amount}
@@ -393,63 +414,78 @@ export function SalesPanel() {
                                                         'ml-1 font-bold',
                                                         sale.payment_status === 'paid' ? 'text-emerald-400' : 'text-amber-400'
                                                     )}>
-                                                        {sale.collected_amount} / {sale.total_price} €
+                                                        {sale.collected_amount} / {sale.total_price} {sale.currency}
                                                     </span>
                                                 </div>
 
-                                                {remaining > 0 && (
-                                                    <Badge variant="outline" className="text-[9px] border-rose-500/30 text-rose-400">
-                                                        <AlertCircle className="w-3 h-3 mr-1" />
-                                                        Kalan: {remaining}€
-                                                    </Badge>
+                                                {sale.payments && sale.payments.length > 0 && (
+                                                    <div className="flex gap-1 flex-wrap">
+                                                        {sale.payments.map((p, idx) => (
+                                                            <Badge key={idx} variant="outline" className="text-[8px] py-0 px-1 border-zinc-800 text-zinc-500">
+                                                                {p.amount}{p.currency}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
                                                 )}
                                             </div>
-                                        </div>
 
-                                        <div className="flex flex-col gap-1">
-                                            {sale.payment_status !== 'paid' && (
-                                                collectingId === sale.id ? (
-                                                    <div className="flex items-center gap-1">
-                                                        <Input
-                                                            type="number"
-                                                            value={collectAmount}
-                                                            onChange={e => setCollectAmount(e.target.value)}
-                                                            className="w-16 h-7 text-xs bg-zinc-950 border-zinc-700"
-                                                            placeholder="€"
-                                                            autoFocus
-                                                        />
-                                                        <button
-                                                            onClick={() => handleCollect(sale)}
-                                                            className="p-1 text-emerald-500 hover:text-emerald-400"
-                                                        >
-                                                            <Check className="w-4 h-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => { setCollectingId(null); setCollectAmount('') }}
-                                                            className="p-1 text-zinc-500"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => setCollectingId(sale.id)}
-                                                        className="h-7 text-[10px] border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
-                                                    >
-                                                        <CreditCard className="w-3 h-3 mr-1" />
-                                                        Tahsil Et
-                                                    </Button>
-                                                )
+                                            {remaining > 0 && (
+                                                <Badge variant="outline" className="text-[9px] border-rose-500/30 text-rose-400">
+                                                    <AlertCircle className="w-3 h-3 mr-1" />
+                                                    Kalan: {remaining}€
+                                                </Badge>
                                             )}
-                                            <button
-                                                onClick={() => handleDelete(sale.id)}
-                                                className="text-[10px] text-zinc-600 hover:text-rose-400 transition-colors"
-                                            >
-                                                Sil
-                                            </button>
                                         </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1">
+                                        {sale.payment_status !== 'paid' && (
+                                            collectingId === sale.id ? (
+                                                <div className="flex items-center gap-1">
+                                                    <Input
+                                                        type="number"
+                                                        value={collectAmount}
+                                                        onChange={e => setCollectAmount(e.target.value)}
+                                                        className="w-16 h-7 text-xs bg-zinc-950 border-zinc-700"
+                                                        placeholder={sale.currency}
+                                                        autoFocus
+                                                    />
+                                                    <Select defaultValue={sale.currency} onValueChange={(val: Currency) => handleCollect(sale, val)}>
+                                                        <SelectTrigger className="w-16 h-7 text-[10px] bg-zinc-950 border-zinc-700">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="EUR">EUR</SelectItem>
+                                                            <SelectItem value="TRY">TRY</SelectItem>
+                                                            <SelectItem value="USD">USD</SelectItem>
+                                                            <SelectItem value="GBP">GBP</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <button
+                                                        onClick={() => { setCollectingId(null); setCollectAmount('') }}
+                                                        className="p-1 text-zinc-500"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setCollectingId(sale.id)}
+                                                    className="h-7 text-[10px] border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                                                >
+                                                    <CreditCard className="w-3 h-3 mr-1" />
+                                                    Tahsil Et
+                                                </Button>
+                                            )
+                                        )}
+                                        <button
+                                            onClick={() => handleDelete(sale.id)}
+                                            className="text-[10px] text-zinc-600 hover:text-rose-400 transition-colors"
+                                        >
+                                            Sil
+                                        </button>
                                     </div>
                                 </motion.div>
                             )

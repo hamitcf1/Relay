@@ -13,7 +13,7 @@ interface HotelActions {
     loadHotel: (hotelId: string) => Promise<void>
     subscribeToHotel: (hotelId: string) => () => void
     createHotelIfNotExists: (hotelId: string, info: HotelInfo) => Promise<void>
-    updateStaffOrder: (hotelId: string, order: string[]) => Promise<void>
+    updateHotelSettings: (hotelId: string, settings: Partial<HotelSettings>) => Promise<void>
 }
 
 type HotelStore = HotelState & HotelActions
@@ -121,16 +121,14 @@ export const useHotelStore = create<HotelStore>((set) => ({
             throw error
         }
     },
-    updateStaffOrder: async (hotelId: string, order: string[]) => {
+    updateHotelSettings: async (hotelId: string, settings: Partial<HotelSettings>) => {
         try {
             const hotelRef = doc(db, 'hotels', hotelId)
             await setDoc(hotelRef, {
-                settings: {
-                    staff_order: order
-                }
+                settings
             }, { merge: true })
         } catch (error) {
-            console.error('Error updating staff order:', error)
+            console.error('Error updating hotel settings:', error)
             throw error
         }
     },

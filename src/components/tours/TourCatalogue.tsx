@@ -234,7 +234,7 @@ export function TourCatalogue() {
                         {isGM && <Button variant="link" className="text-indigo-400 mt-2" onClick={() => setIsAdding(true)}>Create the first one</Button>}
                     </div>
                 ) : (
-                    tours.map(tour => (
+                    [...tours].sort((a, b) => a.name.localeCompare(b.name)).map(tour => (
                         <motion.div key={tour.id} layout>
                             <Card className="bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 transition-all overflow-hidden flex flex-col h-full group">
                                 <CardHeader className="pb-2">

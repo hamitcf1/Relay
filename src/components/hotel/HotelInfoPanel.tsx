@@ -9,13 +9,19 @@ import {
     Save,
     Loader2,
     Edit2,
-    X
+    X,
+    Lock,
+    LockOpen,
+    ShieldCheck
 } from 'lucide-react'
+import { useAuthStore } from '@/stores/authStore'
+import { useHotelStore } from '@/stores/hotelStore'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { useLanguageStore } from '@/stores/languageStore'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 
@@ -51,6 +57,12 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     const [saving, setSaving] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [editInfo, setEditInfo] = useState<HotelInfoData>(defaultInfo)
+    const [isVaultUnlocked, setIsVaultUnlocked] = useState(false)
+    const [passwordInput, setPasswordInput] = useState('')
+
+    const { user } = useAuthStore()
+    const { hotel, updateHotelSettings } = useHotelStore()
+    const isGM = user?.role === 'gm'
 
     // Fetch hotel info
     useEffect(() => {
@@ -95,6 +107,47 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
             console.error('Error saving hotel info:', error)
         } finally {
             setSaving(false)
+        }
+    }
+    const handleSaveSecret = async (secretData: any) => {
+        if (!hotel?.id) return
+        setSaving(true)
+        try {
+            await updateHotelSettings(hotel.id, {
+                secret_info: {
+                    ...hotel.settings.secret_info,
+                    ...secretData
+                }
+            })
+        } catch (error) {
+            console.error('Error saving secret info:', error)
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleSetSafePassword = async () => {
+        if (!hotel?.id || !passwordInput) return
+        setSaving(true)
+        try {
+            await updateHotelSettings(hotel.id, {
+                safe_password: passwordInput
+            })
+            setPasswordInput('')
+            setIsVaultUnlocked(true)
+        } catch (error) {
+            console.error('Error setting safe password:', error)
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleUnlock = () => {
+        if (passwordInput === hotel?.settings?.safe_password) {
+            setIsVaultUnlocked(true)
+            setPasswordInput('')
+        } else {
+            alert('Yanlış şifre!')
         }
     }
 
@@ -253,6 +306,110 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 {t('hotel.noInfo')}{canEdit && ` - ${t('hotel.clickEdit')}`}
                             </p>
                         )}
+
+                        {/* Secret Info Section */}
+                        <div className="mt-6 pt-4 border-t border-zinc-800">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                                    <h3 className="text-sm font-semibold text-white">Gizli Bilgiler (KBS / Acente)</h3>
+                                </div>
+                                {isVaultUnlocked ? (
+                                    <Button size="sm" variant="ghost" onClick={() => setIsVaultUnlocked(false)}>
+                                        <Lock className="w-3 h-3 mr-1" /> Kilitle
+                                    </Button>
+                                ) : (
+                                    <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-[10px]">
+                                        Şifreli Bölüm
+                                    </Badge>
+                                )}
+                            </div>
+
+                            {!hotel?.settings?.safe_password ? (
+                                isGM ? (
+                                    <div className="p-4 bg-indigo-500/5 rounded-xl border border-indigo-500/20 space-y-3">
+                                        <p className="text-xs text-zinc-400">Henüz kasa şifresi belirlenmemiş. Gözetmen olarak şifre belirleyerek bu alanı kullanmaya başlayabilirsiniz.</p>
+                                        <div className="flex gap-2">
+                                            <Input
+                                                type="password"
+                                                placeholder="Güvenli Kasa Şifresi"
+                                                value={passwordInput}
+                                                onChange={e => setPasswordInput(e.target.value)}
+                                                className="h-8 bg-zinc-950 border-zinc-800 text-xs"
+                                            />
+                                            <Button size="sm" onClick={handleSetSafePassword} disabled={saving}>
+                                                Belirle
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-zinc-500 italic">Gözetmen henüz kasa şifresi belirlememiş.</p>
+                                )
+                            ) : !isVaultUnlocked ? (
+                                <div className="flex gap-2">
+                                    <Input
+                                        type="password"
+                                        placeholder="Kasa Şifresi"
+                                        value={passwordInput}
+                                        onChange={e => setPasswordInput(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleUnlock()}
+                                        className="h-9 bg-zinc-950 border-zinc-800"
+                                    />
+                                    <Button onClick={handleUnlock}>
+                                        <LockOpen className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 gap-3">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">Acente Girişleri (Extranet)</label>
+                                            <textarea
+                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
+                                                defaultValue={hotel.settings.secret_info?.agency_logins}
+                                                onBlur={e => handleSaveSecret({ agency_logins: e.target.value })}
+                                                placeholder="Bcom: user/pass&#10;Expedia: user/pass..."
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">KBS Giriş Bilgileri</label>
+                                            <textarea
+                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
+                                                defaultValue={hotel.settings.secret_info?.kbs_logins}
+                                                onBlur={e => handleSaveSecret({ kbs_logins: e.target.value })}
+                                                placeholder="Tesis Kodu: XXXXX&#10;Şifre: XXXXX..."
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">Diğer Kasa Bilgileri</label>
+                                            <textarea
+                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
+                                                defaultValue={hotel.settings.secret_info?.safe_info}
+                                                onBlur={e => handleSaveSecret({ safe_info: e.target.value })}
+                                                placeholder="Kasa kodu, önemli anahtar yerleri vb..."
+                                            />
+                                        </div>
+                                    </div>
+                                    {isGM && (
+                                        <div className="pt-2 flex justify-end">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-6 text-[10px] text-zinc-600 hover:text-rose-400"
+                                                onClick={() => {
+                                                    if (confirm('Şifreyi sıfırlamak istiyor musunuz?')) {
+                                                        updateHotelSettings(hotel.id, { safe_password: '' })
+                                                        setIsVaultUnlocked(false)
+                                                    }
+                                                }}
+                                            >
+                                                Şifreyi Sıfırla
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

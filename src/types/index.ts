@@ -52,6 +52,12 @@ export interface HotelSettings {
     kbs_time: string
     check_agency_intervals: number[]
     staff_order?: string[]
+    safe_password?: string
+    secret_info?: {
+        agency_logins?: string
+        kbs_logins?: string
+        safe_info?: string
+    }
 }
 
 export interface Hotel {

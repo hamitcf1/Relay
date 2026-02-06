@@ -140,7 +140,8 @@ export function MessagingPanel() {
                     type: 'announcement',
                     title: `📢 ${user.name}`,
                     content: content,
-                    target_role: 'all'
+                    target_role: 'all',
+                    link: '/operations?chat=all'
                 })
             } else {
                 await addNotification(hotel.id, {
