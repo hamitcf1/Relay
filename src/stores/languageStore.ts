@@ -407,6 +407,7 @@ type Translations = {
     'hotel.secure.agency': string
     'hotel.secure.other': string
     'hotel.secure.kbs': string
+    'hotel.secure.safeInfo': string
     'hotel.settings.fixturePrices': string
     'fixture.hand_towel': string
     'fixture.bath_towel': string
@@ -845,6 +846,7 @@ const translations: Record<Language, Translations> = {
         'hotel.secure.agency': 'Agency Logins (Extranet)',
         'hotel.secure.other': 'Other Safe Info',
         'hotel.secure.kbs': 'KBS Login Info',
+        'hotel.secure.safeInfo': 'Safe & Key Info',
         'hotel.settings.fixturePrices': 'Fixture Damage Prices',
         'fixture.hand_towel': 'Hand Towel',
         'fixture.bath_towel': 'Bath Towel',
@@ -1210,6 +1212,7 @@ const translations: Record<Language, Translations> = {
         'hotel.secure.agency': 'Acente Girişleri (Extranet)',
         'hotel.secure.other': 'Diğer Kasa Bilgileri',
         'hotel.secure.kbs': 'KBS Giriş Bilgileri',
+        'hotel.secure.safeInfo': 'Kasa ve Anahtar Bilgileri',
         'hotel.settings.fixturePrices': 'Demirbaş Hasar Fiyatları',
         'fixture.hand_towel': 'El Havlusu',
         'fixture.bath_towel': 'Banyo Havlusu',

@@ -59,6 +59,8 @@ export interface HotelSettings {
         agency_logins?: string
         kbs_logins?: string
         safe_info?: string
+        openai_key?: string
+        anthropic_key?: string
     }
     fixture_prices?: Record<string, number>
     minibar_prices?: Record<string, number>

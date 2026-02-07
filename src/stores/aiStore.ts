@@ -2,9 +2,17 @@ import { create } from 'zustand'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Models requested by the user
+export type AIProvider = 'google' | 'openai' | 'anthropic'
+
 export type AIModelType =
-    | 'gemini-2.5-flash-lite'
     | 'gemini-2.5-flash'
+    | 'gemini-3-flash'
+    | 'gpt-5'
+    | 'gpt-5-mini'
+    | 'o3'
+    | 'o3-mini'
+    | 'claude-4.5-sonnet'
+    | 'claude-4.5-haiku'
     | 'gemma-3-27b'
     | 'gemma-3-12b'
     | 'gemma-3-4b'
@@ -23,14 +31,19 @@ interface AIState {
 }
 
 interface AIActions {
-    generate: (prompt: string, modelType: AIModelType, task: AITaskType, context?: string) => Promise<string | null>
+    generate: (
+        prompt: string,
+        modelType: AIModelType,
+        task: AITaskType,
+        context?: string
+    ) => Promise<string | null>
     clearResult: () => void
 }
 
 type AIStore = AIState & AIActions
 
 // API Keys from .env
-const API_KEYS = [
+const GEMINI_KEYS = [
     import.meta.env.VITE_GEMINI_API_KEY_1,
     import.meta.env.VITE_GEMINI_API_KEY_2,
     import.meta.env.VITE_GEMINI_API_KEY_3,
@@ -41,6 +54,9 @@ const API_KEYS = [
     import.meta.env.VITE_GEMINI_API_KEY_8,
     import.meta.env.VITE_GEMINI_API_KEY_9,
 ].filter(Boolean)
+
+const OPENAI_SYSTEM_KEY = import.meta.env.VITE_OPENAI_API_KEY
+const ANTHROPIC_SYSTEM_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY
 
 // Task-specific system prompts
 const SYSTEM_PROMPTS: Record<AITaskType, string> = {
@@ -61,67 +77,112 @@ export const useAIStore = create<AIStore>((set, get) => ({
 
     generate: async (prompt, modelType, task, context?: string) => {
         const { currentKeyIndex } = get()
-
-        if (API_KEYS.length === 0) {
-            set({ error: "No API keys configured. Please add VITE_GEMINI_API_KEY_1...9 to .env" })
-            return null
-        }
-
         set({ loading: true, error: null })
 
         try {
-            // Pick current key
-            const apiKey = API_KEYS[currentKeyIndex]
-            const genAI = new GoogleGenerativeAI(apiKey)
-
-            // Map our types to actual Gemini model names
-            let officialModel = "gemini-1.5-flash" // Safe default
-
-            if (modelType.includes('flash-lite')) {
-                officialModel = "gemini-2.5-flash-lite"
-            } else if (modelType.includes('flash')) {
-                officialModel = "gemini-2.5-flash"
-            } else if (modelType.includes('gemma')) {
-                // Map Gemma 3 to Gemma 2 if 3 is not yet available in the SDK
-                officialModel = modelType.replace('gemma-3', 'gemma-2')
-                if (!officialModel.endsWith('-it')) officialModel += "-it"
-            }
-
             let systemInstruction = SYSTEM_PROMPTS[task]
-
-            // Add Context Injection
             if (context) {
                 systemInstruction += `\n\n[HOTEL KNOWLEDGE BASE]\nUse the following information to answer factual questions about the hotel:\n${context}`
             }
-
-            // Add Translation Rule
             systemInstruction += `\n\n[TRANSLATION RULE]\nIf you generate content in any language OTHER than Turkish, you MUST append a Turkish translation at the very bottom.\nUse this format:\n\n[Original Content]\n\n--- TÜRKÇE ÇEVİRİSİ ---\n[Turkish Translation]`
 
-            const model = genAI.getGenerativeModel({
-                model: officialModel,
-                systemInstruction: systemInstruction
-            })
+            let text = ""
 
-            const result = await model.generateContent(prompt)
-            const text = result.response.text()
+            // OpenAI / Reasoning Models
+            if (modelType.startsWith('gpt-') || modelType.startsWith('o')) {
+                const apiKey = OPENAI_SYSTEM_KEY
+                if (!apiKey) throw new Error("OpenAI API Key not configured in .env")
 
-            // Rotate key for next call
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: modelType,
+                        messages: [
+                            { role: 'system', content: systemInstruction },
+                            { role: 'user', content: prompt }
+                        ],
+                        temperature: 0.7
+                    })
+                })
+
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    throw new Error(errorData.error?.message || "OpenAI API request failed")
+                }
+
+                const data = await response.json()
+                text = data.choices[0].message.content
+            }
+            // Anthropic Models
+            else if (modelType.startsWith('claude-')) {
+                const apiKey = ANTHROPIC_SYSTEM_KEY
+                if (!apiKey) throw new Error("Anthropic API Key not configured in .env")
+
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01',
+                        'dangerously-allow-browser': 'true' // For client-side requests
+                    },
+                    body: JSON.stringify({
+                        model: modelType,
+                        max_tokens: 4096,
+                        system: systemInstruction,
+                        messages: [{ role: 'user', content: prompt }]
+                    })
+                })
+
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    throw new Error(errorData.error?.message || "Anthropic API request failed")
+                }
+
+                const data = await response.json()
+                text = data.content[0].text
+            }
+            // Google Gemini / Gemma Models
+            else {
+                if (GEMINI_KEYS.length === 0) throw new Error("Gemini API keys not configured in .env")
+                const apiKey = GEMINI_KEYS[currentKeyIndex % GEMINI_KEYS.length]
+                const genAI = new GoogleGenerativeAI(apiKey)
+
+                let officialModel = "gemini-1.5-flash"
+                if (modelType.includes('gemini-3')) officialModel = "gemini-3-flash"
+                else if (modelType.includes('gemini-2.5')) officialModel = "gemini-2.5-flash"
+                else if (modelType.startsWith('gemma-3')) {
+                    // Map to corresponding gemma-3 model
+                    officialModel = modelType
+                }
+
+                const model = genAI.getGenerativeModel({
+                    model: officialModel,
+                    systemInstruction: systemInstruction
+                })
+
+                const result = await model.generateContent(prompt)
+                text = result.response.text()
+            }
+
             set({
                 result: text,
                 loading: false,
                 lastUsedModel: modelType,
-                currentKeyIndex: (currentKeyIndex + 1) % API_KEYS.length
+                currentKeyIndex: (currentKeyIndex + 1) % (GEMINI_KEYS.length || 1)
             })
 
             return text
         } catch (error: any) {
             console.error('AI Generation Error:', error)
-
-            // Try next key if this one fails (quota?)
             set({
                 error: error.message,
                 loading: false,
-                currentKeyIndex: (currentKeyIndex + 1) % API_KEYS.length
+                currentKeyIndex: (currentKeyIndex + 1) % (GEMINI_KEYS.length || 1)
             })
             return null
         }

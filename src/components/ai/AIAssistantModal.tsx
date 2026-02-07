@@ -45,20 +45,26 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
     ] as const, [t])
 
     const MODELLS = useMemo(() => [
-        { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', desc: 'Fastest' },
-        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: t('ai.mode.quota') },
-        { id: 'gemma-3-27b', name: 'Gemma 3 27B', desc: 'Largest' },
-        { id: 'gemma-3-12b', name: 'Gemma 3 12B', desc: 'Large' },
-        { id: 'gemma-3-4b', name: 'Gemma 3 4B', desc: 'Medium' },
-        { id: 'gemma-3-2b', name: 'Gemma 3 2B', desc: 'Small' },
-        { id: 'gemma-3-1b', name: 'Gemma 3 1B', desc: 'Smallest' },
+        { id: 'gemini-3-flash', name: 'Gemini 3 Flash', desc: 'Frontier Speed (Google)' },
+        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: 'Balanced (Google)' },
+        { id: 'gpt-5', name: 'GPT-5', desc: 'Next Frontier (OpenAI)' },
+        { id: 'gpt-5-mini', name: 'GPT-5 Mini', desc: 'Fast & Smart (OpenAI)' },
+        { id: 'o3', name: 'OpenAI o3', desc: 'Advanced Reasoning (OpenAI)' },
+        { id: 'o3-mini', name: 'OpenAI o3-mini', desc: 'Fast Reasoning (OpenAI)' },
+        { id: 'claude-4.5-sonnet', name: 'Claude 4.5 Sonnet', desc: 'Very Intelligent (Anthropic)' },
+        { id: 'claude-4.5-haiku', name: 'Claude 4.5 Haiku', desc: 'Balanced (Anthropic)' },
+        { id: 'gemma-3-27b', name: 'Gemma 3 27B', desc: 'Large Open Model (Google)' },
+        { id: 'gemma-3-12b', name: 'Gemma 3 12B', desc: 'Medium Open Model (Google)' },
+        { id: 'gemma-3-4b', name: 'Gemma 3 4B', desc: 'Small Open Model (Google)' },
+        { id: 'gemma-3-2b', name: 'Gemma 3 2B', desc: 'Tiny Open Model (Google)' },
+        { id: 'gemma-3-1b', name: 'Gemma 3 1B', desc: 'Micro Open Model (Google)' },
     ] as const, [t])
 
 
 
     const [task, setTask] = useState<AITaskType>(initialTask)
     const [prompt, setPrompt] = useState(initialPrompt)
-    const [selectedModel, setSelectedModel] = useState<AIModelType>('gemini-2.5-flash')
+    const [selectedModel, setSelectedModel] = useState<AIModelType>('gemini-3-flash')
     const [copied, setCopied] = useState(false)
     const [showModels, setShowModels] = useState(false)
 
