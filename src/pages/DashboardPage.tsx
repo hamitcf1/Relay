@@ -55,7 +55,11 @@ import { FeedbackSection } from '@/components/feedback/FeedbackSection'
 import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
 import { TourCatalogue } from '@/components/tours/TourCatalogue'
 import { SalesPanel } from '@/components/sales/SalesPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard } from 'lucide-react'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Plus } from 'lucide-react'
+import { StickyBoard } from '@/components/logs/StickyBoard'
+import { LogFeed } from '@/components/logs/LogFeed'
+import { useLogsStore } from '@/stores/logsStore'
+import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 
 export function DashboardPage() {
     const navigate = useNavigate()
@@ -91,11 +95,17 @@ export function DashboardPage() {
 
     // Subscribe to sales for dashboard visibility
     const { subscribeToSales } = useSalesStore()
+    const { logs, loading: logsLoading, subscribeToLogs, togglePin, updateLogStatus, archiveLog } = useLogsStore()
+
     useEffect(() => {
         if (!hotel?.id) return
-        const unsub = subscribeToSales(hotel.id)
-        return () => unsub()
-    }, [hotel?.id, subscribeToSales])
+        const unsubSales = subscribeToSales(hotel.id)
+        const unsubLogs = subscribeToLogs()
+        return () => {
+            unsubSales()
+            unsubLogs()
+        }
+    }, [hotel?.id, subscribeToSales, subscribeToLogs])
 
     // Calculate compliance percentage
     const compliancePercentage = useMemo(() => {
@@ -179,6 +189,7 @@ export function DashboardPage() {
                 onClose={() => setIsAIModalOpen(false)}
                 initialTask={aiInitialTask}
             />
+            <ComplianceAlert />
             {/* Header */}
             <header className="h-16 border-b border-zinc-800 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
                 <div className="flex items-center gap-8">
@@ -348,7 +359,31 @@ export function DashboardPage() {
                                     <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
                                 </div>
 
-                                {/* 2. Roster (Weekly Program) */}
+                                {/* 2. Sticky Board & Logs */}
+                                <div className="space-y-4">
+                                    <StickyBoard />
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="text-sm font-semibold text-zinc-400">Activity Feed</h3>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => { /* Open log modal? */ }}
+                                            className="h-7 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10"
+                                        >
+                                            <Plus className="w-3.5 h-3.5 mr-1" />
+                                            New Log
+                                        </Button>
+                                    </div>
+                                    <LogFeed
+                                        logs={logs}
+                                        loading={logsLoading}
+                                        onTogglePin={(id, val) => togglePin(id, val)}
+                                        onResolve={(id) => updateLogStatus(id, 'resolved')}
+                                        onArchive={(id) => archiveLog(id)}
+                                    />
+                                </div>
+
+                                {/* 3. Roster (Weekly Program) */}
                                 {(user?.role === 'gm' || user?.role === 'receptionist') && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}

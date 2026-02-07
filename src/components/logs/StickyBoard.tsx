@@ -1,65 +1,52 @@
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Pin } from 'lucide-react'
+import { useLogsStore } from '@/stores/logsStore'
 import { LogCard } from './LogCard'
-import type { Log } from '@/types'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useLanguageStore } from '@/stores/languageStore'
 
-interface StickyBoardProps {
-    pinnedLogs: Log[]
-    onTogglePin?: (logId: string, isPinned: boolean) => void
-    onResolve?: (logId: string, currentStatus: string) => void
-    onRoomClick?: (roomNumber: string) => void
-}
-
-export function StickyBoard({ pinnedLogs, onTogglePin, onResolve, onRoomClick }: StickyBoardProps) {
+export function StickyBoard() {
+    const { pinnedLogs, togglePin, updateLogStatus, archiveLog } = useLogsStore()
     const { t } = useLanguageStore()
-    if (pinnedLogs.length === 0) {
-        return null
-    }
+
+    if (pinnedLogs.length === 0) return null
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-        >
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-3">
-                <Pin className="w-4 h-4 text-indigo-400" />
-                <h2 className="text-sm font-semibold text-zinc-300">{t('module.stickyBoard')}</h2>
-                <span className="text-xs text-zinc-500">
-                    {t('sticky.pinnedCount', { count: String(pinnedLogs.length) })}
+        <div className="space-y-2">
+            <div className="flex items-center gap-2 text-amber-500 px-1">
+                <Pin className="w-4 h-4" />
+                <h3 className="text-xs font-bold uppercase tracking-wider">{t('log.stickyBoard')}</h3>
+                <span className="text-[10px] text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded-full border border-zinc-800">
+                    {pinnedLogs.length}
                 </span>
             </div>
 
-            {/* Horizontal Scroll Container */}
-            <div className="relative">
-                {/* Gradient fade on edges */}
-                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
-
-                {/* Scrollable content */}
-                <div className="flex gap-4 overflow-x-auto pb-2 px-1 scrollbar-thin">
-                    {pinnedLogs.map((log) => (
-                        <motion.div
-                            key={log.id}
-                            className="flex-shrink-0 w-80"
-                            layout
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                        >
-                            <LogCard
-                                log={log}
-                                onTogglePin={onTogglePin}
-                                onResolve={onResolve}
-                                onRoomClick={onRoomClick}
-                                compact
-                            />
-                        </motion.div>
-                    ))}
+            <ScrollArea className="w-full whitespace-nowrap rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition-colors">
+                <div className="flex gap-4 p-4 min-w-max">
+                    <AnimatePresence mode='popLayout'>
+                        {pinnedLogs.map((log) => (
+                            <motion.div
+                                key={log.id}
+                                layout
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                className="w-[300px] whitespace-normal"
+                            >
+                                <LogCard
+                                    log={log}
+                                    onTogglePin={(id, val) => togglePin(id, val)}
+                                    // Cast status to match LogStatus triggers if needed, but LogCard handles it
+                                    onResolve={(id) => updateLogStatus(id, 'resolved')}
+                                    onArchive={(id) => archiveLog(id)}
+                                    compact // Assuming LogCard might support a compact mode, or we just rely on its responsive design
+                                />
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
-            </div>
-        </motion.div>
+                <ScrollBar orientation="horizontal" className="bg-amber-500/10" />
+            </ScrollArea>
+        </div>
     )
 }

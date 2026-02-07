@@ -342,6 +342,8 @@ export function SalesPanel() {
                                                 <span>{sale.customer_name}</span>
                                                 <span className="text-zinc-600">•</span>
                                                 <span>{formatDisplayDate(sale.date)}</span>
+                                                <span className="text-zinc-600">•</span>
+                                                <span className="text-indigo-300">Sold by: {sale.created_by_name}</span>
                                             </div>
                                         </div>
 

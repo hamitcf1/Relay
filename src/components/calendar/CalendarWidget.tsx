@@ -394,92 +394,101 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                 <div
                                                     key={event.id}
                                                     className={cn(
-                                                        'flex items-center gap-2 p-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50',
-                                                        event.is_completed && 'opacity-50'
+                                                        'group relative flex items-start gap-3 p-3 rounded-xl border transition-all',
+                                                        'glass hover:bg-white/5',
+                                                        event.is_completed ? 'opacity-60 grayscale-[0.5]' : 'border-zinc-700/50'
                                                     )}
                                                 >
                                                     <button
                                                         onClick={() => handleToggleComplete(event.id, event.is_completed)}
                                                         className={cn(
-                                                            'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
+                                                            'mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors',
                                                             event.is_completed
                                                                 ? 'bg-emerald-500 border-emerald-500'
-                                                                : 'border-zinc-600 hover:border-zinc-400'
+                                                                : 'border-zinc-600 group-hover:border-zinc-400'
                                                         )}
                                                     >
                                                         {event.is_completed && <Check className="w-3 h-3 text-white" />}
                                                     </button>
 
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-1.5">
+                                                    <div className="flex-1 min-w-0 space-y-1">
+                                                        <div className="flex items-center gap-2">
                                                             <Badge
                                                                 variant="secondary"
-                                                                className={cn('text-[9px] px-1.5', eventTypeInfo[event.type]?.color)}
+                                                                className={cn('text-[10px] px-1.5 py-0 h-5', eventTypeInfo[event.type]?.color)}
                                                             >
                                                                 {eventTypeInfo[event.type]?.icon}
                                                             </Badge>
                                                             <span className={cn(
-                                                                'text-xs text-zinc-200 truncate',
-                                                                event.is_completed && 'line-through'
+                                                                'text-sm font-medium text-zinc-200 truncate',
+                                                                event.is_completed && 'line-through text-zinc-500'
                                                             )}>
                                                                 {event.title}
                                                             </span>
                                                         </div>
-                                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
+
+                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-400">
                                                             {(event.time || event.room_number) && (
-                                                                <div className="text-[10px] text-zinc-500">
-                                                                    {event.time && <span>{event.time}</span>}
-                                                                    {event.time && event.room_number && <span> • </span>}
-                                                                    {event.room_number && <span>{t('calendar.roomNumber')} {event.room_number}</span>}
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {event.time && <span className="text-zinc-300 bg-zinc-800/50 px-1.5 rounded">{event.time}</span>}
+                                                                    {event.room_number && <span className="font-mono text-zinc-500">#{event.room_number}</span>}
                                                                 </div>
                                                             )}
-                                                            {event.total_price !== null && (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <div className="text-[10px] font-bold text-zinc-400">
-                                                                        {t('calendar.payment')}:
-                                                                        <span className={cn(
-                                                                            "ml-1",
-                                                                            (event.collected_amount || 0) >= (event.total_price || 0)
-                                                                                ? "text-emerald-400"
-                                                                                : "text-amber-400"
-                                                                        )}>
-                                                                            {event.collected_amount || 0} / {event.total_price} €
-                                                                        </span>
-                                                                    </div>
-                                                                    {updatingPaymentId === event.id ? (
-                                                                        <div className="flex items-center gap-1">
-                                                                            <Input
-                                                                                className="h-5 w-14 text-[9px] px-1 bg-zinc-950 border-zinc-700"
-                                                                                value={tempCollected}
-                                                                                onChange={e => setTempCollected(e.target.value)}
-                                                                                autoFocus
-                                                                            />
-                                                                            <button onClick={() => handleUpdatePayment(event.id)} className="text-emerald-500 hover:text-emerald-400">
-                                                                                <Check className="w-3 h-3" />
-                                                                            </button>
-                                                                            <button onClick={() => setUpdatingPaymentId(null)} className="text-zinc-500">
-                                                                                <X className="w-3 h-3" />
-                                                                            </button>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                setUpdatingPaymentId(event.id)
-                                                                                setTempCollected((event.collected_amount || 0).toString())
-                                                                            }}
-                                                                            className="text-[9px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
-                                                                        >
-                                                                            {t('common.update')}
-                                                                        </button>
-                                                                    )}
-                                                                    {(event.total_price - (event.collected_amount || 0)) > 0 && (
-                                                                        <Badge variant="outline" className="text-[8px] h-3 px-1 border-rose-500/30 text-rose-400 lowercase leading-none">
-                                                                            {t('calendar.remaining')}: {event.total_price - (event.collected_amount || 0)} €
-                                                                        </Badge>
-                                                                    )}
-                                                                </div>
+
+                                                            {/* Attribution */}
+                                                            {event.created_by_name && (
+                                                                <span className="text-indigo-400/80">
+                                                                    by {event.created_by_name}
+                                                                </span>
                                                             )}
                                                         </div>
+
+                                                        {event.total_price !== null && (
+                                                            <div className="pt-2 flex items-center gap-2 border-t border-zinc-800/50 mt-2">
+                                                                <div className="text-[11px] font-medium text-zinc-400">
+                                                                    {t('calendar.payment')}:
+                                                                    <span className={cn(
+                                                                        "ml-1.5",
+                                                                        (event.collected_amount || 0) >= (event.total_price || 0)
+                                                                            ? "text-emerald-400"
+                                                                            : "text-amber-400"
+                                                                    )}>
+                                                                        {event.collected_amount || 0} / {event.total_price} €
+                                                                    </span>
+                                                                </div>
+                                                                {updatingPaymentId === event.id ? (
+                                                                    <div className="flex items-center gap-1">
+                                                                        <Input
+                                                                            className="h-5 w-14 text-[9px] px-1 bg-zinc-950 border-zinc-700"
+                                                                            value={tempCollected}
+                                                                            onChange={e => setTempCollected(e.target.value)}
+                                                                            autoFocus
+                                                                        />
+                                                                        <button onClick={() => handleUpdatePayment(event.id)} className="text-emerald-500 hover:text-emerald-400">
+                                                                            <Check className="w-3 h-3" />
+                                                                        </button>
+                                                                        <button onClick={() => setUpdatingPaymentId(null)} className="text-zinc-500">
+                                                                            <X className="w-3 h-3" />
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setUpdatingPaymentId(event.id)
+                                                                            setTempCollected((event.collected_amount || 0).toString())
+                                                                        }}
+                                                                        className="text-[9px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
+                                                                    >
+                                                                        {t('common.update')}
+                                                                    </button>
+                                                                )}
+                                                                {(event.total_price - (event.collected_amount || 0)) > 0 && (
+                                                                    <Badge variant="outline" className="text-[8px] h-3 px-1 border-rose-500/30 text-rose-400 lowercase leading-none">
+                                                                        {t('calendar.remaining')}: {event.total_price - (event.collected_amount || 0)} €
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
 
                                                     <button
@@ -498,6 +507,6 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                     )}
                 </AnimatePresence>
             </div>
-        </CollapsibleCard>
+        </CollapsibleCard >
     )
 }

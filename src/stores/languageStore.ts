@@ -99,6 +99,8 @@ type Translations = {
     'module.offDays': string
     'module.tours': string
     'module.sales': string
+    'log.stickyBoard': string
+    'compliance.kbsLate': string
 
     // Days
     'day.mon': string
@@ -426,6 +428,8 @@ const translations: Record<Language, Translations> = {
         'module.offDays': 'Off-Days',
         'module.tours': 'Tours',
         'module.sales': 'Sales',
+        'log.stickyBoard': 'Sticky Board',
+        'compliance.kbsLate': 'KBS System check is required immediately! Please verify guest identities.',
 
 
 
@@ -968,6 +972,8 @@ const translations: Record<Language, Translations> = {
         'onboarding.localization.title': 'Yerelleştirme',
         'onboarding.localization.desc': 'Türkçe ve İngilizce arasında istediğiniz zaman geçiş yapmak için başlıktaki dünya simgesini kullanın.',
         'onboarding.stepOf': '{total} Adımdan {current}.',
+        'log.stickyBoard': 'Önemli Notlar',
+        'compliance.kbsLate': 'KBS Kontrolü hemen yapılmalıdır! Lütfen misafir kimliklerini doğrulayın.',
     },
 }
 
