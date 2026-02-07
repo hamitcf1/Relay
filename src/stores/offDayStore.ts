@@ -63,7 +63,9 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
                     status: data.status as OffDayStatus,
                     created_at: (data.created_at as Timestamp)?.toDate() || new Date(),
                     processed_at: data.processed_at ? (data.processed_at as Timestamp).toDate() : undefined,
-                    processed_by: data.processed_by
+                    processed_by: data.processed_by,
+                    type: data.type || 'off_day',
+                    shift_name: data.shift_name
                 }
             })
 

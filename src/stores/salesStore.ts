@@ -251,14 +251,22 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             newTotalCollected >= sale.total_price ? 'paid' :
                 newTotalCollected > 0 ? 'partial' : 'pending'
 
+        const sanitizedPayments = payments.map(p => {
+            const entry: any = {
+                amount: p.amount,
+                currency: p.currency,
+                timestamp: Timestamp.fromDate(p.timestamp)
+            }
+            if (p.method) entry.method = p.method
+            if (p.recorded_by) entry.recorded_by = p.recorded_by
+            return entry
+        })
+
         const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
         await updateDoc(saleRef, {
             collected_amount: newTotalCollected,
             payment_status: paymentStatus,
-            payments: payments.map(p => ({
-                ...p,
-                timestamp: Timestamp.fromDate(p.timestamp)
-            }))
+            payments: sanitizedPayments
         })
 
         // Sync to calendar

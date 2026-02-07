@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Calendar as CalendarIcon, Check, X, Clock, Loader2, Send, Plus, Trash2, RefreshCcw } from 'lucide-react'
+import { Calendar as CalendarIcon, Check, X, Clock, Loader2, Send, Plus, Trash2, RefreshCcw, Briefcase } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useOffDayStore } from '@/stores/offDayStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
-import { useCalendarStore } from '@/stores/calendarStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { parseISO } from 'date-fns'
 import { cn, formatDisplayDate } from '@/lib/utils'
 
@@ -16,10 +18,11 @@ export function OffDayScheduler() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
     const { requests, subscribeToRequests, submitRequest, updateRequest, updateRequestStatus, deleteRequest, cancelRequest, loading } = useOffDayStore()
-    const { addEvent } = useCalendarStore()
 
     const [dates, setDates] = useState<string[]>([''])
     const [reason, setReason] = useState('')
+    const [requestType, setRequestType] = useState<'off_day' | 'shift'>('off_day')
+    const [shiftName, setShiftName] = useState('morning')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [submitting, setSubmitting] = useState(false)
 
@@ -42,7 +45,9 @@ export function OffDayScheduler() {
             if (editingId) {
                 await updateRequest(hotel.id, editingId, {
                     date: validDates[0],
-                    reason: reason.trim()
+                    reason: reason.trim(),
+                    type: requestType,
+                    shift_name: requestType === 'shift' ? shiftName : undefined
                 })
                 setEditingId(null)
             } else {
@@ -52,12 +57,17 @@ export function OffDayScheduler() {
                         staff_id: user.uid,
                         staff_name: user.name,
                         date: d,
-                        reason: reason.trim()
+                        reason: reason.trim(),
+                        type: requestType,
+                        shift_name: requestType === 'shift' ? shiftName : undefined
                     })
                 }
             }
+            // Reset form
             setDates([''])
             setReason('')
+            setRequestType('off_day')
+            setShiftName('morning')
         } catch (error) {
             console.error("Submission error:", error)
         } finally {
@@ -69,6 +79,8 @@ export function OffDayScheduler() {
         setEditingId(request.id)
         setDates([request.date])
         setReason(request.reason)
+        setRequestType(request.type || 'off_day')
+        setShiftName(request.shift_name || 'morning')
     }
 
     const addDateField = () => setDates([...dates, ''])
@@ -85,26 +97,8 @@ export function OffDayScheduler() {
 
     const handleAction = async (request: any, status: 'approved' | 'rejected' | 'pending') => {
         if (!hotel?.id || !user) return
-
-        const wasApproved = request.status === 'approved'
         await updateRequestStatus(hotel.id, request.id, status, user.uid)
-
-        if (status === 'approved' && !wasApproved) {
-            // Only add calendar event if not already approved before
-            await addEvent(hotel.id, {
-                type: 'off_day',
-                title: `İZİNLİ: ${request.staff_name}`,
-                description: request.reason,
-                date: parseISO(request.date),
-                time: null,
-                room_number: null,
-                total_price: null,
-                collected_amount: null,
-                created_by: user.uid,
-                created_by_name: user.name
-            })
-        }
-        // Note: Deleting calendar event on rejection would require tracking event IDs
+        // Note: Calendar sync removed as per user request to avoid duplicates
     }
 
     const handleDelete = async (requestId: string) => {
@@ -121,8 +115,8 @@ export function OffDayScheduler() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">İzin Yönetimi</h2>
-                    <p className="text-zinc-500 text-sm">Personel izin programlarını talep edin ve yönetin.</p>
+                    <h2 className="text-2xl font-bold text-white">İzin & Vardiya Yönetimi</h2>
+                    <p className="text-zinc-500 text-sm">Personel izin ve vardiya taleplerini yönetin.</p>
                 </div>
             </div>
 
@@ -136,11 +130,47 @@ export function OffDayScheduler() {
                                 {editingId ? 'Talebi Düzenle' : 'Yeni Talep'}
                             </CardTitle>
                             <CardDescription className="text-xs">
-                                {editingId ? 'Mevcut izin talebinizi güncelleyin.' : 'İzin almak istediğiniz tarihi gönderin.'}
+                                {editingId ? 'Mevcut talebinizi güncelleyin.' : 'İzin veya vardiya değişikliği talep edin.'}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* Type Selection */}
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-zinc-500 uppercase">Talep Türü</Label>
+                                    <RadioGroup
+                                        value={requestType}
+                                        onValueChange={(v: 'off_day' | 'shift') => setRequestType(v)}
+                                        className="flex gap-4"
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem value="off_day" id="type-off" className="border-zinc-600 text-indigo-500" />
+                                            <Label htmlFor="type-off" className="text-sm text-zinc-300 cursor-pointer">İzin (Off Day)</Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem value="shift" id="type-shift" className="border-zinc-600 text-indigo-500" />
+                                            <Label htmlFor="type-shift" className="text-sm text-zinc-300 cursor-pointer">Vardiya İsteği</Label>
+                                        </div>
+                                    </RadioGroup>
+                                </div>
+
+                                {/* Shift Selection (only if type is shift) */}
+                                {requestType === 'shift' && (
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold text-zinc-500 uppercase">İstenen Vardiya</Label>
+                                        <Select value={shiftName} onValueChange={setShiftName}>
+                                            <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="morning">Sabah (Morning)</SelectItem>
+                                                <SelectItem value="evening">Akşam (Evening)</SelectItem>
+                                                <SelectItem value="night">Gece (Night)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
                                         Seçilen Tarih{dates.length > 1 ? 'ler' : ''}
@@ -188,6 +218,7 @@ export function OffDayScheduler() {
                                                 setEditingId(null)
                                                 setDates([''])
                                                 setReason('')
+                                                setRequestType('off_day')
                                             }}
                                             className="flex-1 text-zinc-400 hover:text-white"
                                         >
@@ -238,7 +269,11 @@ export function OffDayScheduler() {
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <p className="text-sm font-bold text-white">{isGM ? r.staff_name : "İzin Talebi"}</p>
+                                                    <p className="text-sm font-bold text-white">
+                                                        {isGM ? r.staff_name :
+                                                            (r.type === 'shift' ? 'Vardiya Değişikliği' : 'İzin Talebi')
+                                                        }
+                                                    </p>
                                                     <Badge className={cn(
                                                         "text-[10px] uppercase px-1.5 h-4",
                                                         r.status === 'pending' && "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -247,13 +282,23 @@ export function OffDayScheduler() {
                                                     )}>
                                                         {r.status === 'pending' ? 'bekliyor' : r.status === 'approved' ? 'onaylandı' : 'reddedildi'}
                                                     </Badge>
+                                                    {/* Request Type Badge */}
+                                                    {r.type === 'shift' ? (
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 bg-indigo-500/10 text-indigo-300 border-indigo-500/20 flex items-center gap-1">
+                                                            <Briefcase className="w-2.5 h-2.5" />
+                                                            {r.shift_name?.toUpperCase()}
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 bg-zinc-700/30 text-zinc-400 border-zinc-700/50">
+                                                            OFF DAY
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                                 <p className="text-xs text-zinc-500 line-clamp-1">{r.reason}</p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-2">
-                                            {/* Staff can edit pending requests */}
                                             {!isGM && r.status === 'pending' && (
                                                 <Button
                                                     variant="secondary"
@@ -265,7 +310,6 @@ export function OffDayScheduler() {
                                                 </Button>
                                             )}
 
-                                            {/* Staff can cancel pending requests */}
                                             {!isGM && r.status === 'pending' && (
                                                 <Button
                                                     variant="secondary"
@@ -277,7 +321,6 @@ export function OffDayScheduler() {
                                                 </Button>
                                             )}
 
-                                            {/* Staff can re-request rejected requests */}
                                             {!isGM && r.status === 'rejected' && (
                                                 <Button
                                                     variant="secondary"

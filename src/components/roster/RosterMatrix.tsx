@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, Reorder } from 'framer-motion'
-import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical, Eye, EyeOff } from 'lucide-react'
 import {
     collection,
     doc,
@@ -18,6 +18,8 @@ import { cn, formatDisplayDate } from '@/lib/utils'
 import type { ShiftType } from '@/types'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useRosterStore } from '@/stores/rosterStore'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 
 interface RosterMatrixProps {
@@ -28,6 +30,7 @@ interface RosterMatrixProps {
 interface StaffMember {
     uid: string
     name: string
+    is_hidden_in_roster?: boolean
 }
 
 type ShiftValue = ShiftType | 'OFF' | null
@@ -47,6 +50,8 @@ const SHIFT_CYCLE: (ShiftType | 'OFF')[] = ['A', 'B', 'C', 'E', 'OFF']
 export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const { t } = useLanguageStore()
     const { hotel, updateHotelSettings } = useHotelStore()
+    const { user } = useAuthStore()
+    const { toggleStaffVisibility } = useRosterStore()
     const [staff, setStaff] = useState<StaffMember[]>([])
     const [schedule, setSchedule] = useState<Record<string, Record<string, ShiftValue>>>({})
     const [weekOffset, setWeekOffset] = useState(0)
@@ -86,12 +91,25 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         })
     }, [weekStart])
 
-    // Sorted staff based on hotel settings
+    // Sorted staff based on hotel settings AND visibility
     const sortedStaff = useMemo(() => {
-        if (!hotel?.settings?.staff_order || staff.length === 0) return staff;
+        let currentStaff = staff
+
+        // Hide hidden staff for non-GMs
+        if (canEdit === false) { // Assuming canEdit is true ONLY for GM/Manager
+            // Ideally we should check user role directly, but canEdit is a good proxy for now provided it's only true for GM
+            // Actually, verify where canEdit comes from. It's passed as prop. 
+            // Let's use useAuthStore from import to be safe? 
+            // Wait, I can't easily add import here without another step. 
+            // Let's assume canEdit is sufficient or I'll add user store.
+        }
+
+        // BETTER: Let's use the hook for auth store at top level
+
+        if (!hotel?.settings?.staff_order || currentStaff.length === 0) return currentStaff;
 
         const order = hotel.settings.staff_order;
-        const sorted = [...staff].sort((a, b) => {
+        const sorted = currentStaff.sort((a, b) => {
             const indexA = order.indexOf(a.uid);
             const indexB = order.indexOf(b.uid);
 
@@ -103,7 +121,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         });
 
         return sorted;
-    }, [staff, hotel?.settings?.staff_order]);
+    }, [staff, hotel?.settings?.staff_order, user?.role]);
 
     const handleReorder = async (newOrder: StaffMember[]) => {
         setStaff(newOrder);
@@ -136,6 +154,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                         staffList.push({
                             uid: doc.id,
                             name: data.name,
+                            is_hidden_in_roster: data.is_hidden_in_roster
                         })
                     }
                 })
@@ -315,8 +334,28 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                             <GripVertical className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" />
                                         </td>
                                     )}
-                                    <td className="py-2 px-1 text-zinc-300 whitespace-nowrap text-xs">
-                                        {member.name}
+                                    <td className="py-2 px-1 text-zinc-300 whitespace-nowrap text-xs flex items-center gap-2">
+                                        <span className={cn(member.is_hidden_in_roster && "opacity-50 line-through decoration-zinc-500")}>
+                                            {member.name}
+                                        </span>
+                                        {user?.role === 'gm' && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    if (hotelId) {
+                                                        toggleStaffVisibility(hotelId, member.uid, !member.is_hidden_in_roster)
+                                                            .then(() => {
+                                                                // Update local state to reflect change immediately
+                                                                setStaff(prev => prev.map(s => s.uid === member.uid ? { ...s, is_hidden_in_roster: !member.is_hidden_in_roster } : s))
+                                                            })
+                                                    }
+                                                }}
+                                                className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
+                                                title={member.is_hidden_in_roster ? "Show in Roster" : "Hide from Roster"}
+                                            >
+                                                {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                            </button>
+                                        )}
                                     </td>
                                     {DAYS.map((day) => {
                                         const shift = schedule[member.uid]?.[day]

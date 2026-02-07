@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import type { Tour } from '@/types'
 import { format } from 'date-fns'
@@ -350,6 +350,9 @@ export function TourCatalogue() {
                     <DialogContent className="bg-zinc-950 border-zinc-800">
                         <DialogHeader>
                             <DialogTitle className="text-white">New Booking: {bookingTour?.name}</DialogTitle>
+                            <DialogDescription className="text-zinc-500 text-sm">
+                                Enter booking details for this tour.
+                            </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="grid grid-cols-2 gap-4">

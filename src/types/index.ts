@@ -41,6 +41,7 @@ export interface User {
         onboarding_seen?: boolean
         dismissed_announcements?: string[]
     }
+    is_hidden_in_roster?: boolean
 }
 
 export interface HotelInfo {
@@ -249,6 +250,9 @@ export interface OffDayRequest {
     created_at: Date
     processed_at?: Date
     processed_by?: string
+    // New fields for Shift Requests
+    type?: 'off_day' | 'shift'
+    shift_name?: string // e.g. 'morning', 'evening', 'night'
 }
 
 // Tour

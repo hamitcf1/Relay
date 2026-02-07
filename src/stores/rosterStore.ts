@@ -9,6 +9,7 @@ interface StaffMember {
     uid: string
     name: string
     role?: string
+    is_hidden_in_roster?: boolean
 }
 
 interface RosterState {
@@ -21,6 +22,7 @@ interface RosterState {
 interface RosterActions {
     subscribeToRoster: (hotelId: string) => () => void
     getShiftsForDate: (date: Date) => Array<{ name: string; shift: ShiftType; uid: string }>
+    toggleStaffVisibility: (hotelId: string, userId: string, isHidden: boolean) => Promise<void>
 }
 
 type RosterStore = RosterState & RosterActions
@@ -72,34 +74,29 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
                 })
             })
 
-            // Fetch staff details if missing
-            // Optimize: Only fetch if we have UIDs that are not in current staff list
-            const currentStaffIds = get().staff.map(s => s.uid)
-            const missingIds = Array.from(userIds).filter(id => !currentStaffIds.includes(id))
+            // Fetch staff details if missing OR if we want to ensure we have latest hidden status
+            // For simplicity, we re-fetch staff list to catch 'is_hidden_in_roster' updates
+            // (In a minimal read optimized app, we'd only do this on change, but this is fine for now)
+            try {
+                const usersRef = collection(db, 'users')
+                const q = query(usersRef, where('hotel_id', '==', hotelId))
+                const userSnap = await getDocs(q)
+                const staffList: StaffMember[] = []
 
-            if (missingIds.length > 0) {
-                try {
-                    // We can't fetch strictly by ID list easily if it's large.
-                    // But we can just fetch all hotel users again to be safe and simple.
-                    const usersRef = collection(db, 'users')
-                    const q = query(usersRef, where('hotel_id', '==', hotelId))
-                    const userSnap = await getDocs(q)
-                    const staffList: StaffMember[] = []
-
-                    userSnap.forEach(uDoc => {
-                        const uData = uDoc.data()
-                        if (uData.name && uData.name !== 'Unknown') {
-                            staffList.push({
-                                uid: uDoc.id,
-                                name: uData.name,
-                                role: uData.role
-                            })
-                        }
-                    })
-                    set({ staff: staffList })
-                } catch (e) {
-                    console.error("Failed to fetch staff details", e)
-                }
+                userSnap.forEach(uDoc => {
+                    const uData = uDoc.data()
+                    if (uData.name && uData.name !== 'Unknown') {
+                        staffList.push({
+                            uid: uDoc.id,
+                            name: uData.name,
+                            role: uData.role,
+                            is_hidden_in_roster: uData.is_hidden_in_roster
+                        })
+                    }
+                })
+                set({ staff: staffList })
+            } catch (e) {
+                console.error("Failed to fetch staff details", e)
             }
 
             set({ schedule: newSchedule, loading: false })
@@ -117,6 +114,12 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         const result: Array<{ name: string; shift: ShiftType; uid: string }> = []
 
         staff.forEach(member => {
+            // NOTE: We do NOT filter hidden staff here because this input is used by components
+            // that might need to show them (like GM view). Filtering should happen at UI level
+            // OR we add a parameter to this function. For now, we return all. 
+            // Actually, for "Current Shift" display, we probably should filter hidden ones if not GM?
+            // Let's stick to returning all and letting UI decide.
+
             const userShifts = schedule[member.uid]
             if (userShifts && userShifts[dateKey]) {
                 const shift = userShifts[dateKey]
@@ -136,5 +139,22 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             const priorityB = SHIFT_PRIORITY[b.shift] || 99
             return priorityA - priorityB
         })
+    },
+
+    toggleStaffVisibility: async (hotelId: string, userId: string, isHidden: boolean) => {
+        try {
+            const { updateDoc, doc } = await import('firebase/firestore')
+            const userRef = doc(db, 'users', userId)
+            await updateDoc(userRef, {
+                is_hidden_in_roster: isHidden
+            })
+            // Refetch staff to update UI immediately
+            const { staff } = get()
+            const updatedStaff = staff.map(s => s.uid === userId ? { ...s, is_hidden_in_roster: isHidden } : s)
+            set({ staff: updatedStaff })
+        } catch (error) {
+            console.error("Error toggling staff visibility:", error)
+            throw error
+        }
     }
 }))

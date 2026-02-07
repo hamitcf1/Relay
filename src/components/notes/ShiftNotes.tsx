@@ -423,6 +423,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             {note.room_number && (
                                                 <Badge variant="outline" className="text-[10px] h-4 bg-zinc-800 text-zinc-400 border-zinc-700">#{note.room_number}</Badge>
                                             )}
+                                            {note.guest_name && (
+                                                <Badge variant="outline" className="text-[10px] h-4 bg-zinc-800 text-zinc-400 border-zinc-700 flex items-center gap-1">
+                                                    <User className="w-2.5 h-2.5" />
+                                                    {note.guest_name}
+                                                </Badge>
+                                            )}
 
                                             {isFinancialCategory(note.category) && note.amount_due && (
                                                 <span className={cn(

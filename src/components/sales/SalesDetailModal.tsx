@@ -7,7 +7,7 @@ import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import type { Sale, Currency, SaleStatus } from '@/types'
@@ -117,6 +117,8 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     return (
         <Dialog open={!!saleId} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-2xl p-0 overflow-hidden">
+                <DialogTitle className="sr-only">Sale Details</DialogTitle>
+                <DialogDescription className="sr-only">View and edit sale details</DialogDescription>
                 <div className="flex flex-col h-[80vh] md:h-auto overflow-y-auto">
                     {/* H E A D E R */}
                     <div className={cn("p-6 border-b border-zinc-800 relative overflow-hidden", saleTypeInfo[sale.type].color.split(" ")[0].replace('/20', '/10'))}>
