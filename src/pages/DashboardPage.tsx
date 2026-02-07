@@ -258,23 +258,6 @@ export function DashboardPage() {
                         <NotificationDropdown />
                     </div>
 
-                    {/* Language Toggle */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
-                                <Globe className="w-4 h-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-32 bg-card border-border">
-                            <DropdownMenuItem onClick={() => setLanguage('en')} className="text-xs">
-                                🇺🇸 English {language === 'en' && <Check className="ml-auto w-3 h-3" />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-xs">
-                                🇹🇷 Türkçe {language === 'tr' && <Check className="ml-auto w-3 h-3" />}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
                     {/* User Profile - Consolidated Actions */}
                     <div id="tour-profile">
                         <DropdownMenu>
@@ -298,7 +281,7 @@ export function DashboardPage() {
                                 <DropdownMenuSub>
                                     <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-indigo-500/10">
                                         <Palette className="w-4 h-4 text-primary" />
-                                        <span className="text-foreground">Appearance</span>
+                                        <span className="text-foreground">{t('common.appearance')}</span>
                                     </DropdownMenuSubTrigger>
                                     <DropdownMenuPortal>
                                         <DropdownMenuSubContent className="w-80 bg-card border-border p-4">
@@ -307,7 +290,25 @@ export function DashboardPage() {
                                     </DropdownMenuPortal>
                                 </DropdownMenuSub>
 
-                                <div className="space-y-1">
+                                {/* Language Selector moved here */}
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-indigo-500/10">
+                                        <Globe className="w-4 h-4 text-primary" />
+                                        <span className="text-foreground">{t('common.language')}</span>
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuPortal>
+                                        <DropdownMenuSubContent className="w-40 bg-card border-border p-1">
+                                            <DropdownMenuItem onClick={() => setLanguage('en')} className="text-xs">
+                                                🇺🇸 English {language === 'en' && <Check className="ml-auto w-3 h-3" />}
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-xs">
+                                                🇹🇷 Türkçe {language === 'tr' && <Check className="ml-auto w-3 h-3" />}
+                                            </DropdownMenuItem>
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuPortal>
+                                </DropdownMenuSub>
+
+                                <div className="space-y-1 mt-2">
                                     <DropdownMenuLabel className="text-[10px] text-muted-foreground font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
 
                                     <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-foreground hover:bg-primary/10 cursor-pointer px-3 py-2 rounded-lg transition-colors">

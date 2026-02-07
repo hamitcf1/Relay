@@ -67,18 +67,12 @@
   }
 }
 
-/* Date/Time Picker Icon Visibility - Moved outside @layer to avoid Vite/PostCSS issues */
+/* Date/Time Picker Icon Visibility */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 0.9;
   transition: opacity 0.2s;
-  filter: invert(0);
-}
-
-.dark input[type="date"]::-webkit-calendar-picker-indicator,
-.dark input[type="time"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator:hover,

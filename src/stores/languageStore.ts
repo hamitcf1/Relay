@@ -248,6 +248,8 @@ type Translations = {
     'common.continue': string
     'common.back': string
     'common.confirm': string
+    'common.language': string
+    'common.appearance': string
     'common.by': string
     'common.none': string
     'common.staff': string
@@ -845,6 +847,8 @@ const translations: Record<Language, Translations> = {
         'common.continue': 'Continue',
         'common.back': 'Back',
         'common.confirm': 'Confirm',
+        'common.language': 'Language',
+        'common.appearance': 'Appearance',
         'common.by': 'by',
         'common.none': 'None',
         'common.staff': 'Staff',
@@ -1556,6 +1560,8 @@ const translations: Record<Language, Translations> = {
         'feedback.submit.title': 'Anonim Şikayet Gönder',
         'feedback.submit.desc': 'Kimliğiniz tamamen gizlidir. Mesajınızla birlikte hiçbir kişisel veri saklanmaz.',
         'feedback.management.view': 'Yönetim Görünümü',
+        'common.language': 'Dil Seçimi',
+        'common.appearance': 'Görünüm',
 
         // AI Modal
         'ai.title': 'Relay AI Asistanı',

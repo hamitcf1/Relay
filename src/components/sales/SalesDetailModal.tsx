@@ -12,7 +12,7 @@ import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import type { Sale, Currency, SaleStatus } from '@/types'
-import { cn, formatDisplayDate } from '@/lib/utils'
+import { cn, formatDisplayDate, getDateLocale } from '@/lib/utils'
 import {
     Select,
     SelectContent,
@@ -115,6 +115,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     }
 
     const remaining = sale.total_price - sale.collected_amount
+    const dateLocale = getDateLocale()
 
     return (
         <Dialog open={!!saleId} onOpenChange={(open) => !open && onClose()}>
@@ -377,7 +378,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                         <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border text-sm">
                                             <div className="flex items-center gap-2">
                                                 <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                                <span className="text-muted-foreground">{format(new Date(payment.timestamp), 'dd MMM HH:mm')}</span>
+                                                <span className="text-muted-foreground">{format(new Date(payment.timestamp), 'dd MMM HH:mm', { locale: dateLocale })}</span>
                                             </div>
                                             <span className="font-medium text-emerald-500">+{payment.amount} {payment.currency}</span>
                                         </div>
@@ -389,7 +390,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                         <div className="text-[10px] text-muted-foreground pt-4 border-t border-border text-center">
                             {t('sales.details.created', {
                                 name: sale.created_by_name,
-                                date: format(new Date(sale.created_at), 'PPP p')
+                                date: format(new Date(sale.created_at), 'PPP p', { locale: dateLocale })
                             })}
                         </div>
 
