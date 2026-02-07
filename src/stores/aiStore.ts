@@ -55,8 +55,6 @@ const GEMINI_KEYS = [
     import.meta.env.VITE_GEMINI_API_KEY_9,
 ].filter(Boolean)
 
-const OPENAI_SYSTEM_KEY = import.meta.env.VITE_OPENAI_API_KEY
-const ANTHROPIC_SYSTEM_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY
 
 // Task-specific system prompts
 const SYSTEM_PROMPTS: Record<AITaskType, string> = {
@@ -88,63 +86,25 @@ export const useAIStore = create<AIStore>((set, get) => ({
 
             let text = ""
 
-            // OpenAI / Reasoning Models
-            if (modelType.startsWith('gpt-') || modelType.startsWith('o')) {
-                const apiKey = OPENAI_SYSTEM_KEY
-                if (!apiKey) throw new Error("OpenAI API Key not configured in .env")
-
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            // OpenAI / Reasoning / Anthropic Models (Using Proxy)
+            if (modelType.startsWith('gpt-') || modelType.startsWith('o') || modelType.startsWith('claude-')) {
+                const response = await fetch('/api/ai', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: modelType,
-                        messages: [
-                            { role: 'system', content: systemInstruction },
-                            { role: 'user', content: prompt }
-                        ],
-                        temperature: 0.7
+                        prompt,
+                        modelType,
+                        systemInstruction
                     })
                 })
 
                 if (!response.ok) {
                     const errorData = await response.json()
-                    throw new Error(errorData.error?.message || "OpenAI API request failed")
+                    throw new Error(errorData.error || "AI Proxy request failed")
                 }
 
                 const data = await response.json()
-                text = data.choices[0].message.content
-            }
-            // Anthropic Models
-            else if (modelType.startsWith('claude-')) {
-                const apiKey = ANTHROPIC_SYSTEM_KEY
-                if (!apiKey) throw new Error("Anthropic API Key not configured in .env")
-
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': apiKey,
-                        'anthropic-version': '2023-06-01',
-                        'dangerously-allow-browser': 'true' // For client-side requests
-                    },
-                    body: JSON.stringify({
-                        model: modelType,
-                        max_tokens: 4096,
-                        system: systemInstruction,
-                        messages: [{ role: 'user', content: prompt }]
-                    })
-                })
-
-                if (!response.ok) {
-                    const errorData = await response.json()
-                    throw new Error(errorData.error?.message || "Anthropic API request failed")
-                }
-
-                const data = await response.json()
-                text = data.content[0].text
+                text = data.text
             }
             // Google Gemini / Gemma Models
             else {
