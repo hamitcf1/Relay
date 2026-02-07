@@ -39,6 +39,7 @@ import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 import { TourOverlay } from '@/components/onboarding/TourOverlay'
+import { CurrencyWidget } from '@/components/dashboard/CurrencyWidget'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -393,6 +394,16 @@ export function DashboardPage() {
                                     transition={{ delay: 0.3 }}
                                 >
                                     <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                </motion.div>
+
+                                {/* 1. Currency Widget */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                >
+                                    {/* Currency Widget with TCMB Rates */}
+                                    <CurrencyWidget />
                                 </motion.div>
 
                                 {/* 1. Calendar Widget */}
