@@ -63,7 +63,7 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
         {
             title: t('onboarding.team.title'),
             description: t('onboarding.team.desc'),
-            icon: Calendar,
+            icon: Calendar, // Or CreditCard if we want to emphasize sales
             color: "text-purple-400"
         },
         {

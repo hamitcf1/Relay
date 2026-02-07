@@ -317,24 +317,30 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                 )}
                             </div>
 
-                            <div className="flex gap-2">
-                                <Input
-                                    placeholder="Guest Name (Optional)"
-                                    value={newGuest}
-                                    onChange={(e) => setNewGuest(e.target.value)}
-                                    className="flex-1 text-sm bg-zinc-800/50"
-                                />
-                                <Select value={newAssignedStaff} onValueChange={setNewAssignedStaff}>
-                                    <SelectTrigger className="w-[140px] text-xs h-9 bg-zinc-800/50 border-zinc-700">
-                                        <SelectValue placeholder="Assign Staff" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">Unassigned</SelectItem>
-                                        {staff.map(s => (
-                                            <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
+                                    <Input
+                                        placeholder="John Doe"
+                                        value={newGuest}
+                                        onChange={(e) => setNewGuest(e.target.value)}
+                                        className="h-9 text-sm bg-zinc-800/50"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('common.staff')}</label>
+                                    <Select value={newAssignedStaff} onValueChange={setNewAssignedStaff}>
+                                        <SelectTrigger className="w-full text-xs h-9 bg-zinc-800/50 border-zinc-700">
+                                            <SelectValue placeholder="Assign To..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">Unassigned</SelectItem>
+                                            {staff.map(s => (
+                                                <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
 
                             {/* Content */}
@@ -500,24 +506,30 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                         />
                                                     )}
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <Input
-                                                        placeholder="Guest Name"
-                                                        value={editGuest}
-                                                        onChange={(e) => setEditGuest(e.target.value)}
-                                                        className="flex-1 h-8 text-sm bg-zinc-950 border-zinc-700"
-                                                    />
-                                                    <Select value={editAssignedStaff} onValueChange={setEditAssignedStaff}>
-                                                        <SelectTrigger className="w-[120px] h-8 text-xs bg-zinc-950 border-zinc-700">
-                                                            <SelectValue placeholder="Staff" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="none">Unassigned</SelectItem>
-                                                            {staff.map(s => (
-                                                                <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
+                                                        <Input
+                                                            placeholder="Guest Name"
+                                                            value={editGuest}
+                                                            onChange={(e) => setEditGuest(e.target.value)}
+                                                            className="h-8 text-sm bg-zinc-950 border-zinc-700"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('common.staff')}</label>
+                                                        <Select value={editAssignedStaff} onValueChange={setEditAssignedStaff}>
+                                                            <SelectTrigger className="w-full h-8 text-xs bg-zinc-950 border-zinc-700">
+                                                                <SelectValue placeholder="Staff" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="none">Unassigned</SelectItem>
+                                                                {staff.map(s => (
+                                                                    <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
                                                 </div>
                                                 <div className="flex gap-2 justify-end">
                                                     <Button size="sm" onClick={handleUpdateNote} disabled={loading} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-3">

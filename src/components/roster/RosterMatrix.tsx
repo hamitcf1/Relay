@@ -351,7 +351,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                                     }
                                                 }}
                                                 className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
-                                                title={member.is_hidden_in_roster ? "Show in Roster" : "Hide from Roster"}
+                                                title={member.is_hidden_in_roster ? t('roster.show') : t('roster.hide')}
                                             >
                                                 {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                                             </button>

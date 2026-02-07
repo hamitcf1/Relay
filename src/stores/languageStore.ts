@@ -299,6 +299,49 @@ type Translations = {
     // Roster
     'roster.title': string
     'roster.noStaff': string
+    'roster.show': string
+    'roster.hide': string
+
+    // Tours
+    'tours.catalogue.title': string
+    'tours.catalogue.desc': string
+    'tours.add': string
+    'tours.edit': string
+    'tours.create': string
+    'tours.form.name': string
+    'tours.form.desc': string
+    'tours.form.basePrice': string
+    'tours.form.adultPrice': string
+    'tours.form.child37Price': string
+    'tours.form.child03Price': string
+    'tours.form.operatingDays': string
+    'tours.noTours': string
+    'tours.createFirst': string
+    'tours.local': string
+    'tours.clickToLog': string
+    'tours.book.title': string
+    'tours.book.desc': string
+    'tours.book.guestName': string
+    'tours.book.room': string
+    'tours.book.pax': string
+    'tours.book.date': string
+    'tours.book.totalPrice': string
+    'tours.book.confirm': string
+
+    // Sales
+    'sales.tracker': string
+    'sales.new': string
+    'sales.newType': string
+    'sales.service': string
+    'sales.other': string
+    'sales.customName': string
+    'sales.pickupTime': string
+    'sales.price': string
+    'sales.notes': string
+    'sales.optionalNotes': string
+    'sales.create': string
+    'sales.noSales': string
+    'sales.soldBy': string
 
     // Compliance
     'compliance.kbs.required': string
@@ -324,6 +367,20 @@ type Translations = {
     'onboarding.localization.desc': string
     'onboarding.stepOf': string
 
+    // Interactive Tour
+    'tour.intro.title': string
+    'tour.intro.desc': string
+    'tour.compliance.title': string
+    'tour.compliance.desc': string
+    'tour.feed.title': string
+    'tour.feed.desc': string
+    'tour.sales.title': string
+    'tour.sales.desc': string
+    'tour.notifications.title': string
+    'tour.notifications.desc': string
+    'tour.profile.title': string
+    'tour.profile.desc': string
+
     // Daily Menu
     'menu.title': string
     'menu.content': string
@@ -334,6 +391,58 @@ type Translations = {
     'menu.breakfastTime': string
     'menu.lunchTime': string
     'menu.dinnerTime': string
+
+    // Hotel Info - New
+    'hotel.secure.title': string
+    'hotel.secure.encrypted': string
+    'hotel.secure.safeCode': string
+    'hotel.secure.agency': string
+    'hotel.secure.other': string
+    'hotel.secure.kbs': string
+
+    // Off Day - New
+    'offday.management.title': string
+    'offday.management.desc': string
+    'offday.pending': string
+    'offday.history': string
+    'offday.petitions': string
+
+    // Messages & Feedback - New
+    'messages.title': string
+    'messages.search': string
+    'messages.announcements': string
+    'messages.broadcast': string
+    'feedback.anonymous.title': string
+    'feedback.anonymous.subtitle': string
+    'feedback.privacy.title': string
+    'feedback.privacy.desc': string
+    'feedback.submit.title': string
+    'feedback.submit.desc': string
+    'feedback.management.view': string
+
+    // AI Modal - New
+    'ai.title': string
+    'ai.poweredBy': string
+    'ai.model': string
+    'ai.mode.assistant': string
+    'ai.mode.quota': string
+    'ai.task.general': string
+    'ai.task.generalDesc': string
+    'ai.task.incident': string
+    'ai.task.incidentDesc': string
+    'ai.task.email': string
+    'ai.task.emailDesc': string
+    'ai.task.review': string
+    'ai.task.reviewDesc': string
+    'ai.context.title': string
+    'ai.context.desc': string
+    'ai.context.save': string
+    'ai.generate': string
+    'ai.cancel': string
+
+    // Shift Notes - New
+    'notes.edited': string
+    'notes.label': string
 }
 
 const translations: Record<Language, Translations> = {
@@ -622,6 +731,49 @@ const translations: Record<Language, Translations> = {
 
         'roster.title': 'Weekly Roster',
         'roster.noStaff': 'No staff members found',
+        'roster.show': 'Show in Roster',
+        'roster.hide': 'Hide from Roster',
+
+        // Tours
+        'tours.catalogue.title': 'Tour Catalogue',
+        'tours.catalogue.desc': 'Browse available tours and track local sales.',
+        'tours.add': 'Add New Tour',
+        'tours.edit': 'Edit Tour',
+        'tours.create': 'Create New Tour Entry',
+        'tours.form.name': 'Tour Name',
+        'tours.form.desc': 'Short Description',
+        'tours.form.basePrice': 'Base Price (EUR)',
+        'tours.form.adultPrice': 'Adult Price',
+        'tours.form.child37Price': 'Child (3-7y)',
+        'tours.form.child03Price': 'Child (0-3y)',
+        'tours.form.operatingDays': 'Operating Days',
+        'tours.noTours': 'No tours in the catalogue yet.',
+        'tours.createFirst': 'Create the first one',
+        'tours.local': 'Local Tour',
+        'tours.clickToLog': 'Click a category to log a sale.',
+        'tours.book.title': 'New Booking: {name}',
+        'tours.book.desc': 'Enter booking details for this tour.',
+        'tours.book.guestName': 'Guest Name',
+        'tours.book.room': 'Room #',
+        'tours.book.pax': 'Pax',
+        'tours.book.date': 'Date',
+        'tours.book.totalPrice': 'Total Price',
+        'tours.book.confirm': 'Confirm Booking',
+
+        // Sales
+        'sales.tracker': 'Sales Tracker',
+        'sales.new': 'New Sale',
+        'sales.newType': 'New {label}',
+        'sales.service': 'Service',
+        'sales.other': 'Other / Custom',
+        'sales.customName': 'Enter custom tour name...',
+        'sales.pickupTime': 'Pickup Time',
+        'sales.price': 'Price',
+        'sales.notes': 'Notes',
+        'sales.optionalNotes': 'Optional notes...',
+        'sales.create': 'Create Sale',
+        'sales.noSales': 'No {label} sales yet.',
+        'sales.soldBy': 'Sold by: {name}',
 
         'compliance.kbs.required': 'KBS Check Required!',
         'compliance.kbs.pastTime': "It's past 23:00",
@@ -634,16 +786,30 @@ const translations: Record<Language, Translations> = {
         'compliance.kbs.checklistDesc': 'Daily compliance check before 23:00',
 
         'onboarding.welcome.title': 'Welcome to Relay',
-        'onboarding.welcome.desc': 'Your digital hotel operations hub. Let\'s take a quick look around.',
-        'onboarding.activity.title': 'Live Activity Feed',
-        'onboarding.activity.desc': 'The left column shows all guest requests and maintenance logs in real-time.',
-        'onboarding.shift.title': 'Shift Operations',
-        'onboarding.shift.desc': 'The center column tracks your active shift, cash, and compliance checklists.',
-        'onboarding.team.title': 'Team & Schedule',
-        'onboarding.team.desc': 'The right column manages the roster, calendar, and general hotel info.',
+        'onboarding.welcome.desc': 'Your digital operations hub. Let\'s get you set up.',
+        'onboarding.activity.title': 'Operations Feed',
+        'onboarding.activity.desc': 'View guest requests, maintenance logs, and shift notes in real-time.',
+        'onboarding.shift.title': 'Shift Management',
+        'onboarding.shift.desc': 'Start/End shifts, check KBS compliance, and count cash.',
+        'onboarding.team.title': 'Roster & Sales',
+        'onboarding.team.desc': 'Check your weekly schedule, request off-days, and manage tour sales.',
         'onboarding.localization.title': 'Localization',
-        'onboarding.localization.desc': 'Use the globe icon in the header to switch between Turkish and English anytime.',
+        'onboarding.localization.desc': 'Switch languages instantly using the globe icon.',
         'onboarding.stepOf': 'Step {current} of {total}',
+
+        // Interactive Tour
+        'tour.intro.title': 'Welcome to Relay',
+        'tour.intro.desc': 'This is your digital handover platform. Let\'s take a quick tour.',
+        'tour.compliance.title': 'Shift Compliance',
+        'tour.compliance.desc': 'Track your mandatory KBS and Agency checks here. The pulse indicates urgency.',
+        'tour.feed.title': 'Activity Feed',
+        'tour.feed.desc': 'All guest requests and maintenance logs appear here in real-time.',
+        'tour.sales.title': 'Sales & Tours',
+        'tour.sales.desc': 'Switch tabs to manage Tour Sales, Off-Days, and guest Feedback.',
+        'tour.notifications.title': 'Notifications',
+        'tour.notifications.desc': 'Stay updated on off-day requests and important messages.',
+        'tour.profile.title': 'Your Profile',
+        'tour.profile.desc': 'Access settings, tutorials, and logout here.',
 
         'menu.title': 'Staff Daily Menu',
         'menu.content': 'Today\'s Menu',
@@ -654,6 +820,58 @@ const translations: Record<Language, Translations> = {
         'menu.breakfastTime': 'Breakfast: 07:00 - 09:00',
         'menu.lunchTime': 'Lunch: 12:00 - 13:30',
         'menu.dinnerTime': 'Dinner: 17:00 - 18:30',
+
+        // Hotel Info
+        'hotel.secure.title': 'Secure Information (KBS / Agency)',
+        'hotel.secure.encrypted': 'Encrypted Section',
+        'hotel.secure.safeCode': 'Safe Code',
+        'hotel.secure.agency': 'Agency Logins (Extranet)',
+        'hotel.secure.other': 'Other Safe Info',
+        'hotel.secure.kbs': 'KBS Login Info',
+
+        // Off Day
+        'offday.management.title': 'Leave & Shift Management',
+        'offday.management.desc': 'Manage staff leave and shift requests.',
+        'offday.pending': 'Pending Requests',
+        'offday.history': 'Request History',
+        'offday.petitions': 'Complaints & Petitions',
+
+        // Messages
+        'messages.title': 'Messages',
+        'messages.search': 'Search staff...',
+        'messages.announcements': 'General Announcements',
+        'messages.broadcast': 'Broadcast to all staff',
+        'feedback.anonymous.title': 'Anonymous Feedback',
+        'feedback.anonymous.subtitle': 'Your voice matters safely.',
+        'feedback.privacy.title': 'Privacy Guaranteed',
+        'feedback.privacy.desc': 'We use hotel-level collections without user associations. Even database administrators cannot trace feedback to a specific user account.',
+        'feedback.submit.title': 'Submit Anonymous Complaint',
+        'feedback.submit.desc': 'Your identity is completely hidden. No personal data is stored with your message.',
+        'feedback.management.view': 'Management View',
+
+        // AI Modal
+        'ai.title': 'Relay AI Assistant',
+        'ai.poweredBy': 'Powered by Gemini & Gemma',
+        'ai.model': 'AI Model',
+        'ai.mode.assistant': 'Assistant Mode',
+        'ai.mode.quota': 'Quota Balanced Mode',
+        'ai.task.general': 'General Assistant Request',
+        'ai.task.generalDesc': 'How can I help you today?',
+        'ai.task.incident': 'Incident Report',
+        'ai.task.incidentDesc': 'Describe the incident (Who, What, When, Where)...',
+        'ai.task.email': 'Professional Email Request',
+        'ai.task.emailDesc': 'Who is the recipient and what is the core message?',
+        'ai.task.review': 'Review Reply Request',
+        'ai.task.reviewDesc': 'Paste the guest review here...',
+        'ai.context.title': 'Hotel Knowledge Base',
+        'ai.context.desc': 'Enter facts about your hotel (breakfast hours, wifi password, policies). The AI will use this to generate accurate answers.',
+        'ai.context.save': 'Save Context',
+        'ai.generate': 'Generate',
+        'ai.cancel': 'Cancel',
+
+        // Shift Notes
+        'notes.edited': '(edited)',
+        'notes.label': 'shift notes',
     },
     tr: {
         'app.welcome': 'Relay\'e Hoşgeldiniz',
@@ -951,6 +1169,117 @@ const translations: Record<Language, Translations> = {
         'menu.lunchTime': 'Öğle Yemeği: 12:00 - 13:30',
         'menu.dinnerTime': 'Akşam Yemeği: 17:00 - 18:30',
 
+        // Hotel Info
+        'hotel.secure.title': 'Gizli Bilgiler (KBS / Acente)',
+        'hotel.secure.encrypted': 'Şifreli Bölüm',
+        'hotel.secure.safeCode': 'Kasa Şifresi',
+        'hotel.secure.agency': 'Acente Girişleri (Extranet)',
+        'hotel.secure.other': 'Diğer Kasa Bilgileri',
+        'hotel.secure.kbs': 'KBS Giriş Bilgileri',
+
+        // Off Day
+        'offday.management.title': 'İzin & Vardiya Yönetimi',
+        'offday.management.desc': 'Personel izin ve vardiya taleplerini yönetin.',
+        'offday.pending': 'Bekleyen Talepler',
+        'offday.history': 'Talep Geçmişim',
+        'offday.petitions': 'Şikayet Dilekçeleri',
+
+        // Messages
+        'messages.title': 'Mesajlar',
+        'messages.search': 'Personel ara...',
+        'messages.announcements': 'Genel Duyurular',
+        'messages.broadcast': 'Tüm personele yayınla',
+        'feedback.anonymous.title': 'Anonim Geri Bildirim',
+        'feedback.anonymous.subtitle': 'Sesiniz güvenle duyulsun.',
+        'feedback.privacy.title': 'Gizlilik Garantili',
+        'feedback.privacy.desc': 'Kullanıcı ilişkilendirmesi olmayan otel düzeyinde koleksiyonlar kullanıyoruz. Veritabanı yöneticileri bile geri bildirimi belirli bir kullanıcı hesabına kadar takip edemez.',
+        'feedback.submit.title': 'Anonim Şikayet Gönder',
+        'feedback.submit.desc': 'Kimliğiniz tamamen gizlidir. Mesajınızla birlikte hiçbir kişisel veri saklanmaz.',
+        'feedback.management.view': 'Yönetim Görünümü',
+
+        // AI Modal
+        'ai.title': 'Relay AI Asistan',
+        'ai.poweredBy': 'Gemini & Gemma ile güçlendirilmiştir',
+        'ai.model': 'Yapay Zeka Modeli',
+        'ai.mode.assistant': 'Asistan Modu',
+        'ai.mode.quota': 'Kota Dengeli Mod',
+        'ai.task.general': 'Genel Asistan Talebi',
+        'ai.task.generalDesc': 'Bugün size nasıl yardımcı olabilirim?',
+        'ai.task.incident': 'Tutanak Raporu',
+        'ai.task.incidentDesc': 'Olayı tanımlayın (Kim, Ne, Ne Zaman, Nerede)...',
+        'ai.task.email': 'Profesyonel E-posta İsteği',
+        'ai.task.emailDesc': 'Alıcı kim ve ana mesaj nedir?',
+        'ai.task.review': 'Yorum Yanıtla',
+        'ai.task.reviewDesc': 'Misafir yorumunu buraya yapıştırın...',
+        'ai.context.title': 'Otel Bilgi Bankası',
+        'ai.context.desc': 'Oteliniz hakkında gerçekleri girin (kahvaltı saatleri, wifi şifresi, kurallar). AI, doğru yanıtlar oluşturmak için bunu kullanacaktır.',
+        'ai.context.save': 'Bağlamı Kaydet',
+        'ai.generate': 'Oluştur',
+        'ai.cancel': 'İptal',
+
+        // Shift Notes
+        'notes.edited': '(düzenlendi)',
+        'notes.label': 'vardiya notları',
+
+        // Tours
+        'tours.catalogue.title': 'Tur Kataloğu',
+        'tours.catalogue.desc': 'Mevcut turları inceleyin ve satışları takip edin.',
+        'tours.add': 'Yeni Tur Ekle',
+        'tours.edit': 'Turu Düzenle',
+        'tours.create': 'Yeni Tur Girişi Oluştur',
+        'tours.form.name': 'Tur Adı',
+        'tours.form.desc': 'Kısa Açıklama',
+        'tours.form.basePrice': 'Taban Fiyat (EUR)',
+        'tours.form.adultPrice': 'Yetişkin Fiyatı',
+        'tours.form.child37Price': 'Çocuk (3-7y)',
+        'tours.form.child03Price': 'Bebek (0-3y)',
+        'tours.form.operatingDays': 'Operasyon Günleri',
+        'tours.noTours': 'Katalogda henüz tur yok.',
+        'tours.createFirst': 'İlk turu oluştur',
+        'tours.local': 'Yerel Tur',
+        'tours.clickToLog': 'Satış girmek için bir kategoriye tıklayın.',
+        'tours.book.title': 'Yeni Rezervasyon: {name}',
+        'tours.book.desc': 'Bu tur için rezervasyon detaylarını girin.',
+        'tours.book.guestName': 'Misafir Adı',
+        'tours.book.room': 'Oda No',
+        'tours.book.pax': 'Kişi',
+        'tours.book.date': 'Tarih',
+        'tours.book.totalPrice': 'Toplam Fiyat',
+        'tours.book.confirm': 'Rezervasyonu Onayla',
+
+        // Interactive Tour
+        'tour.intro.title': 'Relay\'e Hoşgeldiniz',
+        'tour.intro.desc': 'Bu sizin dijital devir teslim platformunuz. Hadi hızlıca bir göz atalım.',
+        'tour.compliance.title': 'Vardiya Uyumluluğu',
+        'tour.compliance.desc': 'Zorunlu KBS ve Acente kontrollerini buradan takip edin. Nabız işareti aciliyeti gösterir.',
+        'tour.feed.title': 'Aktivite Akışı',
+        'tour.feed.desc': 'Tüm misafir talepleri ve bakım kayıtları burada anlık olarak görünür.',
+        'tour.sales.title': 'Satış ve Turlar',
+        'tour.sales.desc': 'Tur Satışlarını, İzin Günlerini ve Misafir Geri Bildirimlerini yönetmek için sekmeleri kullanın.',
+        'tour.notifications.title': 'Bildirimler',
+        'tour.notifications.desc': 'İzin talepleri ve önemli mesajlardan haberdar olun.',
+        'tour.profile.title': 'Profiliniz',
+        'tour.profile.desc': 'Ayarlara, eğitimlere ve çıkış yapma seçeneklerine buradan ulaşın.',
+
+        // Sales
+        'sales.tracker': 'Satış Takibi',
+        'sales.new': 'Yeni Satış',
+        'sales.newType': 'Yeni {label}',
+        'sales.service': 'Hizmet',
+        'sales.other': 'Diğer / Özel',
+        'sales.customName': 'Özel tur adı girin...',
+        'sales.pickupTime': 'Alınış Saati',
+        'sales.price': 'Fiyat',
+        'sales.notes': 'Notlar',
+        'sales.optionalNotes': 'İsteğe bağlı notlar...',
+        'sales.create': 'Satış Oluştur',
+        'sales.noSales': 'Henüz {label} satışı yok.',
+        'sales.soldBy': 'Satan: {name}',
+
+        // Roster
+        'roster.show': 'Çizelgede Göster',
+        'roster.hide': 'Çizelgeden Gizle',
+
         'compliance.kbs.required': 'KBS Kontrolü Gerekli!',
         'compliance.kbs.pastTime': 'Saat 23:00\'ü geçti',
         'compliance.kbs.desc': 'KBS sistem kontrolü vardiyanız bitmeden tamamlanmalıdır. Bu zorunlu bir uyumluluk gerekliliğidir.',
@@ -961,17 +1290,17 @@ const translations: Record<Language, Translations> = {
         'compliance.kbs.label': 'KBS Sistemi Doğrulandı',
         'compliance.kbs.checklistDesc': '23:00\'den önce günlük uyumluluk kontrolü',
 
-        'onboarding.welcome.title': 'Relay\'e Hoş Geldiniz',
-        'onboarding.welcome.desc': 'Dijital otel operasyon merkeziniz. Etrafa hızlıca bir göz atalım.',
-        'onboarding.activity.title': 'Canlı Aktivite Akışı',
-        'onboarding.activity.desc': 'Sol sütun tüm misafir taleplerini ve bakım kayıtlarını gerçek zamanlı olarak gösterir.',
-        'onboarding.shift.title': 'Vardiya Operasyonları',
-        'onboarding.shift.desc': 'Orta sütun aktif vardiyanızı, kasanızı ve uyumluluk kontrol listelerinizi takip eder.',
-        'onboarding.team.title': 'Ekip ve Program',
-        'onboarding.team.desc': 'Sağ sütun kadroyu, takvimi ve genel otel bilgilerini yönetir.',
-        'onboarding.localization.title': 'Yerelleştirme',
-        'onboarding.localization.desc': 'Türkçe ve İngilizce arasında istediğiniz zaman geçiş yapmak için başlıktaki dünya simgesini kullanın.',
-        'onboarding.stepOf': '{total} Adımdan {current}.',
+        'onboarding.welcome.title': 'Relay\'e Hoşgeldiniz',
+        'onboarding.welcome.desc': 'Dijital operasyon merkeziniz. Hadi kuruluma başlayalım.',
+        'onboarding.activity.title': 'Operasyon Akışı',
+        'onboarding.activity.desc': 'Misafir taleplerini, teknik servis kayıtlarını ve vardiya notlarını canlı izleyin.',
+        'onboarding.shift.title': 'Vardiya Yönetimi',
+        'onboarding.shift.desc': 'Vardiya başlat/bitir, KBS kontrollerini yap ve kasa sayımını gerçekleştir.',
+        'onboarding.team.title': 'Çizelge ve Satışlar',
+        'onboarding.team.desc': 'Haftalık programınızı kontrol edin, izin isteyin ve tur satışlarını yönetin.',
+        'onboarding.localization.title': 'Dil Seçimi',
+        'onboarding.localization.desc': 'Dünya ikonunu kullanarak dilediğiniz an dil değiştirebilirsiniz.',
+        'onboarding.stepOf': '{current} / {total}',
         'log.stickyBoard': 'Önemli Notlar',
         'compliance.kbsLate': 'KBS Kontrolü hemen yapılmalıdır! Lütfen misafir kimliklerini doğrulayın.',
     },

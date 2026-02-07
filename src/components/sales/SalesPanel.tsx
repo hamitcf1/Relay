@@ -18,9 +18,11 @@ import {
 } from '@/components/ui/select'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import type { SaleType, Currency, SaleStatus } from '@/types'
 
 export function SalesPanel() {
+    const { t } = useLanguageStore()
     const { sales, loading, subscribeToSales, addSale, updateSale } = useSalesStore()
     const { tours, subscribeToTours } = useTourStore()
     const { hotel } = useHotelStore()
@@ -106,7 +108,7 @@ export function SalesPanel() {
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
                         <CreditCard className="w-5 h-5 text-indigo-400" />
-                        Sales Tracker
+                        {t('sales.tracker')}
                     </CardTitle>
                     {!isAdding && (
                         <Button
@@ -115,7 +117,7 @@ export function SalesPanel() {
                             className="bg-indigo-600 hover:bg-indigo-500 gap-1 h-8 text-xs"
                         >
                             <Plus className="w-3.5 h-3.5" />
-                            New Sale
+                            {t('sales.new')}
                         </Button>
                     )}
                 </div>
@@ -153,7 +155,7 @@ export function SalesPanel() {
                             <div className="p-3 bg-zinc-800/80 rounded-xl border border-indigo-500/30 space-y-3 shadow-lg">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                                        New {saleTypeInfo[activeTab].label}
+                                        {t('sales.newType', { label: saleTypeInfo[activeTab].label })}
                                     </h4>
                                     <button onClick={resetForm} className="text-zinc-500 hover:text-zinc-300">
                                         <X className="w-4 h-4" />
@@ -162,7 +164,7 @@ export function SalesPanel() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <div className="col-span-2 space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Service</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.service')}</label>
                                         {activeTab === 'tour' ? (
                                             <Select
                                                 value={formData.name}
@@ -184,7 +186,7 @@ export function SalesPanel() {
                                                             {t.name} (€{t.adult_price})
                                                         </SelectItem>
                                                     ))}
-                                                    <SelectItem value="other">Other / Custom</SelectItem>
+                                                    <SelectItem value="other">{t('sales.other')}</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         ) : (
@@ -197,7 +199,7 @@ export function SalesPanel() {
                                         )}
                                         {formData.name === 'other' && activeTab === 'tour' && (
                                             <Input
-                                                placeholder="Enter custom tour name..."
+                                                placeholder={t('sales.customName')}
                                                 onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
                                                 className="h-8 text-xs mt-2 bg-zinc-950 border-zinc-700"
                                             />
@@ -205,7 +207,7 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Guest Name</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
                                         <Input
                                             value={formData.customer_name}
                                             onChange={e => setFormData(p => ({ ...p, customer_name: e.target.value }))}
@@ -215,7 +217,7 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Room #</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.room')}</label>
                                         <Input
                                             value={formData.room_number}
                                             onChange={e => setFormData(p => ({ ...p, room_number: e.target.value }))}
@@ -225,7 +227,7 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Pax</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.pax')}</label>
                                         <Input
                                             type="number"
                                             min={1}
@@ -236,7 +238,7 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Date</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.date')}</label>
                                         <Input
                                             type="date"
                                             value={formData.date}
@@ -246,7 +248,7 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Pickup Time</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.pickupTime')}</label>
                                         <Input
                                             type="time"
                                             value={formData.pickup_time}
@@ -256,7 +258,7 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1 relative">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Price</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.price')}</label>
                                         <div className="relative">
                                             <Input
                                                 type="number"
@@ -270,12 +272,12 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="col-span-2 space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">Notes</label>
+                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.notes')}</label>
                                         <Input
                                             value={formData.notes}
                                             onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))}
                                             className="h-8 text-xs bg-zinc-950 border-zinc-700"
-                                            placeholder="Optional notes..."
+                                            placeholder={t('sales.optionalNotes')}
                                         />
                                     </div>
                                 </div>
@@ -287,10 +289,10 @@ export function SalesPanel() {
                                         className="flex-1 bg-indigo-600 hover:bg-indigo-500 h-8 text-xs"
                                     >
                                         <Check className="w-3.5 h-3.5 mr-1" />
-                                        Create Sale
+                                        {t('sales.create')}
                                     </Button>
                                     <Button variant="ghost" onClick={resetForm} className="h-8 text-xs">
-                                        Cancel
+                                        {t('common.cancel')}
                                     </Button>
                                 </div>
                             </div>
@@ -306,7 +308,7 @@ export function SalesPanel() {
                 ) : filteredSales.length === 0 ? (
                     <div className="py-12 text-center">
                         <div className="text-4xl mb-2 opacity-20 text-zinc-600">{saleTypeInfo[activeTab].icon}</div>
-                        <p className="text-zinc-500 text-sm">No {saleTypeInfo[activeTab].label.toLowerCase()} sales yet.</p>
+                        <p className="text-zinc-500 text-sm">{t('sales.noSales', { label: saleTypeInfo[activeTab].label.toLowerCase() })}</p>
                     </div>
                 ) : (
                     <div className="space-y-2">
@@ -343,7 +345,7 @@ export function SalesPanel() {
                                                 <span className="text-zinc-600">•</span>
                                                 <span>{formatDisplayDate(sale.date)}</span>
                                                 <span className="text-zinc-600">•</span>
-                                                <span className="text-indigo-300">Sold by: {sale.created_by_name}</span>
+                                                <span className="text-indigo-300">{t('sales.soldBy', { name: sale.created_by_name })}</span>
                                             </div>
                                         </div>
 
@@ -354,7 +356,7 @@ export function SalesPanel() {
                                             </div>
                                             {/* Detailed Status Badge */}
                                             {/* Detailed Status Select */}
-                                            <div onClick={(e) => e.stopPropagation()} className="mt-1">
+                                            <div onClick={(e) => e.stopPropagation()} className="mt-2">
                                                 <Select
                                                     value={sale.status || 'waiting'}
                                                     onValueChange={(val: any) => {
@@ -364,15 +366,18 @@ export function SalesPanel() {
                                                     }}
                                                 >
                                                     <SelectTrigger className={cn(
-                                                        "h-5 text-[9px] px-1.5 py-0 border-none min-w-[70px] justify-between gap-1 transition-colors",
+                                                        "h-6 text-[10px] uppercase font-bold tracking-wider px-2 py-0 border-0 min-w-[90px] justify-between gap-1 transition-colors rounded-md shadow-sm",
                                                         saleStatusInfo[sale.status as SaleStatus]?.color || "bg-zinc-800 text-zinc-400"
                                                     )}>
                                                         <SelectValue />
                                                     </SelectTrigger>
-                                                    <SelectContent align="end">
+                                                    <SelectContent align="end" className="bg-zinc-900 border-zinc-800">
                                                         {(Object.keys(saleStatusInfo) as SaleStatus[]).map((status) => (
-                                                            <SelectItem key={status} value={status} className="text-xs">
-                                                                {saleStatusInfo[status].label}
+                                                            <SelectItem key={status} value={status} className="text-xs focus:bg-zinc-800 focus:text-zinc-200">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className={cn("w-2 h-2 rounded-full", saleStatusInfo[status].color.split(' ')[0].replace('/20', ''))} />
+                                                                    {saleStatusInfo[status].label}
+                                                                </div>
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>

@@ -20,10 +20,8 @@ Relay isn't just a tool; it's a design-forward platform. Adhering to a **"Cyber-
 ---
 
 ## 🚀 Key Features
-
 ### 📡 Real-Time Operations Feed
 *   **Active Log Feed:** Collaborative, real-time logging of guest requests, maintenance, and complaints.
-*   **Sticky Board:** Pin critical information to a "Glass" header for instant visibility across shifts.
 *   **Room Smart-Linking:** Automatically identifies `#RoomNumbers` in logs to provide instant guest history and context.
 
 ### 🔄 Shift Handover Wizard
@@ -33,16 +31,21 @@ Relay isn't just a tool; it's a design-forward platform. Adhering to a **"Cyber-
 
 ### 📅 Advanced Scheduling & Roster
 *   **Roster Matrix:** A visual, drag-and-drop style staff scheduling system for General Managers.
+*   **Shift Requests:** Staff can request specific shifts (Morning/Evening/Night) or Off Days directly from their dashboard.
 *   **Multi-Shift Support:** Seamlessly manage Morning (A), Afternoon (B), Night (C), and Extra (E) shifts.
 
-### 🚨 Incident & Damage Management
-*   **Visual Evidence:** Capture and attach photos of property damage or theft directly from the field.
-*   **Payment Tracking:** Monitor the status of incident-related costs (Pending, Paid, Waived).
-*   **Checkout Alerts:** Instant warnings if a guest with a pending payment attempts to depart.
+### 🌍 Tours & Transfer Sales
+*   **Digital Catalogue:** Manage and book tours, transfers, and laundry services directly.
+*   **Sales Tracking:** Track payments (Partial/Paid), generate reports, and attribute sales to specific staff members.
+*   **Calendar Integration:** Automatically syncs tour bookings to the hotel calendar.
+
+### 🏢 Multi-Tenancy & Hotel Management
+*   **Hotel Code System:** Securely join staff to specific hotels using unique 6-digit codes.
+*   **Role-Based Access:** Granular permissions for GMs, Receptionists, and Housekeeping staff.
 
 ### 🛠️ Internal Communications
 *   **Peer-to-Peer Messaging:** Secure, threaded internal chat between any two staff members.
-*   **Hotel-Wide Announcements:** GM-level broadcasts that appear as prominent banners for the entire team.
+*   **Announcements:** GM-level broadcasts that appear as prominent banners for the entire team.
 
 ---
 
@@ -62,12 +65,13 @@ Relay is built on a **multi-tenant architecture**, ensuring data isolation and s
 
 ```text
 hotels/{hotelId}
-├── info (Name, Address)
+├── info (Name, Address, **Hotel Code**)
 ├── settings (Compliance times, intervals)
 ├── logs (Maintenance, Guest Requests)
 ├── shifts (Handover records, Compliance)
 ├── roster (Weekly staff schedules)
-└── incidents (Damage/Theft reports)
+├── sales (Tours, Transfers, Laundry)
+└── calendar_events (Synced bookings)
 ```
 
 ---

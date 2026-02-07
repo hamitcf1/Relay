@@ -5,6 +5,7 @@ import { useTourStore } from '@/stores/tourStore'
 import { useSalesStore } from '@/stores/salesStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,7 @@ import { format } from 'date-fns'
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export function TourCatalogue() {
+    const { t } = useLanguageStore()
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
     const { tours, subscribeToTours, addTour, updateTour, deleteTour, loading } = useTourStore()
@@ -127,13 +129,13 @@ export function TourCatalogue() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">Tour Catalogue</h2>
-                    <p className="text-zinc-500 text-sm">Browse available tours and track local sales.</p>
+                    <h2 className="text-2xl font-bold text-white">{t('tours.catalogue.title')}</h2>
+                    <p className="text-zinc-500 text-sm">{t('tours.catalogue.desc')}</p>
                 </div>
                 {isGM && !isAdding && (
                     <Button onClick={() => setIsAdding(true)} className="bg-indigo-600 hover:bg-indigo-500 gap-2">
                         <Plus className="w-4 h-4" />
-                        Add New Tour
+                        {t('tours.add')}
                     </Button>
                 )}
             </div>
@@ -150,7 +152,7 @@ export function TourCatalogue() {
                         >
                             <Card className="bg-zinc-900 border-indigo-500/30">
                                 <CardHeader className="flex flex-row items-center justify-between">
-                                    <CardTitle className="text-white">{editingId ? 'Edit Tour' : 'Create New Tour Entry'}</CardTitle>
+                                    <CardTitle className="text-white">{editingId ? t('tours.edit') : t('tours.create')}</CardTitle>
                                     <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>
                                         <X className="w-4 h-4" />
                                     </Button>
@@ -158,7 +160,7 @@ export function TourCatalogue() {
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold">Tour Name</label>
+                                            <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.name')}</label>
                                             <Input
                                                 value={formData.name}
                                                 onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
@@ -166,7 +168,7 @@ export function TourCatalogue() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold">Short Description</label>
+                                            <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.desc')}</label>
                                             <Input
                                                 value={formData.description}
                                                 onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
@@ -177,7 +179,7 @@ export function TourCatalogue() {
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div className="space-y-2">
                                             <label className="text-xs text-zinc-500 uppercase font-bold flex items-center gap-1">
-                                                <Euro className="w-3 h-3 text-indigo-400" /> Base Price (EUR)
+                                                <Euro className="w-3 h-3 text-indigo-400" /> {t('tours.form.basePrice')}
                                             </label>
                                             <Input
                                                 type="number"
@@ -187,7 +189,7 @@ export function TourCatalogue() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold">Adult Price</label>
+                                            <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.adultPrice')}</label>
                                             <Input
                                                 type="number"
                                                 value={formData.adult_price}
@@ -196,7 +198,7 @@ export function TourCatalogue() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold text-amber-400">Child (3-7y)</label>
+                                            <label className="text-xs text-zinc-500 uppercase font-bold text-amber-400">{t('tours.form.child37Price')}</label>
                                             <Input
                                                 type="number"
                                                 value={formData.child_3_7_price}
@@ -205,7 +207,7 @@ export function TourCatalogue() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold text-emerald-400">Child (0-3y)</label>
+                                            <label className="text-xs text-zinc-500 uppercase font-bold text-emerald-400">{t('tours.form.child03Price')}</label>
                                             <Input
                                                 type="number"
                                                 value={formData.child_0_3_price}
@@ -215,7 +217,7 @@ export function TourCatalogue() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs text-zinc-500 uppercase font-bold">Operating Days</label>
+                                        <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.operatingDays')}</label>
                                         <div className="flex flex-wrap gap-2">
                                             {DAYS_OF_WEEK.map(day => (
                                                 <button
@@ -240,10 +242,10 @@ export function TourCatalogue() {
                                         </div>
                                     </div>
                                     <div className="flex justify-end gap-2 pt-2">
-                                        <Button variant="ghost" onClick={() => { setIsAdding(false); setEditingId(null); }}>Cancel</Button>
+                                        <Button variant="ghost" onClick={() => { setIsAdding(false); setEditingId(null); }}>{t('common.cancel')}</Button>
                                         <Button className="bg-indigo-600 hover:bg-indigo-500 px-8" onClick={handleSave}>
                                             <Save className="w-4 h-4 mr-2" />
-                                            {editingId ? 'Update Tour' : 'Save Tour'}
+                                            {editingId ? t('common.update') : t('common.save')}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -258,8 +260,8 @@ export function TourCatalogue() {
                 ) : tours.length === 0 ? (
                     <div className="col-span-full py-20 text-center bg-zinc-900/40 rounded-3xl border border-dashed border-zinc-800">
                         <Map className="w-16 h-16 text-zinc-800 mx-auto mb-4" />
-                        <p className="text-zinc-500 font-medium">No tours in the catalogue yet.</p>
-                        {isGM && <Button variant="link" className="text-indigo-400 mt-2" onClick={() => setIsAdding(true)}>Create the first one</Button>}
+                        <p className="text-zinc-500 font-medium">{t('tours.noTours')}</p>
+                        {isGM && <Button variant="link" className="text-indigo-400 mt-2" onClick={() => setIsAdding(true)}>{t('tours.createFirst')}</Button>}
                     </div>
                 ) : (
                     [...tours].sort((a, b) => a.name.localeCompare(b.name)).map(tour => (
@@ -268,7 +270,7 @@ export function TourCatalogue() {
                                 <CardHeader className="pb-2">
                                     <div className="flex items-center justify-between mb-1">
                                         <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
-                                            Local Tour
+                                            {t('tours.local')}
                                         </Badge>
                                         {isGM && (
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -311,7 +313,7 @@ export function TourCatalogue() {
                                             className="p-3 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
                                         >
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className="text-[10px] text-zinc-500 uppercase font-bold">Adult Price</span>
+                                                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t('tours.form.adultPrice')}</span>
                                                 <Calendar className="w-3 h-3 text-zinc-700 group-hover/price:text-indigo-400 opacity-0 group-hover/price:opacity-100 transition-all" />
                                             </div>
                                             <p className="text-lg font-bold text-white">
@@ -324,20 +326,20 @@ export function TourCatalogue() {
                                                 onClick={() => openBookingModal(tour, 'child_3_7')}
                                                 className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
                                             >
-                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">Child (3-7y)</p>
+                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">{t('tours.form.child37Price')}</p>
                                                 <p className="text-sm font-bold text-amber-400">€{tour.child_3_7_price}</p>
                                             </div>
                                             <div
                                                 onClick={() => openBookingModal(tour, 'child_0_3')}
                                                 className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
                                             >
-                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">Child (0-3y)</p>
+                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">{t('tours.form.child03Price')}</p>
                                                 <p className="text-sm font-bold text-emerald-400">€{tour.child_0_3_price}</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="mt-auto pt-4 border-t border-zinc-800/50">
-                                        <p className="text-[10px] text-zinc-600 italic text-center">Click a category to log a sale.</p>
+                                        <p className="text-[10px] text-zinc-600 italic text-center">{t('tours.clickToLog')}</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -349,15 +351,15 @@ export function TourCatalogue() {
                 <Dialog open={!!bookingTour} onOpenChange={(open) => !open && setBookingTour(null)}>
                     <DialogContent className="bg-zinc-950 border-zinc-800">
                         <DialogHeader>
-                            <DialogTitle className="text-white">New Booking: {bookingTour?.name}</DialogTitle>
+                            <DialogTitle className="text-white">{t('tours.book.title', { name: bookingTour?.name || '' })}</DialogTitle>
                             <DialogDescription className="text-zinc-500 text-sm">
-                                Enter booking details for this tour.
+                                {t('tours.book.desc')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">Guest Name</label>
+                                    <label className="text-xs text-zinc-500">{t('tours.book.guestName')}</label>
                                     <Input
                                         value={bookingForm.guest_name}
                                         onChange={e => setBookingForm(p => ({ ...p, guest_name: e.target.value }))}
@@ -366,7 +368,7 @@ export function TourCatalogue() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">Room #</label>
+                                    <label className="text-xs text-zinc-500">{t('tours.book.room')}</label>
                                     <Input
                                         value={bookingForm.room_number}
                                         onChange={e => setBookingForm(p => ({ ...p, room_number: e.target.value }))}
@@ -375,7 +377,7 @@ export function TourCatalogue() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">Pax</label>
+                                    <label className="text-xs text-zinc-500">{t('tours.book.pax')}</label>
                                     <Input
                                         type="number"
                                         value={bookingForm.pax}
@@ -385,7 +387,7 @@ export function TourCatalogue() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">Date</label>
+                                    <label className="text-xs text-zinc-500">{t('tours.book.date')}</label>
                                     <Input
                                         type="date"
                                         value={bookingForm.date}
@@ -396,7 +398,7 @@ export function TourCatalogue() {
                             </div>
                             <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
                                 <p className="text-xs text-indigo-300">
-                                    Total Price: <span className="font-bold text-white">€{bookingTour ? (
+                                    {t('tours.book.totalPrice')}: <span className="font-bold text-white">€{bookingTour ? (
                                         (bookingType === 'adult' ? bookingTour.adult_price :
                                             bookingType === 'child_3_7' ? bookingTour.child_3_7_price :
                                                 bookingTour.child_0_3_price) * bookingForm.pax
@@ -405,9 +407,9 @@ export function TourCatalogue() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setBookingTour(null)}>Cancel</Button>
+                            <Button variant="ghost" onClick={() => setBookingTour(null)}>{t('common.cancel')}</Button>
                             <Button className="bg-indigo-600 hover:bg-indigo-500" onClick={confirmBooking} disabled={!bookingForm.guest_name || !bookingForm.room_number}>
-                                <Check className="w-4 h-4 mr-1" /> Confirm Booking
+                                <Check className="w-4 h-4 mr-1" /> {t('tours.book.confirm')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

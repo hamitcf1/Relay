@@ -385,7 +385,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
                                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                                    <h3 className="text-sm font-semibold text-white">Gizli Bilgiler (KBS / Acente)</h3>
+                                    <h3 className="text-sm font-semibold text-white">{t('hotel.secure.title')}</h3>
                                 </div>
                                 {isVaultUnlocked ? (
                                     <Button size="sm" variant="ghost" onClick={() => setIsVaultUnlocked(false)}>
@@ -393,7 +393,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                     </Button>
                                 ) : (
                                     <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-[10px]">
-                                        Şifreli Bölüm
+                                        {t('hotel.secure.encrypted')}
                                     </Badge>
                                 )}
                             </div>
@@ -422,7 +422,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 <div className="flex gap-2">
                                     <Input
                                         type="password"
-                                        placeholder="Kasa Şifresi"
+                                        placeholder={t('hotel.secure.safeCode')}
                                         value={passwordInput}
                                         onChange={e => setPasswordInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && handleUnlock()}
@@ -436,7 +436,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-3">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">Acente Girişleri (Extranet)</label>
+                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('hotel.secure.agency')}</label>
                                             <textarea
                                                 className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
                                                 defaultValue={hotel.settings.secret_info?.agency_logins}
@@ -445,7 +445,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">KBS Giriş Bilgileri</label>
+                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('hotel.secure.kbs')}</label>
                                             <textarea
                                                 className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
                                                 defaultValue={hotel.settings.secret_info?.kbs_logins}
@@ -454,7 +454,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">Diğer Kasa Bilgileri</label>
+                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('hotel.secure.other')}</label>
                                             <textarea
                                                 className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
                                                 defaultValue={hotel.settings.secret_info?.safe_info}

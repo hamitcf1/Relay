@@ -11,7 +11,8 @@ import {
     CheckCircle,
     Archive,
     Edit2,
-    Undo2
+    Undo2,
+    User
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -151,6 +152,13 @@ export function LogCard({
                             )}>
                                 {t(`status.${log.urgency}` as any)}
                             </span>
+
+                            {log.guest_name && (
+                                <Badge variant="outline" className="text-[10px] h-5 bg-zinc-800 text-zinc-400 border-zinc-700 flex items-center gap-1 px-1.5">
+                                    <User className="w-2.5 h-2.5" />
+                                    {log.guest_name}
+                                </Badge>
+                            )}
 
                             {log.created_by_name && (
                                 <span className="text-[10px] text-zinc-600 block sm:inline">

@@ -80,6 +80,7 @@ export interface Log {
     created_by: string // user uid
     created_by_name: string // user display name
     is_pinned: boolean
+    guest_name?: string
 }
 
 // Input type for creating new logs

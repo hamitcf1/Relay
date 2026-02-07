@@ -7,6 +7,7 @@ import { useRosterStore } from '@/stores/rosterStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useNotificationStore } from '@/stores/notificationStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -18,6 +19,7 @@ import { type PrivateMessage } from '@/types'
 export function MessagingPanel() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
+    const { t } = useLanguageStore()
     const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat, deleteMessage } = useMessageStore()
     const { staff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
@@ -165,13 +167,13 @@ export function MessagingPanel() {
                 activeConversation !== 'all' && activeConversation !== '' ? "hidden md:flex" : "flex"
             )}>
                 <div className="p-4 border-b border-zinc-800">
-                    <h3 className="font-bold text-white mb-4">Messages</h3>
+                    <h3 className="font-bold text-white mb-4">{t('messages.title')}</h3>
                     <div className="relative">
                         <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-zinc-500" />
                         <Input
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search staff..."
+                            placeholder={t('messages.search')}
                             className="h-8 pl-8 bg-zinc-950 border-zinc-800 text-xs"
                         />
                     </div>
@@ -192,7 +194,7 @@ export function MessagingPanel() {
                             <Megaphone className="w-4 h-4 text-indigo-400" />
                         </div>
                         <div className="flex-1 text-left">
-                            <p className={cn("text-sm font-medium", activeConversation === 'all' ? "text-indigo-400" : "text-zinc-300")}>Announcements</p>
+                            <p className={cn("text-sm font-medium", activeConversation === 'all' ? "text-indigo-400" : "text-zinc-300")}>{t('messages.announcements')}</p>
                             <p className="text-[10px] text-zinc-500">General Hotel Chat</p>
                         </div>
                     </button>
@@ -257,8 +259,8 @@ export function MessagingPanel() {
                                     <Megaphone className="w-4 h-4 text-indigo-400" />
                                 </div>
                                 <div>
-                                    <h2 className="font-bold text-white">General Announcements</h2>
-                                    <p className="text-xs text-zinc-500">Broadcast to all staff</p>
+                                    <h2 className="font-bold text-white">{t('messages.announcements')}</h2>
+                                    <p className="text-xs text-zinc-500">{t('messages.broadcast')}</p>
                                 </div>
                             </>
                         ) : (

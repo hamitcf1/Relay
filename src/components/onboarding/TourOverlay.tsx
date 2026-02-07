@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface Step {
     target: string // ID of expectation element
@@ -15,47 +16,54 @@ interface TourOverlayProps {
     onClose: () => void
 }
 
-const steps: Step[] = [
-    {
-        target: 'tour-start', // We need to add IDs to these elements
-        title: 'Welcome to Relay',
-        content: 'This is your digital handover platform. Let\'s take a quick tour.',
-        position: 'bottom'
-    },
-    {
-        target: 'tour-shift-start',
-        title: 'Shift Start',
-        content: 'Begin your shift here. Log your cash, keys, and important notes depending on your role.',
-        position: 'right'
-    },
-    {
-        target: 'tour-sales',
-        title: 'Sales & Operations',
-        content: 'Track tours, transfers, and laundry sales. You can now update statuses directly from the list!',
-        position: 'right'
-    },
-    {
-        target: 'tour-logs',
-        title: 'Logs & Issues',
-        content: 'Report maintenance issues or general logs differently. Issues are tracked until resolved.',
-        position: 'right'
-    },
-    {
-        target: 'tour-notifications',
-        title: 'Notifications',
-        content: 'Stay updated on off-day requests and important messages. You can now dismiss them!',
-        position: 'bottom'
-    },
-    {
-        target: 'tour-profile',
-        title: 'Your Profile',
-        content: 'Access settings, tutorials, and logout here.',
-        position: 'left'
-    }
-]
-
 export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
+    const { t } = useLanguageStore()
     const [currentStep, setCurrentStep] = useState(0)
+
+    const steps: Step[] = [
+        {
+            target: 'tour-start',
+            title: t('tour.intro.title'),
+            content: t('tour.intro.desc'),
+            position: 'bottom'
+        },
+        {
+            target: 'tour-shift-start',
+            title: t('tour.compliance.title'),
+            content: t('tour.compliance.desc'),
+            position: 'right'
+        },
+        {
+            target: 'tour-logs',
+            title: t('tour.feed.title'),
+            content: t('tour.feed.desc'),
+            position: 'right'
+        },
+        {
+            target: 'tour-tours',
+            title: t('tours.catalogue.title'),
+            content: t('tours.catalogue.desc'),
+            position: 'bottom'
+        },
+        {
+            target: 'tour-sales',
+            title: t('tour.sales.title'),
+            content: t('tour.sales.desc'),
+            position: 'bottom'
+        },
+        {
+            target: 'tour-notifications',
+            title: t('tour.notifications.title'),
+            content: t('tour.notifications.desc'),
+            position: 'bottom'
+        },
+        {
+            target: 'tour-profile',
+            title: t('tour.profile.title'),
+            content: t('tour.profile.desc'),
+            position: 'left'
+        }
+    ]
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
 
     useEffect(() => {

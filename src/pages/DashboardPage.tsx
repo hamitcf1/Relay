@@ -263,8 +263,12 @@ export function DashboardPage() {
                                 <DropdownMenuSeparator className="bg-zinc-800 my-2" />
 
                                 <DropdownMenuItem onClick={() => setShowTour(true)} className="gap-2 cursor-pointer">
-                                    <Sparkles className="w-4 h-4 text-amber-400" />
-                                    <span className="text-zinc-300">Start Tour</span>
+                                    <Map className="w-4 h-4 text-amber-400" />
+                                    <span className="text-zinc-300">Guided Tour</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setShowTutorial(true)} className="gap-2 cursor-pointer">
+                                    <Play className="w-4 h-4 text-indigo-400" />
+                                    <span className="text-zinc-300">Replay Intro</span>
                                 </DropdownMenuItem>
 
                                 <div className="space-y-1">
@@ -420,11 +424,11 @@ export function DashboardPage() {
                                         <ShieldAlert className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.complaints')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="off-days" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
+                                    <TabsTrigger value="off-days" id="tour-offdays" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
                                         <CalendarDays className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.offDays')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="tours" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
+                                    <TabsTrigger value="tours" id="tour-tours" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
                                         <Map className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.tours')}</span>
                                     </TabsTrigger>

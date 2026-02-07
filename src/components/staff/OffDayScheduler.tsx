@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useOffDayStore } from '@/stores/offDayStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,7 @@ import { cn, formatDisplayDate } from '@/lib/utils'
 export function OffDayScheduler() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
+    const { t } = useLanguageStore()
     const { requests, subscribeToRequests, submitRequest, updateRequest, updateRequestStatus, deleteRequest, cancelRequest, loading } = useOffDayStore()
 
     const [dates, setDates] = useState<string[]>([''])
@@ -115,8 +117,8 @@ export function OffDayScheduler() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">İzin & Vardiya Yönetimi</h2>
-                    <p className="text-zinc-500 text-sm">Personel izin ve vardiya taleplerini yönetin.</p>
+                    <h2 className="text-2xl font-bold text-white">{t('offday.management.title')}</h2>
+                    <p className="text-zinc-500 text-sm">{t('offday.management.desc')}</p>
                 </div>
             </div>
 
@@ -243,7 +245,7 @@ export function OffDayScheduler() {
                     <CardHeader className="border-b border-zinc-800">
                         <CardTitle className="text-zinc-200 flex items-center gap-2 text-base">
                             <Clock className="w-5 h-5 text-amber-400" />
-                            {isGM ? "Bekleyen Talepler" : "Talep Geçmişim"}
+                            {isGM ? t('offday.pending') : t('offday.history')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 overflow-y-auto custom-scrollbar">

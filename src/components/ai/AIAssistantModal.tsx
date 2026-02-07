@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     X,
@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { useAIStore, AIModelType, AITaskType } from '@/stores/aiStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
 
 interface AIAssistantModalProps {
@@ -28,27 +29,32 @@ interface AIAssistantModalProps {
     initialPrompt?: string
 }
 
-const MODELLS = [
-    { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', desc: 'Fastest' },
-    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: 'Balanced' },
-    { id: 'gemma-3-27b', name: 'Gemma 3 27B', desc: 'Largest' },
-    { id: 'gemma-3-12b', name: 'Gemma 3 12B', desc: 'Large' },
-    { id: 'gemma-3-4b', name: 'Gemma 3 4B', desc: 'Medium' },
-    { id: 'gemma-3-2b', name: 'Gemma 3 2B', desc: 'Small' },
-    { id: 'gemma-3-1b', name: 'Gemma 3 1B', desc: 'Smallest' },
-] as const
 
-const TASKS = [
-    { id: 'general', name: 'General Assistant', icon: Sparkles, prompt: 'How can I help you today?' },
-    { id: 'report', name: 'Incident Report (Tutanak)', icon: FileText, prompt: 'Describe the incident (Who, What, When, Where)...' },
-    { id: 'email', name: 'Professional Email', icon: Mail, prompt: 'Who is the recipient and what is the core message?' },
-    { id: 'review', name: 'Review Reply', icon: MessageCircle, prompt: 'Paste the guest review here...' },
-] as const
 
 export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', initialPrompt = '' }: AIAssistantModalProps) {
     const { generate, loading, result, error } = useAIStore()
     const { hotel, updateHotelSettings } = useHotelStore()
     const { user } = useAuthStore()
+    const { t } = useLanguageStore()
+
+    const TASKS = useMemo(() => [
+        { id: 'general', name: t('ai.task.general'), icon: Sparkles, prompt: t('ai.task.generalDesc') },
+        { id: 'report', name: t('ai.task.incident'), icon: FileText, prompt: t('ai.task.incidentDesc') },
+        { id: 'email', name: t('ai.task.email'), icon: Mail, prompt: t('ai.task.emailDesc') },
+        { id: 'review', name: t('ai.task.review'), icon: MessageCircle, prompt: t('ai.task.reviewDesc') },
+    ] as const, [t])
+
+    const MODELLS = useMemo(() => [
+        { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', desc: 'Fastest' },
+        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: t('ai.mode.quota') },
+        { id: 'gemma-3-27b', name: 'Gemma 3 27B', desc: 'Largest' },
+        { id: 'gemma-3-12b', name: 'Gemma 3 12B', desc: 'Large' },
+        { id: 'gemma-3-4b', name: 'Gemma 3 4B', desc: 'Medium' },
+        { id: 'gemma-3-2b', name: 'Gemma 3 2B', desc: 'Small' },
+        { id: 'gemma-3-1b', name: 'Gemma 3 1B', desc: 'Smallest' },
+    ] as const, [t])
+
+
 
     const [task, setTask] = useState<AITaskType>(initialTask)
     const [prompt, setPrompt] = useState(initialPrompt)
@@ -107,8 +113,8 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                             <Wand2 className="w-5 h-5 text-indigo-400" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-white tracking-tight">Relay AI Assistant</h2>
-                            <p className="text-xs text-zinc-500">Powered by Gemini & Gemma</p>
+                            <h2 className="text-lg font-bold text-white tracking-tight">{t('ai.title')}</h2>
+                            <p className="text-xs text-zinc-500">{t('ai.poweredBy')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -122,7 +128,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                 title="Edit Hotel Knowledge Base"
                             >
                                 <BrainIcon className="w-4 h-4" />
-                                {showKbEditor && <span className="text-xs font-bold">Knowledge Base</span>}
+                                {showKbEditor && <span className="text-xs font-bold">{t('ai.context.title')}</span>}
                             </button>
                         )}
                         <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-500 hover:text-white">
@@ -145,16 +151,15 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                 <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-2xl p-4 mb-4">
                                     <div className="flex items-center justify-between mb-2">
                                         <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                                            <BrainIcon className="w-4 h-4" /> Hotel Knowledge Base
+                                            <BrainIcon className="w-4 h-4" /> {t('ai.context.title')}
                                         </h3>
                                         <div className="flex gap-2">
-                                            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowKbEditor(false)}>Cancel</Button>
-                                            <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500" onClick={handleSaveKb}>Save Context</Button>
+                                            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowKbEditor(false)}>{t('ai.cancel')}</Button>
+                                            <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500" onClick={handleSaveKb}>{t('ai.context.save')}</Button>
                                         </div>
                                     </div>
                                     <p className="text-[10px] text-zinc-400 mb-3">
-                                        Enter facts about your hotel (breakfast hours, wifi password, policies).
-                                        The AI will use this to generate accurate answers.
+                                        {t('ai.context.desc')}
                                     </p>
                                     <textarea
                                         value={kbContent}
@@ -170,7 +175,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                     {/* Model & Task Selector */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">AI Model</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">{t('ai.model')}</label>
                             <div className="relative">
                                 <button
                                     onClick={() => setShowModels(!showModels)}
@@ -219,7 +224,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Assistant Mode</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">{t('ai.mode.assistant')}</label>
                             <div className="flex gap-2">
                                 {TASKS.map((t) => {
                                     const Icon = t.icon
@@ -252,7 +257,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                     {/* Input Area */}
                     <div className="space-y-3">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">
-                            {TASKS.find(t => t.id === task)?.name} Request
+                            {TASKS.find(t => t.id === task)?.name}
                         </label>
                         <div className="relative">
                             <textarea
@@ -268,7 +273,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                     className="rounded-xl bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-900/20 h-10 px-4"
                                 >
                                     {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-3.5 h-3.5 mr-2" />}
-                                    Generate
+                                    {t('ai.generate')}
                                 </Button>
                             </div>
                         </div>

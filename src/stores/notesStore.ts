@@ -243,7 +243,8 @@ export const useNotesStore = create<NotesStore>((set) => ({
                 created_at: serverTimestamp(),
                 created_by: note.created_by === 'anonymous' ? 'system' : note.created_by,
                 created_by_name: note.created_by_name,
-                is_pinned: false
+                is_pinned: false,
+                guest_name: note.guest_name || undefined
             })
 
             // Optionally mark note as resolved/archived?

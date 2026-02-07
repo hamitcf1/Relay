@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, getDocs, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { format, addDays, parseISO } from 'date-fns'
 
@@ -141,9 +141,8 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         })
     },
 
-    toggleStaffVisibility: async (hotelId: string, userId: string, isHidden: boolean) => {
+    toggleStaffVisibility: async (_hotelId: string, userId: string, isHidden: boolean) => {
         try {
-            const { updateDoc, doc } = await import('firebase/firestore')
             const userRef = doc(db, 'users', userId)
             await updateDoc(userRef, {
                 is_hidden_in_roster: isHidden

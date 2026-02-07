@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNotesStore } from '@/stores/notesStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +16,7 @@ import { cn } from '@/lib/utils'
 export function FeedbackSection() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
+    const { t } = useLanguageStore()
     const { notes, subscribeToNotes, addNote, updateNoteStatus, loading } = useNotesStore()
 
     const [content, setContent] = useState('')
@@ -79,12 +81,12 @@ export function FeedbackSection() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">Anonymous Feedback</h2>
-                    <p className="text-zinc-500 text-sm">Şikayet Dilekçeleri - Your voice matters safely.</p>
+                    <h2 className="text-2xl font-bold text-white">{t('feedback.anonymous.title')}</h2>
+                    <p className="text-zinc-500 text-sm">{t('offday.petitions')} - {t('feedback.anonymous.subtitle')}</p>
                 </div>
                 {isGM && (
                     <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/20 px-3 py-1">
-                        Management View
+                        {t('feedback.management.view')}
                     </Badge>
                 )}
             </div>
@@ -95,10 +97,10 @@ export function FeedbackSection() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-zinc-200">
                             <Shield className="w-5 h-5 text-emerald-400" />
-                            Submit Anonymous Complaint
+                            {t('feedback.submit.title')}
                         </CardTitle>
                         <CardDescription>
-                            Your identity is completely hidden. No personal data is stored with your message.
+                            {t('feedback.submit.desc')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -149,11 +151,11 @@ export function FeedbackSection() {
                         <CardHeader className="pb-2">
                             <CardTitle className="text-emerald-400 text-sm flex items-center gap-2">
                                 <Shield className="w-4 h-4" />
-                                Privacy Guaranteed
+                                {t('feedback.privacy.title')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="text-[11px] text-emerald-500/60 leading-relaxed">
-                            We use hotel-level collections without user associations. Even database administrators cannot trace feedback to a specific user account.
+                            {t('feedback.privacy.desc')}
                         </CardContent>
                     </Card>
 
