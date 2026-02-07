@@ -404,7 +404,7 @@ export function DashboardPage() {
                                 {(user?.role === 'gm' || user?.role === 'receptionist') && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
+                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
                                         transition={{ duration: 0.5, delay: 0.2 }}
                                     >
                                         <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
@@ -417,7 +417,7 @@ export function DashboardPage() {
                                 {/* 3. Hotel Info */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
                                     transition={{ delay: 0.3 }}
                                 >
                                     <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
@@ -426,7 +426,7 @@ export function DashboardPage() {
                                 {/* 3. Daily Menu */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
                                     transition={{ delay: 0.3 }}
                                 >
                                     <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
@@ -435,7 +435,7 @@ export function DashboardPage() {
                                 {/* 1. Currency Widget */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
                                     transition={{ delay: 0.1 }}
                                 >
                                     {/* Currency Widget with TCMB Rates */}
@@ -445,7 +445,7 @@ export function DashboardPage() {
                                 {/* 1. Calendar Widget */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
                                     transition={{ delay: 0.1 }}
                                 >
                                     <CalendarWidget hotelId={hotel?.id || ''} />
