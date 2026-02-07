@@ -181,6 +181,7 @@ export interface ShiftNote {
     guest_name?: string | null
     assigned_staff_uid?: string | null
     assigned_staff_name?: string | null
+    updated_at?: Date
 }
 
 // Room Types

@@ -32,7 +32,7 @@ interface ShiftNotesProps {
 }
 
 export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
-    const { notes, addNote, updateNote, markPaid, deleteNote } = useNotesStore()
+    const { notes, addNote, updateNote, markPaid, deleteNote, convertToLog } = useNotesStore()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
     const { staff, subscribeToRoster } = useRosterStore()
@@ -126,6 +126,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const handleDelete = async (noteId: string) => {
         if (confirm(t('common.deleteConfirm'))) {
             await deleteNote(hotelId, noteId)
+        }
+    }
+
+    const handleConvertToLog = async (noteId: string) => {
+        if (confirm('Convert this note to a system log?')) {
+            await convertToLog(hotelId, noteId)
         }
     }
 
@@ -536,6 +542,11 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                     <Clock className="w-2.5 h-2.5" />
                                                     {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
                                                     <span className="opacity-50 ml-1">({formatDisplayDateTime(note.created_at)})</span>
+                                                    {note.updated_at && note.updated_at.getTime() !== note.created_at.getTime() && (
+                                                        <span className="text-zinc-600 ml-1" title={formatDisplayDateTime(note.updated_at)}>
+                                                            (edited)
+                                                        </span>
+                                                    )}
                                                 </span>
                                             )}
                                         </div>
@@ -569,14 +580,25 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         </Select>
 
                                         {user?.role === 'gm' && (
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                onClick={() => handleDelete(note.id)}
-                                                className="h-6 w-6 text-rose-500 hover:bg-rose-500/10"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
+                                            <>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={() => handleConvertToLog(note.id)}
+                                                    className="h-6 w-6 text-indigo-400 hover:bg-indigo-500/10"
+                                                    title="Convert to Log"
+                                                >
+                                                    <Wand2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    onClick={() => handleDelete(note.id)}
+                                                    className="h-6 w-6 text-rose-500 hover:bg-rose-500/10"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </>
                                         )}
 
                                         <Button

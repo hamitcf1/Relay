@@ -15,7 +15,7 @@ import { cn, formatDisplayDate } from '@/lib/utils'
 export function OffDayScheduler() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
-    const { requests, subscribeToRequests, submitRequest, updateRequest, updateRequestStatus, loading } = useOffDayStore()
+    const { requests, subscribeToRequests, submitRequest, updateRequest, updateRequestStatus, deleteRequest, cancelRequest, loading } = useOffDayStore()
     const { addEvent } = useCalendarStore()
 
     const [dates, setDates] = useState<string[]>([''])
@@ -105,6 +105,16 @@ export function OffDayScheduler() {
             })
         }
         // Note: Deleting calendar event on rejection would require tracking event IDs
+    }
+
+    const handleDelete = async (requestId: string) => {
+        if (!hotel?.id || !confirm('Bu talebi kalıcı olarak silmek istediğinizden emin misiniz?')) return
+        await deleteRequest(hotel.id, requestId)
+    }
+
+    const handleCancel = async (requestId: string) => {
+        if (!hotel?.id || !confirm('Bu talebi iptal etmek istediğinizden emin misiniz?')) return
+        await cancelRequest(hotel.id, requestId)
     }
 
     return (
@@ -255,6 +265,18 @@ export function OffDayScheduler() {
                                                 </Button>
                                             )}
 
+                                            {/* Staff can cancel pending requests */}
+                                            {!isGM && r.status === 'pending' && (
+                                                <Button
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    onClick={() => handleCancel(r.id)}
+                                                    className="bg-zinc-800 hover:bg-zinc-700 text-rose-400 hover:text-rose-300 h-8 text-xs"
+                                                >
+                                                    İptal
+                                                </Button>
+                                            )}
+
                                             {/* Staff can re-request rejected requests */}
                                             {!isGM && r.status === 'rejected' && (
                                                 <Button
@@ -318,6 +340,18 @@ export function OffDayScheduler() {
                                                 </div>
                                             )}
                                         </div>
+                                        {/* GM Delete Button - Always visible for GM */}
+                                        {isGM && (
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDelete(r.id)}
+                                                className="h-8 w-8 p-0 text-zinc-600 hover:text-rose-500 hover:bg-rose-500/10 ml-2"
+                                                title="Kalıcı Olarak Sil"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
                                     </motion.div>
                                 ))}
                             </div>

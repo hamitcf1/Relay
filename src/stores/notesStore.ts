@@ -31,6 +31,7 @@ interface NotesActions {
     toggleRelevance: (hotelId: string, noteId: string, isRelevant: boolean) => Promise<void>
     markPaid: (hotelId: string, noteId: string) => Promise<void>
     deleteNote: (hotelId: string, noteId: string) => Promise<void>
+    convertToLog: (hotelId: string, noteId: string) => Promise<void>
 }
 
 type NotesStore = NotesState & NotesActions
@@ -72,7 +73,8 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         shift_id: data.shift_id || null,
                         resolved_at: data.resolved_at ? convertTimestamp(data.resolved_at) : null,
                         resolved_by: data.resolved_by || null,
-                        is_anonymous: data.is_anonymous || false
+                        is_anonymous: data.is_anonymous || false,
+                        updated_at: data.updated_at ? convertTimestamp(data.updated_at) : undefined
                     }
                 })
 
@@ -131,6 +133,8 @@ export const useNotesStore = create<NotesStore>((set) => ({
             if (updates.status === 'resolved' || updates.status === 'archived') {
                 updates.resolved_at = updates.resolved_at || new Date()
             }
+
+            updates.updated_at = serverTimestamp() as any
 
             // Clean undefined
             const cleanUpdates = Object.entries(updates).reduce((acc, [k, v]) => {
@@ -223,6 +227,36 @@ export const useNotesStore = create<NotesStore>((set) => ({
             throw error
         }
     },
+
+    convertToLog: async (hotelId, noteId) => {
+        try {
+            const note = useNotesStore.getState().notes.find(n => n.id === noteId)
+            if (!note) throw new Error("Note not found")
+
+            const logsRef = collection(db, 'hotels', hotelId, 'logs')
+            await addDoc(logsRef, {
+                type: 'system', // or based on category
+                content: `[Promoted from Note] ${note.content}`,
+                room_number: note.room_number,
+                urgency: 'low',
+                status: 'open',
+                created_at: serverTimestamp(),
+                created_by: note.created_by === 'anonymous' ? 'system' : note.created_by,
+                created_by_name: note.created_by_name,
+                is_pinned: false
+            })
+
+            // Optionally mark note as resolved/archived?
+            // "Add 'Convert to Log' button/feature for notes"
+            // Usually this implies the note is "processed" into a log.
+            // Let's mark it resolved to avoid duplication.
+            await useNotesStore.getState().updateNoteStatus(hotelId, noteId, 'resolved', 'system')
+
+        } catch (error) {
+            console.error('Error converting note to log:', error)
+            throw error
+        }
+    }
 }))
 
 // Category display info

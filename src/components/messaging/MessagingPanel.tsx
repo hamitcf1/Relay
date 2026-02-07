@@ -18,7 +18,7 @@ import { type PrivateMessage } from '@/types'
 export function MessagingPanel() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
-    const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat } = useMessageStore()
+    const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat, deleteMessage } = useMessageStore()
     const { staff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
     const [searchParams] = useSearchParams()
@@ -320,7 +320,7 @@ export function MessagingPanel() {
                                             )}
 
                                             <div className={cn(
-                                                "p-3 rounded-2xl text-sm leading-relaxed",
+                                                "p-3 rounded-2xl text-sm leading-relaxed relative group/msg",
                                                 isMe ? "bg-indigo-600 text-white rounded-tr-sm" : "bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-tl-sm"
                                             )}>
                                                 {activeConversation === 'all' && !isMe && (
@@ -333,6 +333,25 @@ export function MessagingPanel() {
                                                         msg.is_read ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />
                                                     )}
                                                 </div>
+
+                                                {/* Delete Message Button */}
+                                                {(isMe || user?.role === 'gm') && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            if (confirm('Delete this message?')) {
+                                                                if (hotel?.id) deleteMessage(hotel.id, msg.id)
+                                                            }
+                                                        }}
+                                                        className={cn(
+                                                            "absolute -top-2 p-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 opacity-0 group-hover/msg:opacity-100 transition-opacity hover:text-rose-500 hover:border-rose-500",
+                                                            isMe ? "-left-2" : "-right-2"
+                                                        )}
+                                                        title="Delete message"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )
