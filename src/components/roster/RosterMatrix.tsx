@@ -42,7 +42,7 @@ const SHIFT_COLORS: Record<ShiftValue & string, string> = {
     'B': 'bg-purple-500/80 text-white',
     'C': 'bg-rose-500/80 text-white',
     'E': 'bg-amber-500/80 text-white',
-    'OFF': 'bg-zinc-700 text-zinc-400',
+    'OFF': 'bg-muted text-muted-foreground border border-border/50',
 }
 
 const SHIFT_CYCLE: (ShiftType | 'OFF')[] = ['A', 'B', 'C', 'E', 'OFF']
@@ -248,7 +248,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         return (
             <Card>
                 <CardContent className="flex items-center justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                 </CardContent>
             </Card>
         )
@@ -258,10 +258,10 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         <CollapsibleCard
             id="roster-matrix"
             title={
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-indigo-400" />
+                <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-primary" />
                     {t('roster.title')}
-                    {saving && <Loader2 className="w-3 h-3 animate-spin text-zinc-500" />}
+                    {saving && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
                 </CardTitle>
             }
             headerActions={
@@ -277,7 +277,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <span className="text-[10px] text-zinc-400 min-w-[70px] text-center font-mono">
+                    <span className="text-[10px] text-muted-foreground min-w-[70px] text-center font-mono">
                         {formatDisplayDate(weekStart)}
                     </span>
                     <Button
@@ -302,13 +302,13 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                 ) : (
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-zinc-800">
+                            <tr className="border-b border-border">
                                 {canEdit && <th className="w-8"></th>}
-                                <th className="text-left py-2 px-1 text-zinc-400 font-medium text-[10px] uppercase tracking-wider">{t('common.staff')}</th>
+                                <th className="text-left py-2 px-1 text-muted-foreground font-medium text-[10px] uppercase tracking-wider">{t('common.staff')}</th>
                                 {weekDates.map(({ day, dateStr }) => {
                                     const dayKey = `day.${day.toLowerCase()}` as any
                                     return (
-                                        <th key={day} className="text-center py-2 px-0.5 text-zinc-400 font-medium w-10">
+                                        <th key={day} className="text-center py-2 px-0.5 text-muted-foreground font-medium w-10">
                                             <div className="text-[9px] opacity-50 mb-0.5 font-mono">{dateStr}</div>
                                             <div className="text-[10px]">{t(dayKey)}</div>
                                         </th>
@@ -327,15 +327,15 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                     key={member.uid}
                                     value={member}
                                     as="tr"
-                                    className="border-b border-zinc-800/50 bg-zinc-950/50"
+                                    className="border-b border-border/50 bg-background/50"
                                 >
                                     {canEdit && (
-                                        <td className="py-2 px-1 text-zinc-600 cursor-grab active:cursor-grabbing">
+                                        <td className="py-2 px-1 text-muted-foreground cursor-grab active:cursor-grabbing">
                                             <GripVertical className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" />
                                         </td>
                                     )}
-                                    <td className="py-2 px-1 text-zinc-300 whitespace-nowrap text-xs flex items-center gap-2">
-                                        <span className={cn(member.is_hidden_in_roster && "opacity-50 line-through decoration-zinc-500")}>
+                                    <td className="py-2 px-1 text-foreground whitespace-nowrap text-xs flex items-center gap-2">
+                                        <span className={cn(member.is_hidden_in_roster && "opacity-50 line-through decoration-muted-foreground")}>
                                             {member.name}
                                         </span>
                                         {user?.role === 'gm' && (

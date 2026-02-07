@@ -25,11 +25,11 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
 
     // Move SHIFT_INFO inside to use t() for localized labels
     const SHIFT_INFO: Record<string, { label: string; time: string; color: string }> = {
-        'A': { label: t('shift.morning'), time: '08:00 - 16:00', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-        'B': { label: t('shift.afternoon'), time: '16:00 - 00:00', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-        'C': { label: t('shift.night'), time: '00:00 - 08:00', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
-        'E': { label: t('shift.extra'), time: '10:00 - 18:00', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-        'OFF': { label: t('shift.off'), time: '-', color: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
+        'A': { label: t('shift.morning'), time: '08:00 - 16:00', color: 'bg-indigo-500/10 text-indigo-400 dark:text-indigo-300 border-indigo-500/20' },
+        'B': { label: t('shift.afternoon'), time: '16:00 - 00:00', color: 'bg-purple-500/10 text-purple-400 dark:text-purple-300 border-purple-500/20' },
+        'C': { label: t('shift.night'), time: '00:00 - 08:00', color: 'bg-rose-500/10 text-rose-400 dark:text-rose-300 border-rose-500/20' },
+        'E': { label: t('shift.extra'), time: '10:00 - 18:00', color: 'bg-amber-500/10 text-amber-400 dark:text-amber-300 border-amber-500/20' },
+        'OFF': { label: t('shift.off'), time: '-', color: 'bg-muted text-muted-foreground dark:text-zinc-300 border-border' },
     }
 
     // Ensure we are subscribed
@@ -78,8 +78,8 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
         <CollapsibleCard
             id="current-shift"
             title={
-                <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
+                <CardTitle className="text-sm font-medium text-muted-foreground dark:text-zinc-300 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                     {t('dashboard.weeklySchedule')}
                 </CardTitle>
             }
@@ -87,7 +87,7 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                 <Button
                     variant="ghost"
                     size="icon"
-                    className={cn("h-6 w-6 text-zinc-500", isRefreshing && "animate-spin")}
+                    className={cn("h-6 w-6 text-muted-foreground", isRefreshing && "animate-spin")}
                     onClick={(e) => {
                         e.stopPropagation()
                         handleRefresh()
@@ -96,21 +96,21 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                     <RefreshCcw className="w-3.5 h-3.5" />
                 </Button>
             }
-            className="bg-zinc-900 border-zinc-800"
+            className="bg-card border-border"
         >
             <div className="space-y-5 pt-2">
                 {/* Active Hotel Status Context */}
-                <div className="flex items-center justify-between bg-zinc-800/50 p-3 rounded-lg border border-zinc-800">
+                <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg border border-border">
                     <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-emerald-500/10 rounded-md">
                             <Briefcase className="w-4 h-4 text-emerald-500" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">{t('dashboard.activeHotelShift')}</p>
-                            <p className="text-sm font-medium text-white">{activeLabel}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{t('dashboard.activeHotelShift')}</p>
+                            <p className="text-sm font-medium text-foreground">{activeLabel}</p>
                         </div>
                     </div>
-                    <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-zinc-700">
+                    <Badge variant="outline" className="bg-card text-muted-foreground border-border">
                         {currentShift ? t('status.ongoing') : t('status.noActiveShift')}
                     </Badge>
                 </div>
@@ -118,9 +118,9 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                 {/* Today's Shift Highlight */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-zinc-400">{t('dashboard.todaysAssignment')}</span>
+                        <span className="text-xs font-medium text-muted-foreground">{t('dashboard.todaysAssignment')}</span>
                         {todayShift && todayShift.shift && (
-                            <Badge className={cn("text-[10px] px-2 py-0.5", SHIFT_INFO[todayShift.shift]?.color || "bg-zinc-800")}>
+                            <Badge className={cn("text-[10px] px-2 py-0.5", SHIFT_INFO[todayShift.shift]?.color || "bg-muted")}>
                                 {SHIFT_INFO[todayShift.shift]?.time}
                             </Badge>
                         )}
@@ -129,7 +129,7 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                     {todayShift?.shift ? (
                         <div className={cn(
                             "flex items-center justify-between p-3 rounded-lg border",
-                            SHIFT_INFO[todayShift.shift]?.color || "bg-zinc-800 border-zinc-700"
+                            SHIFT_INFO[todayShift.shift]?.color || "bg-muted border-border"
                         )}>
                             <div className="flex items-center gap-3">
                                 <Clock className="w-5 h-5 opacity-80" />
@@ -140,8 +140,8 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                             </div>
                         </div>
                     ) : (
-                        <div className="p-3 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 text-center">
-                            <span className="text-xs text-zinc-500">{t('dashboard.noAssignedShift')}</span>
+                        <div className="p-3 rounded-lg border border-dashed border-border bg-card/50 text-center">
+                            <span className="text-xs text-muted-foreground">{t('dashboard.noAssignedShift')}</span>
                         </div>
                     )}
                 </div>
@@ -153,12 +153,12 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                             key={day.dayName}
                             className={cn(
                                 "flex flex-col items-center gap-1 p-2 rounded-lg border transition-all",
-                                day.isToday ? "bg-zinc-800 border-zinc-700 ring-1 ring-indigo-500/20" : "bg-transparent border-transparent hover:bg-zinc-800/50"
+                                day.isToday ? "bg-muted border-border ring-1 ring-primary/20" : "bg-transparent border-transparent hover:bg-muted/50"
                             )}
                         >
                             <span className={cn(
                                 "text-[10px] font-medium uppercase",
-                                day.isToday ? "text-indigo-400" : "text-zinc-500"
+                                day.isToday ? "text-primary" : "text-muted-foreground"
                             )}>
                                 {day.dayName}
                             </span>
@@ -167,12 +167,12 @@ export function CurrentShiftDisplay({ hotelId, userId }: CurrentShiftDisplayProp
                                 <div className={cn(
                                     "w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold",
                                     SHIFT_INFO[day.shift]?.color.split(' ')[0], // Use just the bg color
-                                    SHIFT_INFO[day.shift]?.color.includes('text-white') ? 'text-white' : 'text-zinc-300'
+                                    SHIFT_INFO[day.shift]?.color.includes('text-white') ? 'text-white' : 'text-foreground'
                                 )}>
                                     {day.shift === 'OFF' ? '-' : day.shift}
                                 </div>
                             ) : (
-                                <div className="w-6 h-6 rounded bg-zinc-800/50 flex items-center justify-center text-[10px] text-zinc-600">
+                                <div className="w-6 h-6 rounded bg-muted/50 flex items-center justify-center text-[10px] text-muted-foreground">
                                     -
                                 </div>
                             )}

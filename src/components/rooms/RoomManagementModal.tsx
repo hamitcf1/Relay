@@ -169,12 +169,12 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-0">
-                <div className="p-6 pb-2 border-b border-zinc-800 bg-zinc-900/50">
+            <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-0">
+                <div className="p-6 pb-2 border-b border-border bg-muted/30">
                     <DialogHeader>
                         <DialogTitle className="flex items-center justify-between text-xl font-bold">
                             <div className="flex items-center gap-2">
-                                <BedDouble className="w-6 h-6 text-indigo-400" />
+                                <BedDouble className="w-6 h-6 text-primary" />
                                 Room Management
                             </div>
                         </DialogTitle>
@@ -184,23 +184,23 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                     </DialogHeader>
 
                     <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as any)} className="mt-6">
-                        <TabsList className="bg-zinc-900 border border-zinc-800">
+                        <TabsList className="bg-muted border border-border">
                             <TabsTrigger value="overview">Room Situation</TabsTrigger>
                             {isGM && <TabsTrigger value="setup">Room Setup</TabsTrigger>}
                         </TabsList>
                     </Tabs>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 bg-zinc-950/50">
+                <div className="flex-1 overflow-y-auto p-6 bg-background">
                     <Tabs value={activeTab} className="h-full">
                         <TabsContent value="overview" className="mt-0 space-y-6 h-full">
                             {/* Filters */}
-                            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-4 rounded-xl border border-border mt-1">
                                 <div className="relative w-full sm:w-64">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                                     <Input
                                         placeholder="Search room..."
-                                        className="pl-9 bg-zinc-950 border-zinc-800 focus:border-indigo-500"
+                                        className="pl-9 bg-background border-border focus:border-primary"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />
@@ -213,7 +213,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                             size="sm"
                                             onClick={() => setFilterStatus(status)}
                                             className={cn(
-                                                "capitalize text-xs h-8 border-zinc-800",
+                                                "capitalize text-xs h-8 border-border",
                                                 filterStatus === status && status !== 'all' && statusColors[status as RoomStatus]
                                             )}
                                         >
@@ -236,17 +236,17 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                             className={cn(
                                                 "relative group p-4 rounded-xl border transition-all cursor-pointer hover:shadow-lg",
                                                 room.occupancy === 'occupied'
-                                                    ? "bg-zinc-800/60 border-indigo-500/40 hover:border-indigo-500"
-                                                    : "bg-zinc-900 border-zinc-800 hover:border-zinc-600"
+                                                    ? "bg-primary/5 border-primary/40 hover:border-primary"
+                                                    : "bg-card border-border hover:border-primary/50"
                                             )}
                                         >
                                             {/* Header */}
                                             <div className="flex justify-between items-start mb-3">
                                                 <div className="flex flex-col">
-                                                    <span className="text-lg font-bold text-zinc-200">
+                                                    <span className="text-lg font-bold text-foreground">
                                                         {room.number}
                                                     </span>
-                                                    <span className="text-[10px] text-zinc-600 uppercase font-medium">{roomTypeLabels[room.type]}</span>
+                                                    <span className="text-[10px] text-muted-foreground uppercase font-medium">{roomTypeLabels[room.type]}</span>
                                                 </div>
                                                 <div className="flex gap-1">
                                                     {room.type === 'standard' && (
@@ -268,8 +268,8 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                         className={cn(
                                                             "p-1.5 rounded-full transition-colors",
                                                             room.occupancy === 'occupied'
-                                                                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                                                                : "bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700"
+                                                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                                                : "bg-muted text-muted-foreground group-hover:bg-muted/80"
                                                         )}
                                                         title={room.occupancy}
                                                     >
@@ -302,7 +302,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                             </div>
 
                             {filteredRooms.length === 0 && (
-                                <div className="text-center py-12 text-zinc-500">
+                                <div className="text-center py-12 text-muted-foreground">
                                     No rooms found matching your filter.
                                 </div>
                             )}
@@ -316,9 +316,9 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                 </div>
                             ) : (
                                 <div className="space-y-6">
-                                    <Card className="bg-zinc-900/50 border-zinc-800 p-6">
+                                    <Card className="bg-card/50 border-border p-6">
                                         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                            <Plus className="w-5 h-5 text-indigo-400" />
+                                            <Plus className="w-5 h-5 text-primary" />
                                             Add New Room
                                         </h3>
                                         <form onSubmit={handleAddRoom} className="flex gap-4 items-end">
@@ -328,7 +328,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     value={newRoomNumber}
                                                     onChange={(e) => setNewRoomNumber(e.target.value)}
                                                     placeholder="e.g. 101"
-                                                    className="bg-zinc-950 border-zinc-800"
+                                                    className="bg-background border-border"
                                                 />
                                             </div>
                                             <div className="space-y-2 w-32">
@@ -338,13 +338,13 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     onChange={(e) => setNewRoomFloor(e.target.value)}
                                                     placeholder="1"
                                                     type="number"
-                                                    className="bg-zinc-950 border-zinc-800"
+                                                    className="bg-background border-border"
                                                 />
                                             </div>
                                             <div className="space-y-2 w-48">
                                                 <Label>Type</Label>
                                                 <Select value={newRoomType} onValueChange={(v: string) => setNewRoomType(v as RoomType)}>
-                                                    <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                                                    <SelectTrigger className="bg-background border-border">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -361,7 +361,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                 <div className="space-y-2 w-40">
                                                     <Label>Bed Config</Label>
                                                     <Select value={newRoomBedConfig} onValueChange={(v: string) => setNewRoomBedConfig(v as BedConfig)}>
-                                                        <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                                                        <SelectTrigger className="bg-background border-border">
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -371,22 +371,22 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     </Select>
                                                 </div>
                                             )}
-                                            <Button type="submit" disabled={!newRoomNumber} className="bg-indigo-600 hover:bg-indigo-700">
+                                            <Button type="submit" disabled={!newRoomNumber} className="bg-primary hover:bg-primary/90">
                                                 Add Room
                                             </Button>
                                         </form>
                                     </Card>
 
                                     {/* Bulk Setup Section */}
-                                    <Card className="bg-zinc-900/50 border-zinc-800 p-6">
+                                    <Card className="bg-card/50 border-border p-6">
                                         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                            <Layers className="w-5 h-5 text-indigo-400" />
+                                            <Layers className="w-5 h-5 text-primary" />
                                             Bulk Room Setup
                                         </h3>
-                                        <p className="text-sm text-zinc-400 mb-4">Select standard rooms to update their bed configuration.</p>
+                                        <p className="text-sm text-muted-foreground mb-4">Select standard rooms to update their bed configuration.</p>
 
                                         <div className="flex gap-2 mb-4">
-                                            <Button variant="outline" size="sm" onClick={selectAllStandardRooms} className="border-zinc-700">
+                                            <Button variant="outline" size="sm" onClick={selectAllStandardRooms} className="border-border">
                                                 Select All Standard ({standardRooms.length})
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={clearSelection} disabled={selectedRoomIds.size === 0}>
@@ -394,7 +394,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                             </Button>
                                         </div>
 
-                                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 mb-4 max-h-32 overflow-y-auto p-2 bg-zinc-950 rounded-lg border border-zinc-800">
+                                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 mb-4 max-h-32 overflow-y-auto p-2 bg-muted/30 rounded-lg border border-border">
                                             {standardRooms.map(room => (
                                                 <button
                                                     key={room.id}
@@ -402,8 +402,8 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     className={cn(
                                                         'p-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1',
                                                         selectedRoomIds.has(room.id)
-                                                            ? 'bg-indigo-600 text-white'
-                                                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                                            ? 'bg-primary text-primary-foreground'
+                                                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                                     )}
                                                 >
                                                     {selectedRoomIds.has(room.id) ? <CheckSquare className="w-3 h-3" /> : <Square className="w-3 h-3" />}
@@ -420,7 +420,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                         variant={bulkBedConfig === 'separated' ? 'default' : 'outline'}
                                                         size="sm"
                                                         onClick={() => setBulkBedConfig('separated')}
-                                                        className={bulkBedConfig === 'separated' ? 'bg-indigo-600' : 'border-zinc-700'}
+                                                        className={bulkBedConfig === 'separated' ? 'bg-primary' : 'border-border'}
                                                     >
                                                         Ayrık Yataklar
                                                     </Button>
@@ -428,7 +428,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                         variant={bulkBedConfig === 'together' ? 'default' : 'outline'}
                                                         size="sm"
                                                         onClick={() => setBulkBedConfig('together')}
-                                                        className={bulkBedConfig === 'together' ? 'bg-indigo-600' : 'border-zinc-700'}
+                                                        className={bulkBedConfig === 'together' ? 'bg-primary' : 'border-border'}
                                                     >
                                                         Birleşik Yatak
                                                     </Button>
@@ -444,9 +444,9 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                         </div>
                                     </Card>
 
-                                    <div className="rounded-lg border border-zinc-800 overflow-hidden">
+                                    <div className="rounded-lg border border-border overflow-hidden">
                                         <table className="w-full text-sm">
-                                            <thead className="bg-zinc-900 text-zinc-400 font-medium">
+                                            <thead className="bg-muted text-muted-foreground font-medium">
                                                 <tr>
                                                     <th className="p-3 text-left">Room</th>
                                                     <th className="p-3 text-left">Type</th>
@@ -455,24 +455,24 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                     <th className="p-3 text-right">Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-zinc-800">
+                                            <tbody className="divide-y divide-border">
                                                 {rooms.map((room) => (
-                                                    <tr key={room.id} className="bg-zinc-900/30 hover:bg-zinc-800/50 transition-colors">
+                                                    <tr key={room.id} className="bg-muted/10 hover:bg-muted/30 transition-colors">
                                                         <td className="p-3 font-medium">{room.number}</td>
-                                                        <td className="p-3 text-zinc-400">{roomTypeLabels[room.type]}</td>
-                                                        <td className="p-3 text-zinc-400">
+                                                        <td className="p-3 text-muted-foreground">{roomTypeLabels[room.type]}</td>
+                                                        <td className="p-3 text-muted-foreground">
                                                             {room.type === 'standard' && room.bed_config && (
-                                                                <Badge variant="outline" className="text-[10px] border-zinc-700 text-zinc-500">
+                                                                <Badge variant="outline" className="text-[10px] border-border text-muted-foreground">
                                                                     {room.bed_config === 'separated' ? 'Ayrık' : 'Birleşik'}
                                                                 </Badge>
                                                             )}
                                                         </td>
-                                                        <td className="p-3 text-zinc-400">{room.floor}</td>
+                                                        <td className="p-3 text-muted-foreground">{room.floor}</td>
                                                         <td className="p-3 text-right">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="text-zinc-500 hover:text-rose-400"
+                                                                className="text-muted-foreground hover:text-destructive"
                                                                 onClick={() => hotelId && deleteRoom(hotelId, room.id)}
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
@@ -482,7 +482,7 @@ export function RoomManagementModal({ isOpen, onClose }: RoomManagementModalProp
                                                 ))}
                                                 {rooms.length === 0 && (
                                                     <tr>
-                                                        <td colSpan={4} className="p-8 text-center text-zinc-500">
+                                                        <td colSpan={5} className="p-8 text-center text-muted-foreground">
                                                             No rooms added yet.
                                                         </td>
                                                     </tr>

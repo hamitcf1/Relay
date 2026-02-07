@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 import type { Tour } from '@/types'
 import { format } from 'date-fns'
 
-const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const DAYS_OF_WEEK = ['day.mon', 'day.tue', 'day.wed', 'day.thu', 'day.fri', 'day.sat', 'day.sun'] as const
 
 export function TourCatalogue() {
     const { t } = useLanguageStore()
@@ -107,7 +107,7 @@ export function TourCatalogue() {
         try {
             await addSale(hotel.id, {
                 type: 'tour',
-                name: `${bookingTour.name} (${bookingType === 'adult' ? 'Adult' : bookingType === 'child_3_7' ? 'Child 3-7' : 'Child 0-3'})`,
+                name: `${bookingTour.name} (${bookingType === 'adult' ? t('tours.form.adultPrice') : bookingType === 'child_3_7' ? t('tours.form.child37Price') : t('tours.form.child03Price')})`,
                 customer_name: bookingForm.guest_name,
                 room_number: bookingForm.room_number,
                 pax: bookingForm.pax,
@@ -117,7 +117,7 @@ export function TourCatalogue() {
                 currency: 'EUR',
                 created_by: user.uid,
                 created_by_name: user.name,
-                notes: `Quick booking from Catalogue`
+                notes: t('tours.clickToLog')
             })
             setBookingTour(null)
         } catch (error) {
@@ -129,8 +129,8 @@ export function TourCatalogue() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">{t('tours.catalogue.title')}</h2>
-                    <p className="text-zinc-500 text-sm">{t('tours.catalogue.desc')}</p>
+                    <h2 className="text-2xl font-bold text-foreground">{t('tours.catalogue.title')}</h2>
+                    <p className="text-muted-foreground text-sm">{t('tours.catalogue.desc')}</p>
                 </div>
                 {isGM && !isAdding && (
                     <Button onClick={() => setIsAdding(true)} className="bg-indigo-600 hover:bg-indigo-500 gap-2">
@@ -150,9 +150,9 @@ export function TourCatalogue() {
                             exit={{ opacity: 0, scale: 0.95 }}
                             className="col-span-full"
                         >
-                            <Card className="bg-zinc-900 border-indigo-500/30">
+                            <Card className="bg-card border-border">
                                 <CardHeader className="flex flex-row items-center justify-between">
-                                    <CardTitle className="text-white">{editingId ? t('tours.edit') : t('tours.create')}</CardTitle>
+                                    <CardTitle className="text-foreground">{editingId ? t('tours.edit') : t('tours.create')}</CardTitle>
                                     <Button variant="ghost" size="sm" onClick={() => { setIsAdding(false); setEditingId(null); }}>
                                         <X className="w-4 h-4" />
                                     </Button>
@@ -160,64 +160,64 @@ export function TourCatalogue() {
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.name')}</label>
+                                            <label className="text-xs text-muted-foreground uppercase font-bold">{t('tours.form.name')}</label>
                                             <Input
                                                 value={formData.name}
                                                 onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                                                className="bg-zinc-950 border-zinc-800"
+                                                className="bg-background border-border"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.desc')}</label>
+                                            <label className="text-xs text-muted-foreground uppercase font-bold">{t('tours.form.desc')}</label>
                                             <Input
                                                 value={formData.description}
                                                 onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
-                                                className="bg-zinc-950 border-zinc-800"
+                                                className="bg-background border-border"
                                             />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold flex items-center gap-1">
+                                            <label className="text-xs text-muted-foreground uppercase font-bold flex items-center gap-1">
                                                 <Euro className="w-3 h-3 text-indigo-400" /> {t('tours.form.basePrice')}
                                             </label>
                                             <Input
                                                 type="number"
                                                 value={formData.base_price_eur}
                                                 onChange={e => setFormData(p => ({ ...p, base_price_eur: parseFloat(e.target.value) || 0 }))}
-                                                className="bg-zinc-950 border-zinc-800"
+                                                className="bg-background border-border"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.adultPrice')}</label>
+                                            <label className="text-xs text-muted-foreground uppercase font-bold">{t('tours.form.adultPrice')}</label>
                                             <Input
                                                 type="number"
                                                 value={formData.adult_price}
                                                 onChange={e => setFormData(p => ({ ...p, adult_price: parseFloat(e.target.value) || 0 }))}
-                                                className="bg-zinc-950 border-zinc-800"
+                                                className="bg-background border-border"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold text-amber-400">{t('tours.form.child37Price')}</label>
+                                            <label className="text-xs text-muted-foreground uppercase font-bold text-amber-500">{t('tours.form.child37Price')}</label>
                                             <Input
                                                 type="number"
                                                 value={formData.child_3_7_price}
                                                 onChange={e => setFormData(p => ({ ...p, child_3_7_price: parseFloat(e.target.value) || 0 }))}
-                                                className="bg-zinc-950 border-zinc-800"
+                                                className="bg-background border-border"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-xs text-zinc-500 uppercase font-bold text-emerald-400">{t('tours.form.child03Price')}</label>
+                                            <label className="text-xs text-muted-foreground uppercase font-bold text-emerald-500">{t('tours.form.child03Price')}</label>
                                             <Input
                                                 type="number"
                                                 value={formData.child_0_3_price}
                                                 onChange={e => setFormData(p => ({ ...p, child_0_3_price: parseFloat(e.target.value) || 0 }))}
-                                                className="bg-zinc-950 border-zinc-800"
+                                                className="bg-background border-border"
                                             />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs text-zinc-500 uppercase font-bold">{t('tours.form.operatingDays')}</label>
+                                        <label className="text-xs text-muted-foreground uppercase font-bold">{t('tours.form.operatingDays')}</label>
                                         <div className="flex flex-wrap gap-2">
                                             {DAYS_OF_WEEK.map(day => (
                                                 <button
@@ -232,11 +232,11 @@ export function TourCatalogue() {
                                                     className={cn(
                                                         "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                                                         formData.operating_days.includes(day)
-                                                            ? "bg-indigo-600 text-white"
-                                                            : "bg-zinc-800 text-zinc-500 hover:bg-zinc-700"
+                                                            ? "bg-primary text-primary-foreground"
+                                                            : "bg-muted text-muted-foreground hover:bg-muted/80"
                                                     )}
                                                 >
-                                                    {day.slice(0, 3)}
+                                                    {t(day.replace('day.', 'day.short.') as any)}
                                                 </button>
                                             ))}
                                         </div>
@@ -258,15 +258,15 @@ export function TourCatalogue() {
                 {loading ? (
                     <div className="col-span-full py-20 flex justify-center"><Loader2 className="w-10 h-10 animate-spin text-zinc-800" /></div>
                 ) : tours.length === 0 ? (
-                    <div className="col-span-full py-20 text-center bg-zinc-900/40 rounded-3xl border border-dashed border-zinc-800">
-                        <Map className="w-16 h-16 text-zinc-800 mx-auto mb-4" />
-                        <p className="text-zinc-500 font-medium">{t('tours.noTours')}</p>
+                    <div className="col-span-full py-20 text-center bg-muted/20 rounded-3xl border border-dashed border-border">
+                        <Map className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground font-medium">{t('tours.noTours')}</p>
                         {isGM && <Button variant="link" className="text-indigo-400 mt-2" onClick={() => setIsAdding(true)}>{t('tours.createFirst')}</Button>}
                     </div>
                 ) : (
                     [...tours].sort((a, b) => a.name.localeCompare(b.name)).map(tour => (
                         <motion.div key={tour.id} layout>
-                            <Card className="bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 transition-all overflow-hidden flex flex-col h-full group">
+                            <Card className="bg-card border-border hover:border-primary/50 transition-all overflow-hidden flex flex-col h-full group">
                                 <CardHeader className="pb-2">
                                     <div className="flex items-center justify-between mb-1">
                                         <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
@@ -277,7 +277,7 @@ export function TourCatalogue() {
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"
-                                                    className="h-7 w-7 text-zinc-500 hover:text-white"
+                                                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
                                                     onClick={() => {
                                                         setEditingId(tour.id)
                                                         setFormData({ ...tour })
@@ -288,7 +288,7 @@ export function TourCatalogue() {
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"
-                                                    className="h-7 w-7 text-zinc-500 hover:text-rose-400"
+                                                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
                                                     onClick={() => hotel?.id && deleteTour(hotel.id, tour.id)}
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5" />
@@ -296,50 +296,50 @@ export function TourCatalogue() {
                                             </div>
                                         )}
                                     </div>
-                                    <CardTitle className="text-zinc-200">{tour.name}</CardTitle>
+                                    <CardTitle className="text-foreground">{tour.name}</CardTitle>
                                     <CardDescription className="text-xs line-clamp-2">{tour.description}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4 pt-2 flex-1 flex flex-col">
                                     <div className="flex flex-wrap gap-1 mb-2">
                                         {tour.operating_days.map(day => (
-                                            <span key={day} className="text-[9px] px-1.5 py-0.5 bg-zinc-800 text-zinc-400 rounded-md font-bold uppercase">
-                                                {day.slice(0, 3)}
+                                            <span key={day} className="text-[9px] px-1.5 py-0.5 bg-muted text-muted-foreground rounded-md font-bold uppercase">
+                                                {t(day.replace('day.', 'day.short.') as any)}
                                             </span>
                                         ))}
                                     </div>
                                     <div className="grid grid-cols-1 gap-2">
                                         <div
                                             onClick={() => openBookingModal(tour, 'adult')}
-                                            className="p-3 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
+                                            className="p-3 bg-muted/30 rounded-xl border border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer transition-all group/price"
                                         >
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className="text-[10px] text-zinc-500 uppercase font-bold">{t('tours.form.adultPrice')}</span>
-                                                <Calendar className="w-3 h-3 text-zinc-700 group-hover/price:text-indigo-400 opacity-0 group-hover/price:opacity-100 transition-all" />
+                                                <span className="text-[10px] text-muted-foreground uppercase font-bold">{t('tours.form.adultPrice')}</span>
+                                                <Calendar className="w-3 h-3 text-muted-foreground dark:text-muted-foreground/90 group-hover/price:text-primary dark:group-hover/price:text-indigo-300 opacity-0 group-hover/price:opacity-100 transition-all" />
                                             </div>
-                                            <p className="text-lg font-bold text-white">
+                                            <p className="text-lg font-bold text-foreground">
                                                 €{tour.adult_price.toLocaleString()}
-                                                <span className="text-xs text-zinc-500 ml-1 font-normal">(Base: €{tour.base_price_eur})</span>
+                                                <span className="text-xs text-muted-foreground ml-1 font-normal">(Base: €{tour.base_price_eur})</span>
                                             </p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div
                                                 onClick={() => openBookingModal(tour, 'child_3_7')}
-                                                className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
+                                                className="p-2.5 bg-muted/30 rounded-xl border border-border hover:border-amber-500/50 hover:bg-muted/50 cursor-pointer transition-all group/price"
                                             >
-                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">{t('tours.form.child37Price')}</p>
-                                                <p className="text-sm font-bold text-amber-400">€{tour.child_3_7_price}</p>
+                                                <p className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('tours.form.child37Price')}</p>
+                                                <p className="text-sm font-bold text-amber-500">€{tour.child_3_7_price}</p>
                                             </div>
                                             <div
                                                 onClick={() => openBookingModal(tour, 'child_0_3')}
-                                                className="p-2.5 bg-zinc-950/50 rounded-xl border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900 cursor-pointer transition-all group/price"
+                                                className="p-2.5 bg-muted/30 rounded-xl border border-border hover:border-emerald-500/50 hover:bg-muted/50 cursor-pointer transition-all group/price"
                                             >
-                                                <p className="text-[9px] text-zinc-500 uppercase font-bold mb-1">{t('tours.form.child03Price')}</p>
-                                                <p className="text-sm font-bold text-emerald-400">€{tour.child_0_3_price}</p>
+                                                <p className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('tours.form.child03Price')}</p>
+                                                <p className="text-sm font-bold text-emerald-500">€{tour.child_0_3_price}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="mt-auto pt-4 border-t border-zinc-800/50">
-                                        <p className="text-[10px] text-zinc-600 italic text-center">{t('tours.clickToLog')}</p>
+                                    <div className="mt-auto pt-4 border-t border-border/50">
+                                        <p className="text-[10px] text-muted-foreground italic text-center">{t('tours.clickToLog')}</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -349,56 +349,56 @@ export function TourCatalogue() {
 
                 {/* Booking Modal */}
                 <Dialog open={!!bookingTour} onOpenChange={(open) => !open && setBookingTour(null)}>
-                    <DialogContent className="bg-zinc-950 border-zinc-800">
+                    <DialogContent className="bg-card border-border">
                         <DialogHeader>
-                            <DialogTitle className="text-white">{t('tours.book.title', { name: bookingTour?.name || '' })}</DialogTitle>
-                            <DialogDescription className="text-zinc-500 text-sm">
+                            <DialogTitle className="text-foreground">{t('tours.book.title', { name: bookingTour?.name || '' })}</DialogTitle>
+                            <DialogDescription className="text-muted-foreground text-sm">
                                 {t('tours.book.desc')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">{t('tours.book.guestName')}</label>
+                                    <label className="text-xs text-muted-foreground">{t('tours.book.guestName')}</label>
                                     <Input
                                         value={bookingForm.guest_name}
                                         onChange={e => setBookingForm(p => ({ ...p, guest_name: e.target.value }))}
-                                        className="bg-zinc-900 border-zinc-800"
-                                        placeholder="Full Name"
+                                        className="bg-background border-border"
+                                        placeholder={t('auth.name')}
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">{t('tours.book.room')}</label>
+                                    <label className="text-xs text-muted-foreground">{t('tours.book.room')}</label>
                                     <Input
                                         value={bookingForm.room_number}
                                         onChange={e => setBookingForm(p => ({ ...p, room_number: e.target.value }))}
-                                        className="bg-zinc-900 border-zinc-800"
+                                        className="bg-background border-border"
                                         placeholder="101"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">{t('tours.book.pax')}</label>
+                                    <label className="text-xs text-muted-foreground">{t('tours.book.pax')}</label>
                                     <Input
                                         type="number"
                                         value={bookingForm.pax}
                                         onChange={e => setBookingForm(p => ({ ...p, pax: parseInt(e.target.value) || 1 }))}
-                                        className="bg-zinc-900 border-zinc-800"
+                                        className="bg-background border-border"
                                         min={1}
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-zinc-500">{t('tours.book.date')}</label>
+                                    <label className="text-xs text-muted-foreground">{t('tours.book.date')}</label>
                                     <Input
                                         type="date"
                                         value={bookingForm.date}
                                         onChange={e => setBookingForm(p => ({ ...p, date: e.target.value }))}
-                                        className="bg-zinc-900 border-zinc-800"
+                                        className="bg-background border-border"
                                     />
                                 </div>
                             </div>
                             <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
-                                <p className="text-xs text-indigo-300">
-                                    {t('tours.book.totalPrice')}: <span className="font-bold text-white">€{bookingTour ? (
+                                <p className="text-xs text-indigo-500 dark:text-indigo-300">
+                                    {t('tours.book.totalPrice')}: <span className="font-bold text-foreground">€{bookingTour ? (
                                         (bookingType === 'adult' ? bookingTour.adult_price :
                                             bookingType === 'child_3_7' ? bookingTour.child_3_7_price :
                                                 bookingTour.child_0_3_price) * bookingForm.pax

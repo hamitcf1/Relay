@@ -8,10 +8,11 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
             <input
                 type={type}
                 className={cn(
-                    "flex h-10 w-full rounded-lg border border-zinc-700 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 transition-all duration-200",
-                    "focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500",
+                    "flex h-10 w-full rounded-lg border border-input bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-all duration-200",
+                    "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                     "disabled:cursor-not-allowed disabled:opacity-50",
-                    "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-zinc-100",
+                    "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
+                    "[color-scheme:light] dark:[color-scheme:dark]",
                     className
                 )}
                 ref={ref}

@@ -103,18 +103,18 @@ export function SalesPanel() {
     ]
 
     return (
-        <Card className="bg-zinc-900/50 border-zinc-800 h-full flex flex-col">
+        <Card className="bg-card/50 border-border h-full flex flex-col">
             <CardHeader className="pb-3 flex-shrink-0">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-                        <CreditCard className="w-5 h-5 text-indigo-400" />
+                    <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <CreditCard className="w-5 h-5 text-primary" />
                         {t('sales.tracker')}
                     </CardTitle>
                     {!isAdding && (
                         <Button
                             size="sm"
                             onClick={() => setIsAdding(true)}
-                            className="bg-indigo-600 hover:bg-indigo-500 gap-1 h-8 text-xs"
+                            className="bg-primary hover:bg-primary/90 gap-1 h-8 text-xs"
                         >
                             <Plus className="w-3.5 h-3.5" />
                             {t('sales.new')}
@@ -123,7 +123,7 @@ export function SalesPanel() {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 mt-3 p-1 bg-zinc-800/50 rounded-lg">
+                <div className="flex gap-1 mt-3 p-1 bg-muted rounded-lg">
                     {tabs.map(({ type, icon }) => (
                         <button
                             key={type}
@@ -131,12 +131,12 @@ export function SalesPanel() {
                             className={cn(
                                 'flex-1 flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium transition-all',
                                 activeTab === type
-                                    ? 'bg-zinc-700 text-white shadow-sm'
-                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                             )}
                         >
                             {icon}
-                            {saleTypeInfo[type].label}
+                            {t(saleTypeInfo[type].label as any)}
                         </button>
                     ))}
                 </div>
@@ -152,19 +152,19 @@ export function SalesPanel() {
                             exit={{ opacity: 0, height: 0 }}
                             className="overflow-hidden mb-4"
                         >
-                            <div className="p-3 bg-zinc-800/80 rounded-xl border border-indigo-500/30 space-y-3 shadow-lg">
+                            <div className="p-3 bg-card rounded-xl border border-primary/30 space-y-3 shadow-lg">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                                        {t('sales.newType', { label: saleTypeInfo[activeTab].label })}
+                                    <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                                        {t('sales.newType', { label: t(saleTypeInfo[activeTab].label as any) })}
                                     </h4>
-                                    <button onClick={resetForm} className="text-zinc-500 hover:text-zinc-300">
+                                    <button onClick={resetForm} className="text-muted-foreground hover:text-foreground">
                                         <X className="w-4 h-4" />
                                     </button>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <div className="col-span-2 space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.service')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.service')}</label>
                                         {activeTab === 'tour' ? (
                                             <Select
                                                 value={formData.name}
@@ -177,8 +177,8 @@ export function SalesPanel() {
                                                     }))
                                                 }}
                                             >
-                                                <SelectTrigger className="h-8 text-xs bg-zinc-950 border-zinc-700">
-                                                    <SelectValue placeholder="Select Tour" />
+                                                <SelectTrigger className="h-8 text-xs bg-background border-border">
+                                                    <SelectValue placeholder={t('sales.selectTour' as any)} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {[...tours].filter(t => t.is_active).sort((a, b) => a.name.localeCompare(b.name)).map(t => (
@@ -193,15 +193,15 @@ export function SalesPanel() {
                                             <Input
                                                 value={formData.name}
                                                 onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                                                className="h-8 text-xs bg-zinc-950 border-zinc-700"
-                                                placeholder={activeTab === 'transfer' ? 'Destination (e.g. Airport)' : 'Description'}
+                                                className="h-8 text-xs bg-background border-border"
+                                                placeholder={activeTab === 'transfer' ? t('sales.destinationPlaceholder' as any) : t('common.description' as any)}
                                             />
                                         )}
                                         {formData.name === 'other' && activeTab === 'tour' && (
                                             <Input
                                                 placeholder={t('sales.customName')}
                                                 onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                                                className="h-8 text-xs mt-2 bg-zinc-950 border-zinc-700"
+                                                className="h-8 text-xs mt-2 bg-background border-border"
                                             />
                                         )}
                                     </div>
@@ -211,72 +211,72 @@ export function SalesPanel() {
                                         <Input
                                             value={formData.customer_name}
                                             onChange={e => setFormData(p => ({ ...p, customer_name: e.target.value }))}
-                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                            className="h-8 text-xs bg-background border-border"
                                             placeholder="John Doe"
                                         />
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.room')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.room')}</label>
                                         <Input
                                             value={formData.room_number}
                                             onChange={e => setFormData(p => ({ ...p, room_number: e.target.value }))}
-                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                            className="h-8 text-xs bg-background border-border"
                                             placeholder="101"
                                         />
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.pax')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.pax')}</label>
                                         <Input
                                             type="number"
                                             min={1}
                                             value={formData.pax}
                                             onChange={e => setFormData(p => ({ ...p, pax: parseInt(e.target.value) || 1 }))}
-                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                            className="h-8 text-xs bg-background border-border"
                                         />
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.date')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.date')}</label>
                                         <Input
                                             type="date"
                                             value={formData.date}
                                             onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
-                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                            className="h-8 text-xs bg-background border-border"
                                         />
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.pickupTime')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.pickupTime')}</label>
                                         <Input
                                             type="time"
                                             value={formData.pickup_time}
                                             onChange={e => setFormData(p => ({ ...p, pickup_time: e.target.value }))}
-                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                            className="h-8 text-xs bg-background border-border"
                                         />
                                     </div>
 
                                     <div className="space-y-1 relative">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.price')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.price')}</label>
                                         <div className="relative">
                                             <Input
                                                 type="number"
                                                 value={formData.total_price}
                                                 onChange={e => setFormData(p => ({ ...p, total_price: e.target.value }))}
-                                                className="h-8 text-xs bg-zinc-950 border-zinc-700 pl-6"
+                                                className="h-8 text-xs bg-background border-border pl-6"
                                                 placeholder="0"
                                             />
-                                            <span className="absolute left-2 top-2 text-xs text-zinc-500">€</span>
+                                            <span className="absolute left-2 top-2 text-xs text-muted-foreground">€</span>
                                         </div>
                                     </div>
 
                                     <div className="col-span-2 space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('sales.notes')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.notes')}</label>
                                         <Input
                                             value={formData.notes}
                                             onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))}
-                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                            className="h-8 text-xs bg-background border-border"
                                             placeholder={t('sales.optionalNotes')}
                                         />
                                     </div>
@@ -286,7 +286,7 @@ export function SalesPanel() {
                                     <Button
                                         onClick={handleAddSale}
                                         disabled={!formData.name.trim() || !formData.total_price}
-                                        className="flex-1 bg-indigo-600 hover:bg-indigo-500 h-8 text-xs"
+                                        className="flex-1 bg-primary hover:bg-primary/90 h-8 text-xs"
                                     >
                                         <Check className="w-3.5 h-3.5 mr-1" />
                                         {t('sales.create')}
@@ -303,12 +303,12 @@ export function SalesPanel() {
                 {/* Sales List */}
                 {loading ? (
                     <div className="py-12 flex justify-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-zinc-600" />
+                        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : filteredSales.length === 0 ? (
                     <div className="py-12 text-center">
-                        <div className="text-4xl mb-2 opacity-20 text-zinc-600">{saleTypeInfo[activeTab].icon}</div>
-                        <p className="text-zinc-500 text-sm">{t('sales.noSales', { label: saleTypeInfo[activeTab].label.toLowerCase() })}</p>
+                        <div className="text-4xl mb-2 opacity-20 text-muted-foreground">{saleTypeInfo[activeTab].icon}</div>
+                        <p className="text-muted-foreground text-sm">{t('sales.noSales', { label: t(saleTypeInfo[activeTab].label as any).toLowerCase() })}</p>
                     </div>
                 ) : (
                     <div className="space-y-2">
@@ -335,31 +335,31 @@ export function SalesPanel() {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-lg group-hover:scale-110 transition-transform">{saleTypeInfo[sale.type].icon}</span>
-                                                <span className="font-semibold text-zinc-200 truncate">{sale.name}</span>
+                                                <span className="font-semibold text-foreground truncate">{sale.name}</span>
                                                 {remaining > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
                                             </div>
 
-                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-zinc-400">
-                                                <span className="bg-zinc-950/50 px-1.5 py-0.5 rounded border border-zinc-800">Rm {sale.room_number}</span>
+                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                                                <span className="bg-muted px-1.5 py-0.5 rounded border border-border">Rm {sale.room_number}</span>
                                                 <span>{sale.customer_name}</span>
-                                                <span className="text-zinc-600">•</span>
+                                                <span className="text-muted-foreground/50">•</span>
                                                 <span>{formatDisplayDate(sale.date)}</span>
-                                                <span className="text-zinc-600">•</span>
-                                                <span className="text-indigo-300">{t('sales.soldBy', { name: sale.created_by_name })}</span>
+                                                <span className="text-muted-foreground/50">•</span>
+                                                <span className="text-primary">{t('sales.soldBy', { name: sale.created_by_name })}</span>
                                             </div>
                                         </div>
 
                                         <div className="text-right">
-                                            <div className="text-sm font-bold text-white">€{sale.total_price}</div>
+                                            <div className="text-sm font-bold text-foreground">€{sale.total_price}</div>
                                             <div className={cn("text-[10px] font-medium", paymentStatusInfo[sale.payment_status].color.replace('bg-', 'text-').split(' ')[1])}>
-                                                {paymentStatusInfo[sale.payment_status].label}
+                                                {t(paymentStatusInfo[sale.payment_status].label as any)}
                                             </div>
-                                            {/* Detailed Status Badge */}
                                             {/* Detailed Status Select */}
                                             <div onClick={(e) => e.stopPropagation()} className="mt-2">
                                                 <Select
                                                     value={sale.status || 'waiting'}
                                                     onValueChange={(val: any) => {
+                                                        console.log('Updating sale status:', sale.id, val)
                                                         if (hotel?.id) {
                                                             updateSale(hotel.id, sale.id, { status: val })
                                                         }
@@ -367,16 +367,16 @@ export function SalesPanel() {
                                                 >
                                                     <SelectTrigger className={cn(
                                                         "h-6 text-[10px] uppercase font-bold tracking-wider px-2 py-0 border-0 min-w-[90px] justify-between gap-1 transition-colors rounded-md shadow-sm",
-                                                        saleStatusInfo[sale.status as SaleStatus]?.color || "bg-zinc-800 text-zinc-400"
+                                                        saleStatusInfo[sale.status as SaleStatus || 'waiting']?.color || "bg-muted text-muted-foreground"
                                                     )}>
                                                         <SelectValue />
                                                     </SelectTrigger>
-                                                    <SelectContent align="end" className="bg-zinc-900 border-zinc-800">
+                                                    <SelectContent align="end" className="bg-popover border-border">
                                                         {(Object.keys(saleStatusInfo) as SaleStatus[]).map((status) => (
-                                                            <SelectItem key={status} value={status} className="text-xs focus:bg-zinc-800 focus:text-zinc-200">
+                                                            <SelectItem key={status} value={status} className="text-xs focus:bg-muted focus:text-foreground">
                                                                 <div className="flex items-center gap-2">
                                                                     <span className={cn("w-2 h-2 rounded-full", saleStatusInfo[status].color.split(' ')[0].replace('/20', ''))} />
-                                                                    {saleStatusInfo[status].label}
+                                                                    {t(saleStatusInfo[status].label as any)}
                                                                 </div>
                                                             </SelectItem>
                                                         ))}

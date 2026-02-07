@@ -111,17 +111,17 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                className="w-full max-w-2xl bg-background border border-border rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
             >
                 {/* Header */}
-                <div className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50">
+                <div className="p-6 border-b border-border flex items-center justify-between bg-muted/20">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                            <Wand2 className="w-5 h-5 text-indigo-400" />
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                            <Wand2 className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-white tracking-tight">{t('ai.title')}</h2>
-                            <p className="text-xs text-zinc-500">{t('ai.poweredBy')}</p>
+                            <h2 className="text-lg font-bold text-foreground tracking-tight">{t('ai.title')}</h2>
+                            <p className="text-xs text-muted-foreground">{t('ai.poweredBy')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                 onClick={() => setShowKbEditor(!showKbEditor)}
                                 className={cn(
                                     "p-2 rounded-full transition-colors flex items-center gap-2 px-3",
-                                    showKbEditor ? "bg-emerald-500/20 text-emerald-400" : "hover:bg-white/5 text-zinc-500 hover:text-white"
+                                    showKbEditor ? "bg-emerald-500/20 text-emerald-500" : "hover:bg-muted text-muted-foreground hover:text-foreground"
                                 )}
                                 title="Edit Hotel Knowledge Base"
                             >
@@ -138,7 +138,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                 {showKbEditor && <span className="text-xs font-bold">{t('ai.context.title')}</span>}
                             </button>
                         )}
-                        <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-500 hover:text-white">
+                        <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -165,13 +165,13 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                             <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-500" onClick={handleSaveKb}>{t('ai.context.save')}</Button>
                                         </div>
                                     </div>
-                                    <p className="text-[10px] text-zinc-400 mb-3">
+                                    <p className="text-[10px] text-muted-foreground mb-3">
                                         {t('ai.context.desc')}
                                     </p>
                                     <textarea
                                         value={kbContent}
                                         onChange={e => setKbContent(e.target.value)}
-                                        className="w-full h-32 bg-black/40 border border-emerald-500/20 rounded-xl p-3 text-xs text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                                        className="w-full h-32 bg-background/50 border border-emerald-500/20 rounded-xl p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
                                         placeholder="e.g. Breakfast is served 07:00-10:00. Pool closes at 20:00. Checkout is 12:00..."
                                     />
                                 </div>
@@ -182,14 +182,14 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                     {/* Model & Task Selector */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">{t('ai.model')}</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">{t('ai.model')}</label>
                             <div className="relative">
                                 <button
                                     onClick={() => setShowModels(!showModels)}
-                                    className="w-full h-12 px-4 bg-zinc-800/50 border border-zinc-700/50 rounded-2xl flex items-center justify-between text-sm text-zinc-300 hover:border-indigo-500/50 transition-all font-medium"
+                                    className="w-full h-12 px-4 bg-background border border-input rounded-2xl flex items-center justify-between text-sm text-foreground hover:border-primary/50 transition-all font-medium"
                                 >
                                     <div className="flex items-center gap-2">
-                                        <Settings2 className="w-4 h-4 text-indigo-400" />
+                                        <Settings2 className="w-4 h-4 text-primary" />
                                         {MODELLS.find(m => m.id === selectedModel)?.name}
                                     </div>
                                     <ChevronDown className={cn("w-4 h-4 transition-transform", showModels && "rotate-180")} />
@@ -201,7 +201,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: 10 }}
-                                            className="absolute top-full left-0 right-0 mt-2 bg-zinc-800 border border-zinc-700 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                                            className="absolute top-full left-0 right-0 mt-2 bg-popover border border-border rounded-2xl shadow-2xl z-50 overflow-hidden"
                                         >
                                             <div className="max-h-60 overflow-y-auto p-2 space-y-1">
                                                 {MODELLS.map((m) => (
@@ -213,12 +213,12 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                                         }}
                                                         className={cn(
                                                             "w-full px-4 py-3 rounded-xl text-left text-sm transition-colors flex items-center justify-between group",
-                                                            selectedModel === m.id ? "bg-indigo-500 text-white" : "text-zinc-400 hover:bg-white/5"
+                                                            selectedModel === m.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
                                                         )}
                                                     >
                                                         <div>
                                                             <p className="font-semibold">{m.name}</p>
-                                                            <p className={cn("text-[10px]", selectedModel === m.id ? "text-indigo-100" : "text-zinc-600")}>{m.desc}</p>
+                                                            <p className={cn("text-[10px]", selectedModel === m.id ? "text-primary-foreground/80" : "text-muted-foreground")}>{m.desc}</p>
                                                         </div>
                                                         {selectedModel === m.id && <Check className="w-4 h-4" />}
                                                     </button>
@@ -231,7 +231,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">{t('ai.mode.assistant')}</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">{t('ai.mode.assistant')}</label>
                             <div className="flex gap-2">
                                 {TASKS.map((t) => {
                                     const Icon = t.icon
@@ -243,15 +243,15 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                             className={cn(
                                                 "flex-1 h-12 rounded-2xl border transition-all flex items-center justify-center relative group",
                                                 task === t.id
-                                                    ? "bg-indigo-500/10 border-indigo-500 text-indigo-400"
-                                                    : "bg-zinc-800/50 border-zinc-700/50 text-zinc-500 hover:border-zinc-600"
+                                                    ? "bg-primary/10 border-primary text-primary"
+                                                    : "bg-background border-input text-muted-foreground hover:border-foreground/20"
                                             )}
                                         >
                                             <Icon className="w-5 h-5" />
                                             {task === t.id && (
                                                 <motion.div
                                                     layoutId="active-task"
-                                                    className="absolute -bottom-1 w-1 h-1 rounded-full bg-indigo-500"
+                                                    className="absolute -bottom-1 w-1 h-1 rounded-full bg-primary"
                                                 />
                                             )}
                                         </button>
@@ -263,7 +263,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
 
                     {/* Input Area */}
                     <div className="space-y-3">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">
                             {TASKS.find(t => t.id === task)?.name}
                         </label>
                         <div className="relative">
@@ -271,13 +271,13 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
                                 placeholder={TASKS.find(t => t.id === task)?.prompt}
-                                className="w-full h-32 bg-zinc-800/30 border border-zinc-700/50 rounded-2xl p-4 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all resize-none"
+                                className="w-full h-32 bg-input/10 border border-input rounded-2xl p-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all resize-none"
                             />
                             <div className="absolute bottom-3 right-3">
                                 <Button
                                     onClick={handleGenerate}
                                     disabled={loading || !prompt.trim()}
-                                    className="rounded-xl bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-900/20 h-10 px-4"
+                                    className="rounded-xl bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 h-10 px-4"
                                 >
                                     {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-3.5 h-3.5 mr-2" />}
                                     {t('ai.generate')}
@@ -299,12 +299,12 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Suggested Draft</label>
                                     <button
                                         onClick={handleCopy}
-                                        className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white flex items-center gap-1 transition-colors"
+                                        className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                                     >
                                         {copied ? <><Check className="w-3 h-3 text-emerald-500" /> Copied</> : <><Copy className="w-3 h-3" /> Copy Text</>}
                                     </button>
                                 </div>
-                                <div className="w-full bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-5 text-sm text-zinc-300 leading-relaxed font-normal whitespace-pre-wrap selection:bg-emerald-500/30">
+                                <div className="w-full bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-5 text-sm text-foreground leading-relaxed font-normal whitespace-pre-wrap selection:bg-emerald-500/30">
                                     {result}
                                 </div>
                             </motion.div>
@@ -321,12 +321,12 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
                     </AnimatePresence>
                 </div>
 
-                <div className="p-4 bg-white/5 text-center flex items-center justify-center gap-4 border-t border-white/5">
-                    <p className="text-[10px] text-zinc-600 font-medium uppercase tracking-widest">
+                <div className="p-4 bg-muted/20 text-center flex items-center justify-center gap-4 border-t border-border">
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
                         {selectedModel.toUpperCase()}
                     </p>
-                    <div className="w-1 h-1 rounded-full bg-zinc-800" />
-                    <p className="text-[10px] text-zinc-600 font-medium uppercase tracking-widest">
+                    <div className="w-1 h-1 rounded-full bg-muted-foreground" />
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
                         Quota Balanced Mode
                     </p>
                 </div>

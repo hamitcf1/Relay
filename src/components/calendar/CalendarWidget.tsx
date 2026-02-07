@@ -139,7 +139,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
         <CollapsibleCard
             id="calendar-widget"
             title={
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
                     {t('module.calendar')}
                 </CardTitle>
             }
@@ -156,7 +156,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <span className="text-[10px] text-zinc-400 min-w-[70px] text-center font-mono">
+                    <span className="text-[10px] text-muted-foreground min-w-[70px] text-center font-mono">
                         {format(currentMonth, 'MMM yyyy', { locale: getDateLocale() })}
                     </span>
                     <Button
@@ -172,7 +172,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                     </Button>
                 </div>
             }
-            className="glass border-zinc-800/50"
+            className="glass border-border/50"
         >
             <div className="space-y-3 pt-2">
                 {/* Weekday headers */}
@@ -186,7 +186,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                         t('day.short.sat'),
                         t('day.short.sun')
                     ].map((day, i) => (
-                        <div key={i} className="text-center text-[10px] text-zinc-500 font-medium">
+                        <div key={i} className="text-center text-[10px] text-muted-foreground font-medium">
                             {day}
                         </div>
                     ))}
@@ -207,12 +207,12 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                 className={cn(
                                     'aspect-square rounded-md flex flex-col items-center justify-center text-xs transition-all relative',
                                     isSelected
-                                        ? 'bg-indigo-500 text-white'
+                                        ? 'bg-primary text-primary-foreground'
                                         : isTodayDate
-                                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50'
+                                            ? 'bg-primary/20 text-primary border border-primary/50'
                                             : isCurrentMonth
-                                                ? 'bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700/50'
-                                                : 'bg-transparent text-zinc-600 hover:bg-zinc-800/30'
+                                                ? 'bg-muted/50 text-foreground hover:bg-muted'
+                                                : 'bg-transparent text-muted-foreground/50 hover:bg-muted/30'
                                 )}
                             >
                                 <span>{format(day, 'd')}</span>
@@ -229,7 +229,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                             />
                                         ))}
                                         {dayEvents.length > 3 && (
-                                            <span className="text-[8px] text-zinc-400">+</span>
+                                            <span className="text-[8px] text-muted-foreground">+</span>
                                         )}
                                     </div>
                                 )}
@@ -247,19 +247,19 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                         >
-                            <div className="pt-3 border-t border-zinc-800 space-y-3">
+                            <div className="pt-3 border-t border-border space-y-3">
                                 {/* Roster for Selected Date */}
                                 <div className="space-y-1">
-                                    <h4 className="text-[10px] uppercase font-bold text-zinc-500">{t('module.roster')}</h4>
+                                    <h4 className="text-[10px] uppercase font-bold text-muted-foreground">{t('module.roster')}</h4>
                                     <div className="flex flex-wrap gap-2">
                                         {getShiftsForDate(selectedDate).length > 0 ? (
                                             getShiftsForDate(selectedDate).map((shift) => (
                                                 <Badge
                                                     key={shift.uid}
                                                     variant="outline"
-                                                    className="text-[10px] px-1.5 py-0 bg-zinc-800/50 border-zinc-700 text-zinc-300"
+                                                    className="text-[10px] px-1.5 py-0 bg-muted/50 border-border text-foreground"
                                                 >
-                                                    {shift.name} <span className="text-indigo-400 ml-1 font-bold">{shift.shift}</span>
+                                                    {shift.name} <span className="text-primary ml-1 font-bold">{shift.shift}</span>
                                                 </Badge>
                                             ))
                                         ) : (
@@ -276,7 +276,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            className="h-6 text-xs hover:bg-indigo-500/10 hover:text-indigo-400"
+                                            className="h-6 text-xs hover:bg-primary/10 hover:text-primary"
                                             onClick={() => setIsAdding(!isAdding)}
                                         >
                                             <Plus className="w-3 h-3 mr-1" />
@@ -291,7 +291,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                 initial={{ height: 0, opacity: 0 }}
                                                 animate={{ height: 'auto', opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}
-                                                className="space-y-2 p-2 bg-zinc-900/50 rounded-lg border border-zinc-700"
+                                                className="space-y-2 p-2 bg-card rounded-lg border border-border"
                                             >
                                                 {/* Event Type Pills */}
                                                 <div className="flex flex-wrap gap-1">
@@ -300,10 +300,10 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                             key={type}
                                                             onClick={() => setNewEventType(type)}
                                                             className={cn(
-                                                                'text-[10px] px-2 py-0.5 rounded-full',
+                                                                'text-[10px] px-2 py-0.5 rounded-full transition-colors',
                                                                 newEventType === type
                                                                     ? `${eventTypeInfo[type].color} text-white`
-                                                                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                                             )}
                                                         >
                                                             {eventTypeInfo[type].icon} {eventTypeInfo[type].label}
@@ -315,49 +315,49 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                     placeholder={t('calendar.eventTitle')}
                                                     value={newEventTitle}
                                                     onChange={(e) => setNewEventTitle(e.target.value)}
-                                                    className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                    className="h-8 text-xs bg-background border-border"
                                                 />
 
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.time')}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase ml-1">{t('calendar.time')}</label>
                                                         <Input
                                                             value={newEventTime}
                                                             onChange={(e) => setNewEventTime(e.target.value)}
-                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                            className="h-8 text-xs bg-background border-border"
                                                             type="time"
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.roomNumber')}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase ml-1">{t('calendar.roomNumber')}</label>
                                                         <Input
                                                             placeholder={t('log.roomPlaceholder')}
                                                             value={newEventRoom}
                                                             onChange={(e) => setNewEventRoom(e.target.value)}
-                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                            className="h-8 text-xs bg-background border-border"
                                                         />
                                                     </div>
                                                 </div>
 
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.totalPrice')}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase ml-1">{t('calendar.totalPrice')}</label>
                                                         <Input
                                                             type="number"
                                                             placeholder="0"
                                                             value={newEventTotalPrice}
                                                             onChange={(e) => setNewEventTotalPrice(e.target.value)}
-                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                            className="h-8 text-xs bg-background border-border"
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase ml-1">{t('calendar.collectedAmount')}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase ml-1">{t('calendar.collectedAmount')}</label>
                                                         <Input
                                                             type="number"
                                                             placeholder="0"
                                                             value={newEventCollected}
                                                             onChange={(e) => setNewEventCollected(e.target.value)}
-                                                            className="h-8 text-xs bg-zinc-950 border-zinc-700"
+                                                            className="h-8 text-xs bg-background border-border"
                                                         />
                                                     </div>
                                                 </div>
@@ -395,8 +395,8 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                     key={event.id}
                                                     className={cn(
                                                         'group relative flex items-start gap-3 p-3 rounded-xl border transition-all',
-                                                        'glass hover:bg-white/5',
-                                                        event.is_completed ? 'opacity-60 grayscale-[0.5]' : 'border-zinc-700/50'
+                                                        'glass hover:bg-muted/30',
+                                                        event.is_completed ? 'opacity-60 grayscale-[0.5]' : 'border-border'
                                                     )}
                                                 >
                                                     <button
@@ -405,7 +405,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                             'mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors',
                                                             event.is_completed
                                                                 ? 'bg-emerald-500 border-emerald-500'
-                                                                : 'border-zinc-600 group-hover:border-zinc-400'
+                                                                : 'border-muted-foreground/30 group-hover:border-primary/50'
                                                         )}
                                                     >
                                                         {event.is_completed && <Check className="w-3 h-3 text-white" />}
@@ -420,32 +420,32 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                                 {eventTypeInfo[event.type]?.icon}
                                                             </Badge>
                                                             <span className={cn(
-                                                                'text-sm font-medium text-zinc-200 truncate',
-                                                                event.is_completed && 'line-through text-zinc-500'
+                                                                'text-sm font-medium text-foreground truncate',
+                                                                event.is_completed && 'line-through text-muted-foreground'
                                                             )}>
                                                                 {event.title}
                                                             </span>
                                                         </div>
 
-                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-400">
+                                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                                                             {(event.time || event.room_number) && (
                                                                 <div className="flex items-center gap-1.5">
-                                                                    {event.time && <span className="text-zinc-300 bg-zinc-800/50 px-1.5 rounded">{event.time}</span>}
-                                                                    {event.room_number && <span className="font-mono text-zinc-500">#{event.room_number}</span>}
+                                                                    {event.time && <span className="text-foreground bg-muted px-1.5 rounded">{event.time}</span>}
+                                                                    {event.room_number && <span className="font-mono text-muted-foreground">#{event.room_number}</span>}
                                                                 </div>
                                                             )}
 
                                                             {/* Attribution */}
                                                             {event.created_by_name && (
-                                                                <span className="text-indigo-400/80">
+                                                                <span className="text-primary/80">
                                                                     by {event.created_by_name}
                                                                 </span>
                                                             )}
                                                         </div>
 
                                                         {event.total_price !== null && (
-                                                            <div className="pt-2 flex items-center gap-2 border-t border-zinc-800/50 mt-2">
-                                                                <div className="text-[11px] font-medium text-zinc-400">
+                                                            <div className="pt-2 flex items-center gap-2 border-t border-border mt-2">
+                                                                <div className="text-[11px] font-medium text-muted-foreground">
                                                                     {t('calendar.payment')}:
                                                                     <span className={cn(
                                                                         "ml-1.5",
@@ -459,7 +459,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                                 {updatingPaymentId === event.id ? (
                                                                     <div className="flex items-center gap-1">
                                                                         <Input
-                                                                            className="h-5 w-14 text-[9px] px-1 bg-zinc-950 border-zinc-700"
+                                                                            className="h-5 w-14 text-[9px] px-1 bg-background border-border"
                                                                             value={tempCollected}
                                                                             onChange={e => setTempCollected(e.target.value)}
                                                                             autoFocus
@@ -467,7 +467,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                                         <button onClick={() => handleUpdatePayment(event.id)} className="text-emerald-500 hover:text-emerald-400">
                                                                             <Check className="w-3 h-3" />
                                                                         </button>
-                                                                        <button onClick={() => setUpdatingPaymentId(null)} className="text-zinc-500">
+                                                                        <button onClick={() => setUpdatingPaymentId(null)} className="text-muted-foreground">
                                                                             <X className="w-3 h-3" />
                                                                         </button>
                                                                     </div>
@@ -477,7 +477,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                                             setUpdatingPaymentId(event.id)
                                                                             setTempCollected((event.collected_amount || 0).toString())
                                                                         }}
-                                                                        className="text-[9px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
+                                                                        className="text-[9px] text-primary hover:text-primary/80 underline underline-offset-2"
                                                                     >
                                                                         {t('common.update')}
                                                                     </button>
@@ -493,7 +493,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
 
                                                     <button
                                                         onClick={() => handleDeleteEvent(event.id)}
-                                                        className="text-zinc-500 hover:text-rose-400 p-1"
+                                                        className="text-muted-foreground hover:text-destructive p-1"
                                                     >
                                                         <X className="w-3 h-3" />
                                                     </button>

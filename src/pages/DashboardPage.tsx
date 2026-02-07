@@ -8,7 +8,8 @@ import {
     Globe,
     Check,
     BedDouble,
-    Sparkles
+    Sparkles,
+    Palette
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -20,8 +21,13 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
+    DropdownMenuPortal,
 } from '../components/ui/dropdown-menu'
 
+import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
@@ -185,7 +191,7 @@ export function DashboardPage() {
     const [showTutorial, setShowTutorial] = useState(false)
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30">
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
             <AIAssistantModal
@@ -195,25 +201,25 @@ export function DashboardPage() {
             />
             <ComplianceAlert />
             {/* Header */}
-            <header className="h-16 border-b border-zinc-800 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
+            <header className="h-16 border-b border-border bg-background/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                            <span className="font-bold text-white">R</span>
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                            <span className="font-bold text-primary-foreground">R</span>
                         </div>
                         <div>
                             <h1 className="font-semibold text-lg tracking-tight">Relay</h1>
-                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{hotel?.info.name}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{hotel?.info.name}</p>
                         </div>
                     </div>
 
                     {/* Dashboard Tabs List */}
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="hidden md:block">
-                        <TabsList className="bg-zinc-900/50 border border-zinc-800 h-9">
-                            <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                        <TabsList className="bg-muted/50 border border-border h-9">
+                            <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
                                 {t('module.overview') || 'Genel Bakış'}
                             </TabsTrigger>
-                            <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                            <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
                                 {t('module.operations') || 'Operasyon Merkezi'}
                             </TabsTrigger>
                         </TabsList>
@@ -228,7 +234,7 @@ export function DashboardPage() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-zinc-500 hover:text-zinc-300"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
                             onClick={() => setShowDateTime(!showDateTime)}
                             title={showDateTime ? "Hide Time" : "Show Time"}
                         >
@@ -240,11 +246,11 @@ export function DashboardPage() {
                 <div className="flex items-center gap-3">
                     {/* Compliance Pulse (Mini) */}
                     {currentShift && (
-                        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800">
+                        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border">
                             <div className={cn("w-2 h-2 rounded-full animate-pulse",
                                 compliancePercentage === 100 ? "bg-emerald-500" : "bg-amber-500"
                             )} />
-                            <span className="text-xs text-zinc-400 font-medium">{compliancePercentage}% {t('module.compliance')}</span>
+                            <span className="text-xs text-muted-foreground font-medium">{compliancePercentage}% {t('module.compliance')}</span>
                         </div>
                     )}
 
@@ -255,11 +261,11 @@ export function DashboardPage() {
                     {/* Language Toggle */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 text-zinc-400 hover:text-white">
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
                                 <Globe className="w-4 h-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-32 bg-zinc-900 border-zinc-800">
+                        <DropdownMenuContent align="end" className="w-32 bg-card border-border">
                             <DropdownMenuItem onClick={() => setLanguage('en')} className="text-xs">
                                 🇺🇸 English {language === 'en' && <Check className="ml-auto w-3 h-3" />}
                             </DropdownMenuItem>
@@ -273,45 +279,48 @@ export function DashboardPage() {
                     <div id="tour-profile">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="h-9 w-9 rounded-full bg-indigo-600 flex items-center justify-center border border-indigo-500/50 shadow-lg shadow-indigo-500/20 ml-2 hover:bg-indigo-500 transition-colors overflow-hidden">
-                                    <span className="text-xs font-bold text-white">
-                                        {user?.name?.charAt(0).toUpperCase() || <User className="w-4 h-4 text-white" />}
+                                <button className="h-9 w-9 rounded-full bg-primary flex items-center justify-center border border-primary/50 shadow-lg shadow-primary/20 ml-2 hover:bg-primary/90 transition-colors overflow-hidden">
+                                    <span className="text-xs font-bold text-primary-foreground">
+                                        {user?.name?.charAt(0).toUpperCase() || <User className="w-4 h-4 text-primary-foreground" />}
                                     </span>
                                 </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 bg-zinc-900 border-zinc-800 p-2">
+                            <DropdownMenuContent align="end" className="w-56 bg-card border-border p-2">
                                 <DropdownMenuLabel className="px-2 py-1.5">
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-semibold text-white">{user?.name || t('common.unknown')}</span>
-                                        <span className="text-[10px] text-zinc-500 uppercase">{user?.role}</span>
+                                        <span className="text-sm font-semibold text-foreground">{user?.name || t('common.unknown')}</span>
+                                        <span className="text-[10px] text-muted-foreground uppercase">{user?.role}</span>
                                     </div>
                                 </DropdownMenuLabel>
 
-                                <DropdownMenuSeparator className="bg-zinc-800 my-2" />
+                                <DropdownMenuSeparator className="bg-border my-2" />
 
-                                <DropdownMenuItem onClick={() => setShowTour(true)} className="gap-2 cursor-pointer">
-                                    <Map className="w-4 h-4 text-amber-400" />
-                                    <span className="text-zinc-300">Guided Tour</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setShowTutorial(true)} className="gap-2 cursor-pointer">
-                                    <Play className="w-4 h-4 text-indigo-400" />
-                                    <span className="text-zinc-300">Replay Intro</span>
-                                </DropdownMenuItem>
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-indigo-500/10">
+                                        <Palette className="w-4 h-4 text-primary" />
+                                        <span className="text-foreground">Appearance</span>
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuPortal>
+                                        <DropdownMenuSubContent className="w-80 bg-card border-border p-4">
+                                            <AppearanceOptions />
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuPortal>
+                                </DropdownMenuSub>
 
                                 <div className="space-y-1">
-                                    <DropdownMenuLabel className="text-[10px] text-zinc-500 font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
+                                    <DropdownMenuLabel className="text-[10px] text-muted-foreground font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
 
-                                    <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-indigo-500/10 transition-colors">
-                                        <Sparkles className="w-4 h-4 text-indigo-400" />
+                                    <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-foreground hover:bg-primary/10 cursor-pointer px-3 py-2 rounded-lg transition-colors">
+                                        <Sparkles className="w-4 h-4 text-primary" />
                                         <span className="text-xs font-medium">Assistant AI</span>
                                     </DropdownMenuItem>
 
-                                    <DropdownMenuItem onClick={() => setIsRoomManagerOpen(true)} className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-amber-500/10 transition-colors">
-                                        <BedDouble className="w-4 h-4 text-amber-400" />
+                                    <DropdownMenuItem onClick={() => setIsRoomManagerOpen(true)} className="flex items-center gap-2 text-foreground hover:bg-amber-500/10 cursor-pointer px-3 py-2 rounded-lg transition-colors">
+                                        <BedDouble className="w-4 h-4 text-amber-500" />
                                         <span className="text-xs font-medium">{t('dashboard.rooms')}</span>
                                     </DropdownMenuItem>
 
-                                    <DropdownMenuSeparator className="bg-zinc-800" />
+                                    <DropdownMenuSeparator className="bg-border" />
 
                                     {!currentShift ? (
                                         <DropdownMenuItem onClick={() => navigate('/shift-start')} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
@@ -326,9 +335,9 @@ export function DashboardPage() {
                                     )}
                                 </div>
 
-                                <DropdownMenuSeparator className="bg-zinc-800 my-2" />
+                                <DropdownMenuSeparator className="bg-border my-2" />
 
-                                <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-zinc-400 hover:text-white cursor-pointer px-3 py-2 rounded-lg focus:bg-zinc-800 transition-colors">
+                                <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-muted-foreground hover:text-foreground cursor-pointer px-3 py-2 rounded-lg hover:bg-muted transition-colors">
                                     <LogOut className="w-4 h-4" />
                                     <span className="text-xs font-medium">{t('auth.logout')}</span>
                                 </DropdownMenuItem>
@@ -339,13 +348,13 @@ export function DashboardPage() {
             </header>
 
             {/* Mobile Tabs (Visible only on small screens) */}
-            <div className="md:hidden border-b border-zinc-800 bg-black/50 backdrop-blur-xl px-4 py-2">
+            <div className="md:hidden border-b border-border bg-background/50 backdrop-blur-xl px-4 py-2">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="bg-zinc-900/50 border border-zinc-800 h-10 w-full">
-                        <TabsTrigger value="overview" className="flex-1 text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                    <TabsList className="bg-muted/50 border border-border h-10 w-full">
+                        <TabsTrigger value="overview" className="flex-1 text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
                             {t('module.overview') || 'Genel Bakış'}
                         </TabsTrigger>
-                        <TabsTrigger value="operations" className="flex-1 text-xs data-[state=active]:bg-zinc-800 data-[state=active]:text-white">
+                        <TabsTrigger value="operations" className="flex-1 text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
                             {t('module.operations') || 'Operasyon'}
                         </TabsTrigger>
                     </TabsList>
@@ -359,7 +368,7 @@ export function DashboardPage() {
                     <TabsContent value="overview" className="h-full m-0 border-none p-0 outline-none">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
                             {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
-                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
                                 <div id="tour-logs">
                                     <ShiftNotes hotelId={hotel?.id || ''} />
                                 </div>
@@ -378,7 +387,7 @@ export function DashboardPage() {
                             </div>
 
                             {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
-                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
                                 {/* 1. Current Shift & Pulse */}
                                 <div className="space-y-4">
                                     <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
@@ -403,7 +412,7 @@ export function DashboardPage() {
                             </div>
 
                             {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
-                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
                                 {/* 3. Hotel Info */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
@@ -444,32 +453,32 @@ export function DashboardPage() {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
+                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none overflow-y-auto scrollbar-thin">
                         <div className="space-y-8 pb-12">
                             <div className="flex flex-col gap-2">
-                                <h2 className="text-3xl font-bold text-white tracking-tight">{t('dashboard.operationsHub')}</h2>
-                                <p className="text-zinc-500 text-lg font-sans">{t('dashboard.operationsDesc')}</p>
+                                <h2 className="text-3xl font-bold text-foreground tracking-tight">{t('dashboard.operationsHub')}</h2>
+                                <p className="text-muted-foreground text-lg font-sans">{t('dashboard.operationsDesc')}</p>
                             </div>
 
                             <Tabs defaultValue="messaging" className="space-y-8">
-                                <TabsList className="bg-zinc-900/50 p-1 rounded-xl border border-zinc-800 h-12 w-full justify-start overflow-x-auto whitespace-nowrap no-scrollbar">
-                                    <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
+                                <TabsList className="bg-muted/50 p-1 rounded-xl border border-border h-12 w-full justify-start overflow-x-auto whitespace-nowrap no-scrollbar">
+                                    <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
                                         <MessageCircle className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.messaging')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
+                                    <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
                                         <ShieldAlert className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.complaints')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="off-days" id="tour-offdays" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
+                                    <TabsTrigger value="off-days" id="tour-offdays" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
                                         <CalendarDays className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.offDays')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="tours" id="tour-tours" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
+                                    <TabsTrigger value="tours" id="tour-tours" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
                                         <Map className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.tours')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
+                                    <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
                                         <CreditCard className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.sales')}</span>
                                     </TabsTrigger>

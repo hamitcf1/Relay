@@ -296,9 +296,37 @@ type Translations = {
 
     // Notifications
     'notifications.title': string
+    'notifications.markAsRead': string
     'notifications.markAllRead': string
     'notifications.noNotifications': string
     'notifications.viewAll': string
+
+    // Feedback - Expanded
+    'feedback.placeholder': string
+    'feedback.submitSuccess': string
+    'feedback.thankYou': string
+    'feedback.submitAnonymous': string
+    'feedback.recentTitle': string
+    'feedback.noComplaints': string
+
+    // Messaging - Expanded
+    'messaging.everyone': string
+    'messaging.placeholder': string
+    'messaging.noMessages': string
+    'messaging.clearChatConfirm': string
+    'messaging.deleteMessageConfirm': string
+    'messaging.clearTooltip': string
+    'messaging.deleteTooltip': string
+
+    // Currency
+    'currency.title': string
+    'currency.buying': string
+    'currency.selling': string
+    'currency.lastUpdated': string
+
+    // Announcement
+    'announcement.title': string
+    'announcement.deleteConfirm': string
 
     // Status/Filter
     'status.all': string
@@ -309,6 +337,8 @@ type Translations = {
     'roster.noStaff': string
     'roster.show': string
     'roster.hide': string
+    'roster.unknown': string
+    'common.clear': string
 
     // Tours
     'tours.catalogue.title': string
@@ -320,9 +350,9 @@ type Translations = {
     'tours.form.desc': string
     'tours.form.basePrice': string
     'tours.form.adultPrice': string
+    'tours.form.operatingDays': string
     'tours.form.child37Price': string
     'tours.form.child03Price': string
-    'tours.form.operatingDays': string
     'tours.noTours': string
     'tours.createFirst': string
     'tours.local': string
@@ -349,7 +379,48 @@ type Translations = {
     'sales.optionalNotes': string
     'sales.create': string
     'sales.noSales': string
+    'sales.selectTour': string
+    'sales.destinationPlaceholder': string
     'sales.soldBy': string
+    'sales.details.service': string
+    'sales.details.financials': string
+    'sales.details.pickup': string
+    'sales.details.ticket': string
+    'sales.details.pax': string
+    'sales.details.total': string
+    'sales.details.paid': string
+    'sales.details.collect': string
+    'sales.details.remaining': string
+    'sales.details.notes': string
+    'sales.details.history': string
+    'sales.details.exchange': string
+    'sales.details.created': string
+    'sales.details.noNotes': string
+    'sales.details.amountPlaceholder': string
+    'sales.details.valuePlaceholder': string
+    'sales.details.ticketPlaceholder': string
+    'sales.details.notesPlaceholder': string
+    'sales.details.deleteConfirm': string
+    'sales.details.save': string
+    'sales.details.cancel': string
+    'sales.details.person': string
+    'sales.details.persons': string
+    'sales.details.notSet': string
+    'sales.details.none': string
+
+    'sales.status.waiting': string
+    'sales.status.confirmed': string
+    'sales.status.pickup_pending': string
+    'sales.status.realized': string
+    'sales.status.delivered': string
+    'sales.status.cancelled': string
+    'sales.payment.pending': string
+    'sales.payment.partial': string
+    'sales.payment.paid': string
+    'sales.type.tour': string
+    'sales.type.transfer': string
+    'sales.type.laundry': string
+    'sales.type.other': string
 
     // Compliance
     'compliance.kbs.required': string
@@ -557,8 +628,6 @@ const translations: Record<Language, Translations> = {
         'log.stickyBoard': 'Sticky Board',
         'compliance.kbsLate': 'KBS System check is required immediately! Please verify guest identities.',
 
-
-
         'handover.title': 'Handover Wizard',
         'handover.step.tickets': 'Review Open Tickets',
         'handover.step.cash': 'Cash Count',
@@ -608,6 +677,7 @@ const translations: Record<Language, Translations> = {
         'hotel.additionalNotes': 'Additional Notes',
         'hotel.notesPlaceholder': 'Any other important information...',
         'hotel.bankAccount': 'Bank Account',
+        'hotel.settings.minibarPrices': 'Minibar Prices',
         'hotel.noInfo': 'No hotel information set',
         'hotel.clickEdit': 'Click edit to add',
 
@@ -701,13 +771,53 @@ const translations: Record<Language, Translations> = {
         'notes.activeCount': 'Active Notes',
         'notes.noNotes': 'No active notes',
         'notes.aiHelp': 'AI Assist',
+        'notes.noFixturePrices': 'No fixture prices configured by management.',
+        'minibar.cola': 'Cola',
+        'minibar.cola_zero': 'Cola Zero',
+        'minibar.fanta': 'Fanta',
+        'minibar.sprite': 'Sprite',
+        'minibar.soda': 'Soda',
         'notes.anonymous': 'Anonymous',
 
         // Notifications
         'notifications.title': 'Notifications',
+        'notifications.markAsRead': 'Mark as read',
         'notifications.markAllRead': 'Mark all read',
         'notifications.noNotifications': 'No new notifications',
         'notifications.viewAll': 'View All Activity',
+
+        // Feedback - Expanded
+        'feedback.placeholder': 'Describe your concern or feedback here...',
+        'feedback.submitSuccess': 'Submitted Successfully',
+        'feedback.thankYou': 'Thank you for your feedback.',
+        'feedback.submitAnonymous': 'Submit Anonymously',
+        'feedback.recentTitle': 'Recent Feedback',
+        'feedback.noComplaints': 'No complaints to show.',
+
+        // Messaging - Expanded
+        'messaging.everyone': 'Message everyone',
+        'messaging.placeholder': 'Message ...',
+        'messaging.noMessages': 'No messages yet. Start the conversation!',
+        'messaging.clearChatConfirm': 'Are you sure you want to clear this conversation? This action cannot be undone.',
+        'messaging.deleteMessageConfirm': 'Delete this message?',
+        'messaging.clearTooltip': 'Clear Chat History',
+        'messaging.deleteTooltip': 'Delete message',
+
+        // Roster - Expanded
+        'roster.unknown': 'Unknown User',
+
+        // Common - Expanded
+        'common.clear': 'Clear Chat History',
+
+        // Currency
+        'currency.title': 'Exchange Rates (TCMB)',
+        'currency.buying': 'Bank Buys (Bozma)',
+        'currency.selling': 'Bank Sells (Satış)',
+        'currency.lastUpdated': 'Updated',
+
+        // Announcement
+        'announcement.title': 'Important Announcement',
+        'announcement.deleteConfirm': 'Are you sure you want to delete this announcement?',
 
         // Status
         'status.all': 'All',
@@ -720,7 +830,6 @@ const translations: Record<Language, Translations> = {
         'app.systemTitle': 'Relay Hotel Operations System',
 
         'common.dismiss': 'Dismiss',
-
         'common.add': 'Add',
         'common.cancel': 'Cancel',
         'common.save': 'Save',
@@ -792,7 +901,48 @@ const translations: Record<Language, Translations> = {
         'sales.create': 'Create Sale',
         'sales.noSales': 'No {label} sales yet.',
         'sales.soldBy': 'Sold by: {name}',
+        'sales.selectTour': 'Select Tour',
+        'sales.destinationPlaceholder': 'Destination (e.g. Airport)',
+        'sales.details.service': 'Service Details',
+        'sales.details.financials': 'Financials',
+        'sales.details.pickup': 'Pickup Time',
+        'sales.details.ticket': 'Ticket #',
+        'sales.details.pax': 'Pax',
+        'sales.details.total': 'Total Price',
+        'sales.details.paid': 'Paid So Far',
+        'sales.details.collect': 'Collect Payment',
+        'sales.details.remaining': 'Remaining',
+        'sales.details.notes': 'Notes',
+        'sales.details.history': 'Payment History',
+        'sales.details.exchange': 'Exchange Value',
+        'sales.details.created': 'Created by {name} on {date}',
+        'sales.details.noNotes': 'No notes added.',
+        'sales.details.amountPlaceholder': 'Amount...',
+        'sales.details.valuePlaceholder': 'Value in {currency}...',
+        'sales.details.ticketPlaceholder': 'e.g. T-12345',
+        'sales.details.notesPlaceholder': 'Add notes about pickup location, preferences, etc.',
+        'sales.details.deleteConfirm': 'Are you sure you want to completely delete this sale record?',
+        'sales.details.save': 'Save Changes',
+        'sales.details.cancel': 'Cancel',
+        'sales.details.person': 'Person',
+        'sales.details.persons': 'Person(s)',
+        'sales.details.notSet': 'Not set',
+        'sales.details.none': 'None',
+        'sales.status.waiting': 'Waiting',
+        'sales.status.confirmed': 'Confirmed',
+        'sales.status.pickup_pending': 'Pickup Pending',
+        'sales.status.realized': 'Realized',
+        'sales.status.delivered': 'Delivered',
+        'sales.status.cancelled': 'Cancelled',
+        'sales.payment.pending': 'Pending',
+        'sales.payment.partial': 'Partial',
+        'sales.payment.paid': 'Paid',
+        'sales.type.tour': 'Tour',
+        'sales.type.transfer': 'Transfer',
+        'sales.type.laundry': 'Laundry',
+        'sales.type.other': 'Other',
 
+        // Compliance
         'compliance.kbs.required': 'KBS Check Required!',
         'compliance.kbs.pastTime': "It's past 23:00",
         'compliance.kbs.desc': 'The KBS system check must be completed before your shift ends. This is a mandatory compliance requirement.',
@@ -803,6 +953,7 @@ const translations: Record<Language, Translations> = {
         'compliance.kbs.label': 'KBS System Verified',
         'compliance.kbs.checklistDesc': 'Daily compliance check before 23:00',
 
+        // Onboarding
         'onboarding.welcome.title': 'Welcome to Relay',
         'onboarding.welcome.desc': 'Your digital operations hub. Let\'s get you set up.',
         'onboarding.activity.title': 'Operations Feed',
@@ -829,6 +980,7 @@ const translations: Record<Language, Translations> = {
         'tour.profile.title': 'Your Profile',
         'tour.profile.desc': 'Access settings, tutorials, and logout here.',
 
+        // Daily Menu
         'menu.title': 'Staff Daily Menu',
         'menu.content': 'Today\'s Menu',
         'menu.edit': 'Edit Menu',
@@ -855,13 +1007,6 @@ const translations: Record<Language, Translations> = {
         'fixture.duvet_cover': 'Duvet Cover',
         'fixture.bathrobe': 'Bathrobe',
         'fixture.mattress_protector': 'Mattress Protector',
-        'hotel.settings.minibarPrices': 'Minibar Prices',
-        'minibar.cola': 'Cola',
-        'minibar.cola_zero': 'Cola Zero',
-        'minibar.fanta': 'Fanta',
-        'minibar.sprite': 'Sprite',
-        'minibar.soda': 'Soda',
-
 
         // Off Day
         'offday.management.title': 'Leave & Shift Management',
@@ -870,7 +1015,7 @@ const translations: Record<Language, Translations> = {
         'offday.history': 'Request History',
         'offday.petitions': 'Complaints & Petitions',
 
-        // Messages
+        // Messages & Feedback
         'messages.title': 'Messages',
         'messages.search': 'Search staff...',
         'messages.announcements': 'General Announcements',
@@ -906,44 +1051,37 @@ const translations: Record<Language, Translations> = {
         // Shift Notes
         'notes.edited': '(edited)',
         'notes.label': 'shift notes',
-        'notes.noFixturePrices': 'No fixture prices configured by management.',
     },
     tr: {
-        'app.welcome': 'Relay\'e Hoşgeldiniz',
-        'app.description': 'Dijital devir teslim sisteminiz. Vardiyaları yönetin, kayıtları takip edin ve uyumluluğu sağlayın - hepsi tek bir yerde.',
-        'app.activeShift': 'Aktif Vardiya',
-        'app.openTickets': 'Açık Kayıtlar',
-        'app.cashBalance': 'Kasa Bakiyesi',
-        'app.systemTitle': 'Relay Otel Operasyon Sistemi',
-
+        // Auth & Setup
         'auth.login': 'Giriş Yap',
         'auth.register': 'Kayıt Ol',
         'auth.email': 'E-posta Adresi',
         'auth.password': 'Şifre',
-        'auth.name': 'Ad Soyad',
+        'auth.name': 'Tam Ad',
         'auth.confirmPassword': 'Şifreyi Onayla',
         'auth.noAccount': 'Hesabınız yok mu?',
         'auth.haveAccount': 'Zaten hesabınız var mı?',
-        'auth.contactGM': 'Hesap erişimi için yöneticinizle (GM) iletişime geçin',
+        'auth.contactGM': 'Hesap erişimi için GM ile iletişime geçin',
         'auth.error.enterName': 'Lütfen adınızı girin',
         'auth.error.passwordLength': 'Şifre en az 6 karakter olmalıdır',
         'auth.error.passwordMismatch': 'Şifreler eşleşmiyor',
-        'auth.error.regFailed': 'Kayıt başarısız oldu',
+        'auth.error.regFailed': 'Kayıt başarısız',
         'auth.role.receptionist': 'Resepsiyonist',
         'auth.role.receptionistDesc': 'Ön büro personeli',
         'auth.role.housekeeping': 'Kat Hizmetleri',
         'auth.role.housekeepingDesc': 'Temizlik ve bakım',
-        'auth.registerSubtitle': 'Otelinizin Relay sistemine katılın',
+        'auth.registerSubtitle': 'Otelin Relay sistemine katılın',
         'auth.roleLabel': 'Rolünüz',
         'auth.creatingAccount': 'Hesap oluşturuluyor...',
         'auth.createAccount': 'Hesap Oluştur',
         'auth.logout': 'Çıkış Yap',
         'auth.switchAccount': 'Hesap Değiştir',
 
-        'setup.title': 'Otel Seçin',
-        'setup.subtitle': 'Mevcut bir otele katılın veya yeni bir tane oluşturun',
+        'setup.title': 'Otelinizi Seçin',
+        'setup.subtitle': 'Var olan bir otele katılın veya yeni bir tane oluşturun',
         'setup.joinExisting': 'Mevcut Otele Katıl',
-        'setup.createNew': 'Yeni Oluştur',
+        'setup.createNew': 'Yeni Otel Oluştur',
         'setup.hotelName': 'Otel Adı',
         'setup.address': 'Adres',
         'setup.optional': 'isteğe bağlı',
@@ -952,13 +1090,14 @@ const translations: Record<Language, Translations> = {
         'setup.createSuccess': 'Otel başarıyla oluşturuldu',
         'setup.joinSuccess': 'Otele Katıl',
         'setup.unnamedHotel': 'İsimsiz Otel',
-        'setup.error.joinFailed': 'Otele katılma başarısız oldu',
+        'setup.error.joinFailed': 'Otele katılma başarısız',
         'setup.error.enterName': 'Lütfen bir otel adı girin',
-        'setup.error.createFailed': 'Otel oluşturma başarısız oldu',
+        'setup.error.createFailed': 'Otel oluşturma başarısız',
         'setup.hotelNamePlaceholder': 'örn. Grand Palace Otel',
         'setup.addressPlaceholder': '123 Ana Cadde, Şehir',
 
-        'dashboard.welcome': 'Hoşgeldin, {name}',
+        // Dashboard
+        'dashboard.welcome': 'Tekrar hoşgeldin, {name}',
         'dashboard.role': 'Rol: {role}',
         'dashboard.startShift': 'Vardiyayı Başlat',
         'dashboard.endShift': 'Vardiyayı Bitir',
@@ -969,15 +1108,19 @@ const translations: Record<Language, Translations> = {
         'dashboard.activeHotelShift': 'Aktif Otel Vardiyası',
         'dashboard.todaysAssignment': 'Bugünkü Görev',
         'dashboard.assignedShift': 'Atanan Vardiya',
-        'dashboard.noAssignedShift': 'Bugün için atanmış vardiya yok',
+        'dashboard.noAssignedShift': 'Bugün için atanan vardiya yok',
         'dashboard.operationsHub': 'Operasyon Merkezi',
-        'dashboard.operationsDesc': 'Otel iletişimi, geri bildirim ve hizmetleri tek bir yerden yönetin.',
+        'dashboard.operationsDesc': 'Otel içi iletişim, geri bildirim ve servisleri tek bir yerden yönetin.',
         'dashboard.userProfile': 'Kullanıcı Profili',
 
+        // Status
+        'status.all': 'Hepsi',
+
+        // Status & Urgency
         'status.active': 'Aktif',
         'status.ongoing': 'Vardiya Devam Ediyor',
         'status.resolved': 'Çözüldü',
-        'status.archived': 'Arşiv',
+        'status.archived': 'Arşivlendi',
         'status.open': 'Açık',
         'status.noActiveShift': 'Aktif vardiya yok',
         'status.low': 'Düşük',
@@ -988,15 +1131,16 @@ const translations: Record<Language, Translations> = {
         'urgency.high': 'Yüksek',
         'urgency.critical': 'Kritik',
 
+        // Modules
         'module.activityFeed': 'Canlı Aktivite Akışı',
         'module.stickyBoard': 'Önemli Notlar',
-        'module.compliance': 'Uyumluluk Kontrolü',
+        'module.compliance': 'Uyumluluk Listesi',
         'module.shiftNotes': 'Vardiya Notları',
         'module.hotelInfo': 'Otel Bilgileri',
         'module.roster': 'Personel Çizelgesi',
         'module.calendar': 'Takvim',
         'module.maintenance': 'Teknik Servis',
-        'module.guest_request': 'Misafir Talebi',
+        'module.guest_request': 'Misafir İsteği',
         'module.complaint': 'Şikayet',
         'module.system': 'Sistem',
         'module.overview': 'Genel Bakış',
@@ -1006,116 +1150,8 @@ const translations: Record<Language, Translations> = {
         'module.offDays': 'İzin Günleri',
         'module.tours': 'Turlar',
         'module.sales': 'Satışlar',
-
-
-
-        'handover.title': 'Devir Teslim Sihirbazı',
-
-        'common.dismiss': 'Gizle',
-
-        'handover.step.tickets': 'Açık Kayıtları İncele',
-        'handover.step.cash': 'Kasa Sayımı',
-        'handover.step.notes': 'Devir Notları',
-        'handover.step.confirm': 'Onayla ve Bitir',
-        'handover.tickets.desc': 'Devam etmeden önce her açık kaydı onaylayın',
-        'handover.cash.desc': 'Devir yapmadan önce tüm nakit parayı sayın',
-        'handover.notes.desc': 'Bir sonraki vardiya için önemli notlar bırakın',
-        'handover.confirm.desc': 'Devir özetini inceleyin',
-        'handover.cash.started': 'Başlangıç',
-        'handover.cash.difference': 'Fark',
-        'handover.complete': 'Devri Tamamla',
-        'handover.wizard': 'Devir Teslim Sihirbazı',
-        'handover.noOpenTickets': 'Açık kayıt yok!',
-        'handover.allClear': 'Devir teslim için her şey hazır',
-        'handover.cashEnd': 'Bitiş Nakit (₺)',
-        'handover.enterCash': 'Kasadaki nakdi girin',
-        'handover.countCash': 'Devretmeden önce tüm nakdi sayın',
-        'handover.notesDesc': 'Sonraki vardiya için önemli notlar bırakın',
-        'handover.readyToComplete': 'Devri Tamamlamaya Hazır',
-        'handover.reviewSummary': 'Devir özetini gözden geçirin',
-        'handover.ticketsReviewed': 'İncelenen Açık Kayıtlar',
-        'handover.notes': 'Notlar',
-
-        'rooms.title': 'Oda Yönetimi',
-        'rooms.add': 'Oda Ekle',
-        'rooms.edit': 'Odayı Düzenle',
-        'rooms.number': 'Oda Numarası',
-        'rooms.floor': 'Kat',
-        'rooms.type': 'Oda Tipi',
-        'rooms.status': 'Durum',
-        'rooms.occupancy': 'Doluluk',
-        'rooms.vacant': 'Boş',
-        'rooms.occupied': 'Dolu',
-        'rooms.clean': 'Temiz',
-        'rooms.dirty': 'Kirli',
-        'rooms.inspect': 'Kontrol',
-        'rooms.dnd': 'DND (Rahatsız Etmeyin)',
-
-        'hotel.laundry': 'Çamaşırhane Hizmeti',
-        'hotel.transfer': 'Havalimanı Transferi',
-        'hotel.lateCheckout': 'Geç Çıkış',
-        'hotel.extraBed': 'Ekstra Yatak',
-        'hotel.iban': 'Banka IBAN',
-        'hotel.bankName': 'Banka Adı',
-        'hotel.bankNamePlaceholder': 'örn. Garanti BBVA',
-        'hotel.additionalNotes': 'Ek Notlar',
-        'hotel.notesPlaceholder': 'Diğer önemli bilgiler...',
-        'hotel.bankAccount': 'Banka Hesabı',
-        'hotel.noInfo': 'Otel bilgisi ayarlanmamış',
-        'hotel.clickEdit': 'Ekleme yapmak için düzenle\'ye tıklayın',
-
-        'log.new': 'Yeni Kayıt Ekle',
-        'log.edit': 'Kaydı Düzenle',
-        'log.typeLabel': 'Kayıt Tipi',
-        'log.urgencyLabel': 'Aciliyet Seviyesi',
-        'log.contentLabel': 'Açıklama',
-        'log.roomNumberLabel': 'Oda Numarası (Opsiyonel)',
-        'log.create': 'Kayıt Oluştur',
-        'log.save': 'Değişiklikleri Kaydet',
-        'log.enterContent': 'Lütfen bir açıklama girin',
-        'log.mustLogin': 'Giriş yapmalısınız',
-        'log.aiHelp': 'AI Yardımı',
-        'log.roomPlaceholder': 'örn. 101',
-        'log.feed.noActive': 'Aktif kayıt bulunmuyor',
-        'log.feed.noResolved': 'Çözülmüş kayıt bulunmuyor',
-        'log.feed.noArchived': 'Arşiv boş',
-        'log.error.enterDescription': 'Lütfen bir açıklama giriniz',
-        'log.error.mustBeLoggedIn': 'Giriş yapmanız gerekiyor',
-
-        'sticky.pinnedCount': '{count} sabitlenmiş',
-
-        'shift.morning': 'Sabah',
-        'shift.afternoon': 'Öğleden Sonra',
-        'shift.night': 'Gece',
-        'shift.extra': 'Ekstra',
-        'shift.off': 'İzinli',
-        'shift.none': 'Yok',
-        'shift.welcome': 'Hoş geldiniz! Lütfen vardiya verilerinizi giriniz.',
-        'shift.selectType': 'Vardiya Tipi Seçin',
-        'shift.startingCash': 'Başlangıç Nakdi',
-        'shift.proceed': 'Dashboard\'a Devam Et',
-        'shift.loggedAs': 'Giriş yapan kullanıcı:',
-        // Calendar
-        'calendar.noShifts': 'Planlanmış vardiya yok',
-        'calendar.noEvents': 'Bugün için etkinlik yok',
-        'calendar.addEvent': 'Etkinlik Ekle',
-        'calendar.eventTitle': 'Etkinlik Başlığı',
-        'calendar.time': 'Saat',
-        'calendar.roomNumber': 'Oda Numarası',
-        'calendar.totalPrice': 'Toplam Tutar',
-        'calendar.collectedAmount': 'Tahsil Edilen',
-        'calendar.payment': 'Ödeme',
-        'calendar.remaining': 'Kalan',
-        'calendar.eventType.checkout': 'Çıkış',
-        'calendar.eventType.arrival': 'Giriş',
-        'calendar.eventType.meeting': 'Toplantı',
-        'calendar.eventType.inspection': 'Denetim',
-        'calendar.eventType.delivery': 'Teslimat',
-        'calendar.eventType.maintenance': 'Bakım',
-        'calendar.eventType.reminder': 'Hatırlatıcı',
-        'calendar.eventType.tour': 'Tur',
-        'calendar.eventType.transfer': 'Transfer',
-        'calendar.eventType.off_day': 'İzin Günü',
+        'log.stickyBoard': 'Önemli Notlar',
+        'compliance.kbsLate': 'KBS Kontrolü hemen yapılmalıdır! Lütfen misafir kimliklerini doğrulayın.',
 
         // Days
         'day.mon': 'Pazartesi',
@@ -1142,7 +1178,7 @@ const translations: Record<Language, Translations> = {
         'category.feedback': 'Geri Bildirim',
         'category.upgrade': 'Upgrade (Oda)',
         'category.upsell': 'Ekstra Satış',
-        'category.restaurant': 'Restoran',
+        'category.restaurant': 'Restoran/Bar',
         'category.minibar': 'Minibar',
         'category.maintenance': 'Bakım',
         'category.guest_request': 'Misafir İsteği',
@@ -1150,22 +1186,104 @@ const translations: Record<Language, Translations> = {
         'category.system': 'Sistem',
         'category.other': 'Diğer',
 
-        // Notes
-        'notes.activeCount': 'Aktif Kayıtlar',
-        'notes.noNotes': 'Aktif kayıt bulunmuyor',
-        'notes.aiHelp': 'AI Asistan',
-        'notes.anonymous': 'Anonim',
+        // Handover Wizard
+        'handover.title': 'Devir Teslim Sihirbazı',
+        'handover.step.tickets': 'Açık Kayıtları İncele',
+        'handover.step.cash': 'Kasa Sayımı',
+        'handover.step.notes': 'Devir Notları',
+        'handover.step.confirm': 'Onayla ve Bitir',
+        'handover.tickets.desc': 'Devam etmeden önce her açık kaydı onaylayın',
+        'handover.cash.desc': 'Devir öncesi tüm nakit sayımını yapın',
+        'handover.notes.desc': 'Bir sonraki vardiya için önemli notlar bırakın',
+        'handover.confirm.desc': 'Devir özetinizi inceleyin',
+        'handover.cash.started': 'Başlangıç',
+        'handover.cash.difference': 'Fark',
+        'handover.complete': 'Devir Teslimi Tamamla',
+        'handover.wizard': 'Devir Teslim Sihirbazı',
+        'handover.noOpenTickets': 'Açık kayıt yok!',
+        'handover.allClear': 'Devir teslim için her şey hazır',
+        'handover.cashEnd': 'Kasa Sonu (₺)',
+        'handover.enterCash': 'Eldeki nakiti girin',
+        'handover.countCash': 'Devir öncesi tüm nakit sayımını yapın',
+        'handover.notesDesc': 'Bir sonraki vardiya için önemli notlar bırakın',
+        'handover.readyToComplete': 'Devir Teslimi Tamamlamaya Hazır',
+        'handover.reviewSummary': 'Devir özetinizi inceleyin',
+        'handover.ticketsReviewed': 'Açık Kayıtlar İncelendi',
+        'handover.notes': 'Notlar',
 
-        // Notifications
-        'notifications.title': 'Bildirimler',
-        'notifications.markAllRead': 'Tümünü okundu işaretle',
-        'notifications.noNotifications': 'Yeni bildirim yok',
-        'notifications.viewAll': 'Tüm Aktiviteyi Gör',
+        // Room Management
+        'rooms.title': 'Oda Yönetimi',
+        'rooms.add': 'Oda Ekle',
+        'rooms.edit': 'Odayı Düzenle',
+        'rooms.number': 'Oda Numarası',
+        'rooms.floor': 'Kat',
+        'rooms.type': 'Oda Tipi',
+        'rooms.status': 'Durum',
+        'rooms.occupancy': 'Doluluk',
+        'rooms.vacant': 'Boş',
+        'rooms.occupied': 'Dolu',
+        'rooms.clean': 'Temiz',
+        'rooms.dirty': 'Kirli',
+        'rooms.inspect': 'Denetle',
+        'rooms.dnd': 'Rahatsız Etmeyin',
 
-        // Status
-        'status.all': 'Tümü',
+        // Hotel
+        'hotel.laundry': 'Çamaşırhane Hizmeti',
+        'hotel.transfer': 'Havalimanı Transferi',
+        'hotel.lateCheckout': 'Geç Çıkış',
+        'hotel.extraBed': 'Ekstra Yatak',
+        'hotel.iban': 'Banka IBAN',
+        'hotel.bankName': 'Banka Adı',
+        'hotel.bankNamePlaceholder': 'örn. Garanti BBVA',
+        'hotel.additionalNotes': 'Ek Notlar',
+        'hotel.notesPlaceholder': 'Diğer önemli bilgiler...',
+        'hotel.bankAccount': 'Banka Hesabı',
+        'hotel.settings.minibarPrices': 'Minibar Fiyatları',
+        'hotel.noInfo': 'Otel bilgisi ayarlanmamış',
+        'hotel.clickEdit': 'Eklemek için düzenleye tıklayın',
 
+        // Log
+        'log.new': 'Yeni Kayıt Girişi',
+        'log.edit': 'Kaydı Düzenle',
+        'log.typeLabel': 'Kayıt Tipi',
+        'log.urgencyLabel': 'Aciliyet Seviyesi',
+        'log.contentLabel': 'Açıklama',
+        'log.roomNumberLabel': 'Oda Numarası (Opsiyonel)',
+        'log.create': 'Kayıt Oluştur',
+        'log.save': 'Değişiklikleri Kaydet',
+        'log.enterContent': 'Lütfen bir açıklama girin',
+        'log.mustLogin': 'Giriş yapmış olmalısınız',
+        'log.aiHelp': 'AI Yardımı',
+        'log.roomPlaceholder': 'örn. 101',
+        'log.feed.noActive': 'Aktif kayıt yok',
+        'log.feed.noResolved': 'Çözülmüş kayıt yok',
+        'log.feed.noArchived': 'Arşiv boş',
+        'log.error.enterDescription': 'Lütfen bir açıklama girin',
+        'log.error.mustBeLoggedIn': 'Giriş yapmış olmalısınız',
 
+        // Sticky
+        'sticky.pinnedCount': '{count} iğneylendi',
+
+        // Shifts
+        'shift.morning': 'Sabah',
+        'shift.afternoon': 'Öğle',
+        'shift.night': 'Gece',
+        'shift.extra': 'Ekstra',
+        'shift.off': 'İzinli',
+        'shift.none': 'Yok',
+        'shift.welcome': 'Hoşgeldiniz! Lütfen vardiya verilerinizi başlatın.',
+        'shift.selectType': 'Vardiya Tipini Seçin',
+        'shift.startingCash': 'Başlangıç Nakiti',
+        'shift.proceed': 'Panele Devam Et',
+        'shift.loggedAs': 'Giriş yapan',
+
+        // App & Common
+        'app.welcome': "Relay'e Hoşgeldiniz",
+        'app.description': 'Dijital devir teslim sisteminiz. Vardiyaları yönetin, kayıtları takip edin ve uyumluluğu sağlayın - hepsi tek bir yerde.',
+        'app.activeShift': 'Aktif Vardiya',
+        'app.openTickets': 'Açık Kayıtlar',
+        'app.cashBalance': 'Kasa Bakiyesi',
+        'app.systemTitle': 'Relay Otel Operasyon Sistemi',
         'common.add': 'Ekle',
         'common.cancel': 'İptal',
         'common.save': 'Kaydet',
@@ -1191,10 +1309,207 @@ const translations: Record<Language, Translations> = {
         'common.finish': 'Bitir',
         'common.reopen': 'Yeniden Aç',
         'common.resolve': 'Çöz',
+        'common.dismiss': 'Kapat',
 
+        'calendar.noShifts': 'Planlanmış vardiya yok',
+        'calendar.noEvents': 'Bugün için etkinlik yok',
+        'calendar.addEvent': 'Etkinlik Ekle',
+        'calendar.eventTitle': 'Etkinlik Başlığı',
+        'calendar.time': 'Saat',
+        'calendar.roomNumber': 'Oda Numarası',
+        'calendar.totalPrice': 'Toplam Tutar',
+        'calendar.collectedAmount': 'Tahsil Edilen',
+        'calendar.payment': 'Ödeme',
+        'calendar.remaining': 'Kalan',
+        'calendar.eventType.checkout': 'Çıkış',
+        'calendar.eventType.arrival': 'Giriş',
+        'calendar.eventType.meeting': 'Toplantı',
+        'calendar.eventType.inspection': 'Denetim',
+        'calendar.eventType.delivery': 'Teslimat',
+        'calendar.eventType.maintenance': 'Bakım',
+        'calendar.eventType.reminder': 'Hatırlatıcı',
+        'calendar.eventType.tour': 'Tur',
+        'calendar.eventType.transfer': 'Transfer',
+        'calendar.eventType.off_day': 'İzin Günü',
+
+        // Notes & Minibar
+        'notes.activeCount': 'Aktif Kayıtlar',
+        'notes.noNotes': 'Aktif kayıt bulunmuyor',
+        'notes.aiHelp': 'AI Asistan',
+        'notes.noFixturePrices': 'Yönetim tarafından demirbaş fiyatı ayarlanmamış.',
+        'minibar.cola': 'Kola',
+        'minibar.cola_zero': 'Kola Zero',
+        'minibar.fanta': 'Fanta',
+        'minibar.sprite': 'Sprite',
+        'minibar.soda': 'Soda',
+        'notes.anonymous': 'Anonim',
+        'notes.edited': '(düzenlendi)',
+        'notes.label': 'vardiya notları',
+
+        // Notifications
+        'notifications.title': 'Bildirimler',
+        'notifications.markAsRead': 'Okundu işaretle',
+        'notifications.markAllRead': 'Tümünü okundu işaretle',
+        'notifications.noNotifications': 'Yeni bildirim yok',
+        'notifications.viewAll': 'Tüm Aktiviteyi Gör',
+
+        // Feedback - Expanded
+        'feedback.placeholder': 'Şikayet veya geri bildiriminizi buraya yazın...',
+        'feedback.submitSuccess': 'Başarıyla Gönderildi',
+        'feedback.thankYou': 'Geri bildiriminiz için teşekkürler.',
+        'feedback.submitAnonymous': 'Anonim Gönder',
+        'feedback.recentTitle': 'Son Geri Bildirimler',
+        'feedback.noComplaints': 'Gösterilecek şikayet yok.',
+
+        // Messaging - Expanded
+        'messaging.everyone': 'Herkese mesaj yaz',
+        'messaging.placeholder': 'Mesaj ...',
+        'messaging.noMessages': 'Henüz mesaj yok. Sohbeti başlatın!',
+        'messaging.clearChatConfirm': 'Bu sohbeti temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+        'messaging.deleteMessageConfirm': 'Bu mesajı silmek istediğinize emin misiniz?',
+        'messaging.clearTooltip': 'Sohbeti Temizle',
+        'messaging.deleteTooltip': 'Mesajı Sil',
+
+        // Roster - Expanded
+        'roster.unknown': 'Bilinmeyen Kullanıcı',
+
+        // Common - Expanded
+        'common.clear': 'Sohbeti Temizle',
+
+        // Currency
+        'currency.title': 'Döviz Kurları (TCMB)',
+        'currency.buying': 'Döviz Alış (Bozma)',
+        'currency.selling': 'Döviz Satış (Satış)',
+        'currency.lastUpdated': 'Güncellendi',
+
+        // Announcement
+        'announcement.title': 'Önemli Duyuru',
+        'announcement.deleteConfirm': 'Bu duyuruyu silmek istediğinize emin misiniz?',
+
+        // Roster
         'roster.title': 'Haftalık Çizelge',
         'roster.noStaff': 'Personel bulunamadı',
+        'roster.show': 'Çizelgede Göster',
+        'roster.hide': 'Çizelgeden Gizle',
 
+        // Tours
+        'tours.catalogue.title': 'Tur Kataloğu',
+        'tours.catalogue.desc': 'Mevcut turlara göz atın ve yerel satışları takip edin.',
+        'tours.add': 'Yeni Tur Ekle',
+        'tours.edit': 'Turu Düzenle',
+        'tours.create': 'Yeni Tur Girişi Oluştur',
+        'tours.form.name': 'Tur Adı',
+        'tours.form.desc': 'Kısa Açıklama',
+        'tours.form.basePrice': 'Baz Fiyat (EUR)',
+        'tours.form.adultPrice': 'Yetişkin Fiyatı',
+        'tours.form.child37Price': 'Çocuk (3-7y)',
+        'tours.form.child03Price': 'Çocuk (0-3y)',
+        'tours.form.operatingDays': 'Operasyon Günleri',
+        'tours.noTours': 'Henüz katalogda tur bulunmuyor.',
+        'tours.createFirst': 'İlkini oluştur',
+        'tours.local': 'Yerel Tur',
+        'tours.clickToLog': 'Satış kaydetmek için bir kategoriye tıklayın.',
+        'tours.book.title': 'Yeni Rezervasyon: {name}',
+        'tours.book.desc': 'Bu tur için rezervasyon detaylarını girin.',
+        'tours.book.guestName': 'Misafir Adı',
+        'tours.book.room': 'Oda #',
+        'tours.book.pax': 'Kişi Sayısı',
+        'tours.book.date': 'Tarih',
+        'tours.book.totalPrice': 'Toplam Tutar',
+        'tours.book.confirm': 'Rezervasyonu Onayla',
+
+        // Sales
+        'sales.tracker': 'Satış Takibi',
+        'sales.new': 'Yeni Satış',
+        'sales.newType': 'Yeni {label}',
+        'sales.service': 'Servis',
+        'sales.other': 'Diğer / Özel',
+        'sales.customName': 'Özel tur adı girin...',
+        'sales.pickupTime': 'Alış Saati',
+        'sales.price': 'Fiyat',
+        'sales.notes': 'Notlar',
+        'sales.optionalNotes': 'Opsiyonel notlar...',
+        'sales.create': 'Satış Oluştur',
+        'sales.noSales': 'Henüz {label} satışı yok.',
+        'sales.soldBy': 'Satan: {name}',
+        'sales.selectTour': 'Tur Seçin',
+        'sales.destinationPlaceholder': 'Varış Noktası (örn. Havalimanı)',
+        'sales.details.service': 'Servis Detayları',
+        'sales.details.financials': 'Finansal Veriler',
+        'sales.details.pickup': 'Alış Saati',
+        'sales.details.ticket': 'Bilet #',
+        'sales.details.pax': 'Kişi Sayısı',
+        'sales.details.total': 'Toplam Tutar',
+        'sales.details.paid': 'Ödenen Tutar',
+        'sales.details.collect': 'Ödeme Tahsil Et',
+        'sales.details.remaining': 'Kalan',
+        'sales.details.notes': 'Notlar',
+        'sales.details.history': 'Ödeme Geçmişi',
+        'sales.details.exchange': 'Kur Değeri',
+        'sales.details.created': '{name} tarafından {date} tarihinde oluşturuldu',
+        'sales.details.noNotes': 'Not eklenmemiş.',
+        'sales.details.amountPlaceholder': 'Tutar...',
+        'sales.details.valuePlaceholder': '{currency} karşılığı...',
+        'sales.details.ticketPlaceholder': 'örn. T-12345',
+        'sales.details.notesPlaceholder': 'Alış yeri, tercihler vb. hakkında notlar ekleyin.',
+        'sales.details.deleteConfirm': 'Bu satış kaydını tamamen silmek istediğinizden emin misiniz?',
+        'sales.details.person': 'Kişi',
+        'sales.details.persons': 'Kişi',
+        'sales.details.notSet': 'Ayarlanmadı',
+        'sales.details.none': 'Yok',
+        'sales.status.waiting': 'Bekliyor',
+        'sales.status.confirmed': 'Onaylandı',
+        'sales.status.pickup_pending': 'Alım Bekliyor',
+        'sales.status.realized': 'Gerçekleşti',
+        'sales.status.delivered': 'Teslim Edildi',
+        'sales.status.cancelled': 'İptal Edildi',
+        'sales.payment.pending': 'Bekliyor',
+        'sales.payment.partial': 'Kısmi Ödeme',
+        'sales.payment.paid': 'Ödendi',
+        'sales.type.tour': 'Tur',
+        'sales.type.transfer': 'Transfer',
+        'sales.type.laundry': 'Çamaşırhane',
+        'sales.type.other': 'Diğer',
+
+        // Compliance
+        'compliance.kbs.required': 'KBS Kontrolü Gerekli!',
+        'compliance.kbs.pastTime': "Saat 23:00'ü geçti",
+        'compliance.kbs.desc': 'KBS sistem kontrolü vardiyanız bitmeden tamamlanmalıdır. Bu zorunlu bir uyumluluk gerekliliğidir.',
+        'compliance.kbs.remindLater': 'Sonra Hatırlat',
+        'compliance.kbs.checkNow': "KBS'yi Şimdi Kontrol Et",
+        'compliance.agency.label': 'Acente Mesajları Kontrol Edildi',
+        'compliance.agency.desc': 'Tüm OTA mesajlarını (Booking, Expedia, vb.) kontrol edin',
+        'compliance.kbs.label': 'KBS Sistemi Doğrulandı',
+        'compliance.kbs.checklistDesc': "23:00'den önce günlük uyumluluk kontrolü",
+
+        // Onboarding
+        'onboarding.welcome.title': "Relay'e Hoşgeldiniz",
+        'onboarding.welcome.desc': 'Dijital operasyon merkeziniz. Hadi kuruluma başlayalım.',
+        'onboarding.activity.title': 'Operasyon Akışı',
+        'onboarding.activity.desc': 'Misafir taleplerini, teknik servis kayıtlarını ve vardiya notlarını canlı izleyin.',
+        'onboarding.shift.title': 'Vardiya Yönetimi',
+        'onboarding.shift.desc': 'Vardiya başlat/bitir, KBS kontrollerini yap ve kasa sayımını gerçekleştir.',
+        'onboarding.team.title': 'Çizelge ve Satışlar',
+        'onboarding.team.desc': 'Haftalık programınızı kontrol edin, izin isteyin ve tur satışlarını yönetin.',
+        'onboarding.localization.title': 'Dil Seçimi',
+        'onboarding.localization.desc': 'Dünya ikonunu kullanarak dilediğiniz an dil değiştirebilirsiniz.',
+        'onboarding.stepOf': '{current} / {total}',
+
+        // Interactive Tour
+        'tour.intro.title': "Relay'e Hoşgeldiniz",
+        'tour.intro.desc': 'Bu sizin dijital devir teslim platformunuz. Hadi hızlı bir tura çıkalım.',
+        'tour.compliance.title': 'Vardiya Uyumluluğu',
+        'tour.compliance.desc': 'Zorunlu KBS ve Acente kontrollerinizi buradan takip edin. Nabız atışı aciliyeti belirtir.',
+        'tour.feed.title': 'Aktivite Akışı',
+        'tour.feed.desc': 'Tüm misafir talepleri ve bakım kayıtları burada gerçek zamanlı görünür.',
+        'tour.sales.title': 'Satış ve Turlar',
+        'tour.sales.desc': 'Tur Satışlarını, İzin Günlerini ve misafir Geri Bildirimlerini yönetmek için sekmeler arası geçiş yapın.',
+        'tour.notifications.title': 'Bildirimler',
+        'tour.notifications.desc': 'İzin istekleri ve önemli mesajlardan haberdar olun.',
+        'tour.profile.title': 'Profiliniz',
+        'tour.profile.desc': 'Ayarlara, öğreticilere ve çıkış yapma ekranına buradan erişin.',
+
+        // Daily Menu
         'menu.title': 'Personel Günlük Menüsü',
         'menu.content': 'Günün Menüsü',
         'menu.edit': 'Menüyü Düzenle',
@@ -1221,141 +1536,48 @@ const translations: Record<Language, Translations> = {
         'fixture.duvet_cover': 'Nevresim',
         'fixture.bathrobe': 'Bornoz',
         'fixture.mattress_protector': 'Alez',
-        'hotel.settings.minibarPrices': 'Minibar Fiyatları',
-        'minibar.cola': 'Cola',
-        'minibar.cola_zero': 'Cola Zero',
-        'minibar.fanta': 'Fanta',
-        'minibar.sprite': 'Sprite',
-        'minibar.soda': 'Maden Suyu',
-
 
         // Off Day
-        'offday.management.title': 'İzin & Vardiya Yönetimi',
+        'offday.management.title': 'İzin ve Vardiya Yönetimi',
         'offday.management.desc': 'Personel izin ve vardiya taleplerini yönetin.',
         'offday.pending': 'Bekleyen Talepler',
-        'offday.history': 'Talep Geçmişim',
-        'offday.petitions': 'Şikayet Dilekçeleri',
+        'offday.history': 'Talep Geçmişi',
+        'offday.petitions': 'Şikayet ve Dilekçeler',
 
-        // Messages
+        // Messages & Feedback
         'messages.title': 'Mesajlar',
         'messages.search': 'Personel ara...',
         'messages.announcements': 'Genel Duyurular',
         'messages.broadcast': 'Tüm personele yayınla',
         'feedback.anonymous.title': 'Anonim Geri Bildirim',
         'feedback.anonymous.subtitle': 'Sesiniz güvenle duyulsun.',
-        'feedback.privacy.title': 'Gizlilik Garantili',
-        'feedback.privacy.desc': 'Kullanıcı ilişkilendirmesi olmayan otel düzeyinde koleksiyonlar kullanıyoruz. Veritabanı yöneticileri bile geri bildirimi belirli bir kullanıcı hesabına kadar takip edemez.',
+        'feedback.privacy.title': 'Gizlilik Garantisi',
+        'feedback.privacy.desc': 'Geri bildirimleri kullanıcılarla ilişkilendirmeden, otel düzeyinde topluyoruz. Veritabanı yöneticileri bile geri bildirimi hangi kullanıcının gönderdiğini göremez.',
         'feedback.submit.title': 'Anonim Şikayet Gönder',
         'feedback.submit.desc': 'Kimliğiniz tamamen gizlidir. Mesajınızla birlikte hiçbir kişisel veri saklanmaz.',
         'feedback.management.view': 'Yönetim Görünümü',
 
         // AI Modal
-        'ai.title': 'Relay AI Asistan',
-        'ai.poweredBy': 'Gemini & Gemma ile güçlendirilmiştir',
-        'ai.model': 'Yapay Zeka Modeli',
+        'ai.title': 'Relay AI Asistanı',
+        'ai.poweredBy': 'Gemini & Gemma tarafından desteklenmektedir',
+        'ai.model': 'AI Modeli',
         'ai.mode.assistant': 'Asistan Modu',
         'ai.mode.quota': 'Kota Dengeli Mod',
-        'ai.task.general': 'Genel Asistan Talebi',
+        'ai.task.general': 'Genel Asistan İsteği',
         'ai.task.generalDesc': 'Bugün size nasıl yardımcı olabilirim?',
-        'ai.task.incident': 'Tutanak Raporu',
-        'ai.task.incidentDesc': 'Olayı tanımlayın (Kim, Ne, Ne Zaman, Nerede)...',
+        'ai.task.incident': 'Olay Raporu',
+        'ai.task.incidentDesc': 'Olayı açıklayın (Kim, Ne zaman, Nerede, Nasıl)...',
         'ai.task.email': 'Profesyonel E-posta İsteği',
-        'ai.task.emailDesc': 'Alıcı kim ve ana mesaj nedir?',
-        'ai.task.review': 'Yorum Yanıtla',
+        'ai.task.emailDesc': 'Alıcı kim ve ana mesajınız nedir?',
+        'ai.task.review': 'Yorum Yanıtlama İsteği',
         'ai.task.reviewDesc': 'Misafir yorumunu buraya yapıştırın...',
         'ai.context.title': 'Otel Bilgi Bankası',
-        'ai.context.desc': 'Oteliniz hakkında gerçekleri girin (kahvaltı saatleri, wifi şifresi, kurallar). AI, doğru yanıtlar oluşturmak için bunu kullanacaktır.',
+        'ai.context.desc': 'Oteliniz hakkındaki gerçekleri girin (kahvaltı saatleri, wifi şifresi, politikalar). AI bu bilgileri doğru yanıtlar üretmek için kullanacaktır.',
         'ai.context.save': 'Bağlamı Kaydet',
         'ai.generate': 'Oluştur',
         'ai.cancel': 'İptal',
-
-        // Shift Notes
-        'notes.edited': '(düzenlendi)',
-        'notes.label': 'vardiya notları',
-        'notes.noFixturePrices': 'Yönetim tarafından demirbaş fiyatı girilmemiş.',
-
-        // Tours
-        'tours.catalogue.title': 'Tur Kataloğu',
-        'tours.catalogue.desc': 'Mevcut turları inceleyin ve satışları takip edin.',
-        'tours.add': 'Yeni Tur Ekle',
-        'tours.edit': 'Turu Düzenle',
-        'tours.create': 'Yeni Tur Girişi Oluştur',
-        'tours.form.name': 'Tur Adı',
-        'tours.form.desc': 'Kısa Açıklama',
-        'tours.form.basePrice': 'Taban Fiyat (EUR)',
-        'tours.form.adultPrice': 'Yetişkin Fiyatı',
-        'tours.form.child37Price': 'Çocuk (3-7y)',
-        'tours.form.child03Price': 'Bebek (0-3y)',
-        'tours.form.operatingDays': 'Operasyon Günleri',
-        'tours.noTours': 'Katalogda henüz tur yok.',
-        'tours.createFirst': 'İlk turu oluştur',
-        'tours.local': 'Yerel Tur',
-        'tours.clickToLog': 'Satış girmek için bir kategoriye tıklayın.',
-        'tours.book.title': 'Yeni Rezervasyon: {name}',
-        'tours.book.desc': 'Bu tur için rezervasyon detaylarını girin.',
-        'tours.book.guestName': 'Misafir Adı',
-        'tours.book.room': 'Oda No',
-        'tours.book.pax': 'Kişi',
-        'tours.book.date': 'Tarih',
-        'tours.book.totalPrice': 'Toplam Fiyat',
-        'tours.book.confirm': 'Rezervasyonu Onayla',
-
-        // Interactive Tour
-        'tour.intro.title': 'Relay\'e Hoşgeldiniz',
-        'tour.intro.desc': 'Bu sizin dijital devir teslim platformunuz. Hadi hızlıca bir göz atalım.',
-        'tour.compliance.title': 'Vardiya Uyumluluğu',
-        'tour.compliance.desc': 'Zorunlu KBS ve Acente kontrollerini buradan takip edin. Nabız işareti aciliyeti gösterir.',
-        'tour.feed.title': 'Aktivite Akışı',
-        'tour.feed.desc': 'Tüm misafir talepleri ve bakım kayıtları burada anlık olarak görünür.',
-        'tour.sales.title': 'Satış ve Turlar',
-        'tour.sales.desc': 'Tur Satışlarını, İzin Günlerini ve Misafir Geri Bildirimlerini yönetmek için sekmeleri kullanın.',
-        'tour.notifications.title': 'Bildirimler',
-        'tour.notifications.desc': 'İzin talepleri ve önemli mesajlardan haberdar olun.',
-        'tour.profile.title': 'Profiliniz',
-        'tour.profile.desc': 'Ayarlara, eğitimlere ve çıkış yapma seçeneklerine buradan ulaşın.',
-
-        // Sales
-        'sales.tracker': 'Satış Takibi',
-        'sales.new': 'Yeni Satış',
-        'sales.newType': 'Yeni {label}',
-        'sales.service': 'Hizmet',
-        'sales.other': 'Diğer / Özel',
-        'sales.customName': 'Özel tur adı girin...',
-        'sales.pickupTime': 'Alınış Saati',
-        'sales.price': 'Fiyat',
-        'sales.notes': 'Notlar',
-        'sales.optionalNotes': 'İsteğe bağlı notlar...',
-        'sales.create': 'Satış Oluştur',
-        'sales.noSales': 'Henüz {label} satışı yok.',
-        'sales.soldBy': 'Satan: {name}',
-
-        // Roster
-        'roster.show': 'Çizelgede Göster',
-        'roster.hide': 'Çizelgeden Gizle',
-
-        'compliance.kbs.required': 'KBS Kontrolü Gerekli!',
-        'compliance.kbs.pastTime': 'Saat 23:00\'ü geçti',
-        'compliance.kbs.desc': 'KBS sistem kontrolü vardiyanız bitmeden tamamlanmalıdır. Bu zorunlu bir uyumluluk gerekliliğidir.',
-        'compliance.kbs.remindLater': 'Sonra Hatırlat',
-        'compliance.kbs.checkNow': 'KBS\'yi Şimdi Kontrol Et',
-        'compliance.agency.label': 'Acente Mesajları Kontrol Edildi',
-        'compliance.agency.desc': 'Tüm OTA mesajlarını (Booking, Expedia, vb.) kontrol edin',
-        'compliance.kbs.label': 'KBS Sistemi Doğrulandı',
-        'compliance.kbs.checklistDesc': '23:00\'den önce günlük uyumluluk kontrolü',
-
-        'onboarding.welcome.title': 'Relay\'e Hoşgeldiniz',
-        'onboarding.welcome.desc': 'Dijital operasyon merkeziniz. Hadi kuruluma başlayalım.',
-        'onboarding.activity.title': 'Operasyon Akışı',
-        'onboarding.activity.desc': 'Misafir taleplerini, teknik servis kayıtlarını ve vardiya notlarını canlı izleyin.',
-        'onboarding.shift.title': 'Vardiya Yönetimi',
-        'onboarding.shift.desc': 'Vardiya başlat/bitir, KBS kontrollerini yap ve kasa sayımını gerçekleştir.',
-        'onboarding.team.title': 'Çizelge ve Satışlar',
-        'onboarding.team.desc': 'Haftalık programınızı kontrol edin, izin isteyin ve tur satışlarını yönetin.',
-        'onboarding.localization.title': 'Dil Seçimi',
-        'onboarding.localization.desc': 'Dünya ikonunu kullanarak dilediğiniz an dil değiştirebilirsiniz.',
-        'onboarding.stepOf': '{current} / {total}',
-        'log.stickyBoard': 'Önemli Notlar',
-        'compliance.kbsLate': 'KBS Kontrolü hemen yapılmalıdır! Lütfen misafir kimliklerini doğrulayın.',
+        'sales.details.save': 'Değişiklikleri Kaydet',
+        'sales.details.cancel': 'İptal',
     },
 }
 

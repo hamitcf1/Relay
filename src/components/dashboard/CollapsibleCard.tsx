@@ -49,11 +49,11 @@ export function CollapsibleCard({
                         onClick={handleToggle}
                     >
                         {title}
-                        <div className="p-1 rounded-md hover:bg-zinc-800 transition-colors">
+                        <div className="p-1 rounded-md hover:bg-muted transition-colors">
                             {isCollapsed ? (
-                                <ChevronDown className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300" />
+                                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" />
                             ) : (
-                                <ChevronUp className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300" />
+                                <ChevronUp className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" />
                             )}
                         </div>
                     </div>

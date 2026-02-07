@@ -29,11 +29,11 @@ const notificationIcons: Record<NotificationType, any> = {
 }
 
 const notificationColors: Record<NotificationType, string> = {
-    compliance: 'text-rose-400 bg-rose-500/10',
-    message: 'text-indigo-400 bg-indigo-500/10',
-    announcement: 'text-amber-400 bg-amber-500/10',
-    off_day: 'text-emerald-400 bg-emerald-500/10',
-    system: 'text-zinc-400 bg-zinc-500/10'
+    compliance: 'text-rose-500 bg-rose-500/10 dark:text-rose-400',
+    message: 'text-indigo-500 bg-indigo-500/10 dark:text-indigo-400',
+    announcement: 'text-amber-500 bg-amber-500/10 dark:text-amber-400',
+    off_day: 'text-emerald-500 bg-emerald-500/10 dark:text-emerald-400',
+    system: 'text-muted-foreground bg-muted'
 }
 
 export function NotificationDropdown() {
@@ -72,15 +72,15 @@ export function NotificationDropdown() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="relative p-2 rounded-lg hover:bg-zinc-800 transition-all active:scale-95">
-                    <Bell className={cn("w-5 h-5 transition-colors", unreadCount > 0 ? "text-indigo-400" : "text-zinc-400")} />
+                <button className="relative p-2 rounded-lg hover:bg-muted transition-all active:scale-95">
+                    <Bell className={cn("w-5 h-5 transition-colors", unreadCount > 0 ? "text-primary" : "text-muted-foreground")} />
                     <AnimatePresence>
                         {unreadCount > 0 && (
                             <motion.span
                                 initial={{ scale: 0, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 exit={{ scale: 0, opacity: 0 }}
-                                className="absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-zinc-950"
+                                className="absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-background"
                             >
                                 {unreadCount > 9 ? '9+' : unreadCount}
                             </motion.span>
@@ -88,9 +88,9 @@ export function NotificationDropdown() {
                     </AnimatePresence>
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 bg-zinc-900/95 backdrop-blur-md border-zinc-800 p-0 shadow-2xl">
-                <div className="p-4 flex items-center justify-between border-b border-zinc-800">
-                    <DropdownMenuLabel className="p-0 font-bold text-base text-white font-sans">{t('notifications.title')}</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-80 bg-popover/95 backdrop-blur-md border-border p-0 shadow-2xl">
+                <div className="p-4 flex items-center justify-between border-b border-border">
+                    <DropdownMenuLabel className="p-0 font-bold text-base text-foreground font-sans">{t('notifications.title')}</DropdownMenuLabel>
                     {unreadCount > 0 && (
                         <Button
                             variant="ghost"
@@ -107,8 +107,8 @@ export function NotificationDropdown() {
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                     {notifications.length === 0 ? (
                         <div className="p-8 text-center">
-                            <Bell className="w-8 h-8 text-zinc-700 mx-auto mb-3 opacity-20" />
-                            <p className="text-sm text-zinc-500 font-medium">{t('notifications.noNotifications')}</p>
+                            <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-3 opacity-20" />
+                            <p className="text-sm text-muted-foreground font-medium">{t('notifications.noNotifications')}</p>
                         </div>
                     ) : (
                         <div className="py-2">
@@ -119,26 +119,26 @@ export function NotificationDropdown() {
                                         key={n.id}
                                         onSelect={() => handleNotificationClick(n)}
                                         className={cn(
-                                            "flex gap-3 p-4 transition-all cursor-pointer focus:bg-zinc-800/50 relative group outline-none",
-                                            !n.is_read && "bg-indigo-500/[0.03]"
+                                            "flex gap-3 p-4 transition-all cursor-pointer focus:bg-muted/50 relative group outline-none hover:bg-muted/30",
+                                            !n.is_read && "bg-primary/5"
                                         )}
                                     >
                                         {!n.is_read && (
-                                            <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-500 rounded-full" />
+                                            <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full" />
                                         )}
                                         <div className={cn("shrink-0 w-10 h-10 rounded-xl flex items-center justify-center", notificationColors[n.type])}>
                                             <Icon className="w-5 h-5" />
                                         </div>
                                         <div className="flex-1 min-w-0 space-y-1">
                                             <div className="flex items-center justify-between gap-2">
-                                                <p className={cn("text-xs font-bold truncate pr-6", n.is_read ? "text-zinc-400" : "text-white")}>
+                                                <p className={cn("text-xs font-bold truncate pr-6", n.is_read ? "text-muted-foreground" : "text-foreground")}>
                                                     {n.title}
                                                 </p>
-                                                <span className="text-[10px] text-zinc-600 whitespace-nowrap">
+                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                                     {formatDistanceToNow(n.timestamp, { addSuffix: true, locale: getDateLocale() })}
                                                 </span>
                                             </div>
-                                            <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed">
+                                            <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
                                                 {n.content}
                                             </p>
                                         </div>
@@ -151,7 +151,7 @@ export function NotificationDropdown() {
                                                     removeNotification(hotel.id, n.id)
                                                 }
                                             }}
-                                            className="absolute top-2 right-2 p-1 text-zinc-600 hover:text-white hover:bg-zinc-700/50 rounded-full opacity-50 hover:opacity-100 transition-all"
+                                            className="absolute top-2 right-2 p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full opacity-50 hover:opacity-100 transition-all"
                                             title={t('common.dismiss') as string}
                                         >
                                             <X className="w-3 h-3" />
@@ -163,15 +163,15 @@ export function NotificationDropdown() {
                     )}
                 </div>
 
-                <DropdownMenuSeparator className="bg-zinc-800 m-0" />
+                <DropdownMenuSeparator className="bg-border m-0" />
                 <DropdownMenuItem
                     onSelect={() => navigate('/operations')}
-                    className="w-full rounded-none h-11 text-xs text-zinc-500 hover:text-white focus:text-white transition-colors flex items-center justify-center cursor-pointer focus:bg-zinc-800"
+                    className="w-full rounded-none h-11 text-xs text-muted-foreground hover:text-foreground focus:text-foreground transition-colors flex items-center justify-center cursor-pointer focus:bg-muted"
                 >
                     {t('notifications.viewAll')}
                 </DropdownMenuItem>
             </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu >
     )
 }
 

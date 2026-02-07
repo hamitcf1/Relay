@@ -16,25 +16,25 @@ import type { Sale, SaleType, PaymentStatus, Currency, PaymentEntry, SaleStatus 
 
 // Helper to get display info for sale types
 export const saleTypeInfo: Record<SaleType, { label: string; icon: string; color: string }> = {
-    tour: { label: 'Tour', icon: '🗺️', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
-    transfer: { label: 'Transfer', icon: '🚐', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    laundry: { label: 'Laundry', icon: '🧺', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
-    other: { label: 'Other', icon: '📦', color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' }
+    tour: { label: 'sales.type.tour', icon: '🗺️', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
+    transfer: { label: 'sales.type.transfer', icon: '🚐', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+    laundry: { label: 'sales.type.laundry', icon: '🧺', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+    other: { label: 'sales.type.other', icon: '📦', color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' }
 }
 
 export const saleStatusInfo: Record<SaleStatus, { label: string; color: string }> = {
-    waiting: { label: 'Waiting', color: 'bg-zinc-500/20 text-zinc-400' },
-    confirmed: { label: 'Confirmed', color: 'bg-blue-500/20 text-blue-400' },
-    pickup_pending: { label: 'Pickup Pending', color: 'bg-amber-500/20 text-amber-400' },
-    realized: { label: 'Realized', color: 'bg-emerald-500/20 text-emerald-400' },
-    delivered: { label: 'Delivered', color: 'bg-purple-500/20 text-purple-400' },
-    cancelled: { label: 'Cancelled', color: 'bg-rose-500/20 text-rose-400' },
+    waiting: { label: 'sales.status.waiting', color: 'bg-zinc-500/20 text-zinc-400' },
+    confirmed: { label: 'sales.status.confirmed', color: 'bg-blue-500/20 text-blue-400' },
+    pickup_pending: { label: 'sales.status.pickup_pending', color: 'bg-amber-500/20 text-amber-400' },
+    realized: { label: 'sales.status.realized', color: 'bg-emerald-500/20 text-emerald-400' },
+    delivered: { label: 'sales.status.delivered', color: 'bg-purple-500/20 text-purple-400' },
+    cancelled: { label: 'sales.status.cancelled', color: 'bg-rose-500/20 text-rose-400' },
 }
 
 export const paymentStatusInfo: Record<PaymentStatus, { label: string; color: string }> = {
-    pending: { label: 'Pending', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
-    partial: { label: 'Partial', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    paid: { label: 'Paid', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
+    pending: { label: 'sales.payment.pending', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
+    partial: { label: 'sales.payment.partial', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+    paid: { label: 'sales.payment.paid', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
 }
 
 interface SalesState {
@@ -91,6 +91,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     total_price: data.total_price || 0,
                     collected_amount: data.collected_amount || 0,
                     currency: data.currency || 'EUR',
+                    status: data.status as SaleStatus || 'waiting',
                     payment_status: data.payment_status as PaymentStatus,
                     notes: data.notes,
                     created_by: data.created_by,

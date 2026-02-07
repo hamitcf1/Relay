@@ -56,13 +56,13 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
         return (
             <div className="glass glass-hover rounded-2xl border border-zinc-800/50 flex flex-col">
                 <div className="p-6 pb-3">
-                    <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <Utensils className="w-4 h-4 text-indigo-400" />
                         {t('menu.title')}
                     </CardTitle>
                 </div>
                 <div className="p-6 pt-0 flex items-center justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-indigo-500/50" />
+                    <Loader2 className="w-6 h-6 animate-spin text-primary/50" />
                 </div>
             </div>
         )
@@ -72,8 +72,8 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
         <CollapsibleCard
             id="staff-meal"
             title={
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                    <Utensils className="w-4 h-4 text-indigo-400" />
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Utensils className="w-4 h-4 text-primary" />
                     {t('menu.title')}
                 </CardTitle>
             }
@@ -86,13 +86,13 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                             e.stopPropagation()
                             handleEdit()
                         }}
-                        className="hover:bg-indigo-500/10 hover:text-indigo-400 h-8 w-8 p-0"
+                        className="hover:bg-primary/10 hover:text-primary h-8 w-8 p-0"
                     >
                         <Edit2 className="w-4 h-4" />
                     </Button>
                 )
             }
-            className="bg-zinc-900 border-zinc-800"
+            className="bg-card border-border"
         >
             <div className="pt-2">
                 <AnimatePresence mode="wait">
@@ -121,7 +121,7 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                         >
                             {todayMenu && todayMenu.menu.trim() !== '' ? (
                                 <div className="space-y-4">
-                                    <div className="p-3 bg-zinc-800/30 rounded-xl border border-zinc-800/50 group">
+                                    <div className="p-3 bg-muted/30 rounded-xl border border-border/50 group">
                                         <div className="flex items-center gap-2 mb-3 px-1">
                                             <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">
                                                 {t('menu.content')}
@@ -130,8 +130,8 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                                         </div>
                                         <ul className="space-y-1.5 list-none">
                                             {todayMenu.menu.split('\n').filter(line => line.trim() !== '').map((item, index) => (
-                                                <li key={index} className="text-sm text-zinc-200 leading-relaxed flex items-start gap-2 group/item">
-                                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500/40 group-hover/item:bg-indigo-400 transition-colors shrink-0" />
+                                                <li key={index} className="text-sm text-foreground leading-relaxed flex items-start gap-2 group/item">
+                                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/40 group-hover/item:bg-primary transition-colors shrink-0" />
                                                     {item.trim()}
                                                 </li>
                                             ))}

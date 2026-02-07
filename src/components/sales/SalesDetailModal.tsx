@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import type { Sale, Currency, SaleStatus } from '@/types'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import {
@@ -38,6 +39,7 @@ interface SalesDetailModalProps {
 
 export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const { hotel } = useHotelStore()
+    const { t } = useLanguageStore()
     const { sales, updateSale, deleteSale, collectPayment } = useSalesStore()
 
     const [isEditing, setIsEditing] = useState(false)
@@ -106,7 +108,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
     const handleDelete = async () => {
         if (!hotel?.id || !saleId) return
-        if (confirm("Are you sure you want to completely delete this sale record?")) {
+        if (confirm(t('sales.details.deleteConfirm'))) {
             await deleteSale(hotel.id, saleId)
             onClose()
         }
@@ -116,12 +118,12 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
     return (
         <Dialog open={!!saleId} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-2xl p-0 overflow-hidden">
-                <DialogTitle className="sr-only">Sale Details</DialogTitle>
+            <DialogContent className="bg-card border-border text-foreground max-w-2xl p-0 overflow-hidden">
+                <DialogTitle className="sr-only">{t('module.sales')} - {sale.name}</DialogTitle>
                 <DialogDescription className="sr-only">View and edit sale details</DialogDescription>
                 <div className="flex flex-col h-[80vh] md:h-auto overflow-y-auto">
                     {/* H E A D E R */}
-                    <div className={cn("p-6 border-b border-zinc-800 relative overflow-hidden", saleTypeInfo[sale.type].color.split(" ")[0].replace('/20', '/10'))}>
+                    <div className={cn("p-6 border-b border-border relative overflow-hidden", saleTypeInfo[sale.type].color.split(" ")[0].replace('/20', '/10'))}>
                         <div className="absolute top-0 right-0 p-4 flex items-center gap-2">
                             {!isEditing ? (
                                 <>
@@ -135,9 +137,9 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                             ) : (
                                 <>
                                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500" onClick={handleSave}>
-                                        <Check className="w-4 h-4 mr-1" /> Save
+                                        <Check className="w-4 h-4 mr-1" /> {t('sales.details.save')}
                                     </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+                                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>{t('sales.details.cancel')}</Button>
                                 </>
                             )}
 
@@ -146,10 +148,10 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                         <div className="flex items-center gap-3 mb-2">
                             <span className="text-3xl">{saleTypeInfo[sale.type].icon}</span>
                             <Badge variant="outline" className={cn(saleTypeInfo[sale.type].color)}>
-                                {saleTypeInfo[sale.type].label}
+                                {t(saleTypeInfo[sale.type].label as any)}
                             </Badge>
                             <Badge variant="outline" className={cn(paymentStatusInfo[sale.payment_status].color)}>
-                                {paymentStatusInfo[sale.payment_status].label}
+                                {t(paymentStatusInfo[sale.payment_status].label as any)}
                             </Badge>
 
                             {/* Status Selector */}
@@ -158,24 +160,23 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                     value={editForm.status || 'waiting'}
                                     onValueChange={(v: SaleStatus) => setEditForm(prev => ({ ...prev, status: v }))}
                                 >
-                                    <SelectTrigger className="h-6 w-[120px] text-xs bg-zinc-900 border-zinc-700">
+                                    <SelectTrigger className="h-6 w-[120px] text-xs bg-background border-border">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="waiting">Waiting</SelectItem>
-                                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                                        <SelectItem value="pickup_pending">Pickup Pending</SelectItem>
-                                        <SelectItem value="realized">Realized</SelectItem>
-                                        <SelectItem value="delivered">Delivered</SelectItem>
-                                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                                        {Object.entries(saleStatusInfo).map(([status, info]) => (
+                                            <SelectItem key={status} value={status}>
+                                                {t(info.label as any)}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             ) : (
                                 sale.status && (
                                     <Badge variant="outline" className={cn(
-                                        saleStatusInfo[sale.status]?.color || "bg-zinc-800 text-zinc-400 border-zinc-700"
+                                        saleStatusInfo[sale.status]?.color || "bg-muted text-muted-foreground border-border"
                                     )}>
-                                        {saleStatusInfo[sale.status]?.label || sale.status}
+                                        {sale.status ? t(saleStatusInfo[sale.status].label as any) : sale.status}
                                     </Badge>
                                 )
                             )}
@@ -185,15 +186,15 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                             <Input
                                 value={editForm.name}
                                 onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                                className="text-2xl font-bold bg-black/20 border-white/10 text-white mb-2"
+                                className="text-2xl font-bold bg-background/50 border-border text-foreground mb-2"
                             />
                         ) : (
-                            <h2 className="text-2xl font-bold text-white mb-1">{sale.name}</h2>
+                            <h2 className="text-2xl font-bold text-foreground mb-1">{sale.name}</h2>
                         )}
 
-                        <div className="flex items-center gap-4 text-zinc-400 text-sm">
+                        <div className="flex items-center gap-4 text-muted-foreground text-sm">
                             <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {sale.customer_name}</span>
-                            <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> Room {sale.room_number}</span>
+                            <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {t('common.room')} {sale.room_number}</span>
                             <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {formatDisplayDate(sale.date)}</span>
                         </div>
                     </div>
@@ -204,92 +205,92 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                         {/* Details Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-4">
-                                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Service Details</h3>
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('sales.details.service')}</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs text-zinc-500">Pickup Time</label>
+                                        <label className="text-xs text-muted-foreground">{t('sales.details.pickup')}</label>
                                         {isEditing ? (
                                             <Input
                                                 type="time"
                                                 value={editForm.pickup_time}
                                                 onChange={e => setEditForm(prev => ({ ...prev, pickup_time: e.target.value }))}
-                                                className="h-8 bg-zinc-900 border-zinc-800"
+                                                className="h-8 bg-background border-border"
                                             />
                                         ) : (
                                             <div className="flex items-center gap-2 text-sm font-medium">
-                                                <Clock className="w-4 h-4 text-zinc-600" />
-                                                {sale.pickup_time || 'Not set'}
+                                                <Clock className="w-4 h-4 text-muted-foreground" />
+                                                {sale.pickup_time || t('sales.details.notSet')}
                                             </div>
                                         )}
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs text-zinc-500">Ticket #</label>
+                                        <label className="text-xs text-muted-foreground">{t('sales.details.ticket')}</label>
                                         {isEditing ? (
                                             <Input
                                                 value={editForm.ticket_number}
                                                 onChange={e => setEditForm(prev => ({ ...prev, ticket_number: e.target.value }))}
-                                                className="h-8 bg-zinc-900 border-zinc-800"
-                                                placeholder="e.g. T-12345"
+                                                className="h-8 bg-background border-border"
+                                                placeholder={t('sales.details.ticketPlaceholder')}
                                             />
                                         ) : (
                                             <div className="flex items-center gap-2 text-sm font-medium">
-                                                <Ticket className="w-4 h-4 text-zinc-600" />
-                                                {sale.ticket_number || 'None'}
+                                                <Ticket className="w-4 h-4 text-muted-foreground" />
+                                                {sale.ticket_number || t('sales.details.none')}
                                             </div>
                                         )}
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs text-zinc-500">Pax</label>
+                                        <label className="text-xs text-muted-foreground">{t('sales.details.pax')}</label>
                                         {isEditing ? (
                                             <Input
                                                 type="number"
                                                 value={editForm.pax}
                                                 onChange={e => setEditForm(prev => ({ ...prev, pax: parseInt(e.target.value) || 1 }))}
-                                                className="h-8 bg-zinc-900 border-zinc-800"
+                                                className="h-8 bg-background border-border"
                                             />
                                         ) : (
-                                            <div className="text-sm font-medium">{sale.pax} Person(s)</div>
+                                            <div className="text-sm font-medium">{sale.pax} {sale.pax > 1 ? t('sales.details.persons') : t('sales.details.person')}</div>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Financials</h3>
-                                <div className="p-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('sales.details.financials')}</h3>
+                                <div className="p-4 bg-muted/40 rounded-xl border border-border">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-zinc-400">Total Price</span>
+                                        <span className="text-sm text-muted-foreground">{t('sales.details.total')}</span>
                                         {isEditing ? (
                                             <div className="flex items-center gap-1 w-24">
                                                 <Input
                                                     type="number"
                                                     value={editForm.total_price}
                                                     onChange={e => setEditForm(prev => ({ ...prev, total_price: parseFloat(e.target.value) || 0 }))}
-                                                    className="h-7 text-right bg-zinc-950 border-zinc-700"
+                                                    className="h-7 text-right bg-background border-border"
                                                 />
-                                                <span className="text-xs text-zinc-500">€</span>
+                                                <span className="text-xs text-muted-foreground">€</span>
                                             </div>
                                         ) : (
-                                            <span className="text-lg font-bold text-white">€{sale.total_price}</span>
+                                            <span className="text-lg font-bold text-foreground">€{sale.total_price}</span>
                                         )}
                                     </div>
                                     <div className="flex justify-between items-center mb-4">
-                                        <span className="text-sm text-zinc-400">Paid So Far</span>
-                                        <span className={cn("text-sm font-medium", sale.collected_amount >= sale.total_price ? "text-emerald-400" : "text-amber-400")}>
+                                        <span className="text-sm text-muted-foreground">{t('sales.details.paid')}</span>
+                                        <span className={cn("text-sm font-medium", sale.collected_amount >= sale.total_price ? "text-emerald-500" : "text-amber-500")}>
                                             €{sale.collected_amount}
                                         </span>
                                     </div>
 
                                     {remaining > 0 && (
-                                        <div className="pt-3 border-t border-zinc-800 space-y-2">
+                                        <div className="pt-3 border-t border-border space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <div className="flex-1 relative">
                                                     <Input
                                                         value={collectAmount}
                                                         onChange={e => setCollectAmount(e.target.value)}
-                                                        placeholder="Amount..."
+                                                        placeholder={t('sales.details.amountPlaceholder')}
                                                         type="number"
-                                                        className="h-8 bg-zinc-950 border-zinc-700 text-xs pl-2"
+                                                        className="h-8 bg-background border-border text-xs pl-2"
                                                     />
                                                 </div>
                                                 <div className="w-24">
@@ -297,7 +298,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                                         value={paymentCurrency}
                                                         onValueChange={(v: Currency) => setPaymentCurrency(v)}
                                                     >
-                                                        <SelectTrigger className="h-8 text-xs bg-zinc-950 border-zinc-700">
+                                                        <SelectTrigger className="h-8 text-xs bg-background border-border">
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -316,14 +317,14 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                                         <Input
                                                             value={targetAmount}
                                                             onChange={e => setTargetAmount(e.target.value)}
-                                                            placeholder={`Value in ${sale.currency}...`}
+                                                            placeholder={t('sales.details.valuePlaceholder', { currency: sale.currency })}
                                                             type="number"
-                                                            className="h-8 bg-zinc-950 border-amber-500/30 text-xs pl-2"
+                                                            className="h-8 bg-background border-amber-500/30 text-xs pl-2"
                                                         />
-                                                        <span className="absolute right-2 top-2 text-[10px] text-zinc-500 font-bold">{sale.currency}</span>
+                                                        <span className="absolute right-2 top-1.5 text-[10px] text-muted-foreground font-bold">{sale.currency}</span>
                                                     </div>
-                                                    <div className="w-24 flex items-center justify-center text-[10px] text-amber-500 font-medium">
-                                                        Exchange Value
+                                                    <div className="w-24 flex items-center justify-center text-[10px] text-amber-500 font-medium leading-tight text-center">
+                                                        {t('sales.details.exchange')}
                                                     </div>
                                                 </div>
                                             )}
@@ -334,10 +335,10 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                                 disabled={!collectAmount || (paymentCurrency !== sale.currency && !targetAmount)}
                                                 className="w-full h-8 bg-emerald-600 hover:bg-emerald-500 mt-2"
                                             >
-                                                Collect Payment
+                                                {t('sales.details.collect')}
                                             </Button>
 
-                                            <p className="text-[10px] text-zinc-500 text-right">Remaining: <span className="text-rose-400 font-bold">€{remaining.toFixed(2)}</span></p>
+                                            <p className="text-[10px] text-muted-foreground text-right">{t('sales.details.remaining')}: <span className="text-rose-500 font-bold">€{remaining.toFixed(2)}</span></p>
                                         </div>
                                     )}
                                 </div>
@@ -346,22 +347,22 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
                         {/* Notes Section */}
                         <div className="space-y-2">
-                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
-                                <MessageSquare className="w-3 h-3" /> Notes
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                <MessageSquare className="w-3 h-3" /> {t('sales.details.notes')}
                             </h3>
                             {isEditing ? (
                                 <Textarea
                                     value={editForm.notes}
                                     onChange={e => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
-                                    className="bg-zinc-900 border-zinc-800 min-h-[100px]"
-                                    placeholder="Add notes about pickup location, preferences, etc."
+                                    className="bg-background border-border min-h-[100px]"
+                                    placeholder={t('sales.details.notesPlaceholder')}
                                 />
                             ) : (
-                                <div className="p-4 bg-zinc-900/30 rounded-xl border border-zinc-800/50 min-h-[80px]">
+                                <div className="p-4 bg-muted/30 rounded-xl border border-border min-h-[80px]">
                                     {sale.notes ? (
-                                        <p className="text-sm text-zinc-300 whitespace-pre-wrap">{sale.notes}</p>
+                                        <p className="text-sm text-foreground whitespace-pre-wrap">{sale.notes}</p>
                                     ) : (
-                                        <p className="text-sm text-zinc-600 italic">No notes added.</p>
+                                        <p className="text-sm text-muted-foreground italic">{t('sales.details.noNotes')}</p>
                                     )}
                                 </div>
                             )}
@@ -370,23 +371,26 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                         {/* Payment History */}
                         {sale.payments && sale.payments.length > 0 && (
                             <div className="space-y-3">
-                                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Payment History</h3>
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('sales.details.history')}</h3>
                                 <div className="space-y-2">
                                     {sale.payments.map((payment, idx) => (
-                                        <div key={idx} className="flex items-center justify-between p-3 bg-zinc-900/50 rounded-lg border border-zinc-800/50 text-sm">
+                                        <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border text-sm">
                                             <div className="flex items-center gap-2">
                                                 <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                                <span className="text-zinc-400">{format(new Date(payment.timestamp), 'dd MMM HH:mm')}</span>
+                                                <span className="text-muted-foreground">{format(new Date(payment.timestamp), 'dd MMM HH:mm')}</span>
                                             </div>
-                                            <span className="font-medium text-emerald-400">+{payment.amount} {payment.currency}</span>
+                                            <span className="font-medium text-emerald-500">+{payment.amount} {payment.currency}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        <div className="text-[10px] text-zinc-600 pt-4 border-t border-zinc-900 text-center">
-                            Created by {sale.created_by_name} on {format(new Date(sale.created_at), 'PPP p')}
+                        <div className="text-[10px] text-muted-foreground pt-4 border-t border-border text-center">
+                            {t('sales.details.created', {
+                                name: sale.created_by_name,
+                                date: format(new Date(sale.created_at), 'PPP p')
+                            })}
                         </div>
 
                     </div>

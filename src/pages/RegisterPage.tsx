@@ -108,7 +108,7 @@ export function RegisterPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center relative overflow-hidden">
+        <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
             {/* Animated Background */}
             <div className="absolute inset-0 overflow-hidden">
                 <motion.div
@@ -144,7 +144,7 @@ export function RegisterPage() {
                     {/* Back Link */}
                     <Link
                         to="/login"
-                        className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-200 transition-colors mb-6"
+                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         {t('common.back')}
@@ -157,23 +157,23 @@ export function RegisterPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
                     >
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 glow-primary mb-4">
-                            <Hotel className="w-8 h-8 text-white" />
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/80 to-primary glow-primary mb-4">
+                            <Hotel className="w-8 h-8 text-primary-foreground" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gradient-primary">{t('auth.register')}</h1>
-                        <p className="text-zinc-400 mt-1 text-sm">{t('auth.registerSubtitle')}</p>
+                        <h1 className="text-2xl font-bold text-foreground">{t('auth.register')}</h1>
+                        <p className="text-muted-foreground mt-1 text-sm">{t('auth.registerSubtitle')}</p>
                     </motion.div>
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Role Selection & GM Toggle */}
                         <div className="flex flex-col gap-3">
-                            <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">I am a...</p>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">I am a...</p>
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     type="button"
                                     onClick={() => setIsGM(false)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${!isGM ? 'bg-indigo-600/10 border-indigo-500/50 text-indigo-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                                    className={`p-3 rounded-xl border text-left transition-all ${!isGM ? 'bg-primary/10 border-primary/50 text-primary' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50'}`}
                                 >
                                     <div className="font-semibold text-sm mb-1">Staff Member</div>
                                     <div className="text-[10px] opacity-70">Joining a team</div>
@@ -181,7 +181,7 @@ export function RegisterPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsGM(true)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${isGM ? 'bg-indigo-600/10 border-indigo-500/50 text-indigo-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                                    className={`p-3 rounded-xl border text-left transition-all ${isGM ? 'bg-primary/10 border-primary/50 text-primary' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50'}`}
                                 >
                                     <div className="font-semibold text-sm mb-1">Manager</div>
                                     <div className="text-[10px] opacity-70">Creating a hotel</div>
@@ -193,17 +193,17 @@ export function RegisterPage() {
                         {!isGM && (
                             <div className="space-y-2">
                                 <div className="relative">
-                                    <Hotel className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                                    <Hotel className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                                     <Input
                                         value={hotelCode}
                                         onChange={(e) => setHotelCode(e.target.value.toUpperCase())}
-                                        className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600 uppercase tracking-widest font-mono"
+                                        className="pl-9 bg-muted/30 border-border text-foreground placeholder:text-muted-foreground uppercase tracking-widest font-mono"
                                         placeholder="HOTEL CODE (e.g. RELAY-X)"
                                         maxLength={10}
                                         required
                                     />
                                 </div>
-                                <p className="text-[10px] text-zinc-500 ml-1">
+                                <p className="text-[10px] text-muted-foreground ml-1">
                                     Ask your manager for the hotel code.
                                 </p>
                             </div>
@@ -212,11 +212,11 @@ export function RegisterPage() {
                         {/* Standard Fields */}
                         <div className="space-y-3">
                             <div className="relative">
-                                <User className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                                <User className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
                                 <Input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    className="pl-9 bg-muted/30 border-border text-foreground placeholder:text-muted-foreground"
                                     placeholder={t('auth.name')}
                                     required
                                 />
@@ -308,7 +308,7 @@ export function RegisterPage() {
                         )}
 
                         {/* Submit */}
-                        <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
+                        <Button type="submit" className="w-full h-12 text-base bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
                             {loading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />

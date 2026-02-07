@@ -280,7 +280,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         <CollapsibleCard
             id="shift-notes"
             title={
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
                     📋 {t('module.shiftNotes')}
                     {counts.active > 0 && (
                         <Badge variant="secondary" className="text-xs">
@@ -298,17 +298,17 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             e.stopPropagation()
                             setIsAdding(!isAdding)
                         }}
-                        className="hover:bg-indigo-500/10 hover:text-indigo-400 h-8 w-8 p-0"
+                        className="hover:bg-primary/10 hover:text-primary h-8 w-8 p-0"
                     >
                         <Plus className="w-4 h-4" />
                     </Button>
                 )
             }
-            className="glass border-zinc-800/50"
+            className="glass border-border/50"
         >
             <div className="pt-2">
                 {/* Status Tabs */}
-                <div className="flex gap-1 mb-4 p-1 bg-zinc-950/50 rounded-lg border border-zinc-800/50">
+                <div className="flex gap-1 mb-4 p-1 bg-muted/50 rounded-lg border border-border/50">
                     {[
                         { key: 'active' as const, label: t('status.active'), color: 'bg-emerald-500' },
                         { key: 'resolved' as const, label: t('status.resolved'), color: 'bg-indigo-500' },
@@ -321,8 +321,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             className={cn(
                                 'flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded transition-all',
                                 statusFilter === tab.key
-                                    ? 'bg-zinc-800 text-white shadow-sm'
-                                    : 'text-zinc-500 hover:text-zinc-300'
+                                    ? 'bg-card text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
                             )}
                         >
                             {tab.label}
@@ -353,7 +353,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                 'text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all',
                                 filter === tab.key
                                     ? `${tab.color} text-white shadow-lg`
-                                    : 'bg-zinc-800/70 text-zinc-400 hover:bg-zinc-700/70 hover:text-zinc-200'
+                                    : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground'
                             )}
                         >
                             <span>{tab.icon}</span>
@@ -371,7 +371,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="space-y-3 p-3 bg-zinc-900/50 rounded-lg border border-zinc-700"
+                            className="space-y-3 p-3 bg-card/50 rounded-lg border border-border"
                         >
                             {/* Category Selection */}
                             <div className="flex flex-wrap gap-2">
@@ -383,7 +383,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             'text-xs px-2 py-1 rounded-full flex items-center gap-1.5 transition-all',
                                             newCategory === cat
                                                 ? `${categoryInfo[cat].color} text-white shadow-sm`
-                                                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                                : 'bg-muted text-muted-foreground hover:bg-accent'
                                         )}
                                     >
                                         {categoryInfo[cat].icon}
@@ -397,13 +397,13 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                     placeholder={t('common.room') + " #"}
                                     value={newRoom}
                                     onChange={(e) => setNewRoom(e.target.value)}
-                                    className="w-20 text-sm bg-zinc-800/50"
+                                    className="w-20 text-sm bg-muted/50"
                                 />
                                 <Input
                                     type="time"
                                     value={newTime}
                                     onChange={(e) => setNewTime(e.target.value)}
-                                    className="w-24 text-sm bg-zinc-800/50"
+                                    className="w-24 text-sm bg-muted/50"
                                 />
                                 {isFinancialCategory(newCategory) && (
                                     <Input
@@ -411,15 +411,15 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         type="number"
                                         value={newAmount}
                                         onChange={(e) => setNewAmount(e.target.value)}
-                                        className="w-24 text-sm bg-zinc-800/50"
+                                        className="w-24 text-sm bg-muted/50"
                                     />
                                 )}
                             </div>
 
                             {/* Fixture Selector for Damage Category */}
                             {newCategory === 'minibar' && (
-                                <div className="p-3 bg-zinc-950/30 rounded-lg border border-zinc-800 mb-4">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase mb-2 block tracking-wider">
+                                <div className="p-3 bg-muted/30 rounded-lg border border-border mb-4">
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase mb-2 block tracking-wider">
                                         {t('hotel.settings.minibarPrices')}
                                     </label>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -427,10 +427,10 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             const count = selectedMinibar[item] || 0
                                             const price = hotel?.settings?.minibar_prices?.[item] || 0
                                             return (
-                                                <div key={item} className="flex flex-col gap-1 p-2 rounded bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700/50 transition-colors">
+                                                <div key={item} className="flex flex-col gap-1 p-2 rounded bg-card border border-border hover:border-primary/30 transition-colors">
                                                     <div className="flex flex-col">
-                                                        <span className="text-[10px] text-zinc-300 font-medium truncate">{t(`minibar.${item}` as any)}</span>
-                                                        <span className="text-[9px] text-zinc-500 italic">₺{price}</span>
+                                                        <span className="text-[10px] text-foreground font-medium truncate">{t(`minibar.${item}` as any)}</span>
+                                                        <span className="text-[9px] text-muted-foreground italic">₺{price}</span>
                                                     </div>
                                                     <div className="flex items-center justify-between mt-1">
                                                         <button
@@ -441,18 +441,18 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                     setSelectedMinibar(prev => ({ ...prev, [item]: current - 1 }))
                                                                 }
                                                             }}
-                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs transition-colors"
+                                                            className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded text-xs transition-colors"
                                                             type="button"
                                                         >
                                                             -
                                                         </button>
-                                                        <span className="text-xs font-mono w-4 text-center text-zinc-300">{count}</span>
+                                                        <span className="text-xs font-mono w-4 text-center text-foreground">{count}</span>
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation()
                                                                 setSelectedMinibar(prev => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
                                                             }}
-                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs transition-colors"
+                                                            className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded text-xs transition-colors"
                                                             type="button"
                                                         >
                                                             +
@@ -472,8 +472,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             )}
 
                             {newCategory === 'damage' && (
-                                <div className="p-3 bg-zinc-800/30 rounded-lg border border-zinc-800 mb-2">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase mb-2 block">{t('hotel.settings.fixturePrices')}</label>
+                                <div className="p-3 bg-muted/30 rounded-lg border border-border mb-2">
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase mb-2 block">{t('hotel.settings.fixturePrices')}</label>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                         {FIXTURE_ITEMS.map(item => {
                                             const price = hotel?.settings?.fixture_prices?.[item]
@@ -483,20 +483,20 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             return (
                                                 <div key={item} className={cn(
                                                     "flex items-center justify-between p-2 rounded-md border transition-all",
-                                                    count > 0 ? "bg-indigo-500/10 border-indigo-500/30" : "bg-zinc-800/50 border-zinc-700/50"
+                                                    count > 0 ? "bg-indigo-500/10 border-indigo-500/30" : "bg-card border-border"
                                                 )}>
                                                     <div className="flex flex-col">
-                                                        <span className="text-xs text-zinc-300 font-medium">{t(`fixture.${item}` as any)}</span>
-                                                        <span className="text-[10px] text-zinc-500">₺{price}</span>
+                                                        <span className="text-xs text-foreground font-medium">{t(`fixture.${item}` as any)}</span>
+                                                        <span className="text-[10px] text-muted-foreground">₺{price}</span>
                                                     </div>
 
-                                                    <div className="flex items-center gap-1 bg-zinc-900 rounded p-0.5 border border-zinc-700">
+                                                    <div className="flex items-center gap-1 bg-muted rounded p-0.5 border border-border">
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation()
                                                                 setSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: Math.max(0, (prev[item] || 0) - 1) }))
                                                             }}
-                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs"
+                                                            className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded text-xs"
                                                             type="button"
                                                         >
                                                             -
@@ -507,7 +507,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                 e.stopPropagation()
                                                                 setSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
                                                             }}
-                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs"
+                                                            className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded text-xs"
                                                             type="button"
                                                         >
                                                             +
@@ -527,18 +527,18 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.guestName')}</label>
                                     <Input
                                         placeholder="John Doe"
                                         value={newGuest}
                                         onChange={(e) => setNewGuest(e.target.value)}
-                                        className="h-9 text-sm bg-zinc-800/50"
+                                        className="h-9 text-sm bg-muted/50"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('common.staff')}</label>
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('common.staff')}</label>
                                     <Select value={newAssignedStaff} onValueChange={setNewAssignedStaff}>
-                                        <SelectTrigger className="w-full text-xs h-9 bg-zinc-800/50 border-zinc-700">
+                                        <SelectTrigger className="w-full text-xs h-9 bg-muted/50 border-border">
                                             <SelectValue placeholder="Assign To..." />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -554,13 +554,13 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             {/* Content */}
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between px-1">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t('module.shiftNotes')}</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('module.shiftNotes')}</label>
                                     <Button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => setIsAIModalOpen(true)}
-                                        className="h-6 text-[9px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1"
+                                        className="h-6 text-[9px] text-primary hover:text-primary/80 hover:bg-primary/10 gap-1"
                                     >
                                         <Wand2 className="w-3 h-3" />
                                         {t('notes.aiHelp')}
@@ -570,7 +570,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                     placeholder={t('module.shiftNotes') + "..."}
                                     value={newContent}
                                     onChange={(e) => setNewContent(e.target.value)}
-                                    className="text-sm bg-zinc-800/50"
+                                    className="text-sm bg-muted/50"
                                 />
                             </div>
 
@@ -587,7 +587,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                     size="sm"
                                     onClick={handleAddNote}
                                     disabled={!newContent.trim() || loading}
-                                    className="flex-1 bg-white text-black hover:bg-zinc-200"
+                                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
                                 >
                                     {loading ? <Clock className="w-3 h-3 animate-spin mr-2" /> : <Check className="w-3 h-3 mr-2" />}
                                     {t('common.save')}
@@ -606,7 +606,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
                 {/* Notes List */}
                 {filteredNotes.length === 0 ? (
-                    <p className="text-zinc-500 text-sm text-center py-8">{t('notes.noNotes')}</p>
+                    <p className="text-muted-foreground text-sm text-center py-8">{t('notes.noNotes')}</p>
                 ) : (
                     <div className="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar">
                         {filteredNotes.map((note) => (
@@ -618,8 +618,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                 className={cn(
                                     'p-3 rounded-lg border transition-all group',
                                     note.status === 'active'
-                                        ? 'border-zinc-800 bg-zinc-900/50'
-                                        : 'border-zinc-800/30 bg-zinc-900/20 opacity-60'
+                                        ? 'border-border bg-muted/30'
+                                        : 'border-border/30 bg-muted/10 opacity-60'
                                 )}
                             >
                                 <div className="flex items-start justify-between gap-2">
@@ -635,10 +635,10 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             </span>
 
                                             {note.room_number && (
-                                                <Badge variant="outline" className="text-[10px] h-4 bg-zinc-800 text-zinc-400 border-zinc-700">#{note.room_number}</Badge>
+                                                <Badge variant="outline" className="text-[10px] h-4 bg-muted text-muted-foreground border-border">#{note.room_number}</Badge>
                                             )}
                                             {note.guest_name && (
-                                                <Badge variant="outline" className="text-[10px] h-4 bg-zinc-800 text-zinc-400 border-zinc-700 flex items-center gap-1">
+                                                <Badge variant="outline" className="text-[10px] h-4 bg-muted text-muted-foreground border-border flex items-center gap-1">
                                                     <User className="w-2.5 h-2.5" />
                                                     {note.guest_name}
                                                 </Badge>
@@ -676,7 +676,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                 'text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 transition-all',
                                                                 editCategory === cat
                                                                     ? `${categoryInfo[cat].color} text-white`
-                                                                    : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'
+                                                                    : 'bg-muted text-muted-foreground hover:bg-accent'
                                                             )}
                                                         >
                                                             {categoryInfo[cat].icon} {categoryInfo[cat].label}
@@ -687,7 +687,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                     <Input
                                                         value={editContent}
                                                         onChange={(e) => setEditContent(e.target.value)}
-                                                        className="h-8 text-sm bg-zinc-950 border-zinc-700 flex-1"
+                                                        className="h-8 text-sm bg-background border-border flex-1"
                                                         autoFocus
                                                     />
                                                 </div>
@@ -696,13 +696,13 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                         placeholder="Room #"
                                                         value={editRoom}
                                                         onChange={(e) => setEditRoom(e.target.value)}
-                                                        className="h-8 w-20 text-sm bg-zinc-950 border-zinc-700"
+                                                        className="h-8 w-20 text-sm bg-background border-border"
                                                     />
                                                     <Input
                                                         type="time"
                                                         value={editTime}
                                                         onChange={(e) => setEditTime(e.target.value)}
-                                                        className="h-8 w-24 text-sm bg-zinc-950 border-zinc-700"
+                                                        className="h-8 w-24 text-sm bg-background border-border"
                                                     />
                                                     {isFinancialCategory(editCategory) && (
                                                         <Input
@@ -710,15 +710,15 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                             placeholder="₺"
                                                             value={editAmount}
                                                             onChange={(e) => setEditAmount(e.target.value)}
-                                                            className="h-8 w-20 text-sm bg-zinc-950 border-zinc-700"
+                                                            className="h-8 w-20 text-sm bg-background border-border"
                                                         />
                                                     )}
                                                 </div>
 
                                                 {/* Fixture Selector for Damage Category (Edit Mode) */}
                                                 {editCategory === 'damage' && (
-                                                    <div className="p-2 bg-zinc-950/30 rounded border border-zinc-800 mb-2">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase mb-1 block">{t('hotel.settings.fixturePrices')}</label>
+                                                    <div className="p-2 bg-muted/30 rounded border border-border mb-2">
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase mb-1 block">{t('hotel.settings.fixturePrices')}</label>
                                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                                             {FIXTURE_ITEMS.map(item => {
                                                                 const price = hotel?.settings?.fixture_prices?.[item]
@@ -728,20 +728,20 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                 return (
                                                                     <div key={item} className={cn(
                                                                         "flex items-center justify-between p-1.5 rounded-md border transition-all",
-                                                                        count > 0 ? "bg-indigo-500/10 border-indigo-500/30" : "bg-zinc-800/50 border-zinc-700/50"
+                                                                        count > 0 ? "bg-indigo-500/10 border-indigo-500/30" : "bg-card border-border"
                                                                     )}>
                                                                         <div className="flex flex-col">
-                                                                            <span className="text-[10px] text-zinc-300 font-medium truncate max-w-[80px]" title={t(`fixture.${item}` as any)}>{t(`fixture.${item}` as any)}</span>
-                                                                            <span className="text-[9px] text-zinc-500">₺{price}</span>
+                                                                            <span className="text-[10px] text-foreground font-medium truncate max-w-[80px]" title={t(`fixture.${item}` as any)}>{t(`fixture.${item}` as any)}</span>
+                                                                            <span className="text-[9px] text-muted-foreground">₺{price}</span>
                                                                         </div>
 
-                                                                        <div className="flex items-center gap-0.5 bg-zinc-900 rounded border border-zinc-700">
+                                                                        <div className="flex items-center gap-0.5 bg-muted rounded border border-border">
                                                                             <button
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation()
                                                                                     setEditSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: Math.max(0, (prev[item] || 0) - 1) }))
                                                                                 }}
-                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded text-[10px]"
                                                                                 type="button"
                                                                             >
                                                                                 -
@@ -752,7 +752,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                                     e.stopPropagation()
                                                                                     setEditSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
                                                                                 }}
-                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded text-[10px]"
                                                                                 type="button"
                                                                             >
                                                                                 +
@@ -767,8 +767,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
                                                 {/* Minibar Selector for Minibar Category (Edit Mode) */}
                                                 {editCategory === 'minibar' && (
-                                                    <div className="p-2 bg-zinc-950/30 rounded border border-zinc-800 mb-2">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase mb-1 block tracking-wider">{t('hotel.settings.minibarPrices')}</label>
+                                                    <div className="p-2 bg-muted/30 rounded border border-border mb-2">
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase mb-1 block tracking-wider">{t('hotel.settings.minibarPrices')}</label>
                                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                                             {MINIBAR_ITEMS.map(item => {
                                                                 const count = editSelectedMinibar[item] || 0
@@ -776,13 +776,13 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                 return (
                                                                     <div key={item} className={cn(
                                                                         "flex items-center justify-between p-1.5 rounded-md border transition-all",
-                                                                        count > 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-zinc-800/50 border-zinc-700/50"
+                                                                        count > 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-card border-border"
                                                                     )}>
                                                                         <div className="flex flex-col min-w-0">
-                                                                            <span className="text-[10px] text-zinc-300 font-medium truncate" title={t(`minibar.${item}` as any)}>{t(`minibar.${item}` as any)}</span>
-                                                                            <span className="text-[9px] text-zinc-500">₺{price}</span>
+                                                                            <span className="text-[10px] text-foreground font-medium truncate" title={t(`minibar.${item}` as any)}>{t(`minibar.${item}` as any)}</span>
+                                                                            <span className="text-[9px] text-muted-foreground">₺{price}</span>
                                                                         </div>
-                                                                        <div className="flex items-center gap-0.5 bg-zinc-900 rounded border border-zinc-700">
+                                                                        <div className="flex items-center gap-0.5 bg-muted rounded border border-border">
                                                                             <button
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation()
@@ -791,7 +791,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                                         return { ...prev, [item]: val }
                                                                                     })
                                                                                 }}
-                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded text-[10px]"
                                                                                 type="button"
                                                                             >
                                                                                 -
@@ -802,7 +802,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                                     e.stopPropagation()
                                                                                     setEditSelectedMinibar((prev: Record<string, number>) => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
                                                                                 }}
-                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                className="w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background rounded text-[10px]"
                                                                                 type="button"
                                                                             >
                                                                                 +
@@ -816,18 +816,18 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 )}
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.guestName')}</label>
                                                         <Input
                                                             placeholder="Guest Name"
                                                             value={editGuest}
                                                             onChange={(e) => setEditGuest(e.target.value)}
-                                                            className="h-8 text-sm bg-zinc-950 border-zinc-700"
+                                                            className="h-8 text-sm bg-background border-border"
                                                         />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('common.staff')}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('common.staff')}</label>
                                                         <Select value={editAssignedStaff} onValueChange={setEditAssignedStaff}>
-                                                            <SelectTrigger className="w-full h-8 text-xs bg-zinc-950 border-zinc-700">
+                                                            <SelectTrigger className="w-full h-8 text-xs bg-background border-border">
                                                                 <SelectValue placeholder="Staff" />
                                                             </SelectTrigger>
                                                             <SelectContent>
@@ -849,11 +849,11 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="text-sm text-zinc-300 mb-2 leading-relaxed">{note.content}</p>
+                                            <p className="text-sm text-foreground mb-2 leading-relaxed">{note.content}</p>
                                         )}
 
                                         {/* Footer */}
-                                        <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                                             {/* Author - Hide for non-GMs if feedback */}
                                             {(user?.role === 'gm' || note.category !== 'feedback') && (
                                                 <span className="flex items-center gap-1">
@@ -869,7 +869,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                     {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
                                                     <span className="opacity-50 ml-1">({formatDisplayDateTime(note.created_at)})</span>
                                                     {note.updated_at && note.updated_at.getTime() !== note.created_at.getTime() && (
-                                                        <span className="text-zinc-600 ml-1" title={formatDisplayDateTime(note.updated_at)}>
+                                                        <span className="text-muted-foreground ml-1" title={formatDisplayDateTime(note.updated_at)}>
                                                             (edited)
                                                         </span>
                                                     )}
@@ -895,10 +895,10 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             value={note.status}
                                             onValueChange={(v) => handleStatusChange(note.id, v as NoteStatus)}
                                         >
-                                            <SelectTrigger className="h-6 w-24 bg-zinc-950 border-zinc-800 text-[10px] px-2">
+                                            <SelectTrigger className="h-6 w-24 bg-background border-border text-[10px] px-2">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent className="bg-zinc-900 border-zinc-800">
+                                            <SelectContent>
                                                 <SelectItem value="active" className="text-xs">{t('status.active')}</SelectItem>
                                                 <SelectItem value="resolved" className="text-xs">{t('status.resolved')}</SelectItem>
                                                 <SelectItem value="archived" className="text-xs">{t('status.archived')}</SelectItem>

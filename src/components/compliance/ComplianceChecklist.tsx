@@ -77,8 +77,8 @@ export function ComplianceChecklist({
         <CollapsibleCard
             id="compliance"
             title={
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                     {t('module.compliance')}
                 </CardTitle>
             }
@@ -93,7 +93,7 @@ export function ComplianceChecklist({
                             'w-full flex items-center gap-3 p-3 rounded-lg border transition-all text-left',
                             check.checked
                                 ? 'border-emerald-500/30 bg-emerald-500/10'
-                                : 'border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/50',
+                                : 'border-border hover:bg-muted/50',
                             (disabled || (!check.canRecheck && check.checked)) && 'opacity-50 cursor-not-allowed'
                         )}
                         whileTap={{ scale: 0.98 }}
@@ -101,14 +101,14 @@ export function ComplianceChecklist({
                         {/* Icon */}
                         <div className={cn(
                             'p-2 rounded-lg',
-                            check.checked ? 'bg-emerald-500/20' : 'bg-zinc-800'
+                            check.checked ? 'bg-emerald-500/20' : 'bg-muted'
                         )}>
                             {loading === check.key ? (
-                                <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
+                                <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                             ) : (
                                 <check.icon className={cn(
                                     'w-4 h-4',
-                                    check.checked ? 'text-emerald-400' : 'text-zinc-400'
+                                    check.checked ? 'text-emerald-500 dark:text-emerald-400' : 'text-muted-foreground'
                                 )} />
                             )}
                         </div>
@@ -118,24 +118,24 @@ export function ComplianceChecklist({
                             <div className="flex items-center gap-2">
                                 <span className={cn(
                                     'text-sm font-medium',
-                                    check.checked ? 'text-emerald-300' : 'text-zinc-200'
+                                    check.checked ? 'text-emerald-600 dark:text-emerald-300' : 'text-foreground'
                                 )}>
                                     {check.label}
                                 </span>
                                 {check.count !== null && check.count > 0 && (
-                                    <span className="text-xs bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">
+                                    <span className="text-xs bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 px-1.5 py-0.5 rounded">
                                         ×{check.count}
                                     </span>
                                 )}
                             </div>
-                            <span className="text-xs text-zinc-500">{check.description}</span>
+                            <span className="text-xs text-muted-foreground">{check.description}</span>
                         </div>
 
                         {/* Check indicator */}
                         {check.checked ? (
-                            <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                            <CheckCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
                         ) : (
-                            <Circle className="w-5 h-5 text-zinc-600 flex-shrink-0" />
+                            <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                         )}
                     </motion.button>
                 ))}

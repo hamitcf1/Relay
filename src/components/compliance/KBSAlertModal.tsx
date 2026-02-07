@@ -86,7 +86,7 @@ export function KBSAlertModal({ isOpen, onClose, onCheckKBS }: KBSAlertModalProp
                                 <h2 className="text-2xl font-bold text-rose-400 mb-2">
                                     {t('compliance.kbs.required')}
                                 </h2>
-                                <div className="flex items-center justify-center gap-2 text-zinc-400">
+                                <div className="flex items-center justify-center gap-2 text-zinc-300">
                                     <Clock className="w-4 h-4" />
                                     <span>{t('compliance.kbs.pastTime')}</span>
                                 </div>

@@ -8,7 +8,16 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 import { TabNotifications } from '@/components/ui/TabNotifications'
 
+import { useThemeStore } from '@/stores/themeStore'
+import { useEffect } from 'react'
+
 function App() {
+    const applyTheme = useThemeStore(state => state.applyTheme)
+
+    useEffect(() => {
+        applyTheme()
+    }, [applyTheme])
+
     return (
         <BrowserRouter>
             <TabNotifications />

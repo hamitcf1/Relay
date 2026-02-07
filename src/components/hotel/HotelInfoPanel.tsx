@@ -158,7 +158,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
         return (
             <Card>
                 <CardContent className="flex items-center justify-center py-8">
-                    <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 </CardContent>
             </Card>
         )
@@ -175,8 +175,8 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
         <CollapsibleCard
             id="hotel-info"
             title={
-                <CardTitle className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                    <Settings className="w-4 h-4 text-indigo-400" />
+                <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <Settings className="w-4 h-4 text-primary" />
                     {t('module.hotelInfo')}
                 </CardTitle>
             }
@@ -205,7 +205,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                     >
                         {/* IBAN */}
                         <div className="space-y-2">
-                            <label className="text-xs text-zinc-400">{t('hotel.iban')}</label>
+                            <label className="text-xs text-muted-foreground">{t('hotel.iban')}</label>
                             <Input
                                 placeholder="TR00 0000 0000 0000 0000 0000 00"
                                 value={editInfo.iban}
@@ -214,7 +214,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         </div>
 
                         <div>
-                            <label className="text-xs text-zinc-400">{t('hotel.bankName')}</label>
+                            <label className="text-xs text-muted-foreground">{t('hotel.bankName')}</label>
                             <Input
                                 placeholder={t('hotel.bankNamePlaceholder')}
                                 value={editInfo.bank_name}
@@ -226,7 +226,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         <div className="grid grid-cols-2 gap-3">
                             {priceItems.map((item) => (
                                 <div key={item.key}>
-                                    <label className="text-xs text-zinc-400">{item.label} (₺)</label>
+                                    <label className="text-xs text-muted-foreground">{item.label} (₺)</label>
                                     <Input
                                         type="number"
                                         value={String(editInfo[item.key as keyof HotelInfoData] || 0)}
@@ -241,13 +241,13 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                         {/* Notes */}
                         <div>
-                            <label className="text-xs text-zinc-400">{t('hotel.additionalNotes')}</label>
+                            <label className="text-xs text-muted-foreground">{t('hotel.additionalNotes')}</label>
                             <textarea
                                 placeholder={t('hotel.notesPlaceholder')}
                                 value={editInfo.notes}
                                 onChange={(e) => setEditInfo((prev) => ({ ...prev, notes: e.target.value }))}
                                 rows={3}
-                                className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                className="w-full rounded-lg border border-input bg-muted/30 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
                             />
                         </div>
 
@@ -268,27 +268,26 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         {/* IBAN Display */}
                         {/* Hotel Code Display or Generation */}
                         {isGM && (
-                            <div className="p-3 bg-zinc-800/50 rounded-lg flex items-center justify-between">
+                            <div className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <KeyRound className="w-4 h-4 text-indigo-400" />
-                                    <span className="text-xs text-zinc-400">Hotel Code:</span>
+                                    <KeyRound className="w-4 h-4 text-primary" />
+                                    <span className="text-xs text-muted-foreground">Hotel Code:</span>
                                     <div className="flex items-center gap-2">
                                         {hotel?.code ? (
                                             <div className="flex items-center gap-2">
-                                                <div className="bg-black/40 px-3 py-1.5 rounded border border-indigo-500/30 flex items-center gap-2">
-                                                    <span className="font-mono text-xl font-bold text-indigo-300 tracking-[0.2em]">{hotel.code}</span>
+                                                <div className="bg-muted/50 px-3 py-1.5 rounded border border-primary/30 flex items-center gap-2">
+                                                    <span className="font-mono text-xl font-bold text-primary tracking-[0.2em]">{hotel.code}</span>
                                                 </div>
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 w-8 p-0 text-zinc-400 hover:text-white"
+                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                                                     onClick={() => {
                                                         navigator.clipboard.writeText(hotel.code || '')
-                                                        // Ideally show a toast here, but for now simple feedback
                                                         const btn = document.activeElement as HTMLElement
                                                         if (btn) {
                                                             const originalHTML = btn.innerHTML
-                                                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 text-emerald-400"><path d="M20 6 9 17l-5-5"/></svg>'
+                                                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 text-emerald-500"><path d="M20 6 9 17l-5-5"/></svg>'
                                                             setTimeout(() => { btn.innerHTML = originalHTML }, 2000)
                                                         }
                                                     }}
@@ -304,17 +303,14 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                 size="sm"
                                                 variant="outline"
                                                 onClick={async (e) => {
-                                                    e.preventDefault() // Prevent form submission if inside one
+                                                    e.preventDefault()
                                                     if (!hotel?.id) return
-
                                                     setSaving(true)
-
                                                     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
                                                     let result = ''
                                                     for (let i = 0; i < 6; i++) {
                                                         result += chars.charAt(Math.floor(Math.random() * chars.length))
                                                     }
-
                                                     try {
                                                         const { doc, updateDoc } = await import('firebase/firestore')
                                                         const { db } = await import('@/lib/firebase')
@@ -326,7 +322,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                         setSaving(false)
                                                     }
                                                 }}
-                                                className="h-7 text-xs bg-indigo-600/10 text-indigo-300 border-indigo-500/30 hover:bg-indigo-600/20"
+                                                className="h-7 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
                                                 disabled={saving}
                                             >
                                                 {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <KeyRound className="w-3 h-3 mr-1" />}
@@ -339,14 +335,14 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         )}
 
                         {info.iban && (
-                            <div className="p-3 bg-zinc-800/50 rounded-lg">
+                            <div className="p-3 bg-muted/50 rounded-lg">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <CreditCard className="w-4 h-4 text-indigo-400" />
-                                    <span className="text-xs text-zinc-400">{t('hotel.bankAccount')}</span>
+                                    <CreditCard className="w-4 h-4 text-primary" />
+                                    <span className="text-xs text-muted-foreground">{t('hotel.bankAccount')}</span>
                                 </div>
-                                <p className="font-mono text-sm text-zinc-200">{info.iban}</p>
+                                <p className="font-mono text-sm text-foreground">{info.iban}</p>
                                 {info.bank_name && (
-                                    <p className="text-xs text-zinc-500 mt-1">{info.bank_name}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">{info.bank_name}</p>
                                 )}
                             </div>
                         )}
@@ -358,11 +354,11 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 if (!value || value === 0) return null
                                 const Icon = item.icon
                                 return (
-                                    <div key={item.key} className="flex items-center gap-2 p-2 bg-zinc-800/30 rounded">
-                                        <Icon className="w-4 h-4 text-zinc-500" />
+                                    <div key={item.key} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
+                                        <Icon className="w-4 h-4 text-muted-foreground" />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-zinc-400 truncate">{item.label}</p>
-                                            <p className="text-sm font-bold text-zinc-200">₺{(value as number).toLocaleString()}</p>
+                                            <p className="text-xs text-muted-foreground truncate">{item.label}</p>
+                                            <p className="text-sm font-bold text-foreground">₺{(value as number).toLocaleString()}</p>
                                         </div>
                                     </div>
                                 )
@@ -371,30 +367,30 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                         {/* Notes */}
                         {info.notes && (
-                            <div className="text-sm text-zinc-400 p-2 bg-zinc-800/30 rounded">
+                            <div className="text-sm text-muted-foreground p-2 bg-muted/30 rounded">
                                 {info.notes}
                             </div>
                         )}
 
                         {!info.iban && !info.notes && priceItems.every((item) => !info[item.key as keyof HotelInfoData]) && (
-                            <p className="text-zinc-500 text-sm text-center py-4">
+                            <p className="text-muted-foreground text-sm text-center py-4">
                                 {t('hotel.noInfo')}{canEdit && ` - ${t('hotel.clickEdit')}`}
                             </p>
                         )}
 
                         {/* Secret Info Section */}
-                        <div className="mt-6 pt-4 border-t border-zinc-800">
+                        <div className="mt-6 pt-4 border-t border-border">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
-                                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                                    <h3 className="text-sm font-semibold text-white">{t('hotel.secure.title')}</h3>
+                                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                    <h3 className="text-sm font-semibold text-foreground">{t('hotel.secure.title')}</h3>
                                 </div>
                                 {isVaultUnlocked ? (
                                     <Button size="sm" variant="ghost" onClick={() => setIsVaultUnlocked(false)}>
                                         <Lock className="w-3 h-3 mr-1" /> Kilitle
                                     </Button>
                                 ) : (
-                                    <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-[10px]">
+                                    <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px]">
                                         {t('hotel.secure.encrypted')}
                                     </Badge>
                                 )}
@@ -402,8 +398,8 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                             {!hotel?.settings?.safe_password ? (
                                 isGM ? (
-                                    <div className="p-4 bg-indigo-500/5 rounded-xl border border-indigo-500/20 space-y-3">
-                                        <p className="text-xs text-zinc-400">Henüz kasa şifresi belirlenmemiş. Gözetmen olarak şifre belirleyerek bu alanı kullanmaya başlayabilirsiniz.</p>
+                                    <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
+                                        <p className="text-xs text-muted-foreground">Henüz kasa şifresi belirlenmemiş. Gözetmen olarak şifre belirleyerek bu alanı kullanmaya başlayabilirsiniz.</p>
                                         <div className="flex gap-2">
                                             <Input
                                                 type="password"
@@ -411,7 +407,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                 autoComplete="new-password"
                                                 value={passwordInput}
                                                 onChange={e => setPasswordInput(e.target.value)}
-                                                className="h-8 bg-zinc-950 border-zinc-800 text-xs"
+                                                className="h-8 bg-muted/30 border-input text-xs"
                                             />
                                             <Button size="sm" onClick={handleSetSafePassword} disabled={saving}>
                                                 Belirle
@@ -419,7 +415,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="text-xs text-zinc-500 italic">Gözetmen henüz kasa şifresi belirlememiş.</p>
+                                    <p className="text-xs text-muted-foreground italic">Gözetmen henüz kasa şifresi belirlememiş.</p>
                                 )
                             ) : !isVaultUnlocked ? (
                                 <div className="flex gap-2">
@@ -430,7 +426,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                         value={passwordInput}
                                         onChange={e => setPasswordInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && handleUnlock()}
-                                        className="h-9 bg-zinc-950 border-zinc-800"
+                                        className="h-9 bg-background border-border"
                                     />
                                     <Button onClick={handleUnlock}>
                                         <LockOpen className="w-4 h-4" />
@@ -440,27 +436,27 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 gap-3">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('hotel.secure.agency')}</label>
+                                            <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('hotel.secure.agency')}</label>
                                             <textarea
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
+                                                className="w-full bg-muted/30 border border-input rounded-lg p-2 text-xs text-foreground min-h-[60px] focus:outline-none focus:ring-2 focus:ring-primary/50"
                                                 defaultValue={hotel.settings.secret_info?.agency_logins}
                                                 onBlur={e => handleSaveSecret({ agency_logins: e.target.value })}
                                                 placeholder="Bcom: user/pass&#10;Expedia: user/pass..."
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('hotel.secure.kbs')}</label>
+                                            <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('hotel.secure.kbs')}</label>
                                             <textarea
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
+                                                className="w-full bg-muted/30 border border-input rounded-lg p-2 text-xs text-foreground min-h-[60px] focus:outline-none focus:ring-2 focus:ring-primary/50"
                                                 defaultValue={hotel.settings.secret_info?.kbs_logins}
                                                 onBlur={e => handleSaveSecret({ kbs_logins: e.target.value })}
                                                 placeholder="Tesis Kodu: XXXXX&#10;Şifre: XXXXX..."
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('hotel.secure.other')}</label>
+                                            <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('hotel.secure.other')}</label>
                                             <textarea
-                                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 min-h-[60px]"
+                                                className="w-full bg-muted/30 border border-input rounded-lg p-2 text-xs text-foreground min-h-[60px] focus:outline-none focus:ring-2 focus:ring-primary/50"
                                                 defaultValue={hotel.settings.secret_info?.safe_info}
                                                 onBlur={e => handleSaveSecret({ safe_info: e.target.value })}
                                                 placeholder="Kasa kodu, önemli anahtar yerleri vb..."
@@ -470,20 +466,20 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                                     {/* Fixture Prices Section (Inside Vault for security/GMs) */}
                                     {isGM && (
-                                        <div className="pt-4 border-t border-zinc-800">
+                                        <div className="pt-4 border-t border-border">
                                             <div className="flex items-center gap-2 mb-3">
-                                                <Shirt className="w-4 h-4 text-indigo-400" />
-                                                <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">{t('hotel.settings.fixturePrices')}</h4>
+                                                <Shirt className="w-4 h-4 text-primary" />
+                                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">{t('hotel.settings.fixturePrices')}</h4>
                                             </div>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {FIXTURE_ITEMS.map(item => (
                                                     <div key={item} className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t(`fixture.${item}` as any)}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t(`fixture.${item}` as any)}</label>
                                                         <div className="relative">
-                                                            <span className="absolute left-2 top-1.5 text-zinc-500 text-xs">₺</span>
+                                                            <span className="absolute left-2 top-1.5 text-muted-foreground text-xs">₺</span>
                                                             <Input
                                                                 type="number"
-                                                                className="h-8 bg-zinc-950 border-zinc-800 pl-6 text-xs"
+                                                                className="h-8 bg-muted/30 border-input pl-6 text-xs"
                                                                 placeholder="0.00"
                                                                 defaultValue={hotel.settings.fixture_prices?.[item] || ''}
                                                                 onBlur={(e) => {
@@ -508,20 +504,20 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                                     {/* Minibar Prices Section */}
                                     {isGM && (
-                                        <div className="pt-4 border-t border-zinc-800">
+                                        <div className="pt-4 border-t border-border">
                                             <div className="flex items-center gap-2 mb-3">
-                                                <Pizza className="w-4 h-4 text-emerald-400" />
-                                                <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">{t('hotel.settings.minibarPrices')}</h4>
+                                                <Pizza className="w-4 h-4 text-emerald-500" />
+                                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">{t('hotel.settings.minibarPrices')}</h4>
                                             </div>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {MINIBAR_ITEMS.map(item => (
                                                     <div key={item} className="space-y-1">
-                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t(`minibar.${item}` as any)}</label>
+                                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t(`minibar.${item}` as any)}</label>
                                                         <div className="relative">
-                                                            <span className="absolute left-2 top-1.5 text-zinc-500 text-xs">₺</span>
+                                                            <span className="absolute left-2 top-1.5 text-muted-foreground text-xs">₺</span>
                                                             <Input
                                                                 type="number"
-                                                                className="h-8 bg-zinc-950 border-zinc-800 pl-6 text-xs"
+                                                                className="h-8 bg-muted/30 border-input pl-6 text-xs"
                                                                 placeholder="0.00"
                                                                 defaultValue={hotel.settings.minibar_prices?.[item] || ''}
                                                                 onBlur={(e) => {
@@ -549,7 +545,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="h-6 text-[10px] text-zinc-600 hover:text-rose-400"
+                                                className="h-6 text-[10px] text-muted-foreground hover:text-destructive"
                                                 onClick={() => {
                                                     if (confirm('Şifreyi sıfırlamak istiyor musunuz?')) {
                                                         updateHotelSettings(hotel.id, { safe_password: '' })
@@ -567,6 +563,6 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                     </div>
                 )}
             </div>
-        </CollapsibleCard>
+        </CollapsibleCard >
     )
 }

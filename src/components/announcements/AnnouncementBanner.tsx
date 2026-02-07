@@ -4,6 +4,7 @@ import { AlertTriangle, X, Trash2 } from 'lucide-react'
 import { useMessageStore } from '@/stores/messageStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -14,6 +15,7 @@ import { formatDistanceToNow } from 'date-fns'
 export function AnnouncementBanner() {
     const { user, updateSettings } = useAuthStore()
     const { hotel } = useHotelStore()
+    const { t } = useLanguageStore()
     const { messages, subscribeToMessages, deleteMessage } = useMessageStore()
 
     // Filter for important announcements (receiver_id === 'all' and recent)
@@ -36,7 +38,7 @@ export function AnnouncementBanner() {
 
     const handleDelete = async (id: string) => {
         if (!hotel?.id) return
-        if (window.confirm('Bu duyuruyu silmek istediğinize emin misiniz?')) {
+        if (window.confirm(t('announcement.deleteConfirm'))) {
             await deleteMessage(hotel.id, id)
         }
     }
@@ -59,18 +61,18 @@ export function AnnouncementBanner() {
                         initial={{ opacity: 0, y: -20, height: 0 }}
                         animate={{ opacity: 1, y: 0, height: 'auto' }}
                         exit={{ opacity: 0, y: -20, height: 0 }}
-                        className="bg-gradient-to-r from-amber-600/20 via-amber-500/10 to-amber-600/20 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3"
+                        className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3"
                     >
-                        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                        <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Önemli Duyuru</span>
-                                <span className="text-[10px] text-amber-500/60">
+                                <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">{t('announcement.title')}</span>
+                                <span className="text-[10px] text-amber-600/60 dark:text-amber-500/60">
                                     {formatDistanceToNow(a.timestamp, { addSuffix: true })}
                                 </span>
                             </div>
-                            <p className="text-sm text-amber-100">{a.content}</p>
-                            <p className="text-[10px] text-amber-500/50 mt-1">— {a.sender_name}</p>
+                            <p className="text-sm text-amber-900 dark:text-amber-100">{a.content}</p>
+                            <p className="text-[10px] text-amber-700/50 dark:text-amber-500/50 mt-1">— {a.sender_name}</p>
                         </div>
                         <div className="flex flex-col gap-1">
                             {user?.role === 'gm' && (

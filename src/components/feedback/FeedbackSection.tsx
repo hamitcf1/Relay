@@ -30,10 +30,10 @@ export function FeedbackSection() {
 
     const getStatusConfig = (status: NoteStatus) => {
         switch (status) {
-            case 'active': return { label: 'Yeni', icon: Clock, color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' }
-            case 'resolved': return { label: 'Çözüldü', icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' }
-            case 'archived': return { label: 'Arşivlendi', icon: Eye, color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' }
-            default: return { label: status, icon: Clock, color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' }
+            case 'active': return { label: t('status.active'), icon: Clock, color: 'bg-indigo-500/10 text-indigo-400 dark:text-indigo-300 border-indigo-500/20' }
+            case 'resolved': return { label: t('status.resolved'), icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-400 dark:text-emerald-300 border-emerald-500/20' }
+            case 'archived': return { label: t('status.archived'), icon: Eye, color: 'bg-zinc-500/10 text-zinc-400 dark:text-zinc-300 border-zinc-500/20' }
+            default: return { label: status, icon: Clock, color: 'bg-zinc-500/10 text-zinc-400 dark:text-zinc-300 border-zinc-500/20' }
         }
     }
 
@@ -81,8 +81,8 @@ export function FeedbackSection() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">{t('feedback.anonymous.title')}</h2>
-                    <p className="text-zinc-500 text-sm">{t('offday.petitions')} - {t('feedback.anonymous.subtitle')}</p>
+                    <h2 className="text-2xl font-bold text-foreground">{t('feedback.anonymous.title')}</h2>
+                    <p className="text-muted-foreground text-sm">{t('offday.petitions')} - {t('feedback.anonymous.subtitle')}</p>
                 </div>
                 {isGM && (
                     <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/20 px-3 py-1">
@@ -93,10 +93,10 @@ export function FeedbackSection() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Submission Form */}
-                <Card className="md:col-span-2 bg-zinc-900/50 border-zinc-800 backdrop-blur-sm overflow-hidden relative">
+                <Card className="md:col-span-2 bg-card/50 border-border backdrop-blur-sm overflow-hidden relative">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-zinc-200">
-                            <Shield className="w-5 h-5 text-emerald-400" />
+                        <CardTitle className="flex items-center gap-2 text-foreground">
+                            <Shield className="w-5 h-5 text-emerald-500" />
                             {t('feedback.submit.title')}
                         </CardTitle>
                         <CardDescription>
@@ -110,8 +110,8 @@ export function FeedbackSection() {
                                     required
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
-                                    placeholder="Describe your concern or feedback here..."
-                                    className="w-full h-40 bg-zinc-950/50 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
+                                    placeholder={t('feedback.placeholder')}
+                                    className="w-full h-40 bg-muted/50 border border-border rounded-xl p-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
                                 />
                                 <AnimatePresence>
                                     {success && (
@@ -125,8 +125,8 @@ export function FeedbackSection() {
                                                 <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-2">
                                                     <Send className="w-6 h-6 text-white" />
                                                 </div>
-                                                <p className="text-emerald-400 font-bold">Submitted Successfully</p>
-                                                <p className="text-emerald-500/60 text-xs">Thank you for your feedback.</p>
+                                                <p className="text-emerald-500 font-bold">{t('feedback.submitSuccess')}</p>
+                                                <p className="text-emerald-600/60 text-xs">{t('feedback.thankYou')}</p>
                                             </div>
                                         </motion.div>
                                     )}
@@ -135,10 +135,10 @@ export function FeedbackSection() {
                             <div className="flex justify-end">
                                 <Button
                                     disabled={submitting || !content.trim()}
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2 px-6 h-11"
+                                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 px-6 h-11"
                                 >
                                     {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                    Submit Anonymously
+                                    {t('feedback.submitAnonymous')}
                                 </Button>
                             </div>
                         </form>
@@ -161,12 +161,12 @@ export function FeedbackSection() {
 
                     {isGM && (
                         <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider px-2">Recent Feedback</h3>
+                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider px-2">{t('feedback.recentTitle')}</h3>
                             <div className="space-y-3">
                                 {loading ? (
                                     <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-zinc-600" /></div>
                                 ) : complaints.length === 0 ? (
-                                    <p className="text-xs text-zinc-600 text-center py-4 bg-zinc-800/20 rounded-lg">No complaints to show.</p>
+                                    <p className="text-xs text-muted-foreground text-center py-4 bg-muted/20 rounded-lg">{t('feedback.noComplaints')}</p>
                                 ) : (
                                     complaints.map(c => {
                                         const statusConfig = getStatusConfig(c.status)
@@ -176,7 +176,7 @@ export function FeedbackSection() {
                                                 key={c.id}
                                                 initial={{ opacity: 0, x: 20 }}
                                                 animate={{ opacity: 1, x: 0 }}
-                                                className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-2 hover:border-zinc-700 transition-colors"
+                                                className="p-4 bg-card border border-border rounded-xl space-y-2 hover:border-primary/50 transition-colors"
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-2">
@@ -186,17 +186,17 @@ export function FeedbackSection() {
                                                             {statusConfig.label}
                                                         </Badge>
                                                     </div>
-                                                    <span className="text-[10px] text-zinc-500">{formatDistanceToNow(c.created_at, { addSuffix: true })}</span>
+                                                    <span className="text-[10px] text-muted-foreground">{formatDistanceToNow(c.created_at, { addSuffix: true })}</span>
                                                 </div>
-                                                <p className="text-xs text-zinc-300 leading-normal">{c.content}</p>
+                                                <p className="text-xs text-foreground leading-normal">{c.content}</p>
                                                 <Select value={c.status} onValueChange={(v) => handleStatusChange(c.id, v as NoteStatus)}>
-                                                    <SelectTrigger className="h-7 bg-zinc-950 border-zinc-700 text-xs w-32">
+                                                    <SelectTrigger className="h-7 bg-background border-border text-xs w-32">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="active">Yeni</SelectItem>
-                                                        <SelectItem value="resolved">Çözüldü</SelectItem>
-                                                        <SelectItem value="archived">Arşivlendi</SelectItem>
+                                                        <SelectItem value="active">{t('status.active')}</SelectItem>
+                                                        <SelectItem value="resolved">{t('status.resolved')}</SelectItem>
+                                                        <SelectItem value="archived">{t('status.archived')}</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </motion.div>

@@ -62,11 +62,11 @@ export function ComplianceAlert() {
                                 <AlertTriangle className="w-6 h-6 text-rose-500" />
                             </div>
                             <div className="flex-1 space-y-1">
-                                <h4 className="font-bold text-white text-lg flex items-center gap-2">
+                                <h4 className="font-bold text-foreground text-lg flex items-center gap-2">
                                     CRITICAL ALERT
                                     <span className="text-[10px] bg-rose-500 text-white px-1.5 py-0.5 rounded font-mono">23:00</span>
                                 </h4>
-                                <p className="text-sm text-zinc-300">
+                                <p className="text-sm text-muted-foreground">
                                     {t('compliance.kbsLate') || 'KBS System check is required immediately! Please verify guest identities.'}
                                 </p>
                             </div>

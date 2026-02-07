@@ -117,17 +117,17 @@ export function OffDayScheduler() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-white">{t('offday.management.title')}</h2>
-                    <p className="text-zinc-500 text-sm">{t('offday.management.desc')}</p>
+                    <h2 className="text-2xl font-bold text-foreground">{t('offday.management.title')}</h2>
+                    <p className="text-muted-foreground text-sm">{t('offday.management.desc')}</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Request Form (Staff only) */}
                 {!isGM && (
-                    <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
+                    <Card className="bg-card border-border backdrop-blur-sm">
                         <CardHeader>
-                            <CardTitle className="text-zinc-200 flex items-center gap-2 text-base">
+                            <CardTitle className="text-foreground flex items-center gap-2 text-base">
                                 <CalendarIcon className="w-5 h-5 text-indigo-400" />
                                 {editingId ? 'Talebi Düzenle' : 'Yeni Talep'}
                             </CardTitle>
@@ -139,19 +139,19 @@ export function OffDayScheduler() {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 {/* Type Selection */}
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-zinc-500 uppercase">Talep Türü</Label>
+                                    <Label className="text-xs font-bold text-muted-foreground uppercase">Talep Türü</Label>
                                     <RadioGroup
                                         value={requestType}
                                         onValueChange={(v: 'off_day' | 'shift') => setRequestType(v)}
                                         className="flex gap-4"
                                     >
                                         <div className="flex items-center space-x-2">
-                                            <RadioGroupItem value="off_day" id="type-off" className="border-zinc-600 text-indigo-500" />
-                                            <Label htmlFor="type-off" className="text-sm text-zinc-300 cursor-pointer">İzin (Off Day)</Label>
+                                            <RadioGroupItem value="off_day" id="type-off" className="border-border text-primary" />
+                                            <Label htmlFor="type-off" className="text-sm text-foreground cursor-pointer">İzin (Off Day)</Label>
                                         </div>
                                         <div className="flex items-center space-x-2">
-                                            <RadioGroupItem value="shift" id="type-shift" className="border-zinc-600 text-indigo-500" />
-                                            <Label htmlFor="type-shift" className="text-sm text-zinc-300 cursor-pointer">Vardiya İsteği</Label>
+                                            <RadioGroupItem value="shift" id="type-shift" className="border-border text-primary" />
+                                            <Label htmlFor="type-shift" className="text-sm text-foreground cursor-pointer">Vardiya İsteği</Label>
                                         </div>
                                     </RadioGroup>
                                 </div>
@@ -159,9 +159,9 @@ export function OffDayScheduler() {
                                 {/* Shift Selection (only if type is shift) */}
                                 {requestType === 'shift' && (
                                     <div className="space-y-2">
-                                        <Label className="text-xs font-bold text-zinc-500 uppercase">İstenen Vardiya</Label>
+                                        <Label className="text-xs font-bold text-muted-foreground uppercase">İstenen Vardiya</Label>
                                         <Select value={shiftName} onValueChange={setShiftName}>
-                                            <SelectTrigger className="bg-zinc-950 border-zinc-800">
+                                            <SelectTrigger className="bg-background border-border">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -174,7 +174,7 @@ export function OffDayScheduler() {
                                 )}
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase flex items-center gap-2">
+                                    <label className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
                                         Seçilen Tarih{dates.length > 1 ? 'ler' : ''}
                                         {!editingId && (
                                             <Button type="button" variant="ghost" size="sm" onClick={addDateField} className="h-5 px-1 text-indigo-400">
@@ -190,7 +190,7 @@ export function OffDayScheduler() {
                                                     required
                                                     value={d}
                                                     onChange={(e) => updateDate(i, e.target.value)}
-                                                    className="bg-zinc-950 border-zinc-800 focus:ring-indigo-500"
+                                                    className="bg-background border-border focus:ring-primary"
                                                 />
                                                 {dates.length > 1 && (
                                                     <Button type="button" variant="ghost" size="sm" onClick={() => removeDateField(i)} className="h-9 px-2 text-rose-500">
@@ -202,13 +202,13 @@ export function OffDayScheduler() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase">Sebep / Not</label>
+                                    <label className="text-xs font-bold text-muted-foreground uppercase">Sebep / Not</label>
                                     <textarea
                                         required
                                         value={reason}
                                         onChange={(e) => setReason(e.target.value)}
                                         placeholder="Talep için kısa açıklama..."
-                                        className="w-full h-24 bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                                        className="w-full h-24 bg-background border border-border rounded-lg p-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                                     />
                                 </div>
                                 <div className="flex gap-2">
@@ -222,7 +222,7 @@ export function OffDayScheduler() {
                                                 setReason('')
                                                 setRequestType('off_day')
                                             }}
-                                            className="flex-1 text-zinc-400 hover:text-white"
+                                            className="flex-1 text-muted-foreground hover:text-foreground"
                                         >
                                             İptal
                                         </Button>
@@ -241,37 +241,37 @@ export function OffDayScheduler() {
                 )}
 
                 {/* Request List */}
-                <Card className={cn("bg-zinc-900/50 border-zinc-800 flex flex-col min-h-[500px]", !isGM ? "lg:col-span-2" : "lg:col-span-3")}>
-                    <CardHeader className="border-b border-zinc-800">
-                        <CardTitle className="text-zinc-200 flex items-center gap-2 text-base">
+                <Card className={cn("bg-card border-border flex flex-col min-h-[500px]", !isGM ? "lg:col-span-2" : "lg:col-span-3")}>
+                    <CardHeader className="border-b border-border">
+                        <CardTitle className="text-foreground flex items-center gap-2 text-base">
                             <Clock className="w-5 h-5 text-amber-400" />
                             {isGM ? t('offday.pending') : t('offday.history')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0 overflow-y-auto custom-scrollbar">
                         {loading ? (
-                            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-zinc-800" /></div>
+                            <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
                         ) : requests.length === 0 ? (
                             <div className="text-center py-20">
-                                <CalendarIcon className="w-12 h-12 text-zinc-800 mx-auto mb-4 opacity-20" />
-                                <p className="text-zinc-600">Talep bulunamadı.</p>
+                                <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
+                                <p className="text-muted-foreground">Talep bulunamadı.</p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-zinc-800">
+                            <div className="divide-y divide-border">
                                 {requests.map((r) => (
                                     <motion.div
                                         key={r.id}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="p-4 flex items-center justify-between group hover:bg-zinc-800/30 transition-colors"
+                                        className="p-4 flex items-center justify-between group hover:bg-muted/50 transition-colors"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="px-2 h-10 rounded-lg bg-zinc-800/50 flex flex-col items-center justify-center border border-zinc-700/50 min-w-[80px]">
-                                                <span className="text-[10px] font-bold text-white font-mono">{formatDisplayDate(parseISO(r.date))}</span>
+                                            <div className="px-2 h-10 rounded-lg bg-muted flex flex-col items-center justify-center border border-border min-w-[80px]">
+                                                <span className="text-[10px] font-bold text-foreground font-mono">{formatDisplayDate(parseISO(r.date))}</span>
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <p className="text-sm font-bold text-white">
+                                                    <p className="text-sm font-bold text-foreground">
                                                         {isGM ? r.staff_name :
                                                             (r.type === 'shift' ? 'Vardiya Değişikliği' : 'İzin Talebi')
                                                         }
@@ -286,117 +286,120 @@ export function OffDayScheduler() {
                                                     </Badge>
                                                     {/* Request Type Badge */}
                                                     {r.type === 'shift' ? (
-                                                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 bg-indigo-500/10 text-indigo-300 border-indigo-500/20 flex items-center gap-1">
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 bg-primary/10 text-primary border-primary/20 flex items-center gap-1">
                                                             <Briefcase className="w-2.5 h-2.5" />
                                                             {r.shift_name?.toUpperCase()}
                                                         </Badge>
                                                     ) : (
-                                                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 bg-zinc-700/30 text-zinc-400 border-zinc-700/50">
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 h-4 bg-muted text-muted-foreground border-border">
                                                             OFF DAY
                                                         </Badge>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-zinc-500 line-clamp-1">{r.reason}</p>
+                                                <p className="text-xs text-muted-foreground line-clamp-1">{r.reason}</p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-2">
-                                            {!isGM && r.status === 'pending' && (
-                                                <Button
-                                                    variant="secondary"
-                                                    size="sm"
-                                                    onClick={() => handleEdit(r)}
-                                                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 h-8 text-xs"
-                                                >
-                                                    Düzenle
-                                                </Button>
-                                            )}
-
-                                            {!isGM && r.status === 'pending' && (
-                                                <Button
-                                                    variant="secondary"
-                                                    size="sm"
-                                                    onClick={() => handleCancel(r.id)}
-                                                    className="bg-zinc-800 hover:bg-zinc-700 text-rose-400 hover:text-rose-300 h-8 text-xs"
-                                                >
-                                                    İptal
-                                                </Button>
-                                            )}
-
-                                            {!isGM && r.status === 'rejected' && (
-                                                <Button
-                                                    variant="secondary"
-                                                    size="sm"
-                                                    onClick={() => handleAction(r, 'pending')}
-                                                    className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 text-xs"
-                                                >
-                                                    <RefreshCcw className="w-3 h-3 mr-1" />
-                                                    Yeniden Talep Et
-                                                </Button>
-                                            )}
-
-                                            {isGM && r.status === 'pending' ? (
-                                                <div className="flex gap-2">
+                                            <div className="flex items-center gap-2">
+                                                {!isGM && r.status === 'pending' && (
                                                     <Button
+                                                        variant="secondary"
                                                         size="sm"
-                                                        className="bg-emerald-600 hover:bg-emerald-500 text-white h-9 px-3"
-                                                        onClick={() => handleAction(r, 'approved')}
+                                                        onClick={() => handleEdit(r)}
+                                                        className="bg-muted hover:bg-muted/80 text-muted-foreground h-8 text-xs"
                                                     >
-                                                        <Check className="w-4 h-4" />
+                                                        Düzenle
                                                     </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="destructive"
-                                                        className="bg-rose-600 hover:bg-rose-500 text-white h-9 px-3"
-                                                        onClick={() => handleAction(r, 'rejected')}
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-2">
-                                                    <p className="text-[10px] text-zinc-600 italic">
-                                                        ID: {r.id.slice(0, 8)}
-                                                    </p>
-                                                    {isGM && r.status !== 'pending' && (
-                                                        <>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                className="h-6 px-2 text-[10px] text-zinc-500 hover:text-zinc-300"
-                                                                onClick={() => handleAction(r, r.status === 'approved' ? 'rejected' : 'approved')}
-                                                                title={r.status === 'approved' ? 'Reddet' : 'Onayla'}
-                                                            >
-                                                                {r.status === 'approved' ? <X className="w-3 h-3 mr-1" /> : <Check className="w-3 h-3 mr-1" />}
-                                                                {r.status === 'approved' ? 'Reddet' : 'Onayla'}
-                                                            </Button>
+                                                )}
 
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                className="h-6 px-2 text-[10px] text-zinc-500 hover:text-amber-400"
-                                                                onClick={() => handleAction(r, 'pending')}
-                                                                title="Sıfırla (Bekliyor)"
-                                                            >
-                                                                <RefreshCcw className="w-3 h-3" />
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                </div>
+                                                {!isGM && r.status === 'pending' && (
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={() => handleCancel(r.id)}
+                                                        className="bg-muted hover:bg-muted/80 text-destructive hover:text-destructive/80 h-8 text-xs"
+                                                    >
+                                                        İptal
+                                                    </Button>
+                                                )}
+
+                                                {!isGM && r.status === 'rejected' && (
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={() => handleAction(r, 'pending')}
+                                                        className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 text-xs"
+                                                    >
+                                                        <RefreshCcw className="w-3 h-3 mr-1" />
+                                                        Yeniden Talep Et
+                                                    </Button>
+                                                )}
+
+                                                {isGM && r.status === 'pending' ? (
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            className="bg-emerald-600 hover:bg-emerald-500 text-white h-9 px-3"
+                                                            onClick={() => handleAction(r, 'approved')}
+                                                        >
+                                                            <Check className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            className="bg-rose-600 hover:bg-rose-500 text-white h-9 px-3"
+                                                            onClick={() => handleAction(r, 'rejected')}
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-[10px] text-muted-foreground italic">
+                                                            ID: {r.id.slice(0, 8)}
+                                                        </p>
+                                                        {isGM && r.status !== 'pending' && (
+                                                            <>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="h-6 px-2 text-[10px] text-muted-foreground hover:text-foreground"
+                                                                    onClick={() => handleAction(r, r.status === 'approved' ? 'rejected' : 'approved')}
+                                                                    title={r.status === 'approved' ? 'Reddet' : 'Onayla'}
+                                                                >
+                                                                    {r.status === 'approved' ? <X className="w-3 h-3 mr-1" /> : <Check className="w-3 h-3 mr-1" />}
+                                                                    {r.status === 'approved' ? 'Reddet' : 'Onayla'}
+                                                                </Button>
+
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="h-6 px-2 text-[10px] text-muted-foreground hover:text-amber-400"
+                                                                    onClick={() => handleAction(r, 'pending')}
+                                                                    title="Sıfırla (Bekliyor)"
+                                                                >
+                                                                    <RefreshCcw className="w-3 h-3" />
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* GM Delete Button - Now grouped inside the right-aligned container */}
+                                            {isGM && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => handleDelete(r.id)}
+                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10"
+                                                    title="Kalıcı Olarak Sil"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
                                             )}
                                         </div>
-                                        {/* GM Delete Button - Always visible for GM */}
-                                        {isGM && (
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => handleDelete(r.id)}
-                                                className="h-8 w-8 p-0 text-zinc-600 hover:text-rose-500 hover:bg-rose-500/10 ml-2"
-                                                title="Kalıcı Olarak Sil"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        )}
                                     </motion.div>
                                 ))}
                             </div>
