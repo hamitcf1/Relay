@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react' // Force re-build
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale, formatDisplayDateTime } from '@/lib/utils'
@@ -82,6 +82,34 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
 
     const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'upsell', 'restaurant'].includes(cat)
 
+    const [selectedFixtures, setSelectedFixtures] = useState<Record<string, number>>({})
+    const [editSelectedFixtures, setEditSelectedFixtures] = useState<Record<string, number>>({})
+
+    // Auto-calculate amount and content when fixtures change
+    useEffect(() => {
+        if (newCategory !== 'damage') return
+
+        const items = Object.entries(selectedFixtures).filter(([_, count]) => count > 0)
+
+        if (items.length === 0) {
+            setNewAmount('')
+            setNewContent('')
+            return
+        }
+
+        let total = 0
+        const contentParts: string[] = []
+
+        items.forEach(([item, count]) => {
+            const price = hotel?.settings?.fixture_prices?.[item] || 0
+            total += price * count
+            contentParts.push(`${t(`fixture.${item}` as any)} (x${count})`)
+        })
+
+        setNewAmount(total.toString())
+        setNewContent(contentParts.join(', '))
+    }, [selectedFixtures, newCategory, hotel?.settings?.fixture_prices, t])
+
     const handleAddNote = async () => {
         if (!newContent.trim() || !user) return
 
@@ -111,6 +139,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
             setNewTime('')
             setNewGuest('')
             setNewAssignedStaff('')
+            setSelectedFixtures({}) // Reset fixtures
             setIsAdding(false)
         } finally {
             setLoading(false)
@@ -147,6 +176,25 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         setEditTime(note.time || '')
         setEditGuest(note.guest_name || '')
         setEditAssignedStaff(note.assigned_staff_uid || 'none')
+
+        // Parse fixtures if damage category
+        if (note.category === 'damage') {
+            const fixtures: Record<string, number> = {}
+            FIXTURE_ITEMS.forEach(item => {
+                const itemName = t(`fixture.${item}` as any)
+                // Regex to find "ItemName (xN)"
+                // We need to escape itemName for regex
+                const escapedName = itemName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`${escapedName}\\s*\\(x(\\d+)\\)`)
+                const match = note.content.match(regex)
+                if (match) {
+                    fixtures[item] = parseInt(match[1])
+                }
+            })
+            setEditSelectedFixtures(fixtures)
+        } else {
+            setEditSelectedFixtures({})
+        }
     }
 
     const handleUpdateNote = async () => {
@@ -164,6 +212,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 assigned_staff_name: (editAssignedStaff && editAssignedStaff !== 'none') ? (staff.find(s => s.uid === editAssignedStaff)?.name || null) : null
             })
             setEditingId(null)
+            setEditSelectedFixtures({}) // Reset edit fixtures
         } finally {
             setLoading(false)
         }
@@ -324,33 +373,51 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             {newCategory === 'damage' && (
                                 <div className="p-3 bg-zinc-800/30 rounded-lg border border-zinc-800 mb-2">
                                     <label className="text-[10px] text-zinc-500 font-bold uppercase mb-2 block">{t('hotel.settings.fixturePrices')}</label>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                         {FIXTURE_ITEMS.map(item => {
                                             const price = hotel?.settings?.fixture_prices?.[item]
                                             if (!price) return null
+                                            const count = selectedFixtures[item] || 0
+
                                             return (
-                                                <button
-                                                    key={item}
-                                                    onClick={() => {
-                                                        setNewAmount(price.toString())
-                                                        // Append to content if not already present
-                                                        const itemName = t(`fixture.${item}` as any)
-                                                        if (!newContent.includes(itemName)) {
-                                                            setNewContent(prev => prev ? `${prev} - ${itemName}` : itemName)
-                                                        }
-                                                    }}
-                                                    className="text-xs px-2 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md transition-colors flex items-center gap-2 group"
-                                                >
-                                                    <span className="text-zinc-300">{t(`fixture.${item}` as any)}</span>
-                                                    <Badge variant="secondary" className="h-5 px-1.5 bg-zinc-900 text-zinc-400 group-hover:text-white">
-                                                        ₺{price}
-                                                    </Badge>
-                                                </button>
+                                                <div key={item} className={cn(
+                                                    "flex items-center justify-between p-2 rounded-md border transition-all",
+                                                    count > 0 ? "bg-indigo-500/10 border-indigo-500/30" : "bg-zinc-800/50 border-zinc-700/50"
+                                                )}>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs text-zinc-300 font-medium">{t(`fixture.${item}` as any)}</span>
+                                                        <span className="text-[10px] text-zinc-500">₺{price}</span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1 bg-zinc-900 rounded p-0.5 border border-zinc-700">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: Math.max(0, (prev[item] || 0) - 1) }))
+                                                            }}
+                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs"
+                                                            type="button"
+                                                        >
+                                                            -
+                                                        </button>
+                                                        <span className="text-xs font-mono w-4 text-center">{count}</span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
+                                                            }}
+                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs"
+                                                            type="button"
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             )
                                         })}
                                     </div>
                                     {(!hotel?.settings?.fixture_prices || Object.keys(hotel.settings.fixture_prices).length === 0) && (
-                                        <p className="text-xs text-zinc-500 italic">
+                                        <p className="text-xs text-zinc-500 italic mt-2">
                                             {t('notes.noFixturePrices')}
                                         </p>
                                     )}
@@ -551,27 +618,46 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 {editCategory === 'damage' && (
                                                     <div className="p-2 bg-zinc-950/30 rounded border border-zinc-800 mb-2">
                                                         <label className="text-[10px] text-zinc-500 font-bold uppercase mb-1 block">{t('hotel.settings.fixturePrices')}</label>
-                                                        <div className="flex flex-wrap gap-1.5">
+                                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                                             {FIXTURE_ITEMS.map(item => {
                                                                 const price = hotel?.settings?.fixture_prices?.[item]
                                                                 if (!price) return null
+                                                                const count = editSelectedFixtures[item] || 0
+
                                                                 return (
-                                                                    <button
-                                                                        key={item}
-                                                                        onClick={() => {
-                                                                            setEditAmount(price.toString())
-                                                                            const itemName = t(`fixture.${item}` as any)
-                                                                            if (!editContent.includes(itemName)) {
-                                                                                setEditContent(prev => prev ? `${prev} - ${itemName}` : itemName)
-                                                                            }
-                                                                        }}
-                                                                        className="text-[10px] px-1.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded transition-colors flex items-center gap-1.5 group"
-                                                                    >
-                                                                        <span className="text-zinc-400 group-hover:text-zinc-300">{t(`fixture.${item}` as any)}</span>
-                                                                        <Badge variant="secondary" className="h-4 px-1 bg-black text-zinc-500 group-hover:text-white text-[9px]">
-                                                                            ₺{price}
-                                                                        </Badge>
-                                                                    </button>
+                                                                    <div key={item} className={cn(
+                                                                        "flex items-center justify-between p-1.5 rounded-md border transition-all",
+                                                                        count > 0 ? "bg-indigo-500/10 border-indigo-500/30" : "bg-zinc-800/50 border-zinc-700/50"
+                                                                    )}>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-[10px] text-zinc-300 font-medium truncate max-w-[80px]" title={t(`fixture.${item}` as any)}>{t(`fixture.${item}` as any)}</span>
+                                                                            <span className="text-[9px] text-zinc-500">₺{price}</span>
+                                                                        </div>
+
+                                                                        <div className="flex items-center gap-0.5 bg-zinc-900 rounded border border-zinc-700">
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation()
+                                                                                    setEditSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: Math.max(0, (prev[item] || 0) - 1) }))
+                                                                                }}
+                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                type="button"
+                                                                            >
+                                                                                -
+                                                                            </button>
+                                                                            <span className="text-[10px] font-mono w-3 text-center">{count}</span>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation()
+                                                                                    setEditSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
+                                                                                }}
+                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                type="button"
+                                                                            >
+                                                                                +
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
                                                                 )
                                                             })}
                                                         </div>
