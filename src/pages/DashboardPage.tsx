@@ -55,10 +55,7 @@ import { FeedbackSection } from '@/components/feedback/FeedbackSection'
 import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
 import { TourCatalogue } from '@/components/tours/TourCatalogue'
 import { SalesPanel } from '@/components/sales/SalesPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Plus } from 'lucide-react'
-import { StickyBoard } from '@/components/logs/StickyBoard'
-import { LogFeed } from '@/components/logs/LogFeed'
-import { useLogsStore } from '@/stores/logsStore'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 
 export function DashboardPage() {
@@ -95,17 +92,14 @@ export function DashboardPage() {
 
     // Subscribe to sales for dashboard visibility
     const { subscribeToSales } = useSalesStore()
-    const { logs, loading: logsLoading, subscribeToLogs, togglePin, updateLogStatus, archiveLog } = useLogsStore()
 
     useEffect(() => {
         if (!hotel?.id) return
         const unsubSales = subscribeToSales(hotel.id)
-        const unsubLogs = subscribeToLogs()
         return () => {
             unsubSales()
-            unsubLogs()
         }
-    }, [hotel?.id, subscribeToSales, subscribeToLogs])
+    }, [hotel?.id, subscribeToSales])
 
     // Calculate compliance percentage
     const compliancePercentage = useMemo(() => {
@@ -359,29 +353,11 @@ export function DashboardPage() {
                                     <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
                                 </div>
 
-                                {/* 2. Sticky Board & Logs */}
-                                <div className="space-y-4">
-                                    <StickyBoard />
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-sm font-semibold text-zinc-400">Activity Feed</h3>
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => { /* Open log modal? */ }}
-                                            className="h-7 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10"
-                                        >
-                                            <Plus className="w-3.5 h-3.5 mr-1" />
-                                            New Log
-                                        </Button>
-                                    </div>
-                                    <LogFeed
-                                        logs={logs}
-                                        loading={logsLoading}
-                                        onTogglePin={(id, val) => togglePin(id, val)}
-                                        onResolve={(id) => updateLogStatus(id, 'resolved')}
-                                        onArchive={(id) => archiveLog(id)}
-                                    />
-                                </div>
+                                {/* 2. Sticky Board & Logs (REMOVED) */}
+                                {/* The user requested to remove the log system. Keeping the column structure for now or we can collapse it?
+                                    Actually, if we remove this, the center column has mainly CurrentShiftDisplay.
+                                    We'll keep the column but empty for now aside from ShiftDisplay.
+                                */}
 
                                 {/* 3. Roster (Weekly Program) */}
                                 {(user?.role === 'gm' || user?.role === 'receptionist') && (
@@ -435,24 +411,24 @@ export function DashboardPage() {
                             </div>
 
                             <Tabs defaultValue="messaging" className="space-y-8">
-                                <TabsList className="bg-zinc-900/50 p-1 rounded-xl border border-zinc-800 h-12 inline-flex">
-                                    <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                <TabsList className="bg-zinc-900/50 p-1 rounded-xl border border-zinc-800 h-12 w-full justify-start overflow-x-auto whitespace-nowrap no-scrollbar">
+                                    <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
                                         <MessageCircle className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.messaging')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                    <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
                                         <ShieldAlert className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.complaints')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="off-days" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                    <TabsTrigger value="off-days" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
                                         <CalendarDays className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.offDays')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="tours" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                    <TabsTrigger value="tours" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
                                         <Map className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.tours')}</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4">
+                                    <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4 shrink-0">
                                         <CreditCard className="w-4 h-4" />
                                         <span className="hidden sm:inline">{t('module.sales')}</span>
                                     </TabsTrigger>

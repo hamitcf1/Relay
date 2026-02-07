@@ -160,7 +160,7 @@ export function SalesPanel() {
                                     </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <div className="col-span-2 space-y-1">
                                         <label className="text-[10px] text-zinc-500 font-bold uppercase">Service</label>
                                         {activeTab === 'tour' ? (

@@ -158,9 +158,12 @@ export function MessagingPanel() {
     }
 
     return (
-        <div className="h-[650px] flex gap-4 bg-zinc-950 rounded-xl overflow-hidden border border-zinc-800">
+        <div className="h-[650px] flex flex-col md:flex-row gap-4 bg-zinc-950 rounded-xl overflow-hidden border border-zinc-800">
             {/* Sidebar */}
-            <div className="w-72 bg-zinc-900/50 flex flex-col border-r border-zinc-800">
+            <div className={cn(
+                "w-full md:w-72 bg-zinc-900/50 flex flex-col border-r border-zinc-800",
+                activeConversation !== 'all' && activeConversation !== '' ? "hidden md:flex" : "flex"
+            )}>
                 <div className="p-4 border-b border-zinc-800">
                     <h3 className="font-bold text-white mb-4">Messages</h3>
                     <div className="relative">
@@ -233,10 +236,21 @@ export function MessagingPanel() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-zinc-950/30">
+            <div className={cn(
+                "flex-1 flex flex-col bg-zinc-950/30",
+                activeConversation === 'all' || activeConversation === '' ? "hidden md:flex" : "flex"
+            )}>
                 {/* Header */}
-                <div className="h-14 border-b border-zinc-800 flex items-center px-6 justify-between shrink-0">
+                <div className="h-14 border-b border-zinc-800 flex items-center px-4 md:px-6 justify-between shrink-0">
                     <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="md:hidden -ml-2 mr-1"
+                            onClick={() => setActiveConversation('all')}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left w-5 h-5"><path d="m15 18-6-6 6-6" /></svg>
+                        </Button>
                         {activeConversation === 'all' ? (
                             <>
                                 <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center">
