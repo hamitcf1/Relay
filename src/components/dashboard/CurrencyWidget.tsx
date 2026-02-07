@@ -81,10 +81,23 @@ export function CurrencyWidget() {
                     {currencies.map((currency) => {
                         const rate = rates?.[currency.code as keyof typeof rates]
                         const Icon = currency.icon
+                        const isSelected = selectedCurrency === currency.code
 
                         return (
-                            <div key={currency.code} className="bg-zinc-900/40 rounded-lg p-2 border border-zinc-800/50 text-center relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div
+                                key={currency.code}
+                                onClick={() => setSelectedCurrency(currency.code)}
+                                className={cn(
+                                    "rounded-lg p-2 border text-center relative overflow-hidden group cursor-pointer transition-all duration-200",
+                                    isSelected
+                                        ? "bg-zinc-800/80 border-indigo-500/50 shadow-[0_0_15px_-5px_rgba(99,102,241,0.3)]"
+                                        : "bg-zinc-900/40 border-zinc-800/50 hover:bg-zinc-800/60"
+                                )}
+                            >
+                                <div className={cn(
+                                    "absolute inset-0 bg-gradient-to-br transition-opacity",
+                                    isSelected ? "from-indigo-500/10 to-transparent opacity-100" : "from-white/5 to-transparent opacity-0 group-hover:opacity-100"
+                                )} />
 
                                 <div className="flex items-center justify-center gap-1 mb-1">
                                     <Icon className={cn("w-3 h-3", currency.color)} />
@@ -97,7 +110,7 @@ export function CurrencyWidget() {
                                         <div className="h-2 w-8 bg-zinc-800 rounded mx-auto" />
                                     </div>
                                 ) : rate ? (
-                                    <div className="cursor-pointer" onClick={() => setSelectedCurrency(currency.code)}>
+                                    <div>
                                         <div className="text-sm font-bold text-zinc-200 tracking-tight">
                                             {rate.selling.toFixed(4)}
                                         </div>
@@ -119,7 +132,23 @@ export function CurrencyWidget() {
                 {rates && (
                     <div className="bg-zinc-900/30 rounded-lg p-3 border border-zinc-800/50 space-y-3">
                         <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Converter</label>
+                            <div className="flex gap-1">
+                                {currencies.map(c => (
+                                    <button
+                                        key={c.code}
+                                        onClick={() => setSelectedCurrency(c.code)}
+                                        className={cn(
+                                            "w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold transition-colors border",
+                                            selectedCurrency === c.code
+                                                ? "bg-indigo-600 text-white border-indigo-500"
+                                                : "bg-zinc-900 text-zinc-500 border-zinc-800 hover:text-zinc-300"
+                                        )}
+                                    >
+                                        {c.code.charAt(0)}
+                                    </button>
+                                ))}
+                            </div>
+
                             <div className="flex bg-zinc-900 rounded-md p-0.5 border border-zinc-800">
                                 <button
                                     onClick={() => setConversionType('toTRY')}
