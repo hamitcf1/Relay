@@ -284,6 +284,7 @@ type Translations = {
     'notes.activeCount': string
     'notes.noNotes': string
     'notes.aiHelp': string
+    'notes.noFixturePrices': string
     'notes.anonymous': string
 
     // Notifications
@@ -399,6 +400,14 @@ type Translations = {
     'hotel.secure.agency': string
     'hotel.secure.other': string
     'hotel.secure.kbs': string
+    'hotel.settings.fixturePrices': string
+    'fixture.hand_towel': string
+    'fixture.bath_towel': string
+    'fixture.bed_sheet': string
+    'fixture.pillow_case': string
+    'fixture.duvet_cover': string
+    'fixture.bathrobe': string
+    'fixture.mattress_protector': string
 
     // Off Day - New
     'offday.management.title': string
@@ -828,6 +837,14 @@ const translations: Record<Language, Translations> = {
         'hotel.secure.agency': 'Agency Logins (Extranet)',
         'hotel.secure.other': 'Other Safe Info',
         'hotel.secure.kbs': 'KBS Login Info',
+        'hotel.settings.fixturePrices': 'Fixture Damage Prices',
+        'fixture.hand_towel': 'Hand Towel',
+        'fixture.bath_towel': 'Bath Towel',
+        'fixture.bed_sheet': 'Bed Sheet',
+        'fixture.pillow_case': 'Pillow Case',
+        'fixture.duvet_cover': 'Duvet Cover',
+        'fixture.bathrobe': 'Bathrobe',
+        'fixture.mattress_protector': 'Mattress Protector',
 
         // Off Day
         'offday.management.title': 'Leave & Shift Management',
@@ -872,6 +889,7 @@ const translations: Record<Language, Translations> = {
         // Shift Notes
         'notes.edited': '(edited)',
         'notes.label': 'shift notes',
+        'notes.noFixturePrices': 'No fixture prices configured by management.',
     },
     tr: {
         'app.welcome': 'Relay\'e Hoşgeldiniz',
@@ -1176,6 +1194,14 @@ const translations: Record<Language, Translations> = {
         'hotel.secure.agency': 'Acente Girişleri (Extranet)',
         'hotel.secure.other': 'Diğer Kasa Bilgileri',
         'hotel.secure.kbs': 'KBS Giriş Bilgileri',
+        'hotel.settings.fixturePrices': 'Demirbaş Hasar Fiyatları',
+        'fixture.hand_towel': 'El Havlusu',
+        'fixture.bath_towel': 'Banyo Havlusu',
+        'fixture.bed_sheet': 'Çarşaf',
+        'fixture.pillow_case': 'Yastık Kılıfı',
+        'fixture.duvet_cover': 'Nevresim',
+        'fixture.bathrobe': 'Bornoz',
+        'fixture.mattress_protector': 'Alez',
 
         // Off Day
         'offday.management.title': 'İzin & Vardiya Yönetimi',
@@ -1220,6 +1246,7 @@ const translations: Record<Language, Translations> = {
         // Shift Notes
         'notes.edited': '(düzenlendi)',
         'notes.label': 'vardiya notları',
+        'notes.noFixturePrices': 'Yönetim tarafından demirbaş fiyatı girilmemiş.',
 
         // Tours
         'tours.catalogue.title': 'Tur Kataloğu',

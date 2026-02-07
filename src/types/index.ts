@@ -60,6 +60,7 @@ export interface HotelSettings {
         kbs_logins?: string
         safe_info?: string
     }
+    fixture_prices?: Record<string, number>
 }
 
 export interface Hotel {

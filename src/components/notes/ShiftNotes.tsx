@@ -23,8 +23,10 @@ import { type ShiftNote } from '@/types'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useRosterStore } from '@/stores/rosterStore'
+import { useHotelStore } from '@/stores/hotelStore'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
+import { FIXTURE_ITEMS } from '@/lib/constants'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -36,6 +38,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
     const { staff, subscribeToRoster } = useRosterStore()
+    const { hotel } = useHotelStore()
 
     // Ensure we have staff list
     useEffect(() => {
@@ -317,6 +320,43 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                 )}
                             </div>
 
+                            {/* Fixture Selector for Damage Category */}
+                            {newCategory === 'damage' && (
+                                <div className="p-3 bg-zinc-800/30 rounded-lg border border-zinc-800 mb-2">
+                                    <label className="text-[10px] text-zinc-500 font-bold uppercase mb-2 block">{t('hotel.settings.fixturePrices')}</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {FIXTURE_ITEMS.map(item => {
+                                            const price = hotel?.settings?.fixture_prices?.[item]
+                                            if (!price) return null
+                                            return (
+                                                <button
+                                                    key={item}
+                                                    onClick={() => {
+                                                        setNewAmount(price.toString())
+                                                        // Append to content if not already present
+                                                        const itemName = t(`fixture.${item}` as any)
+                                                        if (!newContent.includes(itemName)) {
+                                                            setNewContent(prev => prev ? `${prev} - ${itemName}` : itemName)
+                                                        }
+                                                    }}
+                                                    className="text-xs px-2 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-md transition-colors flex items-center gap-2 group"
+                                                >
+                                                    <span className="text-zinc-300">{t(`fixture.${item}` as any)}</span>
+                                                    <Badge variant="secondary" className="h-5 px-1.5 bg-zinc-900 text-zinc-400 group-hover:text-white">
+                                                        ₺{price}
+                                                    </Badge>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                    {(!hotel?.settings?.fixture_prices || Object.keys(hotel.settings.fixture_prices).length === 0) && (
+                                        <p className="text-xs text-zinc-500 italic">
+                                            {t('notes.noFixturePrices')}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="space-y-1">
                                     <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
@@ -506,6 +546,37 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                         />
                                                     )}
                                                 </div>
+
+                                                {/* Fixture Selector for Damage Category (Edit Mode) */}
+                                                {editCategory === 'damage' && (
+                                                    <div className="p-2 bg-zinc-950/30 rounded border border-zinc-800 mb-2">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase mb-1 block">{t('hotel.settings.fixturePrices')}</label>
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {FIXTURE_ITEMS.map(item => {
+                                                                const price = hotel?.settings?.fixture_prices?.[item]
+                                                                if (!price) return null
+                                                                return (
+                                                                    <button
+                                                                        key={item}
+                                                                        onClick={() => {
+                                                                            setEditAmount(price.toString())
+                                                                            const itemName = t(`fixture.${item}` as any)
+                                                                            if (!editContent.includes(itemName)) {
+                                                                                setEditContent(prev => prev ? `${prev} - ${itemName}` : itemName)
+                                                                            }
+                                                                        }}
+                                                                        className="text-[10px] px-1.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded transition-colors flex items-center gap-1.5 group"
+                                                                    >
+                                                                        <span className="text-zinc-400 group-hover:text-zinc-300">{t(`fixture.${item}` as any)}</span>
+                                                                        <Badge variant="secondary" className="h-4 px-1 bg-black text-zinc-500 group-hover:text-white text-[9px]">
+                                                                            ₺{price}
+                                                                        </Badge>
+                                                                    </button>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className="space-y-1">
                                                         <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
