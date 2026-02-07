@@ -45,7 +45,8 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
     ] as const, [t])
 
     const MODELLS = useMemo(() => [
-        { id: 'gemini-3-flash', name: 'Gemini 3 Flash', desc: 'Frontier Speed (Google)' },
+        { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash', desc: 'Frontier Speed (Google)' },
+        { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', desc: 'Frontier Speed (Google)' },
         { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: 'Balanced (Google)' },
         { id: 'gpt-5', name: 'GPT-5', desc: 'Next Frontier (OpenAI)' },
         { id: 'gpt-5-mini', name: 'GPT-5 Mini', desc: 'Fast & Smart (OpenAI)' },
@@ -64,7 +65,7 @@ export function AIAssistantModal({ isOpen, onClose, initialTask = 'general', ini
 
     const [task, setTask] = useState<AITaskType>(initialTask)
     const [prompt, setPrompt] = useState(initialPrompt)
-    const [selectedModel, setSelectedModel] = useState<AIModelType>('gemini-3-flash')
+    const [selectedModel, setSelectedModel] = useState<AIModelType>('gemini-3-flash-preview')
     const [copied, setCopied] = useState(false)
     const [showModels, setShowModels] = useState(false)
 

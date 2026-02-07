@@ -6,7 +6,8 @@ export type AIProvider = 'google' | 'openai' | 'anthropic'
 
 export type AIModelType =
     | 'gemini-2.5-flash'
-    | 'gemini-3-flash'
+    | 'gemini-3-flash-preview'
+    | 'gemini-3-pro-preview'
     | 'gpt-5'
     | 'gpt-5-mini'
     | 'o3'
@@ -113,7 +114,8 @@ export const useAIStore = create<AIStore>((set, get) => ({
                 const genAI = new GoogleGenerativeAI(apiKey)
 
                 let officialModel = "gemini-1.5-flash"
-                if (modelType.includes('gemini-3')) officialModel = "gemini-3-flash"
+                if (modelType.includes('gemini-3')) officialModel = "gemini-3-flash-preview"
+                else if (modelType.includes('gemini-3-pro')) officialModel = "gemini-3-pro-preview"
                 else if (modelType.includes('gemini-2.5')) officialModel = "gemini-2.5-flash"
                 else if (modelType.startsWith('gemma-3')) {
                     // Map to corresponding gemma-3 model
