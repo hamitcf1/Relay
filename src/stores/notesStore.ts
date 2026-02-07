@@ -267,6 +267,7 @@ export const categoryInfo: Record<NoteCategory, { label: string; color: string; 
     upgrade: { label: 'Upgrade', color: 'bg-emerald-600', icon: '⬆️' },
     upsell: { label: 'Upsell', color: 'bg-green-500', icon: '💰' },
     restaurant: { label: 'Restaurant', color: 'bg-orange-500', icon: '🍽️' },
+    minibar: { label: 'Minibar', color: 'bg-zinc-700', icon: '🥤' },
     early_checkout: { label: 'Early Checkout', color: 'bg-amber-500', icon: '🚪' },
     guest_info: { label: 'Guest Info', color: 'bg-cyan-500', icon: '👤' },
     feedback: { label: 'Feedback', color: 'bg-purple-500', icon: '💬' },

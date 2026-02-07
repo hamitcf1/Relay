@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
     User,
     LogOut,
@@ -56,8 +56,9 @@ import { FeedbackSection } from '@/components/feedback/FeedbackSection'
 import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
 import { TourCatalogue } from '@/components/tours/TourCatalogue'
 import { SalesPanel } from '@/components/sales/SalesPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard } from 'lucide-react'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
+import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 
 export function DashboardPage() {
     const navigate = useNavigate()
@@ -75,6 +76,14 @@ export function DashboardPage() {
     const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
+    const [showDateTime, setShowDateTime] = useState(() => {
+        const saved = localStorage.getItem('relay_show_datetime')
+        return saved !== null ? JSON.parse(saved) : true
+    })
+
+    useEffect(() => {
+        localStorage.setItem('relay_show_datetime', JSON.stringify(showDateTime))
+    }, [showDateTime])
 
     // Update activeTab when location changes (e.g. via navigate('/operations'))
     useEffect(() => {
@@ -209,6 +218,23 @@ export function DashboardPage() {
                             </TabsTrigger>
                         </TabsList>
                     </Tabs>
+
+                    <div className="hidden lg:flex items-center gap-2">
+                        <AnimatePresence>
+                            {showDateTime && (
+                                <DateTimeWidget />
+                            )}
+                        </AnimatePresence>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-zinc-500 hover:text-zinc-300"
+                            onClick={() => setShowDateTime(!showDateTime)}
+                            title={showDateTime ? "Hide Time" : "Show Time"}
+                        >
+                            {showDateTime ? <EyeOff className="w-3.5 h-3.5" /> : <ClockIcon className="w-3.5 h-3.5" />}
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">

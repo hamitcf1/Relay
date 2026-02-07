@@ -128,6 +128,7 @@ type Translations = {
     'category.upgrade': string
     'category.upsell': string
     'category.restaurant': string
+    'category.minibar': string
     'category.maintenance': string
     'category.guest_request': string
     'category.complaint': string
@@ -186,6 +187,7 @@ type Translations = {
     'hotel.additionalNotes': string
     'hotel.notesPlaceholder': string
     'hotel.bankAccount': string
+    'hotel.settings.minibarPrices': string
     'hotel.noInfo': string
     'hotel.clickEdit': string
 
@@ -285,6 +287,11 @@ type Translations = {
     'notes.noNotes': string
     'notes.aiHelp': string
     'notes.noFixturePrices': string
+    'minibar.cola': string
+    'minibar.cola_zero': string
+    'minibar.fanta': string
+    'minibar.sprite': string
+    'minibar.soda': string
     'notes.anonymous': string
 
     // Notifications
@@ -682,6 +689,7 @@ const translations: Record<Language, Translations> = {
         'category.upgrade': 'Upgrade (Room)',
         'category.upsell': 'Upsell',
         'category.restaurant': 'Restaurant/Bar',
+        'category.minibar': 'Minibar',
         'category.maintenance': 'Maintenance',
         'category.guest_request': 'Guest Request',
         'category.complaint': 'Complaint',
@@ -845,6 +853,13 @@ const translations: Record<Language, Translations> = {
         'fixture.duvet_cover': 'Duvet Cover',
         'fixture.bathrobe': 'Bathrobe',
         'fixture.mattress_protector': 'Mattress Protector',
+        'hotel.settings.minibarPrices': 'Minibar Prices',
+        'minibar.cola': 'Cola',
+        'minibar.cola_zero': 'Cola Zero',
+        'minibar.fanta': 'Fanta',
+        'minibar.sprite': 'Sprite',
+        'minibar.soda': 'Soda',
+
 
         // Off Day
         'offday.management.title': 'Leave & Shift Management',
@@ -1126,6 +1141,7 @@ const translations: Record<Language, Translations> = {
         'category.upgrade': 'Upgrade (Oda)',
         'category.upsell': 'Ekstra Satış',
         'category.restaurant': 'Restoran',
+        'category.minibar': 'Minibar',
         'category.maintenance': 'Bakım',
         'category.guest_request': 'Misafir İsteği',
         'category.complaint': 'Şikayet',
@@ -1202,6 +1218,13 @@ const translations: Record<Language, Translations> = {
         'fixture.duvet_cover': 'Nevresim',
         'fixture.bathrobe': 'Bornoz',
         'fixture.mattress_protector': 'Alez',
+        'hotel.settings.minibarPrices': 'Minibar Fiyatları',
+        'minibar.cola': 'Cola',
+        'minibar.cola_zero': 'Cola Zero',
+        'minibar.fanta': 'Fanta',
+        'minibar.sprite': 'Sprite',
+        'minibar.soda': 'Maden Suyu',
+
 
         // Off Day
         'offday.management.title': 'İzin & Vardiya Yönetimi',

@@ -10,7 +10,8 @@ import {
     User,
     Trash2,
     Wand2,
-    Pencil
+    Pencil,
+    AlertTriangle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,7 +27,7 @@ import { useRosterStore } from '@/stores/rosterStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
-import { FIXTURE_ITEMS } from '@/lib/constants'
+import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -80,10 +81,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         })
     }, [notes, filter, statusFilter])
 
-    const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'upsell', 'restaurant'].includes(cat)
+    const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'upsell', 'restaurant', 'minibar'].includes(cat)
 
     const [selectedFixtures, setSelectedFixtures] = useState<Record<string, number>>({})
+    const [selectedMinibar, setSelectedMinibar] = useState<Record<string, number>>({})
     const [editSelectedFixtures, setEditSelectedFixtures] = useState<Record<string, number>>({})
+    const [editSelectedMinibar, setEditSelectedMinibar] = useState<Record<string, number>>({})
 
     // Auto-calculate amount and content when fixtures change
     useEffect(() => {
@@ -109,6 +112,31 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         setNewAmount(total.toString())
         setNewContent(contentParts.join(', '))
     }, [selectedFixtures, newCategory, hotel?.settings?.fixture_prices, t])
+
+    // Auto-calculate amount and content when minibar change
+    useEffect(() => {
+        if (newCategory !== 'minibar') return
+
+        const items = Object.entries(selectedMinibar).filter(([_, count]) => count > 0)
+
+        if (items.length === 0) {
+            setNewAmount('')
+            setNewContent('')
+            return
+        }
+
+        let total = 0
+        const contentParts: string[] = []
+
+        items.forEach(([item, count]) => {
+            const price = hotel?.settings?.minibar_prices?.[item] || 0
+            total += price * count
+            contentParts.push(`${t(`minibar.${item}` as any)} (x${count})`)
+        })
+
+        setNewAmount(total.toString())
+        setNewContent(contentParts.join(', '))
+    }, [selectedMinibar, newCategory, hotel?.settings?.minibar_prices, t])
 
     const handleAddNote = async () => {
         if (!newContent.trim() || !user) return
@@ -140,6 +168,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
             setNewGuest('')
             setNewAssignedStaff('')
             setSelectedFixtures({}) // Reset fixtures
+            setSelectedMinibar({}) // Reset minibar
             setIsAdding(false)
         } finally {
             setLoading(false)
@@ -195,6 +224,23 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         } else {
             setEditSelectedFixtures({})
         }
+
+        // Parse minibar if minibar category
+        if (note.category === 'minibar') {
+            const minibar: Record<string, number> = {}
+            MINIBAR_ITEMS.forEach(item => {
+                const itemName = t(`minibar.${item}` as any)
+                const escapedName = itemName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`${escapedName}\\s*\\(x(\\d+)\\)`)
+                const match = note.content.match(regex)
+                if (match) {
+                    minibar[item] = parseInt(match[1])
+                }
+            })
+            setEditSelectedMinibar(minibar)
+        } else {
+            setEditSelectedMinibar({})
+        }
     }
 
     const handleUpdateNote = async () => {
@@ -213,6 +259,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
             })
             setEditingId(null)
             setEditSelectedFixtures({}) // Reset edit fixtures
+            setEditSelectedMinibar({}) // Reset edit minibar
         } finally {
             setLoading(false)
         }
@@ -370,6 +417,60 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             </div>
 
                             {/* Fixture Selector for Damage Category */}
+                            {newCategory === 'minibar' && (
+                                <div className="p-3 bg-zinc-950/30 rounded-lg border border-zinc-800 mb-4">
+                                    <label className="text-[10px] text-zinc-500 font-bold uppercase mb-2 block tracking-wider">
+                                        {t('hotel.settings.minibarPrices')}
+                                    </label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        {MINIBAR_ITEMS.map(item => {
+                                            const count = selectedMinibar[item] || 0
+                                            const price = hotel?.settings?.minibar_prices?.[item] || 0
+                                            return (
+                                                <div key={item} className="flex flex-col gap-1 p-2 rounded bg-zinc-900/50 border border-zinc-800/50 hover:border-zinc-700/50 transition-colors">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[10px] text-zinc-300 font-medium truncate">{t(`minibar.${item}` as any)}</span>
+                                                        <span className="text-[9px] text-zinc-500 italic">₺{price}</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between mt-1">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                const current = selectedMinibar[item] || 0
+                                                                if (current > 0) {
+                                                                    setSelectedMinibar(prev => ({ ...prev, [item]: current - 1 }))
+                                                                }
+                                                            }}
+                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs transition-colors"
+                                                            type="button"
+                                                        >
+                                                            -
+                                                        </button>
+                                                        <span className="text-xs font-mono w-4 text-center text-zinc-300">{count}</span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setSelectedMinibar(prev => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
+                                                            }}
+                                                            className="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-xs transition-colors"
+                                                            type="button"
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                    {(!hotel?.settings?.minibar_prices || Object.keys(hotel.settings.minibar_prices).length === 0) && (
+                                        <p className="text-[10px] text-amber-500/80 italic mt-2 flex items-center gap-1.5">
+                                            <AlertTriangle className="w-3 h-3" />
+                                            {t('notes.noFixturePrices')}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
                             {newCategory === 'damage' && (
                                 <div className="p-3 bg-zinc-800/30 rounded-lg border border-zinc-800 mb-2">
                                     <label className="text-[10px] text-zinc-500 font-bold uppercase mb-2 block">{t('hotel.settings.fixturePrices')}</label>
@@ -650,6 +751,56 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation()
                                                                                     setEditSelectedFixtures((prev: Record<string, number>) => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
+                                                                                }}
+                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                type="button"
+                                                                            >
+                                                                                +
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Minibar Selector for Minibar Category (Edit Mode) */}
+                                                {editCategory === 'minibar' && (
+                                                    <div className="p-2 bg-zinc-950/30 rounded border border-zinc-800 mb-2">
+                                                        <label className="text-[10px] text-zinc-500 font-bold uppercase mb-1 block tracking-wider">{t('hotel.settings.minibarPrices')}</label>
+                                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                            {MINIBAR_ITEMS.map(item => {
+                                                                const count = editSelectedMinibar[item] || 0
+                                                                const price = hotel?.settings?.minibar_prices?.[item] || 0
+                                                                return (
+                                                                    <div key={item} className={cn(
+                                                                        "flex items-center justify-between p-1.5 rounded-md border transition-all",
+                                                                        count > 0 ? "bg-emerald-500/10 border-emerald-500/30" : "bg-zinc-800/50 border-zinc-700/50"
+                                                                    )}>
+                                                                        <div className="flex flex-col min-w-0">
+                                                                            <span className="text-[10px] text-zinc-300 font-medium truncate" title={t(`minibar.${item}` as any)}>{t(`minibar.${item}` as any)}</span>
+                                                                            <span className="text-[9px] text-zinc-500">₺{price}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-0.5 bg-zinc-900 rounded border border-zinc-700">
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation()
+                                                                                    setEditSelectedMinibar((prev: Record<string, number>) => {
+                                                                                        const val = Math.max(0, (prev[item] || 0) - 1)
+                                                                                        return { ...prev, [item]: val }
+                                                                                    })
+                                                                                }}
+                                                                                className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
+                                                                                type="button"
+                                                                            >
+                                                                                -
+                                                                            </button>
+                                                                            <span className="text-[10px] font-mono w-3 text-center">{count}</span>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation()
+                                                                                    setEditSelectedMinibar((prev: Record<string, number>) => ({ ...prev, [item]: (prev[item] || 0) + 1 }))
                                                                                 }}
                                                                                 className="w-4 h-4 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 rounded text-[10px]"
                                                                                 type="button"

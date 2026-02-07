@@ -13,7 +13,8 @@ import {
     Lock,
     LockOpen,
     ShieldCheck,
-    KeyRound
+    KeyRound,
+    Pizza
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -25,7 +26,7 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useLanguageStore } from '@/stores/languageStore'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
-import { FIXTURE_ITEMS } from '@/lib/constants'
+import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
 
 interface HotelInfoData {
     iban: string
@@ -407,6 +408,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                             <Input
                                                 type="password"
                                                 placeholder="Güvenli Kasa Şifresi"
+                                                autoComplete="new-password"
                                                 value={passwordInput}
                                                 onChange={e => setPasswordInput(e.target.value)}
                                                 className="h-8 bg-zinc-950 border-zinc-800 text-xs"
@@ -424,6 +426,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                     <Input
                                         type="password"
                                         placeholder={t('hotel.secure.safeCode')}
+                                        autoComplete="new-password"
                                         value={passwordInput}
                                         onChange={e => setPasswordInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && handleUnlock()}
@@ -488,6 +491,42 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                                     const currentPrices = hotel.settings.fixture_prices || {}
                                                                     updateHotelSettings(hotel.id, {
                                                                         fixture_prices: {
+                                                                            ...currentPrices,
+                                                                            [item]: val
+                                                                        }
+                                                                    })
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Minibar Prices Section */}
+                                    <div className="pt-4 border-t border-zinc-800">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <Pizza className="w-4 h-4 text-emerald-400" />
+                                            <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">{t('hotel.settings.minibarPrices')}</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {MINIBAR_ITEMS.map(item => (
+                                                <div key={item} className="space-y-1">
+                                                    <label className="text-[10px] text-zinc-500 font-bold uppercase">{t(`minibar.${item}` as any)}</label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-2 top-1.5 text-zinc-500 text-xs">₺</span>
+                                                        <Input
+                                                            type="number"
+                                                            className="h-8 bg-zinc-950 border-zinc-800 pl-6 text-xs"
+                                                            placeholder="0.00"
+                                                            defaultValue={hotel.settings.minibar_prices?.[item] || ''}
+                                                            onBlur={(e) => {
+                                                                const val = parseFloat(e.target.value)
+                                                                if (!isNaN(val)) {
+                                                                    const currentPrices = hotel.settings.minibar_prices || {}
+                                                                    updateHotelSettings(hotel.id, {
+                                                                        minibar_prices: {
                                                                             ...currentPrices,
                                                                             [item]: val
                                                                         }

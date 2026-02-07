@@ -61,6 +61,7 @@ export interface HotelSettings {
         safe_info?: string
     }
     fixture_prices?: Record<string, number>
+    minibar_prices?: Record<string, number>
 }
 
 export interface Hotel {
@@ -159,6 +160,7 @@ export type NoteCategory =
     | 'upgrade'        // Room Upgrades (financial)
     | 'upsell'         // Upselling services (financial)
     | 'restaurant'     // Restaurant/Bar payments (financial)
+    | 'minibar'        // Minibar usage (financial)
     | 'other'
 
 export type NoteStatus = 'active' | 'resolved' | 'archived'
