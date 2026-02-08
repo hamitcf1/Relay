@@ -62,8 +62,8 @@ export function AnnouncementModal() {
                                     </div>
                                 </div>
 
-                                <div className="bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800 w-full">
-                                    <p className="text-zinc-300 leading-relaxed text-lg italic">
+                                <div className="bg-zinc-950/50 p-6 rounded-2xl border border-zinc-800 w-full max-h-[40vh] overflow-y-auto custom-scrollbar">
+                                    <p className="text-zinc-300 leading-relaxed text-lg italic whitespace-pre-wrap">
                                         "{announcement.content}"
                                     </p>
                                 </div>
