@@ -250,6 +250,9 @@ type Translations = {
     'common.confirm': string
     'common.language': string
     'common.appearance': string
+    'common.updateAvailable': string
+    'common.updateDescription': string
+    'common.refreshNow': string
     'common.by': string
     'common.none': string
     'common.staff': string
@@ -849,6 +852,9 @@ const translations: Record<Language, Translations> = {
         'common.confirm': 'Confirm',
         'common.language': 'Language',
         'common.appearance': 'Appearance',
+        'common.updateAvailable': 'New version available',
+        'common.updateDescription': 'Please refresh the page to use the latest features.',
+        'common.refreshNow': 'Refresh Now',
         'common.by': 'by',
         'common.none': 'None',
         'common.staff': 'Staff',
@@ -1562,6 +1568,9 @@ const translations: Record<Language, Translations> = {
         'feedback.management.view': 'Yönetim Görünümü',
         'common.language': 'Dil Seçimi',
         'common.appearance': 'Görünüm',
+        'common.updateAvailable': 'Yeni sürüm mevcut',
+        'common.updateDescription': 'En son özellikleri kullanmak için lütfen sayfayı yenileyin.',
+        'common.refreshNow': 'Şimdi Yenile',
 
         // AI Modal
         'ai.title': 'Relay AI Asistanı',

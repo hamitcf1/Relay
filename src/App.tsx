@@ -7,6 +7,7 @@ import ShiftStartPage from '@/pages/ShiftStartPage'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 import { TabNotifications } from '@/components/ui/TabNotifications'
+import { UpdateNotifier } from '@/components/layout/UpdateNotifier'
 
 import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
@@ -20,6 +21,7 @@ function App() {
 
     return (
         <BrowserRouter>
+            <UpdateNotifier />
             <TabNotifications />
             <Routes>
                 {/* Public Routes */}

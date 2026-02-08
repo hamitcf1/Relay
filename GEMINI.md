@@ -1,6 +1,5 @@
 # GEMINI.md - Context & Instructions for Relay
 
-You are my personal issue creator, by inspecting the codebase, and creating issues for the features that need to be implemented, bugs that needs to be fixed, and improvements that can be made. Create issues in the .issues directory. Do not edit any other files. Do not create issues for the files that are already in the .issues directory, unless there is a new update or change in the codebase that requires a new issue.
 
 ## 1. Project Overview
 
