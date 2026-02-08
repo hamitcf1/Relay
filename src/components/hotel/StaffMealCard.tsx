@@ -126,7 +126,7 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                                             <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">
                                                 {t('menu.content')}
                                             </span>
-                                            <div className="h-[1px] flex-1 bg-zinc-800/50" />
+                                            <div className="h-[1px] flex-1 bg-border" />
                                         </div>
                                         <ul className="space-y-1.5 list-none">
                                             {todayMenu.menu.split('\n').filter(line => line.trim() !== '').map((item, index) => (
@@ -154,8 +154,8 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-6 px-4 text-center space-y-3 opacity-60">
-                                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center">
-                                        <Utensils className="w-5 h-5 text-zinc-600" />
+                                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                        <Utensils className="w-5 h-5 text-muted-foreground" />
                                     </div>
                                     <p className="text-xs text-zinc-500 font-medium max-w-[180px]">
                                         {t('menu.noMenuToday')}
@@ -168,7 +168,7 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                                                 e.stopPropagation()
                                                 handleEdit()
                                             }}
-                                            className="border-zinc-800 text-zinc-400 hover:text-white h-7"
+                                            className="border-border text-muted-foreground hover:bg-muted h-7"
                                         >
                                             {t('menu.edit')}
                                         </Button>
@@ -180,22 +180,22 @@ export function StaffMealCard({ hotelId, canEdit }: StaffMealCardProps) {
                 </AnimatePresence>
 
                 {/* Fixed Service Hours Section */}
-                <div className="pt-2 border-t border-zinc-800/50">
+                <div className="pt-2 border-t border-border/50">
                     <div className="flex items-center gap-2 mb-2 px-1">
                         <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">
                             {t('menu.hours')}
                         </span>
                     </div>
                     <div className="grid grid-cols-1 gap-1.5">
-                        <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-800/20 py-1.5 px-2 rounded-lg border border-zinc-800/30">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/40 py-1.5 px-2 rounded-lg border border-border/40">
                             <Coffee className="w-3 h-3 text-amber-500/70" />
                             {t('menu.breakfastTime')}
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-800/20 py-1.5 px-2 rounded-lg border border-zinc-800/30">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/40 py-1.5 px-2 rounded-lg border border-border/40">
                             <Utensils className="w-3 h-3 text-emerald-500/70" />
                             {t('menu.lunchTime')}
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-800/20 py-1.5 px-2 rounded-lg border border-zinc-800/30">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground bg-muted/40 py-1.5 px-2 rounded-lg border border-border/40">
                             <Moon className="w-3 h-3 text-indigo-500/70" />
                             {t('menu.dinnerTime')}
                         </div>

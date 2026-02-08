@@ -28,7 +28,7 @@ export function StaffMealEditor({
                 <textarea
                     value={menu}
                     onChange={(e) => setMenu(e.target.value)}
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[120px] transition-all"
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary min-h-[120px] transition-all"
                     placeholder="..."
                 />
             </div>
@@ -38,7 +38,7 @@ export function StaffMealEditor({
                     onClick={() => onSave(menu)}
                     disabled={loading}
                     size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                     {t('common.save')}
@@ -48,7 +48,7 @@ export function StaffMealEditor({
                     onClick={onCancel}
                     disabled={loading}
                     size="sm"
-                    className="text-zinc-400 hover:text-white"
+                    className="text-muted-foreground hover:text-foreground"
                 >
                     <X className="w-4 h-4 mr-2" />
                     {t('common.cancel')}
