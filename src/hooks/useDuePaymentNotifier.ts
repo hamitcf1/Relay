@@ -9,7 +9,7 @@ import { useAuthStore } from '@/stores/authStore'
  * Runs on dashboard load and every 2 hours thereafter.
  */
 export function useDuePaymentNotifier() {
-    const { sales, getDueSales } = useSalesStore()
+    const { getDueSales } = useSalesStore()
     const { addNotification } = useNotificationStore()
     const { hotel } = useHotelStore()
     const { user } = useAuthStore()
@@ -27,6 +27,10 @@ export function useDuePaymentNotifier() {
 
             if (now - lastCheckTime < CHECK_INTERVAL) return
 
+            // Update last check time IMMEDIATELY before the async call
+            // This prevents race conditions if the hook is re-triggered
+            localStorage.setItem(STORAGE_KEY, now.toString())
+
             const dueSales = getDueSales()
             if (dueSales.length === 0) return
 
@@ -41,9 +45,6 @@ export function useDuePaymentNotifier() {
                 title: 'Bekleyen Ödemeler',
                 content: `${dueSales.length} satışta toplam ${totalDue}€ tahsil edilmedi.`
             })
-
-            // Update last check time
-            localStorage.setItem(STORAGE_KEY, now.toString())
         }
 
         // Run immediately on mount (checks storage)
@@ -53,5 +54,5 @@ export function useDuePaymentNotifier() {
         const intervalId = setInterval(checkDuePayments, 60 * 60 * 1000) // Check every hour if we need to trigger
 
         return () => clearInterval(intervalId)
-    }, [hotel?.id, user, sales, getDueSales, addNotification])
+    }, [hotel?.id, user, addNotification])
 }
