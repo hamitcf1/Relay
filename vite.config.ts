@@ -1,12 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
+import fs from 'node:fs'
+import path from 'node:path'
+
+// Try to read version from public/version.json to synchronize with build script
+let buildVersion = Date.now()
+try {
+    const pkgPath = fileURLToPath(new URL('.', import.meta.url))
+    const versionFile = path.join(pkgPath, 'public', 'version.json')
+    if (fs.existsSync(versionFile)) {
+        const data = JSON.parse(fs.readFileSync(versionFile, 'utf-8'))
+        buildVersion = data.version
+    }
+} catch (e) {
+    // console.warn('Could not read version.json, using current timestamp')
+}
 
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [react()],
     define: {
-        '__BUILD_VERSION__': JSON.stringify(Date.now()),
+        '__BUILD_VERSION__': JSON.stringify(buildVersion),
     },
     resolve: {
         alias: {

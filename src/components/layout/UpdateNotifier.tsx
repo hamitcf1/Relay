@@ -25,10 +25,10 @@ export function UpdateNotifier() {
                 if (!response.ok) return
 
                 const data = await response.json()
-                const serverVersion = String(data.version)
-                const localVersion = String(__BUILD_VERSION__)
+                const serverVersion = Number(data.version)
+                const localVersion = Number(__BUILD_VERSION__)
 
-                if (serverVersion !== localVersion) {
+                if (serverVersion > localVersion) {
                     console.log('Update detected:', { serverVersion, localVersion })
                     setUpdateAvailable(true)
                 }
