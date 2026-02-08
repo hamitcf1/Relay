@@ -10,11 +10,15 @@ import { useNotificationStore } from '@/stores/notificationStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { isSameDay, format } from 'date-fns'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { type PrivateMessage } from '@/types'
+import { useFormatting } from '@/hooks/useFormatting'
+import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
+import { TextFormatter } from '@/components/ui/TextFormatter'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
@@ -28,6 +32,8 @@ export function MessagingPanel() {
     const [activeConversation, setActiveConversation] = useState<string>('all') // 'all' or user uid
     const [newMessage, setNewMessage] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
+    const messageInputRef = useRef<HTMLTextAreaElement>(null)
+    const formatting = useFormatting(newMessage, setNewMessage, messageInputRef)
     const scrollRef = useRef<HTMLDivElement>(null)
 
     // Handle Deep Linking via URL query params
@@ -342,7 +348,7 @@ export function MessagingPanel() {
                                                 {activeConversation === 'all' && !isMe && (
                                                     <p className="text-[10px] font-bold text-primary mb-1">{msg.sender_name}</p>
                                                 )}
-                                                {msg.content}
+                                                <TextFormatter text={msg.content} />
                                                 <div className={cn("text-[9px] mt-1 flex items-center justify-end gap-1 opacity-70", isMe ? "text-primary-foreground/80" : "text-muted-foreground")}>
                                                     {format(msg.timestamp, 'HH:mm')}
                                                     {isMe && (
@@ -380,11 +386,25 @@ export function MessagingPanel() {
                 {/* Input Area */}
                 <div className="p-4 bg-muted/20 border-t border-border">
                     <form onSubmit={handleSend} className="flex gap-3">
-                        <Input
+                        <Textarea
+                            ref={messageInputRef}
                             placeholder={activeConversation === 'all' ? t('messaging.everyone') : t('messaging.placeholder')}
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
-                            className="bg-background border-border focus-visible:ring-primary/50"
+                            onContextMenu={formatting.handleContextMenu}
+                            className="bg-background border-border focus-visible:ring-primary/50 min-h-[44px] max-h-[120px] py-3 resize-none"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    handleSend(e as any)
+                                }
+                            }}
+                        />
+                        <FormattingContextMenu
+                            state={formatting.menu}
+                            onClose={formatting.closeMenu}
+                            onToggleBullet={formatting.toggleBullet}
+                            t={t}
                         />
                         <Button
                             type="submit"

@@ -223,7 +223,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                         {isEditing ? (
                                             <Input
                                                 type="time"
-                                                value={editForm.pickup_time}
+                                                value={editForm.pickup_time || ''}
                                                 onChange={e => setEditForm(prev => ({ ...prev, pickup_time: e.target.value }))}
                                                 className="h-8 bg-background border-border"
                                             />

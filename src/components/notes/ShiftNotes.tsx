@@ -2,19 +2,10 @@ import { useState, useMemo, useEffect } from 'react' // Force re-build
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale, formatDisplayDateTime } from '@/lib/utils'
-import {
-    Plus,
-    Check,
-    DollarSign,
-    Clock,
-    User,
-    Trash2,
-    Wand2,
-    Pencil,
-    AlertTriangle
-} from 'lucide-react'
+import { Plus, Check, DollarSign, Clock, User, Trash2, Wand2, Pencil, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -28,6 +19,10 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
+import { useFormatting } from '@/hooks/useFormatting'
+import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
+import { TextFormatter } from '@/components/ui/TextFormatter'
+import { useRef } from 'react'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -58,6 +53,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [newGuest, setNewGuest] = useState('')
     const [newAssignedStaff, setNewAssignedStaff] = useState<string>('')
 
+    const newContentRef = useRef<HTMLTextAreaElement>(null)
+    const newFormatting = useFormatting(newContent, setNewContent, newContentRef)
+
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editContent, setEditContent] = useState('')
     const [editCategory, setEditCategory] = useState<NoteCategory>('handover')
@@ -66,6 +64,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [editTime, setEditTime] = useState('')
     const [editGuest, setEditGuest] = useState('')
     const [editAssignedStaff, setEditAssignedStaff] = useState('none')
+
+    const editContentRef = useRef<HTMLTextAreaElement>(null)
+    const editFormatting = useFormatting(editContent, setEditContent, editContentRef)
 
     const [loading, setLoading] = useState(false)
     const [isAIModalOpen, setIsAIModalOpen] = useState(false)
@@ -566,11 +567,19 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         {t('notes.aiHelp')}
                                     </Button>
                                 </div>
-                                <Input
+                                <Textarea
+                                    ref={newContentRef}
                                     placeholder={t('module.shiftNotes') + "..."}
                                     value={newContent}
                                     onChange={(e) => setNewContent(e.target.value)}
-                                    className="text-sm bg-muted/50"
+                                    onContextMenu={newFormatting.handleContextMenu}
+                                    className="text-sm bg-muted/50 min-h-[80px]"
+                                />
+                                <FormattingContextMenu
+                                    state={newFormatting.menu}
+                                    onClose={newFormatting.closeMenu}
+                                    onToggleBullet={newFormatting.toggleBullet}
+                                    t={t}
                                 />
                             </div>
 
@@ -684,11 +693,19 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                     ))}
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Input
+                                                    <Textarea
+                                                        ref={editContentRef}
                                                         value={editContent}
                                                         onChange={(e) => setEditContent(e.target.value)}
-                                                        className="h-8 text-sm bg-background border-border flex-1"
+                                                        onContextMenu={editFormatting.handleContextMenu}
+                                                        className="min-h-[80px] text-sm bg-background border-border flex-1"
                                                         autoFocus
+                                                    />
+                                                    <FormattingContextMenu
+                                                        state={editFormatting.menu}
+                                                        onClose={editFormatting.closeMenu}
+                                                        onToggleBullet={editFormatting.toggleBullet}
+                                                        t={t}
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
@@ -849,7 +866,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="text-sm text-foreground mb-2 leading-relaxed">{note.content}</p>
+                                            <div className="text-sm text-foreground mb-2 leading-relaxed">
+                                                <TextFormatter text={note.content} />
+                                            </div>
                                         )}
 
                                         {/* Footer */}

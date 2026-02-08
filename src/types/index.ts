@@ -310,7 +310,7 @@ export interface Sale {
     room_number: string
     pax: number               // Number of people
     date: Date                // Date of service
-    pickup_time?: string      // HH:MM
+    pickup_time?: string | null      // HH:MM
     ticket_number?: string    // External ticket #
     total_price: number
     collected_amount: number

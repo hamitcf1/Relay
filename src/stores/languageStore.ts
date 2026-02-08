@@ -251,6 +251,7 @@ type Translations = {
     'common.confirm': string
     'common.language': string
     'common.appearance': string
+    'common.formatting.bulletList': string
     'common.updateAvailable': string
     'common.updateDescription': string
     'common.refreshNow': string
@@ -556,34 +557,35 @@ type Translations = {
 
 const translations: Record<Language, Translations> = {
     en: {
+        // Auth & Setup
         'auth.login': 'Login',
         'auth.register': 'Register',
         'auth.email': 'Email Address',
         'auth.password': 'Password',
         'auth.name': 'Full Name',
         'auth.confirmPassword': 'Confirm Password',
-        'auth.noAccount': "Don't have an account?",
+        'auth.noAccount': "Don't have an account? Contact GM",
         'auth.haveAccount': 'Already have an account?',
-        'auth.contactGM': 'Contact your GM for account access',
-        'auth.error.enterName': 'Please enter your name',
+        'auth.contactGM': 'Contact Management',
+        'auth.error.enterName': 'Please enter your full name',
         'auth.error.passwordLength': 'Password must be at least 6 characters',
         'auth.error.passwordMismatch': 'Passwords do not match',
-        'auth.error.regFailed': 'Registration failed',
+        'auth.error.regFailed': 'Registration failed. Please try again.',
         'auth.role.receptionist': 'Receptionist',
-        'auth.role.receptionistDesc': 'Front desk staff',
+        'auth.role.receptionistDesc': 'Front desk operations, check-ins, and guest relations.',
         'auth.role.housekeeping': 'Housekeeping',
-        'auth.role.housekeepingDesc': 'Cleaning & maintenance',
-        'auth.registerSubtitle': "Join your hotel's Relay system",
-        'auth.roleLabel': 'Your Role',
+        'auth.role.housekeepingDesc': 'Room cleaning, maintenance reporting, and status updates.',
+        'auth.registerSubtitle': 'Create your staff account',
+        'auth.roleLabel': 'Select Your Role',
         'auth.creatingAccount': 'Creating account...',
         'auth.createAccount': 'Create Account',
         'auth.logout': 'Logout',
-        'auth.switchAccount': 'Switch Account',
+        'auth.switchAccount': 'Switch Hotel',
 
-        'setup.title': 'Select Your Hotel',
-        'setup.subtitle': 'Join an existing hotel or create a new one',
-        'setup.joinExisting': 'Join Existing',
-        'setup.createNew': 'Create New',
+        'setup.title': 'Hotel Setup',
+        'setup.subtitle': 'Join an existing hotel or create a new one to begin.',
+        'setup.joinExisting': 'Join Existing Hotel',
+        'setup.createNew': 'Create New Hotel',
         'setup.hotelName': 'Hotel Name',
         'setup.address': 'Address',
         'setup.optional': 'optional',
@@ -614,6 +616,7 @@ const translations: Record<Language, Translations> = {
         'dashboard.operationsDesc': 'Manage hotel communication, feedback, and services in one place.',
         'dashboard.userProfile': 'User Profile',
 
+        // Status & Urgency
         'status.active': 'Active',
         'status.ongoing': 'Shift Ongoing',
         'status.resolved': 'Resolved',
@@ -623,11 +626,13 @@ const translations: Record<Language, Translations> = {
         'status.low': 'Low',
         'status.medium': 'Medium',
         'status.critical': 'Critical',
+        'status.all': 'All',
         'urgency.low': 'Low',
         'urgency.medium': 'Medium',
         'urgency.high': 'High',
         'urgency.critical': 'Critical',
 
+        // Modules
         'module.activityFeed': 'Live Activity Feed',
         'module.stickyBoard': 'Sticky Board',
         'module.compliance': 'Compliance Checklist',
@@ -649,6 +654,7 @@ const translations: Record<Language, Translations> = {
         'log.stickyBoard': 'Sticky Board',
         'compliance.kbsLate': 'KBS System check is required immediately! Please verify guest identities.',
 
+        // Handover Wizard
         'handover.title': 'Handover Wizard',
         'handover.step.tickets': 'Review Open Tickets',
         'handover.step.cash': 'Cash Count',
@@ -673,6 +679,7 @@ const translations: Record<Language, Translations> = {
         'handover.ticketsReviewed': 'Open Tickets Reviewed',
         'handover.notes': 'Notes',
 
+        // Room Management
         'rooms.title': 'Room Management',
         'rooms.add': 'Add Room',
         'rooms.edit': 'Edit Room',
@@ -688,6 +695,7 @@ const translations: Record<Language, Translations> = {
         'rooms.inspect': 'Inspect',
         'rooms.dnd': 'DND',
 
+        // Hotel
         'hotel.laundry': 'Laundry Service',
         'hotel.ironing': 'Ironing',
         'hotel.transfer': 'Airport Transfer',
@@ -700,9 +708,18 @@ const translations: Record<Language, Translations> = {
         'hotel.notesPlaceholder': 'Any other important information...',
         'hotel.bankAccount': 'Bank Account',
         'hotel.settings.minibarPrices': 'Minibar Prices',
+        'hotel.settings.fixturePrices': 'Fixture Damage Prices',
         'hotel.noInfo': 'No hotel information set',
         'hotel.clickEdit': 'Click edit to add',
+        'hotel.secure.title': 'Secure Information (KBS / Agency)',
+        'hotel.secure.encrypted': 'Encrypted Section',
+        'hotel.secure.safeCode': 'Safe Code',
+        'hotel.secure.agency': 'Agency Logins (Extranet)',
+        'hotel.secure.other': 'Other Safe Info',
+        'hotel.secure.kbs': 'KBS Login Info',
+        'hotel.secure.safeInfo': 'Safe & Key Info',
 
+        // Log
         'log.new': 'New Log Entry',
         'log.edit': 'Edit Log Entry',
         'log.typeLabel': 'Log Type',
@@ -723,6 +740,7 @@ const translations: Record<Language, Translations> = {
 
         'sticky.pinnedCount': '{count} pinned',
 
+        // Shifts & Roster
         'shift.morning': 'Morning',
         'shift.afternoon': 'Afternoon',
         'shift.night': 'Night',
@@ -734,6 +752,12 @@ const translations: Record<Language, Translations> = {
         'shift.startingCash': 'Starting Cash',
         'shift.proceed': 'Proceed to Dashboard',
         'shift.loggedAs': 'Logged in as',
+        'roster.title': 'Weekly Roster',
+        'roster.noStaff': 'No staff members found',
+        'roster.show': 'Show in Roster',
+        'roster.hide': 'Hide from Roster',
+        'roster.unknown': 'Unknown User',
+
         // Calendar
         'calendar.noShifts': 'No shifts scheduled',
         'calendar.noEvents': 'No events for today',
@@ -794,12 +818,25 @@ const translations: Record<Language, Translations> = {
         'notes.noNotes': 'No active notes',
         'notes.aiHelp': 'AI Assist',
         'notes.noFixturePrices': 'No fixture prices configured by management.',
+        'notes.anonymous': 'Anonymous',
+        'notes.edited': '(edited)',
+        'notes.label': 'shift notes',
+
+        // Minibar
         'minibar.cola': 'Cola',
         'minibar.cola_zero': 'Cola Zero',
         'minibar.fanta': 'Fanta',
         'minibar.sprite': 'Sprite',
         'minibar.soda': 'Soda',
-        'notes.anonymous': 'Anonymous',
+
+        // Fixtures
+        'fixture.hand_towel': 'Hand Towel',
+        'fixture.bath_towel': 'Bath Towel',
+        'fixture.bed_sheet': 'Bed Sheet',
+        'fixture.pillow_case': 'Pillow Case',
+        'fixture.duvet_cover': 'Duvet Cover',
+        'fixture.bathrobe': 'Bathrobe',
+        'fixture.mattress_protector': 'Mattress Protector',
 
         // Notifications
         'notifications.title': 'Notifications',
@@ -808,15 +845,22 @@ const translations: Record<Language, Translations> = {
         'notifications.noNotifications': 'No new notifications',
         'notifications.viewAll': 'View All Activity',
 
-        // Feedback - Expanded
+        // Feedback
         'feedback.placeholder': 'Describe your concern or feedback here...',
         'feedback.submitSuccess': 'Submitted Successfully',
         'feedback.thankYou': 'Thank you for your feedback.',
         'feedback.submitAnonymous': 'Submit Anonymously',
         'feedback.recentTitle': 'Recent Feedback',
         'feedback.noComplaints': 'No complaints to show.',
+        'feedback.anonymous.title': 'Anonymous Feedback',
+        'feedback.anonymous.subtitle': 'Your voice matters safely.',
+        'feedback.privacy.title': 'Privacy Guaranteed',
+        'feedback.privacy.desc': 'We use hotel-level collections without user associations. Even database administrators cannot trace feedback to a specific user account.',
+        'feedback.submit.title': 'Submit Anonymous Complaint',
+        'feedback.submit.desc': 'Your identity is completely hidden. No personal data is stored with your message.',
+        'feedback.management.view': 'Management View',
 
-        // Messaging - Expanded
+        // Messaging
         'messaging.everyone': 'Message everyone',
         'messaging.placeholder': 'Message ...',
         'messaging.noMessages': 'No messages yet. Start the conversation!',
@@ -824,69 +868,10 @@ const translations: Record<Language, Translations> = {
         'messaging.deleteMessageConfirm': 'Delete this message?',
         'messaging.clearTooltip': 'Clear Chat History',
         'messaging.deleteTooltip': 'Delete message',
-
-        // Roster - Expanded
-        'roster.unknown': 'Unknown User',
-
-        // Common - Expanded
-        'common.clear': 'Clear Chat History',
-
-        // Currency
-        'currency.title': 'Exchange Rates (TCMB)',
-        'currency.buying': 'Bank Buys (Bozma)',
-        'currency.selling': 'Bank Sells (Satış)',
-        'currency.lastUpdated': 'Updated',
-
-        // Announcement
-        'announcement.title': 'Important Announcement',
-        'announcement.deleteConfirm': 'Are you sure you want to delete this announcement?',
-
-        // Status
-        'status.all': 'All',
-
-        'app.welcome': 'Welcome to Relay',
-        'app.description': 'Your digital handover system for seamless hotel operations. Manage shifts, track logs, and ensure compliance—all in one place.',
-        'app.activeShift': 'Active Shift',
-        'app.openTickets': 'Open Tickets',
-        'app.cashBalance': 'Cash Balance',
-        'app.systemTitle': 'Relay Hotel Operations System',
-
-        'common.dismiss': 'Dismiss',
-        'common.add': 'Add',
-        'common.cancel': 'Cancel',
-        'common.save': 'Save',
-        'common.delete': 'Delete',
-        'common.edit': 'Edit',
-        'common.archive': 'Archive',
-        'common.viewAll': 'View All',
-        'common.loading': 'Loading...',
-        'common.room': 'Room',
-        'common.amount': 'Amount',
-        'common.description': 'Description',
-        'common.search': 'Search...',
-        'common.continue': 'Continue',
-        'common.back': 'Back',
-        'common.confirm': 'Confirm',
-        'common.language': 'Language',
-        'common.appearance': 'Appearance',
-        'common.updateAvailable': 'New version available',
-        'common.updateDescription': 'Please refresh the page to use the latest features.',
-        'common.refreshNow': 'Refresh Now',
-        'common.by': 'by',
-        'common.none': 'None',
-        'common.staff': 'Staff',
-        'common.unknown': 'Unknown',
-        'common.update': 'Update',
-        'common.deleteConfirm': 'Delete this event?',
-        'common.next': 'Next',
-        'common.finish': 'Finish',
-        'common.reopen': 'Reopen',
-        'common.resolve': 'Resolve',
-
-        'roster.title': 'Weekly Roster',
-        'roster.noStaff': 'No staff members found',
-        'roster.show': 'Show in Roster',
-        'roster.hide': 'Hide from Roster',
+        'messages.title': 'Messages',
+        'messages.search': 'Search staff...',
+        'messages.announcements': 'General Announcements',
+        'messages.broadcast': 'Broadcast to all staff',
 
         // Tours
         'tours.catalogue.title': 'Tour Catalogue',
@@ -1033,22 +1018,7 @@ const translations: Record<Language, Translations> = {
         'menu.lunchTime': 'Lunch: 12:00 - 13:30',
         'menu.dinnerTime': 'Dinner: 17:00 - 18:30',
 
-        // Hotel Info
-        'hotel.secure.title': 'Secure Information (KBS / Agency)',
-        'hotel.secure.encrypted': 'Encrypted Section',
-        'hotel.secure.safeCode': 'Safe Code',
-        'hotel.secure.agency': 'Agency Logins (Extranet)',
-        'hotel.secure.other': 'Other Safe Info',
-        'hotel.secure.kbs': 'KBS Login Info',
-        'hotel.secure.safeInfo': 'Safe & Key Info',
-        'hotel.settings.fixturePrices': 'Fixture Damage Prices',
-        'fixture.hand_towel': 'Hand Towel',
-        'fixture.bath_towel': 'Bath Towel',
-        'fixture.bed_sheet': 'Bed Sheet',
-        'fixture.pillow_case': 'Pillow Case',
-        'fixture.duvet_cover': 'Duvet Cover',
-        'fixture.bathrobe': 'Bathrobe',
-        'fixture.mattress_protector': 'Mattress Protector',
+
 
         // Off Day
         'offday.management.title': 'Leave & Shift Management',
@@ -1056,19 +1026,6 @@ const translations: Record<Language, Translations> = {
         'offday.pending': 'Pending Requests',
         'offday.history': 'Request History',
         'offday.petitions': 'Complaints & Petitions',
-
-        // Messages & Feedback
-        'messages.title': 'Messages',
-        'messages.search': 'Search staff...',
-        'messages.announcements': 'General Announcements',
-        'messages.broadcast': 'Broadcast to all staff',
-        'feedback.anonymous.title': 'Anonymous Feedback',
-        'feedback.anonymous.subtitle': 'Your voice matters safely.',
-        'feedback.privacy.title': 'Privacy Guaranteed',
-        'feedback.privacy.desc': 'We use hotel-level collections without user associations. Even database administrators cannot trace feedback to a specific user account.',
-        'feedback.submit.title': 'Submit Anonymous Complaint',
-        'feedback.submit.desc': 'Your identity is completely hidden. No personal data is stored with your message.',
-        'feedback.management.view': 'Management View',
 
         // AI Modal
         'ai.title': 'Relay AI Assistant',
@@ -1090,9 +1047,56 @@ const translations: Record<Language, Translations> = {
         'ai.generate': 'Generate',
         'ai.cancel': 'Cancel',
 
-        // Shift Notes
-        'notes.edited': '(edited)',
-        'notes.label': 'shift notes',
+
+
+        'app.welcome': 'Welcome to Relay',
+        'app.description': 'Your digital handover system for seamless hotel operations.',
+        'app.activeShift': 'Active Shift',
+        'app.openTickets': 'Open Tickets',
+        'app.cashBalance': 'Cash Balance',
+        'app.systemTitle': 'Relay Hotel Operations System',
+
+        'common.dismiss': 'Dismiss',
+        'common.add': 'Add',
+        'common.cancel': 'Cancel',
+        'common.save': 'Save',
+        'common.delete': 'Delete',
+        'common.edit': 'Edit',
+        'common.archive': 'Archive',
+        'common.viewAll': 'View All',
+        'common.loading': 'Loading...',
+        'common.room': 'Room',
+        'common.amount': 'Amount',
+        'common.description': 'Description',
+        'common.search': 'Search...',
+        'common.continue': 'Continue',
+        'common.back': 'Back',
+        'common.confirm': 'Confirm',
+        'common.language': 'Language',
+        'common.appearance': 'Appearance',
+        'common.formatting.bulletList': 'Bullet List',
+        'common.updateAvailable': 'New version available',
+        'common.updateDescription': 'Please refresh the page to use the latest features.',
+        'common.refreshNow': 'Refresh Now',
+        'common.by': 'by',
+        'common.none': 'None',
+        'common.staff': 'Staff',
+        'common.unknown': 'Unknown',
+        'common.update': 'Update',
+        'common.deleteConfirm': 'Delete this event?',
+        'common.next': 'Next',
+        'common.finish': 'Finish',
+        'common.reopen': 'Reopen',
+        'common.resolve': 'Resolve',
+
+        'currency.title': 'Exchange Rates (TCMB)',
+        'currency.buying': 'Bank Buys (Bozma)',
+        'currency.selling': 'Bank Sells (Satış)',
+        'currency.lastUpdated': 'Updated',
+        'announcement.title': 'Important Announcement',
+        'announcement.deleteConfirm': 'Are you sure you want to delete this announcement?',
+        'common.clear': 'Clear Chat',
+
     },
     tr: {
         // Auth & Setup
@@ -1102,26 +1106,26 @@ const translations: Record<Language, Translations> = {
         'auth.password': 'Şifre',
         'auth.name': 'Tam Ad',
         'auth.confirmPassword': 'Şifreyi Onayla',
-        'auth.noAccount': 'Hesabınız yok mu?',
+        'auth.noAccount': 'Hesabınız yok mu? GM ile görüşün',
         'auth.haveAccount': 'Zaten hesabınız var mı?',
-        'auth.contactGM': 'Hesap erişimi için GM ile iletişime geçin',
-        'auth.error.enterName': 'Lütfen adınızı girin',
+        'auth.contactGM': 'Yönetimle İletişime Geçin',
+        'auth.error.enterName': 'Lütfen tam adınızı girin',
         'auth.error.passwordLength': 'Şifre en az 6 karakter olmalıdır',
         'auth.error.passwordMismatch': 'Şifreler eşleşmiyor',
-        'auth.error.regFailed': 'Kayıt başarısız',
+        'auth.error.regFailed': 'Kayıt başarısız. Lütfen tekrar deneyin.',
         'auth.role.receptionist': 'Resepsiyonist',
-        'auth.role.receptionistDesc': 'Ön büro personeli',
+        'auth.role.receptionistDesc': 'Ön büro işlemleri, girişler ve misafir ilişkileri.',
         'auth.role.housekeeping': 'Kat Hizmetleri',
-        'auth.role.housekeepingDesc': 'Temizlik ve bakım',
-        'auth.registerSubtitle': 'Otelin Relay sistemine katılın',
-        'auth.roleLabel': 'Rolünüz',
+        'auth.role.housekeepingDesc': 'Oda temizliği, teknik bildirimler ve durum güncellemeleri.',
+        'auth.registerSubtitle': 'Personel hesabınızı oluşturun',
+        'auth.roleLabel': 'Rolünüzü Seçin',
         'auth.creatingAccount': 'Hesap oluşturuluyor...',
         'auth.createAccount': 'Hesap Oluştur',
         'auth.logout': 'Çıkış Yap',
-        'auth.switchAccount': 'Hesap Değiştir',
+        'auth.switchAccount': 'Otel Değiştir',
 
-        'setup.title': 'Otelinizi Seçin',
-        'setup.subtitle': 'Var olan bir otele katılın veya yeni bir tane oluşturun',
+        'setup.title': 'Otel Kurulumu',
+        'setup.subtitle': 'Başlamak için mevcut bir otele katılın veya yeni bir tane oluşturun.',
         'setup.joinExisting': 'Mevcut Otele Katıl',
         'setup.createNew': 'Yeni Otel Oluştur',
         'setup.hotelName': 'Otel Adı',
@@ -1155,9 +1159,6 @@ const translations: Record<Language, Translations> = {
         'dashboard.operationsDesc': 'Otel içi iletişim, geri bildirim ve servisleri tek bir yerden yönetin.',
         'dashboard.userProfile': 'Kullanıcı Profili',
 
-        // Status
-        'status.all': 'Hepsi',
-
         // Status & Urgency
         'status.active': 'Aktif',
         'status.ongoing': 'Vardiya Devam Ediyor',
@@ -1168,6 +1169,7 @@ const translations: Record<Language, Translations> = {
         'status.low': 'Düşük',
         'status.medium': 'Orta',
         'status.critical': 'Kritik',
+        'status.all': 'Hepsi',
         'urgency.low': 'Düşük',
         'urgency.medium': 'Orta',
         'urgency.high': 'Yüksek',
@@ -1284,6 +1286,14 @@ const translations: Record<Language, Translations> = {
         'hotel.settings.minibarPrices': 'Minibar Fiyatları',
         'hotel.noInfo': 'Otel bilgisi ayarlanmamış',
         'hotel.clickEdit': 'Eklemek için düzenleye tıklayın',
+        'hotel.secure.title': 'Gizli Bilgiler (KBS / Acente)',
+        'hotel.secure.encrypted': 'Şifreli Bölüm',
+        'hotel.secure.safeCode': 'Kasa Şifresi',
+        'hotel.secure.agency': 'Acente Girişleri (Extranet)',
+        'hotel.secure.other': 'Diğer Kasa Bilgileri',
+        'hotel.secure.kbs': 'KBS Giriş Bilgileri',
+        'hotel.secure.safeInfo': 'Kasa ve Anahtar Bilgileri',
+        'hotel.settings.fixturePrices': 'Demirbaş Hasar Fiyatları',
 
         // Log
         'log.new': 'Yeni Kayıt Girişi',
@@ -1305,9 +1315,9 @@ const translations: Record<Language, Translations> = {
         'log.error.mustBeLoggedIn': 'Giriş yapmış olmalısınız',
 
         // Sticky
-        'sticky.pinnedCount': '{count} iğneylendi',
+        'sticky.pinnedCount': '{count} iğnelendi',
 
-        // Shifts
+        // Shifts & Roster
         'shift.morning': 'Sabah',
         'shift.afternoon': 'Öğle',
         'shift.night': 'Gece',
@@ -1327,6 +1337,8 @@ const translations: Record<Language, Translations> = {
         'app.openTickets': 'Açık Kayıtlar',
         'app.cashBalance': 'Kasa Bakiyesi',
         'app.systemTitle': 'Relay Otel Operasyon Sistemi',
+
+        'common.dismiss': 'Kapat',
         'common.add': 'Ekle',
         'common.cancel': 'İptal',
         'common.save': 'Kaydet',
@@ -1342,6 +1354,12 @@ const translations: Record<Language, Translations> = {
         'common.continue': 'Devam Et',
         'common.back': 'Geri',
         'common.confirm': 'Onayla',
+        'common.language': 'Dil Seçimi',
+        'common.appearance': 'Görünüm Ayarları',
+        'common.formatting.bulletList': 'Madde İşareti',
+        'common.updateAvailable': 'Yeni sürüm mevcut',
+        'common.updateDescription': 'En son özellikleri kullanmak için lütfen sayfayı yenileyin.',
+        'common.refreshNow': 'Şimdi Yenile',
         'common.by': 'tarafından',
         'common.none': 'Yok',
         'common.staff': 'Personel',
@@ -1352,8 +1370,9 @@ const translations: Record<Language, Translations> = {
         'common.finish': 'Bitir',
         'common.reopen': 'Yeniden Aç',
         'common.resolve': 'Çöz',
-        'common.dismiss': 'Kapat',
+        'common.clear': 'Sohbeti Temizle',
 
+        // Calendar
         'calendar.noShifts': 'Planlanmış vardiya yok',
         'calendar.noEvents': 'Bugün için etkinlik yok',
         'calendar.addEvent': 'Etkinlik Ekle',
@@ -1396,15 +1415,26 @@ const translations: Record<Language, Translations> = {
         'notifications.noNotifications': 'Yeni bildirim yok',
         'notifications.viewAll': 'Tüm Aktiviteyi Gör',
 
-        // Feedback - Expanded
+        // Feedback
         'feedback.placeholder': 'Şikayet veya geri bildiriminizi buraya yazın...',
         'feedback.submitSuccess': 'Başarıyla Gönderildi',
         'feedback.thankYou': 'Geri bildiriminiz için teşekkürler.',
         'feedback.submitAnonymous': 'Anonim Gönder',
         'feedback.recentTitle': 'Son Geri Bildirimler',
         'feedback.noComplaints': 'Gösterilecek şikayet yok.',
+        'feedback.anonymous.title': 'Anonim Geri Bildirim',
+        'feedback.anonymous.subtitle': 'Sesiniz güvenle duyulsun.',
+        'feedback.privacy.title': 'Gizlilik Garantisi',
+        'feedback.privacy.desc': 'Geri bildirimleri kullanıcılarla ilişkilendirmeden, otel düzeyinde topluyoruz. Veritabanı yöneticileri bile geri bildirimi hangi kullanıcının gönderdiğini göremez.',
+        'feedback.submit.title': 'Anonim Şikayet Gönder',
+        'feedback.submit.desc': 'Kimliğiniz tamamen gizlidir. Mesajınızla birlikte hiçbir kişisel veri saklanmaz.',
+        'feedback.management.view': 'Yönetim Görünümü',
 
-        // Messaging - Expanded
+        // Messaging
+        'messages.title': 'Mesajlar',
+        'messages.search': 'Personel ara...',
+        'messages.announcements': 'Genel Duyurular',
+        'messages.broadcast': 'Tüm personele yayınla',
         'messaging.everyone': 'Herkese mesaj yaz',
         'messaging.placeholder': 'Mesaj ...',
         'messaging.noMessages': 'Henüz mesaj yok. Sohbeti başlatın!',
@@ -1412,12 +1442,6 @@ const translations: Record<Language, Translations> = {
         'messaging.deleteMessageConfirm': 'Bu mesajı silmek istediğinize emin misiniz?',
         'messaging.clearTooltip': 'Sohbeti Temizle',
         'messaging.deleteTooltip': 'Mesajı Sil',
-
-        // Roster - Expanded
-        'roster.unknown': 'Bilinmeyen Kullanıcı',
-
-        // Common - Expanded
-        'common.clear': 'Sohbeti Temizle',
 
         // Currency
         'currency.title': 'Döviz Kurları (TCMB)',
@@ -1434,6 +1458,7 @@ const translations: Record<Language, Translations> = {
         'roster.noStaff': 'Personel bulunamadı',
         'roster.show': 'Çizelgede Göster',
         'roster.hide': 'Çizelgeden Gizle',
+        'roster.unknown': 'Bilinmeyen Kullanıcı',
 
         // Tours
         'tours.catalogue.title': 'Tur Kataloğu',
@@ -1496,6 +1521,8 @@ const translations: Record<Language, Translations> = {
         'sales.details.ticketPlaceholder': 'örn. T-12345',
         'sales.details.notesPlaceholder': 'Alış yeri, tercihler vb. hakkında notlar ekleyin.',
         'sales.details.deleteConfirm': 'Bu satış kaydını tamamen silmek istediğinizden emin misiniz?',
+        'sales.details.save': 'Değişiklikleri Kaydet',
+        'sales.details.cancel': 'İptal',
         'sales.details.person': 'Kişi',
         'sales.details.persons': 'Kişi',
         'sales.details.notSet': 'Ayarlanmadı',
@@ -1578,15 +1605,7 @@ const translations: Record<Language, Translations> = {
         'menu.lunchTime': 'Öğle Yemeği: 12:00 - 13:30',
         'menu.dinnerTime': 'Akşam Yemeği: 17:00 - 18:30',
 
-        // Hotel Info
-        'hotel.secure.title': 'Gizli Bilgiler (KBS / Acente)',
-        'hotel.secure.encrypted': 'Şifreli Bölüm',
-        'hotel.secure.safeCode': 'Kasa Şifresi',
-        'hotel.secure.agency': 'Acente Girişleri (Extranet)',
-        'hotel.secure.other': 'Diğer Kasa Bilgileri',
-        'hotel.secure.kbs': 'KBS Giriş Bilgileri',
-        'hotel.secure.safeInfo': 'Kasa ve Anahtar Bilgileri',
-        'hotel.settings.fixturePrices': 'Demirbaş Hasar Fiyatları',
+        // Fixtures
         'fixture.hand_towel': 'El Havlusu',
         'fixture.bath_towel': 'Banyo Havlusu',
         'fixture.bed_sheet': 'Çarşaf',
@@ -1601,24 +1620,6 @@ const translations: Record<Language, Translations> = {
         'offday.pending': 'Bekleyen Talepler',
         'offday.history': 'Talep Geçmişi',
         'offday.petitions': 'Şikayet ve Dilekçeler',
-
-        // Messages & Feedback
-        'messages.title': 'Mesajlar',
-        'messages.search': 'Personel ara...',
-        'messages.announcements': 'Genel Duyurular',
-        'messages.broadcast': 'Tüm personele yayınla',
-        'feedback.anonymous.title': 'Anonim Geri Bildirim',
-        'feedback.anonymous.subtitle': 'Sesiniz güvenle duyulsun.',
-        'feedback.privacy.title': 'Gizlilik Garantisi',
-        'feedback.privacy.desc': 'Geri bildirimleri kullanıcılarla ilişkilendirmeden, otel düzeyinde topluyoruz. Veritabanı yöneticileri bile geri bildirimi hangi kullanıcının gönderdiğini göremez.',
-        'feedback.submit.title': 'Anonim Şikayet Gönder',
-        'feedback.submit.desc': 'Kimliğiniz tamamen gizlidir. Mesajınızla birlikte hiçbir kişisel veri saklanmaz.',
-        'feedback.management.view': 'Yönetim Görünümü',
-        'common.language': 'Dil Seçimi',
-        'common.appearance': 'Görünüm',
-        'common.updateAvailable': 'Yeni sürüm mevcut',
-        'common.updateDescription': 'En son özellikleri kullanmak için lütfen sayfayı yenileyin.',
-        'common.refreshNow': 'Şimdi Yenile',
 
         // AI Modal
         'ai.title': 'Relay AI Asistanı',
@@ -1639,8 +1640,6 @@ const translations: Record<Language, Translations> = {
         'ai.context.save': 'Bağlamı Kaydet',
         'ai.generate': 'Oluştur',
         'ai.cancel': 'İptal',
-        'sales.details.save': 'Değişiklikleri Kaydet',
-        'sales.details.cancel': 'İptal',
     },
 }
 

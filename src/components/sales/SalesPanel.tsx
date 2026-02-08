@@ -163,7 +163,7 @@ export function SalesPanel() {
             room_number: formData.room_number.trim(),
             pax: formData.pax,
             date: saleDate,
-            pickup_time: formData.pickup_time || undefined,
+            pickup_time: formData.pickup_time || null,
             total_price: totalPrice,
             currency: isLaundry ? 'TRY' : formData.currency,
             notes: finalNotes,
