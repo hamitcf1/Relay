@@ -19,6 +19,9 @@ import {
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useNotesStore } from '@/stores/notesStore'
+import { getDoc, doc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 import type { SaleType, Currency, SaleStatus } from '@/types'
 
 export function SalesPanel() {
@@ -45,15 +48,56 @@ export function SalesPanel() {
         notes: ''
     })
 
+    const [laundryData, setLaundryData] = useState({
+        whites: 0,
+        colors: 0,
+        ironingPieces: 0,
+        service: 'washing' as 'washing' | 'ironing' | 'washing_ironing'
+    })
+
+    const [transferData, setTransferData] = useState({
+        destination: '',
+        pickupLocation: '',
+        flightNumber: '',
+        restAmount: ''
+    })
+
+    const [hotelInfo, setHotelInfo] = useState<any>(null)
+    const [shouldAddToNotes, setShouldAddToNotes] = useState(true)
+    const { addNote } = useNotesStore()
+
     useEffect(() => {
         if (!hotel?.id) return
         const unsubSales = subscribeToSales(hotel.id)
         const unsubTours = subscribeToTours(hotel.id)
+
+        // Fetch prices
+        getDoc(doc(db, 'hotels', hotel.id, 'settings', 'info')).then(snap => {
+            if (snap.exists()) setHotelInfo(snap.data())
+        })
+
         return () => {
             unsubSales()
             unsubTours()
         }
     }, [hotel?.id, subscribeToSales, subscribeToTours])
+
+    // Auto-calculate Laundry Price
+    useEffect(() => {
+        if (activeTab === 'laundry' && hotelInfo) {
+            const colorMachines = Math.ceil(laundryData.colors / 8);
+            const whiteMachines = Math.ceil(laundryData.whites / 8);
+            const totalMachines = colorMachines + whiteMachines;
+
+            const laundryBase = (laundryData.service !== 'ironing') ? totalMachines * (hotelInfo.laundry_price || 0) : 0;
+            const ironingTotal = (laundryData.service !== 'washing') ? laundryData.ironingPieces * (hotelInfo.ironing_price || 0) : 0;
+
+            const total = laundryBase + ironingTotal;
+            if (total > 0) {
+                setFormData(p => ({ ...p, total_price: total.toString() }));
+            }
+        }
+    }, [laundryData.colors, laundryData.whites, laundryData.ironingPieces, laundryData.service, activeTab, hotelInfo])
 
     const filteredSales = sales.filter(s => s.type === activeTab)
 
@@ -69,29 +113,80 @@ export function SalesPanel() {
             currency: 'EUR',
             notes: ''
         })
+        setLaundryData({
+            whites: 0,
+            colors: 0,
+            ironingPieces: 0,
+            service: 'washing'
+        })
+        setTransferData({
+            destination: '',
+            pickupLocation: '',
+            flightNumber: '',
+            restAmount: ''
+        })
         setIsAdding(false)
     }
 
     const handleAddSale = async () => {
-        if (!hotel?.id || !user || !formData.name.trim() || !formData.total_price) return
+        const isLaundry = activeTab === 'laundry'
+        const isTransfer = activeTab === 'transfer'
+
+        const finalName = isLaundry ? t('sales.type.laundry') : (isTransfer ? transferData.destination : formData.name.trim())
+        if (!hotel?.id || !user || !finalName || !formData.total_price) return
 
         const saleDate = new Date(formData.date)
         const totalPrice = parseFloat(formData.total_price)
 
+        let finalNotes = formData.notes.trim()
+        if (isLaundry) {
+            const washingType = laundryData.service === 'ironing'
+                ? t('sales.laundry.ironing')
+                : (laundryData.service === 'washing_ironing' ? t('sales.laundry.washingAndIroning') : t('sales.laundry.washing'))
+            const whitesInfo = laundryData.whites > 0 ? t('sales.laundry.itemsCount', { count: laundryData.whites.toString(), type: t('sales.laundry.whites') }) : ''
+            const colorsInfo = laundryData.colors > 0 ? t('sales.laundry.itemsCount', { count: laundryData.colors.toString(), type: t('sales.laundry.colors') }) : ''
+            const ironingInfo = laundryData.ironingPieces > 0 ? `${laundryData.ironingPieces} ${t('sales.laundry.ironingPieces')}` : ''
+            finalNotes = [washingType, colorsInfo, whitesInfo, ironingInfo, finalNotes].filter(Boolean).join(' | ')
+        } else if (isTransfer) {
+            const transferInfo = [
+                transferData.pickupLocation ? `${t('sales.transfer.pickup')}: ${transferData.pickupLocation}` : '',
+                transferData.flightNumber ? `${t('sales.transfer.flight')}: ${transferData.flightNumber}` : '',
+                transferData.restAmount ? `${t('sales.transfer.rest')}: ${transferData.restAmount}` : ''
+            ].filter(Boolean).join(' | ')
+            finalNotes = [transferInfo, finalNotes].filter(Boolean).join('\n')
+        }
+
         await addSale(hotel.id, {
             type: activeTab,
-            name: formData.name.trim(),
+            name: finalName,
             customer_name: formData.customer_name.trim(),
             room_number: formData.room_number.trim(),
             pax: formData.pax,
             date: saleDate,
             pickup_time: formData.pickup_time || undefined,
             total_price: totalPrice,
-            currency: formData.currency,
-            notes: formData.notes.trim() || '',
+            currency: isLaundry ? 'TRY' : formData.currency,
+            notes: finalNotes,
             created_by: user.uid,
             created_by_name: user.name || 'Unknown'
         })
+
+        // Also add to Shift Notes if enabled
+        if (shouldAddToNotes) {
+            const noteContent = `${finalName} - Room ${formData.room_number}: ${totalPrice} ${isLaundry ? 'TRY' : formData.currency}${finalNotes ? ` (${finalNotes.replace(/\n/g, ' ')})` : ''}`
+            await addNote(hotel.id, {
+                category: 'upsell',
+                content: noteContent,
+                room_number: formData.room_number.trim(),
+                is_relevant: true,
+                created_by: user.uid,
+                created_by_name: user.name || 'Staff',
+                guest_name: formData.customer_name.trim(),
+                shift_id: null,
+                amount_due: totalPrice,
+                is_paid: false
+            })
+        }
 
         resetForm()
     }
@@ -173,7 +268,8 @@ export function SalesPanel() {
                                                     setFormData(p => ({
                                                         ...p,
                                                         name: value,
-                                                        total_price: selectedTour ? selectedTour.adult_price.toString() : p.total_price
+                                                        total_price: selectedTour ? selectedTour.adult_price.toString() : p.total_price,
+                                                        currency: 'EUR'
                                                     }))
                                                 }}
                                             >
@@ -189,12 +285,82 @@ export function SalesPanel() {
                                                     <SelectItem value="other">{t('sales.other')}</SelectItem>
                                                 </SelectContent>
                                             </Select>
+                                        ) : activeTab === 'transfer' ? (
+                                            <Input
+                                                value={transferData.destination}
+                                                onChange={e => setTransferData(p => ({ ...p, destination: e.target.value }))}
+                                                className="h-8 text-xs bg-background border-border"
+                                                placeholder={t('sales.transfer.destination')}
+                                            />
+                                        ) : activeTab === 'laundry' ? (
+                                            <div className="grid grid-cols-2 gap-2 p-2 bg-muted/30 rounded-lg border border-border/50">
+                                                <div className="space-y-1">
+                                                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight">{t('sales.laundry.colors')}</label>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        value={laundryData.colors || ''}
+                                                        onChange={e => setLaundryData(p => ({ ...p, colors: parseInt(e.target.value) || 0 }))}
+                                                        className="h-7 text-xs bg-background border-border"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight">{t('sales.laundry.whites')}</label>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        value={laundryData.whites || ''}
+                                                        onChange={e => setLaundryData(p => ({ ...p, whites: parseInt(e.target.value) || 0 }))}
+                                                        className="h-7 text-xs bg-background border-border"
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 space-y-1">
+                                                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight">{t('sales.laundry.ironingPieces')}</label>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        value={laundryData.ironingPieces || ''}
+                                                        onChange={e => setLaundryData(p => ({ ...p, ironingPieces: parseInt(e.target.value) || 0 }))}
+                                                        className="h-7 text-xs bg-background border-border"
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 flex flex-col gap-2 pt-1 border-t border-border/50">
+                                                    <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight">{t('sales.service')}</label>
+                                                    <div className="flex gap-1">
+                                                        {(['washing', 'ironing', 'washing_ironing'] as const).map((type) => (
+                                                            <button
+                                                                key={type}
+                                                                type="button"
+                                                                onClick={() => setLaundryData(p => ({ ...p, service: type }))}
+                                                                className={cn(
+                                                                    "flex-1 text-[9px] py-1 px-1 rounded transition-all font-semibold border text-center",
+                                                                    laundryData.service === type
+                                                                        ? "bg-primary/20 text-primary border-primary/30"
+                                                                        : "bg-background text-muted-foreground border-border hover:border-zinc-500"
+                                                                )}
+                                                            >
+                                                                {t(`sales.laundry.${type === 'washing_ironing' ? 'washingAndIroning' : type}` as any)}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="text-[10px] text-zinc-400 font-mono text-right h-3">
+                                                        {(() => {
+                                                            if (laundryData.service === 'ironing') return '';
+                                                            const colorMachines = Math.ceil(laundryData.colors / 8);
+                                                            const whiteMachines = Math.ceil(laundryData.whites / 8);
+                                                            const total = colorMachines + whiteMachines;
+                                                            return total > 0 ? `${total} ${total === 1 ? t('sales.laundry.machine') : t('sales.laundry.machines')}` : '';
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         ) : (
                                             <Input
                                                 value={formData.name}
                                                 onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
                                                 className="h-8 text-xs bg-background border-border"
-                                                placeholder={activeTab === 'transfer' ? t('sales.destinationPlaceholder' as any) : t('common.description' as any)}
+                                                placeholder={t('common.description' as any)}
                                             />
                                         )}
                                         {formData.name === 'other' && activeTab === 'tour' && (
@@ -237,37 +403,96 @@ export function SalesPanel() {
                                         />
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.date')}</label>
-                                        <Input
-                                            type="date"
-                                            value={formData.date}
-                                            onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
-                                            className="h-8 text-xs bg-background border-border"
-                                        />
+                                    <div className="col-span-2 grid grid-cols-2 gap-2">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.date')}</label>
+                                            <Input
+                                                type="date"
+                                                value={formData.date}
+                                                onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
+                                                className="h-8 text-xs bg-background border-border"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.pickupTime')}</label>
+                                            <Input
+                                                type="time"
+                                                value={formData.pickup_time}
+                                                onChange={e => setFormData(p => ({ ...p, pickup_time: e.target.value }))}
+                                                className="h-8 text-xs bg-background border-border"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.pickupTime')}</label>
-                                        <Input
-                                            type="time"
-                                            value={formData.pickup_time}
-                                            onChange={e => setFormData(p => ({ ...p, pickup_time: e.target.value }))}
-                                            className="h-8 text-xs bg-background border-border"
-                                        />
-                                    </div>
+                                    {activeTab === 'transfer' && (
+                                        <div className="col-span-2 grid grid-cols-3 gap-2">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-muted-foreground font-bold uppercase">
+                                                    {t('sales.transfer.pickup')}
+                                                </label>
+                                                <Input
+                                                    value={transferData.pickupLocation}
+                                                    onChange={e => setTransferData(p => ({ ...p, pickupLocation: e.target.value }))}
+                                                    className="h-8 text-xs bg-background border-border"
+                                                    placeholder="Hotel Lobby"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-muted-foreground font-bold uppercase">
+                                                    {t('sales.transfer.flight')}
+                                                </label>
+                                                <Input
+                                                    value={transferData.flightNumber}
+                                                    onChange={e => setTransferData(p => ({ ...p, flightNumber: e.target.value }))}
+                                                    className="h-8 text-xs bg-background border-border"
+                                                    placeholder="TK1234"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-muted-foreground font-bold uppercase">
+                                                    {t('sales.transfer.rest')}
+                                                </label>
+                                                <Input
+                                                    value={transferData.restAmount}
+                                                    onChange={e => setTransferData(p => ({ ...p, restAmount: e.target.value }))}
+                                                    className="h-8 text-xs bg-background border-border"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-1 relative">
                                         <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.price')}</label>
-                                        <div className="relative">
-                                            <Input
-                                                type="number"
-                                                value={formData.total_price}
-                                                onChange={e => setFormData(p => ({ ...p, total_price: e.target.value }))}
-                                                className="h-8 text-xs bg-background border-border pl-6"
-                                                placeholder="0"
-                                            />
-                                            <span className="absolute left-2 top-2 text-xs text-muted-foreground">€</span>
+                                        <div className="relative flex gap-1">
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    type="number"
+                                                    value={formData.total_price}
+                                                    onChange={e => setFormData(p => ({ ...p, total_price: e.target.value }))}
+                                                    className="h-8 text-xs bg-background border-border pl-6"
+                                                    placeholder="0"
+                                                />
+                                                <span className="absolute left-2 top-2 text-xs text-muted-foreground">
+                                                    {activeTab === 'laundry' ? '₺' : (formData.currency === 'EUR' ? '€' : (formData.currency === 'TRY' ? '₺' : '$'))}
+                                                </span>
+                                            </div>
+                                            {activeTab !== 'laundry' && (
+                                                <Select
+                                                    value={formData.currency}
+                                                    onValueChange={(val: any) => setFormData(p => ({ ...p, currency: val }))}
+                                                >
+                                                    <SelectTrigger className="h-8 w-16 text-[10px] bg-background border-border">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="EUR">EUR</SelectItem>
+                                                        <SelectItem value="TRY">TRY</SelectItem>
+                                                        <SelectItem value="USD">USD</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
                                         </div>
                                     </div>
 
@@ -282,16 +507,42 @@ export function SalesPanel() {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 pt-2">
+                                <div className="col-span-2 flex items-center gap-2 py-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShouldAddToNotes(!shouldAddToNotes)}
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all border",
+                                            shouldAddToNotes
+                                                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+                                                : "bg-muted text-muted-foreground border-border"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "w-3 h-3 rounded-sm border flex items-center justify-center transition-all",
+                                            shouldAddToNotes ? "bg-emerald-500 border-emerald-500" : "bg-background border-border"
+                                        )}>
+                                            {shouldAddToNotes && <Check className="w-2.5 h-2.5 text-white" />}
+                                        </div>
+                                        {t('sales.addToNotes')}
+                                    </button>
+                                </div>
+                                <div className="flex gap-2 pt-2 col-span-2">
                                     <Button
                                         onClick={handleAddSale}
-                                        disabled={!formData.name.trim() || !formData.total_price}
+                                        disabled={
+                                            (activeTab === 'tour' && (!formData.name || formData.name === 'other')) ||
+                                            (activeTab === 'transfer' && !transferData.destination) ||
+                                            (activeTab === 'laundry' && (laundryData.whites === 0 && laundryData.colors === 0 && laundryData.ironingPieces === 0)) ||
+                                            (activeTab === 'other' && !formData.name.trim()) ||
+                                            !formData.total_price
+                                        }
                                         className="flex-1 bg-primary hover:bg-primary/90 h-8 text-xs"
                                     >
                                         <Check className="w-3.5 h-3.5 mr-1" />
                                         {t('sales.create')}
                                     </Button>
-                                    <Button variant="ghost" onClick={resetForm} className="h-8 text-xs">
+                                    <Button variant="ghost" type="button" onClick={resetForm} className="h-8 text-xs">
                                         {t('common.cancel')}
                                     </Button>
                                 </div>
@@ -350,7 +601,10 @@ export function SalesPanel() {
                                         </div>
 
                                         <div className="text-right">
-                                            <div className="text-sm font-bold text-foreground">€{sale.total_price}</div>
+                                            <div className="text-sm font-bold text-foreground">
+                                                {sale.currency === 'EUR' ? '€' : (sale.currency === 'TRY' ? '₺' : '$')}
+                                                {sale.total_price}
+                                            </div>
                                             <div className={cn("text-[10px] font-medium", paymentStatusInfo[sale.payment_status].color.replace('bg-', 'text-').split(' ')[1])}>
                                                 {t(paymentStatusInfo[sale.payment_status].label as any)}
                                             </div>
@@ -396,6 +650,6 @@ export function SalesPanel() {
                 saleId={selectedSaleId}
                 onClose={() => setSelectedSaleId(null)}
             />
-        </Card>
+        </Card >
     )
 }

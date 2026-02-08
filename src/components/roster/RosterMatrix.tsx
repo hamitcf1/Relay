@@ -188,12 +188,20 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     }, [hotelId, weekStart])
 
     // Cycle shift value
-    const cycleShift = async (userId: string, day: string) => {
+    const cycleShift = async (userId: string, day: string, direction: 'forward' | 'backward' = 'forward') => {
         if (!canEdit) return
 
         const currentValue = schedule[userId]?.[day] || null
         const currentIndex = currentValue ? SHIFT_CYCLE.indexOf(currentValue as ShiftType | 'OFF') : -1
-        const nextValue = SHIFT_CYCLE[(currentIndex + 1) % SHIFT_CYCLE.length]
+
+        let nextIndex: number
+        if (direction === 'forward') {
+            nextIndex = (currentIndex + 1) % SHIFT_CYCLE.length
+        } else {
+            nextIndex = (currentIndex - 1 + SHIFT_CYCLE.length) % SHIFT_CYCLE.length
+        }
+
+        const nextValue = SHIFT_CYCLE[nextIndex]
 
         // Update local state
         setSchedule((prev) => ({
@@ -362,7 +370,11 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                         return (
                                             <td key={day} className="py-2 px-0.5 text-center">
                                                 <motion.button
-                                                    onClick={() => cycleShift(member.uid, day)}
+                                                    onClick={() => cycleShift(member.uid, day, 'forward')}
+                                                    onContextMenu={(e) => {
+                                                        e.preventDefault();
+                                                        cycleShift(member.uid, day, 'backward');
+                                                    }}
                                                     disabled={!canEdit}
                                                     className={cn(
                                                         'w-9 h-7 rounded text-[10px] font-bold transition-all',

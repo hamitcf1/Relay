@@ -32,6 +32,7 @@ interface HotelInfoData {
     iban: string
     bank_name: string
     laundry_price: number
+    ironing_price: number
     transfer_price: number
     late_checkout_price: number
     extra_bed_price: number
@@ -47,6 +48,7 @@ const defaultInfo: HotelInfoData = {
     iban: '',
     bank_name: '',
     laundry_price: 0,
+    ironing_price: 0,
     transfer_price: 0,
     late_checkout_price: 0,
     extra_bed_price: 0,
@@ -166,6 +168,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
     const priceItems = [
         { key: 'laundry_price', label: t('hotel.laundry'), icon: Shirt },
+        { key: 'ironing_price', label: t('hotel.ironing'), icon: Shirt },
         { key: 'transfer_price', label: t('hotel.transfer'), icon: Plane },
         { key: 'late_checkout_price', label: t('hotel.lateCheckout'), icon: MapPin },
         { key: 'extra_bed_price', label: t('hotel.extraBed'), icon: Settings },

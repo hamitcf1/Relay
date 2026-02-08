@@ -178,6 +178,7 @@ type Translations = {
 
     // Hotel
     'hotel.laundry': string
+    'hotel.ironing': string
     'hotel.transfer': string
     'hotel.lateCheckout': string
     'hotel.extraBed': string
@@ -426,6 +427,21 @@ type Translations = {
     'sales.type.transfer': string
     'sales.type.laundry': string
     'sales.type.other': string
+    'sales.laundry.whites': string
+    'sales.laundry.colors': string
+    'sales.laundry.ironing': string
+    'sales.laundry.washing': string
+    'sales.laundry.washingAndIroning': string
+    'sales.laundry.totalMachines': string
+    'sales.laundry.itemsCount': string
+    'sales.laundry.machine': string
+    'sales.laundry.ironingPieces': string
+    'sales.laundry.machines': string
+    'sales.transfer.destination': string
+    'sales.transfer.pickup': string
+    'sales.transfer.flight': string
+    'sales.transfer.rest': string
+    'sales.addToNotes': string
 
     // Compliance
     'compliance.kbs.required': string
@@ -673,6 +689,7 @@ const translations: Record<Language, Translations> = {
         'rooms.dnd': 'DND',
 
         'hotel.laundry': 'Laundry Service',
+        'hotel.ironing': 'Ironing',
         'hotel.transfer': 'Airport Transfer',
         'hotel.lateCheckout': 'Late Checkout',
         'hotel.extraBed': 'Extra Bed',
@@ -951,6 +968,21 @@ const translations: Record<Language, Translations> = {
         'sales.type.transfer': 'Transfer',
         'sales.type.laundry': 'Laundry',
         'sales.type.other': 'Other',
+        'sales.laundry.whites': 'Whites (Pieces)',
+        'sales.laundry.colors': 'Colors (Pieces)',
+        'sales.laundry.ironing': 'Ironing Only',
+        'sales.laundry.washing': 'Washing & Drying',
+        'sales.laundry.washingAndIroning': 'Wash & Iron',
+        'sales.laundry.totalMachines': 'Total Machines',
+        'sales.laundry.itemsCount': '{count} items ({type})',
+        'sales.laundry.ironingPieces': 'Ironing (Pieces)',
+        'sales.laundry.machine': 'machine',
+        'sales.laundry.machines': 'machines',
+        'sales.transfer.destination': 'Destination',
+        'sales.transfer.pickup': 'Pickup Location',
+        'sales.transfer.flight': 'Flight Number',
+        'sales.transfer.rest': 'Rest (Vehicle)',
+        'sales.addToNotes': 'Add to Shift Notes',
 
         // Compliance
         'compliance.kbs.required': 'KBS Check Required!',
@@ -1239,6 +1271,7 @@ const translations: Record<Language, Translations> = {
 
         // Hotel
         'hotel.laundry': 'Çamaşırhane Hizmeti',
+        'hotel.ironing': 'Ütüleme',
         'hotel.transfer': 'Havalimanı Transferi',
         'hotel.lateCheckout': 'Geç Çıkış',
         'hotel.extraBed': 'Ekstra Yatak',
@@ -1480,6 +1513,21 @@ const translations: Record<Language, Translations> = {
         'sales.type.transfer': 'Transfer',
         'sales.type.laundry': 'Çamaşırhane',
         'sales.type.other': 'Diğer',
+        'sales.laundry.whites': 'Beyazlar (Adet)',
+        'sales.laundry.colors': 'Renkliler (Adet)',
+        'sales.laundry.ironing': 'Sadece Ütü',
+        'sales.laundry.washing': 'Yıkama & Kurutma',
+        'sales.laundry.washingAndIroning': 'Yıkama + Ütü',
+        'sales.laundry.totalMachines': 'Toplam Makine',
+        'sales.laundry.itemsCount': '{count} parça ({type})',
+        'sales.laundry.ironingPieces': 'Ütüleme (Adet)',
+        'sales.laundry.machine': 'makine',
+        'sales.laundry.machines': 'makine',
+        'sales.transfer.destination': 'Varış Noktası',
+        'sales.transfer.pickup': 'Alış Yeri',
+        'sales.transfer.flight': 'Uçuş Numarası',
+        'sales.transfer.rest': 'Rest (Araçta)',
+        'sales.addToNotes': 'Nöbet Notlarına Ekle',
 
         // Compliance
         'compliance.kbs.required': 'KBS Kontrolü Gerekli!',

@@ -48,6 +48,15 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const [paymentCurrency, setPaymentCurrency] = useState<Currency>('EUR')
     const [targetAmount, setTargetAmount] = useState('')
 
+    const getCurrencySymbol = (currency: Currency) => {
+        switch (currency) {
+            case 'TRY': return '₺'
+            case 'USD': return '$'
+            case 'GBP': return '£'
+            default: return '€'
+        }
+    }
+
     const sale = sales.find(s => s.id === saleId)
 
     useEffect(() => {
@@ -61,6 +70,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                 date: sale.date,
                 name: sale.name,
                 room_number: sale.room_number,
+                currency: sale.currency,
                 status: sale.status || 'waiting'
             })
             // Reset payment currency to sale currency by default
@@ -262,23 +272,41 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-sm text-muted-foreground">{t('sales.details.total')}</span>
                                         {isEditing ? (
-                                            <div className="flex items-center gap-1 w-24">
+                                            <div className="flex items-center gap-1">
                                                 <Input
                                                     type="number"
                                                     value={editForm.total_price}
                                                     onChange={e => setEditForm(prev => ({ ...prev, total_price: parseFloat(e.target.value) || 0 }))}
-                                                    className="h-7 text-right bg-background border-border"
+                                                    className="h-7 w-20 text-right bg-background border-border"
                                                 />
-                                                <span className="text-xs text-muted-foreground">€</span>
+                                                {sale.type === 'laundry' ? (
+                                                    <span className="text-xs text-muted-foreground">₺</span>
+                                                ) : (
+                                                    <Select
+                                                        value={editForm.currency}
+                                                        onValueChange={(v: Currency) => setEditForm(prev => ({ ...prev, currency: v }))}
+                                                    >
+                                                        <SelectTrigger className="h-7 w-16 text-[10px] bg-background border-border">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="EUR">EUR</SelectItem>
+                                                            <SelectItem value="TRY">TRY</SelectItem>
+                                                            <SelectItem value="USD">USD</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
                                             </div>
                                         ) : (
-                                            <span className="text-lg font-bold text-foreground">€{sale.total_price}</span>
+                                            <span className="text-lg font-bold text-foreground">
+                                                {getCurrencySymbol(sale.currency)}{sale.total_price}
+                                            </span>
                                         )}
                                     </div>
                                     <div className="flex justify-between items-center mb-4">
                                         <span className="text-sm text-muted-foreground">{t('sales.details.paid')}</span>
                                         <span className={cn("text-sm font-medium", sale.collected_amount >= sale.total_price ? "text-emerald-500" : "text-amber-500")}>
-                                            €{sale.collected_amount}
+                                            {getCurrencySymbol(sale.currency)}{sale.collected_amount}
                                         </span>
                                     </div>
 
@@ -339,7 +367,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                                 {t('sales.details.collect')}
                                             </Button>
 
-                                            <p className="text-[10px] text-muted-foreground text-right">{t('sales.details.remaining')}: <span className="text-rose-500 font-bold">€{remaining.toFixed(2)}</span></p>
+                                            <p className="text-[10px] text-muted-foreground text-right">{t('sales.details.remaining')}: <span className="text-rose-500 font-bold">{getCurrencySymbol(sale.currency)}{remaining.toFixed(2)}</span></p>
                                         </div>
                                     )}
                                 </div>

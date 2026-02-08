@@ -17,6 +17,14 @@ function App() {
 
     useEffect(() => {
         applyTheme()
+
+        // Global right-click prevention
+        const handleContextMenu = (e: MouseEvent) => {
+            e.preventDefault()
+        }
+
+        window.addEventListener('contextmenu', handleContextMenu)
+        return () => window.removeEventListener('contextmenu', handleContextMenu)
     }, [applyTheme])
 
     return (
