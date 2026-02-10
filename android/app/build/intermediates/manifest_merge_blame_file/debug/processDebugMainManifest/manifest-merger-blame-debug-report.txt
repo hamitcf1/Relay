@@ -1,0 +1,190 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.relay.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="36" />
+10
+11    <!-- Permissions -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:39:5-67
+12-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:39:22-64
+13
+14    <!-- Camera -->
+15    <uses-permission android:name="android.permission.CAMERA" />
+15-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:42:5-65
+15-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:42:22-62
+16
+17    <uses-feature
+17-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:43:5-85
+18        android:name="android.hardware.camera"
+18-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:43:19-57
+19        android:required="false" />
+19-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:43:58-82
+20
+21    <!-- Location -->
+22    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+22-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:46:5-81
+22-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:46:22-78
+23    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+23-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:47:5-79
+23-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:47:22-76
+24
+25    <uses-feature
+25-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:48:5-91
+26        android:name="android.hardware.location.gps"
+26-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:48:19-63
+27        android:required="false" />
+27-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:48:64-88
+28
+29    <!-- Storage (Recommended for Camera/Gallery) -->
+30    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+30-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:51:5-79
+30-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:51:22-77
+31    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+31-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:52:5-81
+31-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:52:22-78
+32
+33    <permission
+33-->[androidx.core:core:1.17.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/11094a199bb7945826b161d8a9c17beb/transformed/core-1.17.0/AndroidManifest.xml:22:5-24:47
+34        android:name="com.relay.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+34-->[androidx.core:core:1.17.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/11094a199bb7945826b161d8a9c17beb/transformed/core-1.17.0/AndroidManifest.xml:23:9-81
+35        android:protectionLevel="signature" />
+35-->[androidx.core:core:1.17.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/11094a199bb7945826b161d8a9c17beb/transformed/core-1.17.0/AndroidManifest.xml:24:9-44
+36
+37    <uses-permission android:name="com.relay.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+37-->[androidx.core:core:1.17.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/11094a199bb7945826b161d8a9c17beb/transformed/core-1.17.0/AndroidManifest.xml:26:5-97
+37-->[androidx.core:core:1.17.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/11094a199bb7945826b161d8a9c17beb/transformed/core-1.17.0/AndroidManifest.xml:26:22-94
+38
+39    <application
+39-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:4:5-36:19
+40        android:allowBackup="true"
+40-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:5:9-35
+41        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+41-->[androidx.core:core:1.17.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/11094a199bb7945826b161d8a9c17beb/transformed/core-1.17.0/AndroidManifest.xml:28:18-86
+42        android:debuggable="true"
+43        android:extractNativeLibs="false"
+44        android:icon="@mipmap/ic_launcher"
+44-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:6:9-43
+45        android:label="@string/app_name"
+45-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:7:9-41
+46        android:roundIcon="@mipmap/ic_launcher_round"
+46-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:8:9-54
+47        android:supportsRtl="true"
+47-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:9:9-35
+48        android:testOnly="true"
+49        android:theme="@style/AppTheme" >
+49-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:10:9-40
+50        <activity
+50-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:12:9-25:20
+51            android:name="com.relay.app.MainActivity"
+51-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:14:13-41
+52            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+52-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:13:13-148
+53            android:exported="true"
+53-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:18:13-36
+54            android:label="@string/title_activity_main"
+54-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:15:13-56
+55            android:launchMode="singleTask"
+55-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:17:13-44
+56            android:theme="@style/AppTheme.NoActionBarLaunch" >
+56-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:16:13-62
+57            <intent-filter>
+57-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:20:13-23:29
+58                <action android:name="android.intent.action.MAIN" />
+58-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:21:17-69
+58-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:21:25-66
+59
+60                <category android:name="android.intent.category.LAUNCHER" />
+60-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:22:17-77
+60-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:22:27-74
+61            </intent-filter>
+62        </activity>
+63
+64        <provider
+65            android:name="androidx.core.content.FileProvider"
+65-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:28:13-62
+66            android:authorities="com.relay.app.fileprovider"
+66-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:29:13-64
+67            android:exported="false"
+67-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:30:13-37
+68            android:grantUriPermissions="true" >
+68-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:31:13-47
+69            <meta-data
+69-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:32:13-34:64
+70                android:name="android.support.FILE_PROVIDER_PATHS"
+70-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:33:17-67
+71                android:resource="@xml/file_paths" />
+71-->/Users/hamitcanfindik/Desktop/Relay/android/app/src/main/AndroidManifest.xml:34:17-51
+72        </provider>
+73        <provider
+73-->[androidx.emoji2:emoji2:1.3.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/353d69426d62513a7e19e841051a3a44/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+74            android:name="androidx.startup.InitializationProvider"
+74-->[androidx.emoji2:emoji2:1.3.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/353d69426d62513a7e19e841051a3a44/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+75            android:authorities="com.relay.app.androidx-startup"
+75-->[androidx.emoji2:emoji2:1.3.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/353d69426d62513a7e19e841051a3a44/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+76            android:exported="false" >
+76-->[androidx.emoji2:emoji2:1.3.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/353d69426d62513a7e19e841051a3a44/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+77            <meta-data
+77-->[androidx.emoji2:emoji2:1.3.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/353d69426d62513a7e19e841051a3a44/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+78                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+78-->[androidx.emoji2:emoji2:1.3.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/353d69426d62513a7e19e841051a3a44/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+79                android:value="androidx.startup" />
+79-->[androidx.emoji2:emoji2:1.3.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/353d69426d62513a7e19e841051a3a44/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+80            <meta-data
+80-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/14a3b51da1167f75215e7e32d2231e74/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+81                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+81-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/14a3b51da1167f75215e7e32d2231e74/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+82                android:value="androidx.startup" />
+82-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/14a3b51da1167f75215e7e32d2231e74/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+83            <meta-data
+83-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+84                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+84-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+85                android:value="androidx.startup" />
+85-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+86        </provider>
+87
+88        <receiver
+88-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+89            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+89-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+90            android:directBootAware="false"
+90-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+91            android:enabled="true"
+91-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+92            android:exported="true"
+92-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+93            android:permission="android.permission.DUMP" >
+93-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+94            <intent-filter>
+94-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+95                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+95-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+95-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+96            </intent-filter>
+97            <intent-filter>
+97-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+98                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+98-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+98-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+99            </intent-filter>
+100            <intent-filter>
+100-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+101                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+101-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+101-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+102            </intent-filter>
+103            <intent-filter>
+103-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+104                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+104-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+104-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hamitcanfindik/.gradle/caches/8.14.3/transforms/f95ab50c54d3211c648684c462933e30/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+105            </intent-filter>
+106        </receiver>
+107    </application>
+108
+109</manifest>
