@@ -17,6 +17,10 @@ export function useDuePaymentNotifier() {
     useEffect(() => {
         if (!hotel?.id || !user || user.role !== 'gm') return
 
+        // Safety check: Ensure the loaded hotel matches the user's assigned hotel
+        // This prevents data leaks if the hotel store hasn't been cleared yet
+        if (user.hotel_id && user.hotel_id !== hotel.id) return
+
         const checkDuePayments = async () => {
             const now = Date.now()
             const STORAGE_KEY = `last_payment_check_${hotel.id}`

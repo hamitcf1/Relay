@@ -45,6 +45,26 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
     subscribeToCurrentShift: (hotelId: string) => {
         set({ loading: true, error: null })
 
+        // Mock Shift for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                currentShift: {
+                    shift_id: 'DEMO_SHIFT_A',
+                    date: new Date().toISOString().split('T')[0],
+                    type: 'A',
+                    staff_ids: ['demo-user-gm', 'demo-user-staff'],
+                    compliance: { kbs_checked: true, agency_msg_checked_count: 3 },
+                    cash_start: 5000,
+                    cash_end: 0,
+                    handover_note: 'Room 101 AC fixed. VIP arrival in 204 at 14:00.',
+                    status: 'active',
+                },
+                loading: false,
+                error: null
+            })
+            return () => { } // no-op unsubscribe
+        }
+
         // Query for active shift
         const shiftsRef = collection(db, 'hotels', hotelId, 'shifts')
         const activeShiftQuery = query(

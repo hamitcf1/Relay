@@ -1,0 +1,284 @@
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useNavigate, Link } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Star, Globe, Shield, Smartphone, Mail, Zap, Lock, BarChart3, Clock, Users, MessageSquare, Download, Apple, Play } from 'lucide-react'
+import { useAuthStore } from '@/stores/authStore'
+import { useEffect, useRef } from 'react'
+import { CustomCursor } from '@/components/ui/CustomCursor'
+
+export function LandingPage() {
+    const navigate = useNavigate()
+    const { user } = useAuthStore()
+    const targetRef = useRef<HTMLDivElement>(null)
+    const { scrollYProgress } = useScroll({
+        target: targetRef,
+        offset: ["start start", "end start"]
+    })
+
+    const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+    const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
+
+    useEffect(() => {
+        if (user) {
+            navigate('/dashboard')
+        }
+    }, [user, navigate])
+
+    const staggerContainer = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none">
+            <CustomCursor />
+
+            {/* Navbar */}
+            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/50 backdrop-blur-md border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
+                        <span className="font-bold text-white">R</span>
+                    </div>
+                    <span className="font-bold text-xl tracking-tight text-white">Relay</span>
+                </div>
+                <div className="hidden md:flex items-center gap-8">
+                    <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-zinc-400 hover:text-white transition-colors">Features</button>
+                    <Link to="/pricing" className="text-sm text-zinc-400 hover:text-white transition-colors">Pricing</Link>
+                    <Link to="/legal/status" className="text-sm text-zinc-400 hover:text-white transition-colors">Status</Link>
+                </div>
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" onClick={() => navigate('/login')} className="text-zinc-400 hover:text-white hidden sm:flex">Login</Button>
+                    <Button onClick={() => navigate('/live-demo')} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-full px-6">
+                        Live Demo
+                    </Button>
+                    <Button onClick={() => navigate('/pricing')} className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]">
+                        Get Started
+                    </Button>
+                </div>
+            </nav>
+
+            {/* Hero Section */}
+            <section ref={targetRef} className="h-screen relative flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+                    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+                </div>
+
+                <motion.div
+                    style={{ opacity, scale }}
+                    className="relative z-10 text-center px-4 max-w-5xl mx-auto"
+                >
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm font-medium mb-8 backdrop-blur-sm">
+                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                            <span>Trusted by 500+ Luxury Hotels</span>
+                        </div>
+                        <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6">
+                            Next-Gen <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-500">Hospitality</span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed mb-10">
+                            The intelligent operating system for modern hotels. Seamless handovers, real-time sync, and operations automation.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <Button
+                                size="lg"
+                                onClick={() => navigate('/pricing')}
+                                className="h-14 px-8 text-lg bg-white text-black hover:bg-zinc-200 rounded-full w-full sm:w-auto transition-transform hover:scale-105"
+                            >
+                                Start Free Trial
+                            </Button>
+                            <Button
+                                size="lg"
+                                variant="outline"
+                                onClick={() => navigate('/live-demo')}
+                                className="h-14 px-8 text-lg border-white/20 text-white hover:bg-white/10 rounded-full w-full sm:w-auto"
+                            >
+                                <Play className="w-4 h-4 mr-2" /> Live Demo
+                            </Button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+
+                {/* Scroll Indicator */}
+                <motion.div
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2"
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                >
+                    <div className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2">
+                        <div className="w-1 h-3 bg-white/50 rounded-full" />
+                    </div>
+                </motion.div>
+            </section>
+
+            {/* Get App Section */}
+            <section className="py-20 border-y border-white/5 bg-white/5 backdrop-blur-sm relative z-20">
+                <div className="container mx-auto px-6 text-center">
+                    <h2 className="text-2xl font-bold text-white mb-8">Download Relay for Mobile</h2>
+                    <div className="flex flex-wrap justify-center gap-4">
+                        <AppButton icon={<Apple className="w-6 h-6" />} label="App Store" sub="Download for iOS" />
+                        <AppButton icon={<Smartphone className="w-6 h-6" />} label="Google Play" sub="Get it on Android" />
+                        <AppButton icon={<Download className="w-6 h-6" />} label="Direct APK" sub="Android Package" />
+                        <AppButton icon={<Globe className="w-6 h-6" />} label="Web App" sub="Access in Browser" onClick={() => navigate('/login')} />
+                    </div>
+                </div>
+            </section>
+
+            {/* Features Section */}
+            <section id="features" className="py-32 bg-zinc-950 relative z-20">
+                <div className="container mx-auto px-6">
+                    <div className="text-center mb-20">
+                        <h2 className="text-4xl font-bold text-white mb-4">Complete Hotel Operations</h2>
+                        <p className="text-zinc-400">Everything you need to run a modern hotel efficiently.</p>
+                    </div>
+
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                    >
+                        <FeatureCard
+                            icon={<Smartphone className="w-6 h-6 text-blue-400" />}
+                            title="Mobile First"
+                            desc="Designed for staff on the move. Works perfectly on any device."
+                        />
+                        <FeatureCard
+                            icon={<Shield className="w-6 h-6 text-emerald-400" />}
+                            title="Military-Grade Security"
+                            desc="Encrypted vaults for your most sensitive data and codes."
+                        />
+                        <FeatureCard
+                            icon={<Globe className="w-6 h-6 text-purple-400" />}
+                            title="Real-Time Sync"
+                            desc="Changes update instantly across all devices context."
+                        />
+                        <FeatureCard
+                            icon={<MessageSquare className="w-6 h-6 text-pink-400" />}
+                            title="Instant Messaging"
+                            desc="Secure internal comms replacing WhatsApp groups."
+                        />
+                        <FeatureCard
+                            icon={<Clock className="w-6 h-6 text-orange-400" />}
+                            title="Smart Handovers"
+                            desc="Digital logbooks that ensure nothing gets lost between shifts."
+                        />
+                        <FeatureCard
+                            icon={<Users className="w-6 h-6 text-cyan-400" />}
+                            title="Staff Rostering"
+                            desc="Drag-and-drop scheduling with automated notifications."
+                        />
+                        <FeatureCard
+                            icon={<BarChart3 className="w-6 h-6 text-indigo-400" />}
+                            title="Analytics Dashboard"
+                            desc="Visual insights into hotel performance and efficiency."
+                        />
+                        <FeatureCard
+                            icon={<Lock className="w-6 h-6 text-red-400" />}
+                            title="Secret Vault"
+                            desc="Password-protected storage for agency logins and KBS."
+                        />
+                        <FeatureCard
+                            icon={<Zap className="w-6 h-6 text-yellow-400" />}
+                            title="Automated Tasks"
+                            desc="Recurring checklists ensure compliance every day."
+                        />
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Pricing Teaser */}
+            <section className="py-32 bg-black relative z-20 overflow-hidden">
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
+
+                <div className="container mx-auto px-6 text-center relative z-10">
+                    <h2 className="text-4xl font-bold text-white mb-6">Ready to upgrade your hotel?</h2>
+                    <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto">
+                        Join 500+ hotels using Relay to streamline their operations today.
+                    </p>
+                    <Button
+                        onClick={() => navigate('/pricing')}
+                        className="h-16 px-10 text-xl bg-white text-black hover:bg-zinc-200 rounded-full transition-transform hover:scale-105"
+                    >
+                        View Pricing Plans
+                    </Button>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="py-12 bg-zinc-950 border-t border-white/5 relative z-20">
+                <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
+                                <span className="font-bold text-white text-xs">R</span>
+                            </div>
+                            <span className="font-bold text-white">Relay</span>
+                        </div>
+                        <p className="text-sm text-zinc-500">© 2026 Relay Systems Inc.</p>
+                    </div>
+
+                    <div className="flex gap-6">
+                        <Link to="/legal/privacy" className="text-zinc-500 hover:text-white transition-colors text-sm">Privacy</Link>
+                        <Link to="/legal/terms" className="text-zinc-500 hover:text-white transition-colors text-sm">Terms</Link>
+                        <Link to="/legal/status" className="text-zinc-500 hover:text-white transition-colors text-sm">Status</Link>
+                    </div>
+
+                    <a
+                        href="mailto:hamitfindik2@gmail.com"
+                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-sm font-medium transition-colors border border-white/10 text-zinc-300"
+                    >
+                        <Mail className="w-4 h-4" />
+                        <span>Contact Admin</span>
+                    </a>
+                </div>
+            </footer>
+        </div>
+    )
+}
+
+function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+    return (
+        <motion.div
+            variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+            }}
+            className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group cursor-none"
+        >
+            <div className="mb-6 p-4 rounded-2xl bg-black/50 w-fit group-hover:scale-110 transition-transform duration-500 border border-white/5">
+                {icon}
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
+            <p className="text-zinc-400 leading-relaxed text-sm">{desc}</p>
+        </motion.div>
+    )
+}
+
+function AppButton({ icon, label, sub, onClick }: { icon: React.ReactNode, label: string, sub: string, onClick?: () => void }) {
+    return (
+        <button
+            onClick={onClick}
+            className="flex items-center gap-3 px-6 py-3 rounded-xl bg-black/50 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group text-left min-w-[200px]"
+        >
+            <div className="text-zinc-400 group-hover:text-white transition-colors">
+                {icon}
+            </div>
+            <div>
+                <div className="text-[10px] text-zinc-500 uppercase tracking-wider leading-none mb-1">{sub}</div>
+                <div className="font-bold text-white leading-none">{label}</div>
+            </div>
+        </button>
+    )
+}

@@ -3,6 +3,12 @@ import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { SetupHotelPage } from '@/pages/SetupHotelPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { LandingPage } from '@/pages/LandingPage'
+import { PricingPage } from '@/pages/PricingPage'
+import { LiveDemoPage } from '@/pages/LiveDemoPage'
+import { PrivacyPage } from '@/pages/legal/PrivacyPage'
+import { TermsPage } from '@/pages/legal/TermsPage'
+import { StatusPage } from '@/pages/legal/StatusPage'
 import ShiftStartPage from '@/pages/ShiftStartPage'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
@@ -11,8 +17,10 @@ import { UpdateNotifier } from '@/components/layout/UpdateNotifier'
 
 import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
+import { useMobileCapabilities } from '@/hooks/useMobileCapabilities'
 
 function App() {
+    useMobileCapabilities()
     const applyTheme = useThemeStore(state => state.applyTheme)
 
     useEffect(() => {
@@ -33,8 +41,16 @@ function App() {
             <TabNotifications />
             <Routes>
                 {/* Public Routes */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/live-demo" element={<LiveDemoPage />} />
+
+                {/* Legal Routes */}
+                <Route path="/legal/privacy" element={<PrivacyPage />} />
+                <Route path="/legal/terms" element={<TermsPage />} />
+                <Route path="/legal/status" element={<StatusPage />} />
 
                 {/* Protected Routes */}
                 <Route
@@ -54,7 +70,7 @@ function App() {
                     }
                 />
                 <Route
-                    path="/operations"
+                    path="/dashboard"
                     element={
                         <ProtectedRoute>
                             <DashboardPage />
@@ -62,7 +78,7 @@ function App() {
                     }
                 />
                 <Route
-                    path="/"
+                    path="/operations"
                     element={
                         <ProtectedRoute>
                             <DashboardPage />

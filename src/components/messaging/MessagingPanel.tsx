@@ -166,7 +166,7 @@ export function MessagingPanel() {
     }
 
     return (
-        <div className="h-[650px] flex flex-col md:flex-row gap-4 bg-background rounded-xl overflow-hidden border border-border">
+        <div className="h-full flex flex-col md:flex-row gap-4 bg-background rounded-xl overflow-hidden border border-border shadow-sm">
             {/* Sidebar */}
             <div className={cn(
                 "w-full md:w-72 bg-muted/30 flex flex-col border-r border-border",

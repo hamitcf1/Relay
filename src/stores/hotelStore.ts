@@ -37,9 +37,28 @@ export const useHotelStore = create<HotelStore>((set) => ({
     loadHotel: async (hotelId: string) => {
         set({ loading: true, error: null })
 
+        // Mock Data for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                hotel: {
+                    id: 'demo-hotel-id',
+                    code: 'DEMO123',
+                    info: { name: 'Grand Relay Hotel', address: '123 Demo St, Tech City' },
+                    settings: {
+                        kbs_time: '23:00',
+                        check_agency_intervals: [9, 12, 15, 18, 21],
+                        staff_order: ['demo-user-gm', 'demo-user-staff'],
+                    },
+                },
+                loading: false
+            })
+            return
+        }
+
         try {
             const hotelRef = doc(db, 'hotels', hotelId)
             const hotelSnap = await getDoc(hotelRef)
+            // ... rest of the code
 
             if (hotelSnap.exists()) {
                 const data = hotelSnap.data()
@@ -70,6 +89,25 @@ export const useHotelStore = create<HotelStore>((set) => ({
 
     subscribeToHotel: (hotelId: string) => {
         set({ loading: true, error: null })
+
+        // Mock Subscription for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                hotel: {
+                    id: 'demo-hotel-id',
+                    code: 'DEMO123',
+                    info: { name: 'Grand Relay Hotel', address: '123 Demo St, Tech City' },
+                    settings: {
+                        kbs_time: '23:00',
+                        check_agency_intervals: [9, 12, 15, 18, 21],
+                        staff_order: ['demo-user-gm', 'demo-user-staff'],
+                    },
+                },
+                loading: false,
+                error: null,
+            })
+            return () => { } // no-op unsubscribe
+        }
 
         const hotelRef = doc(db, 'hotels', hotelId)
 

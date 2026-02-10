@@ -553,6 +553,39 @@ type Translations = {
     // Shift Notes - New
     'notes.edited': string
     'notes.label': string
+
+    // Landing Page
+    'landing.hero.trusted': string
+    'landing.hero.title.prefix': string
+    'landing.hero.title.suffix': string
+    'landing.hero.subtitle': string
+    'landing.hero.cta.primary': string
+    'landing.hero.cta.secondary': string
+    'landing.features.title': string
+    'landing.features.subtitle': string
+    'landing.getApp.title': string
+    'landing.pricing.title': string
+    'landing.pricing.subtitle': string
+    'landing.pricing.cta': string
+    'landing.footer.contact': string
+    'landing.feature.mobile.title': string
+    'landing.feature.mobile.desc': string
+    'landing.feature.security.title': string
+    'landing.feature.security.desc': string
+    'landing.feature.sync.title': string
+    'landing.feature.sync.desc': string
+    'landing.feature.messaging.title': string
+    'landing.feature.messaging.desc': string
+    'landing.feature.handovers.title': string
+    'landing.feature.handovers.desc': string
+    'landing.feature.roster.title': string
+    'landing.feature.roster.desc': string
+    'landing.feature.analytics.title': string
+    'landing.feature.analytics.desc': string
+    'landing.feature.vault.title': string
+    'landing.feature.vault.desc': string
+    'landing.feature.tasks.title': string
+    'landing.feature.tasks.desc': string
 }
 
 const translations: Record<Language, Translations> = {
@@ -1097,6 +1130,39 @@ const translations: Record<Language, Translations> = {
         'announcement.deleteConfirm': 'Are you sure you want to delete this announcement?',
         'common.clear': 'Clear Chat',
 
+        // Landing Page
+        'landing.hero.trusted': 'Trusted by 500+ Luxury Hotels',
+        'landing.hero.title.prefix': 'Next-Gen',
+        'landing.hero.title.suffix': 'Hospitality',
+        'landing.hero.subtitle': 'The intelligent operating system for modern hotels. Seamless handovers, real-time sync, and operations automation.',
+        'landing.hero.cta.primary': 'Start Free Trial',
+        'landing.hero.cta.secondary': 'Live Demo',
+        'landing.features.title': 'Complete Hotel Operations',
+        'landing.features.subtitle': 'Everything you need to run a modern hotel efficiently.',
+        'landing.getApp.title': 'Download Relay for Mobile',
+        'landing.pricing.title': 'Ready to upgrade your hotel?',
+        'landing.pricing.subtitle': 'Join 500+ hotels using Relay to streamline their operations today.',
+        'landing.pricing.cta': 'View Pricing Plans',
+        'landing.footer.contact': 'Contact Admin',
+        'landing.feature.mobile.title': 'Mobile First',
+        'landing.feature.mobile.desc': 'Designed for staff on the move. Works perfectly on any device.',
+        'landing.feature.security.title': 'Military-Grade Security',
+        'landing.feature.security.desc': 'Encrypted vaults for your most sensitive data and codes.',
+        'landing.feature.sync.title': 'Real-Time Sync',
+        'landing.feature.sync.desc': 'Changes update instantly across all devices context.',
+        'landing.feature.messaging.title': 'Instant Messaging',
+        'landing.feature.messaging.desc': 'Secure internal comms replacing WhatsApp groups.',
+        'landing.feature.handovers.title': 'Smart Handovers',
+        'landing.feature.handovers.desc': 'Digital logbooks that ensure nothing gets lost between shifts.',
+        'landing.feature.roster.title': 'Staff Rostering',
+        'landing.feature.roster.desc': 'Drag-and-drop scheduling with automated notifications.',
+        'landing.feature.analytics.title': 'Analytics Dashboard',
+        'landing.feature.analytics.desc': 'Visual insights into hotel performance and efficiency.',
+        'landing.feature.vault.title': 'Secret Vault',
+        'landing.feature.vault.desc': 'Password-protected storage for agency logins and KBS.',
+        'landing.feature.tasks.title': 'Automated Tasks',
+        'landing.feature.tasks.desc': 'Recurring checklists ensure compliance every day.',
+
     },
     tr: {
         // Auth & Setup
@@ -1640,6 +1706,39 @@ const translations: Record<Language, Translations> = {
         'ai.context.save': 'Bağlamı Kaydet',
         'ai.generate': 'Oluştur',
         'ai.cancel': 'İptal',
+
+        // Landing Page
+        'landing.hero.trusted': "500+ Lüks Otel Tarafından Kullanılıyor",
+        'landing.hero.title.prefix': 'Yeni Nesil',
+        'landing.hero.title.suffix': 'Konaklama', // This will cycle
+        'landing.hero.subtitle': "Modern oteller için akıllı işletim sistemi. Sorunsuz devir teslimler, gerçek zamanlı senkronizasyon ve operasyon otomasyonu.",
+        'landing.hero.cta.primary': 'Ücretsiz Deneyin',
+        'landing.hero.cta.secondary': 'Canlı Demo',
+        'landing.features.title': 'Tam Kapsamlı Otel Operasyonları',
+        'landing.features.subtitle': 'Modern bir oteli verimli bir şekilde yönetmek için ihtiyacınız olan her şey.',
+        'landing.getApp.title': "Relay'i İndirin",
+        'landing.pricing.title': 'Otelini yükseltmeye hazır mısın?',
+        'landing.pricing.subtitle': 'Operasyonlarını kolaylaştırmak için Relay kullanan 500+ otele katılın.',
+        'landing.pricing.cta': 'Planları İncele',
+        'landing.footer.contact': 'Yönetici ile İletişim',
+        'landing.feature.mobile.title': 'Mobil Öncelikli',
+        'landing.feature.mobile.desc': 'Hareket halindeki personel için tasarlandı. Her cihazda mükemmel çalışır.',
+        'landing.feature.security.title': 'Askeri Düzeyde Güvenlik',
+        'landing.feature.security.desc': 'En hassas verileriniz ve şifreleriniz için şifreli kasalar.',
+        'landing.feature.sync.title': 'Gerçek Zamanlı Senkronizasyon',
+        'landing.feature.sync.desc': 'Değişiklikler tüm cihazlarda anında güncellenir.',
+        'landing.feature.messaging.title': 'Anlık Mesajlaşma',
+        'landing.feature.messaging.desc': 'WhatsApp gruplarının yerini alan güvenli iç iletişim.',
+        'landing.feature.handovers.title': 'Akıllı Devir Teslim',
+        'landing.feature.handovers.desc': 'Vardiyalar arasında hiçbir şeyin kaybolmamasını sağlayan dijital kayıt defterleri.',
+        'landing.feature.roster.title': 'Personel Vardiyası',
+        'landing.feature.roster.desc': 'Otomatik bildirimli sürükle-bırak çizelgeleme.',
+        'landing.feature.analytics.title': 'Analiz Paneli',
+        'landing.feature.analytics.desc': 'Otel performansı ve verimliliğine dair görsel içgörüler.',
+        'landing.feature.vault.title': 'Gizli Kasa',
+        'landing.feature.vault.desc': 'Acente girişleri ve KBS için şifre korumalı depolama.',
+        'landing.feature.tasks.title': 'Otomatik Görevler',
+        'landing.feature.tasks.desc': 'Tekrarlayan kontrol listeleri her gün uyumluluğu sağlar.',
     },
 }
 

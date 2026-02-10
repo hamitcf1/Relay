@@ -6,7 +6,6 @@ import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import type { UserRole } from '@/types'
@@ -108,184 +107,221 @@ export function RegisterPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="absolute inset-0 overflow-hidden">
+        <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden font-sans selection:bg-primary/30 py-10">
+            {/* Cyber-Concierge Background */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(76,29,149,0.1),rgba(0,0,0,0))]" />
+                <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-primary/5 to-transparent opacity-60" />
+
+                {/* Animated Orbs */}
                 <motion.div
-                    className="absolute w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl"
-                    animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
-                    transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{ top: '10%', left: '10%' }}
+                    className="absolute w-[600px] h-[600px] rounded-full bg-primary/20 blur-[120px]"
+                    animate={{
+                        x: [0, 100, 0],
+                        y: [0, -50, 0],
+                        scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                        duration: 25,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                    }}
+                    style={{ top: '-20%', left: '-10%' }}
                 />
                 <motion.div
-                    className="absolute w-80 h-80 rounded-full bg-purple-500/20 blur-3xl"
-                    animate={{ x: [0, -80, 0], y: [0, 80, 0] }}
-                    transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{ bottom: '10%', right: '10%' }}
+                    className="absolute w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[100px]"
+                    animate={{
+                        x: [0, -80, 0],
+                        y: [0, 80, 0],
+                    }}
+                    transition={{
+                        duration: 30,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                    }}
+                    style={{ bottom: '-10%', right: '-10%' }}
                 />
+
+                {/* Grid Overlay */}
                 <div
-                    className="absolute inset-0 opacity-[0.03]"
+                    className="absolute inset-0 z-0 opacity-20"
                     style={{
-                        backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-                        backgroundSize: '50px 50px',
+                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
+                        backgroundSize: '40px 40px'
                     }}
                 />
             </div>
 
             {/* Register Card */}
             <motion.div
-                className="relative z-10 w-full max-w-md mx-4"
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="relative z-10 w-full max-w-[480px] mx-4"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-                <div className="glass rounded-3xl p-8 shadow-2xl">
+                {/* Glass Container */}
+                <div className="relative backdrop-blur-3xl bg-black/40 border border-white/10 rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_-10px_rgba(0,0,0,0.5)] overflow-hidden group">
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
                     {/* Back Link */}
                     <Link
-                        to="/login"
-                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+                        to="/"
+                        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-8 group/back relative z-10"
                     >
-                        <ArrowLeft className="w-4 h-4" />
-                        {t('common.back')}
+                        <ArrowLeft className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" />
+                        Back to Home
                     </Link>
 
-                    {/* Logo */}
+                    {/* Header */}
                     <motion.div
-                        className="flex flex-col items-center mb-6"
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.5 }}
+                        className="mb-8 relative z-10"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
                     >
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/80 to-primary glow-primary mb-4">
-                            <Hotel className="w-8 h-8 text-primary-foreground" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-foreground">{t('auth.register')}</h1>
-                        <p className="text-muted-foreground mt-1 text-sm">{t('auth.registerSubtitle')}</p>
+                        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">{t('auth.register')}</h1>
+                        <p className="text-zinc-400">{t('auth.registerSubtitle')}</p>
                     </motion.div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                         {/* Role Selection & GM Toggle */}
-                        <div className="flex flex-col gap-3">
-                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">I am a...</p>
-                            <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-3">
+                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider pl-1">I am a...</p>
+                            <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setIsGM(false)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${!isGM ? 'bg-primary/10 border-primary/50 text-primary' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50'}`}
+                                    className={`p-4 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group/btn ${!isGM
+                                        ? 'bg-primary/20 border-primary/50 text-white shadow-[0_0_20px_-5px_rgba(var(--primary),0.3)]'
+                                        : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:border-white/20'
+                                        }`}
                                 >
-                                    <div className="font-semibold text-sm mb-1">Staff Member</div>
-                                    <div className="text-[10px] opacity-70">Joining a team</div>
+                                    <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 transition-opacity duration-500 ${!isGM ? 'opacity-100' : ''}`} />
+                                    <div className="relative z-10">
+                                        <div className="font-bold text-sm mb-1">Staff Member</div>
+                                        <div className="text-[11px] opacity-70">Joining a team</div>
+                                    </div>
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setIsGM(true)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${isGM ? 'bg-primary/10 border-primary/50 text-primary' : 'bg-muted border-border text-muted-foreground hover:border-muted-foreground/50'}`}
+                                    className={`p-4 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group/btn ${isGM
+                                        ? 'bg-primary/20 border-primary/50 text-white shadow-[0_0_20px_-5px_rgba(var(--primary),0.3)]'
+                                        : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:border-white/20'
+                                        }`}
                                 >
-                                    <div className="font-semibold text-sm mb-1">Manager</div>
-                                    <div className="text-[10px] opacity-70">Creating a hotel</div>
+                                    <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 transition-opacity duration-500 ${isGM ? 'opacity-100' : ''}`} />
+                                    <div className="relative z-10">
+                                        <div className="font-bold text-sm mb-1">Manager</div>
+                                        <div className="text-[11px] opacity-70">Creating a hotel</div>
+                                    </div>
                                 </button>
                             </div>
                         </div>
 
                         {/* Hotel Code (Only for Staff) */}
                         {!isGM && (
-                            <div className="space-y-2">
-                                <div className="relative">
-                                    <Hotel className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-                                    <Input
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                className="space-y-2"
+                            >
+                                <div className="group/input relative">
+                                    <Hotel className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    <input
                                         value={hotelCode}
                                         onChange={(e) => setHotelCode(e.target.value.toUpperCase())}
-                                        className="pl-9 bg-muted/30 border-border text-foreground placeholder:text-muted-foreground uppercase tracking-widest font-mono"
-                                        placeholder="HOTEL CODE (e.g. RELAY-X)"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 font-mono tracking-wider uppercase text-sm"
+                                        placeholder="HOTEL CODE"
                                         maxLength={10}
                                         required
                                     />
                                 </div>
-                                <p className="text-[10px] text-muted-foreground ml-1">
+                                <p className="text-[11px] text-zinc-500 pl-1">
                                     Ask your manager for the hotel code.
                                 </p>
-                            </div>
+                            </motion.div>
                         )}
 
                         {/* Standard Fields */}
-                        <div className="space-y-3">
-                            <div className="relative">
-                                <User className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-                                <Input
+                        <div className="space-y-4">
+                            <div className="group/input relative">
+                                <User className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="pl-9 bg-muted/30 border-border text-foreground placeholder:text-muted-foreground"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
                                     placeholder={t('auth.name')}
                                     required
                                 />
                             </div>
 
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
-                                <Input
+                            <div className="group/input relative">
+                                <Mail className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
                                     placeholder={t('auth.email')}
                                     required
                                 />
                             </div>
 
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
-                                <Input
-                                    type={showPassword ? "text" : "password"}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-9 pr-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
-                                    placeholder={t('auth.password')}
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-2.5 text-zinc-500 hover:text-white"
-                                >
-                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="group/input relative">
+                                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-10 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
+                                        placeholder={t('auth.password')}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-3.5 text-zinc-500 hover:text-white transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
 
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
-                                <Input
-                                    type={showPassword ? "text" : "password"}
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="pl-9 bg-black/50 border-zinc-800 text-white placeholder:text-zinc-600"
-                                    placeholder={t('auth.confirmPassword')}
-                                    required
-                                />
+                                <div className="group/input relative">
+                                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
+                                        placeholder={t('auth.confirmPassword')}
+                                        required
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         {/* Staff Role Selection (Only if not GM) */}
                         {!isGM && (
-                            <div className="grid grid-cols-2 gap-2 mt-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 {roles.map((r) => (
                                     <div
                                         key={r.value}
                                         onClick={() => setRole(r.value)}
-                                        className={`cursor-pointer p-3 rounded-xl border transition-all ${role === r.value
-                                            ? 'bg-zinc-800 border-zinc-700'
-                                            : 'bg-black/20 border-zinc-800/50 hover:bg-zinc-900'
+                                        className={`cursor-pointer p-3 rounded-xl border transition-all duration-300 ${role === r.value
+                                            ? 'bg-white/10 border-white/30'
+                                            : 'bg-white/5 border-white/5 hover:bg-white/10'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className={`text-xs font-semibold ${role === r.value ? 'text-white' : 'text-zinc-400'}`}>
+                                            <span className={`text-xs font-bold ${role === r.value ? 'text-white' : 'text-zinc-400'}`}>
                                                 {r.label}
                                             </span>
                                             {role === r.value && (
-                                                <motion.div layoutId="check">
-                                                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                                                </motion.div>
+                                                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary),0.8)]" />
                                             )}
                                         </div>
                                         <p className="text-[10px] text-zinc-500 leading-tight">
@@ -299,29 +335,34 @@ export function RegisterPage() {
                         {/* Error */}
                         {error && (
                             <motion.div
-                                className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm"
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
+                                className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-200 text-sm text-center font-medium backdrop-blur-sm"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
                             >
                                 {error}
                             </motion.div>
                         )}
 
                         {/* Submit */}
-                        <Button type="submit" className="w-full h-12 text-base bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
+                        <Button
+                            type="submit"
+                            className="w-full h-14 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-base tracking-wide transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100"
+                            disabled={loading}
+                        >
                             {loading ? (
-                                <>
+                                <div className="flex items-center gap-2">
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    {t('auth.creatingAccount')}
-                                </>
+                                    <span>{t('auth.creatingAccount')}</span>
+                                </div>
                             ) : (
                                 t('auth.createAccount')
                             )}
                         </Button>
                     </form>
-
-                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-20 bg-indigo-500/20 blur-3xl rounded-full" />
                 </div>
+
+                {/* Bottom Glow */}
+                <div className="absolute -bottom-4 left-10 right-10 h-8 bg-primary/20 blur-2xl rounded-full z-0 pointer-events-none" />
             </motion.div>
         </div>
     )

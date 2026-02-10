@@ -1,33 +1,13 @@
 import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-    User,
-    LogOut,
-    Play,
-    StopCircle,
-    Globe,
-    Check,
-    BedDouble,
-    Sparkles,
-    Palette
+    LayoutDashboard,
+    Activity
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-    DropdownMenuSub,
-    DropdownMenuSubTrigger,
-    DropdownMenuSubContent,
-    DropdownMenuPortal,
-} from '../components/ui/dropdown-menu'
 
-import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
@@ -65,17 +45,18 @@ import { SalesPanel } from '@/components/sales/SalesPanel'
 import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
+import { UserNav } from '@/components/layout/UserNav'
 
 export function DashboardPage() {
     const navigate = useNavigate()
     const location = useLocation()
-    const { user, initialize: initAuth, signOut } = useAuthStore()
+    const { user, initialize: initAuth } = useAuthStore()
     const { hotel, subscribeToHotel } = useHotelStore()
     const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
     const { subscribeToNotes } = useNotesStore()
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
-    const { t, language, setLanguage } = useLanguageStore()
+    const { t } = useLanguageStore()
 
 
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
@@ -95,7 +76,7 @@ export function DashboardPage() {
     useEffect(() => {
         if (location.pathname === '/operations') {
             setActiveTab('operations')
-        } else if (location.pathname === '/') {
+        } else if (location.pathname === '/dashboard' || location.pathname === '/') {
             setActiveTab('overview')
         }
     }, [location.pathname])
@@ -191,7 +172,13 @@ export function DashboardPage() {
     const [showTutorial, setShowTutorial] = useState(false)
 
     return (
-        <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30">
+        <div className="h-[100dvh] overflow-hidden bg-black text-foreground flex flex-col font-sans selection:bg-primary/30 relative">
+            {/* Background Gradients (Cyber Theme) */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-[120px]" />
+            </div>
+
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
             <AIAssistantModal
@@ -201,7 +188,7 @@ export function DashboardPage() {
             />
             <ComplianceAlert />
             {/* Header */}
-            <header className="h-16 border-b border-border bg-background/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
+            <header className="safe-header border-b border-white/10 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50 transition-all duration-300 relative">
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20">
@@ -260,110 +247,44 @@ export function DashboardPage() {
 
                     {/* User Profile - Consolidated Actions */}
                     <div id="tour-profile">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button className="h-9 w-9 rounded-full bg-primary flex items-center justify-center border border-primary/50 shadow-lg shadow-primary/20 ml-2 hover:bg-primary/90 transition-colors overflow-hidden">
-                                    <span className="text-xs font-bold text-primary-foreground">
-                                        {user?.name?.charAt(0).toUpperCase() || <User className="w-4 h-4 text-primary-foreground" />}
-                                    </span>
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 bg-card border-border p-2">
-                                <DropdownMenuLabel className="px-2 py-1.5">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-semibold text-foreground">{user?.name || t('common.unknown')}</span>
-                                        <span className="text-[10px] text-muted-foreground uppercase">{user?.role}</span>
-                                    </div>
-                                </DropdownMenuLabel>
-
-                                <DropdownMenuSeparator className="bg-border my-2" />
-
-                                <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-indigo-500/10">
-                                        <Palette className="w-4 h-4 text-primary" />
-                                        <span className="text-foreground">{t('common.appearance')}</span>
-                                    </DropdownMenuSubTrigger>
-                                    <DropdownMenuPortal>
-                                        <DropdownMenuSubContent className="w-80 bg-card border-border p-4">
-                                            <AppearanceOptions />
-                                        </DropdownMenuSubContent>
-                                    </DropdownMenuPortal>
-                                </DropdownMenuSub>
-
-                                {/* Language Selector moved here */}
-                                <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-indigo-500/10">
-                                        <Globe className="w-4 h-4 text-primary" />
-                                        <span className="text-foreground">{t('common.language')}</span>
-                                    </DropdownMenuSubTrigger>
-                                    <DropdownMenuPortal>
-                                        <DropdownMenuSubContent className="w-40 bg-card border-border p-1">
-                                            <DropdownMenuItem onClick={() => setLanguage('en')} className="text-xs">
-                                                🇺🇸 English {language === 'en' && <Check className="ml-auto w-3 h-3" />}
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-xs">
-                                                🇹🇷 Türkçe {language === 'tr' && <Check className="ml-auto w-3 h-3" />}
-                                            </DropdownMenuItem>
-                                        </DropdownMenuSubContent>
-                                    </DropdownMenuPortal>
-                                </DropdownMenuSub>
-
-                                <div className="space-y-1 mt-2">
-                                    <DropdownMenuLabel className="text-[10px] text-muted-foreground font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
-
-                                    <DropdownMenuItem onClick={() => openAI('general')} className="flex items-center gap-2 text-foreground hover:bg-primary/10 cursor-pointer px-3 py-2 rounded-lg transition-colors">
-                                        <Sparkles className="w-4 h-4 text-primary" />
-                                        <span className="text-xs font-medium">Assistant AI</span>
-                                    </DropdownMenuItem>
-
-                                    <DropdownMenuItem onClick={() => setIsRoomManagerOpen(true)} className="flex items-center gap-2 text-foreground hover:bg-amber-500/10 cursor-pointer px-3 py-2 rounded-lg transition-colors">
-                                        <BedDouble className="w-4 h-4 text-amber-500" />
-                                        <span className="text-xs font-medium">{t('dashboard.rooms')}</span>
-                                    </DropdownMenuItem>
-
-                                    <DropdownMenuSeparator className="bg-border" />
-
-                                    {!currentShift ? (
-                                        <DropdownMenuItem onClick={() => navigate('/shift-start')} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
-                                            <Play className="w-4 h-4" />
-                                            <span className="text-xs font-medium">{t('dashboard.startShift')}</span>
-                                        </DropdownMenuItem>
-                                    ) : (
-                                        <DropdownMenuItem onClick={() => setIsHandoverOpen(true)} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-rose-500/10 transition-colors">
-                                            <StopCircle className="w-4 h-4" />
-                                            <span className="text-xs font-medium">{t('dashboard.endShift')}</span>
-                                        </DropdownMenuItem>
-                                    )}
-                                </div>
-
-                                <DropdownMenuSeparator className="bg-border my-2" />
-
-                                <DropdownMenuItem onClick={() => signOut()} className="flex items-center gap-2 text-muted-foreground hover:text-foreground cursor-pointer px-3 py-2 rounded-lg hover:bg-muted transition-colors">
-                                    <LogOut className="w-4 h-4" />
-                                    <span className="text-xs font-medium">{t('auth.logout')}</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <UserNav
+                            onOpenAI={openAI}
+                            onOpenRoomManager={() => setIsRoomManagerOpen(true)}
+                            onOpenHandover={() => setIsHandoverOpen(true)}
+                        />
                     </div>
                 </div>
-            </header>
 
-            {/* Mobile Tabs (Visible only on small screens) */}
-            <div className="md:hidden border-b border-border bg-background/50 backdrop-blur-xl px-4 py-2">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="bg-muted/50 border border-border h-10 w-full">
-                        <TabsTrigger value="overview" className="flex-1 text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
-                            {t('module.overview') || 'Genel Bakış'}
-                        </TabsTrigger>
-                        <TabsTrigger value="operations" className="flex-1 text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
-                            {t('module.operations') || 'Operasyon'}
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
-            </div>
+            </header >
+
+            {/* Mobile Bottom Navigation (Fixed) */}
+            < div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border pb-safe" >
+                <nav className="flex items-center justify-around h-16 px-2">
+                    <button
+                        onClick={() => setActiveTab('overview')}
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform",
+                            activeTab === 'overview' ? "text-primary" : "text-muted-foreground"
+                        )}
+                    >
+                        <LayoutDashboard className="w-6 h-6" />
+                        <span className="text-[10px] font-medium">{t('module.overview') || 'Overview'}</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('operations')}
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform",
+                            activeTab === 'operations' ? "text-primary" : "text-muted-foreground"
+                        )}
+                    >
+                        <Activity className="w-6 h-6" />
+                        <span className="text-[10px] font-medium">{t('module.operations') || 'Operations'}</span>
+                    </button>
+                </nav>
+            </div >
 
             {/* Main Content Area */}
-            <main className="flex-1 overflow-hidden p-4 lg:p-6">
+            < main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6 transition-all duration-300" >
                 <AnnouncementBanner />
                 <Tabs value={activeTab} className="h-full border-none p-0 bg-transparent shadow-none">
                     <TabsContent value="overview" className="h-full m-0 border-none p-0 outline-none">
@@ -454,73 +375,80 @@ export function DashboardPage() {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none overflow-y-auto scrollbar-thin">
-                        <div className="space-y-8 pb-12">
-                            <div className="flex flex-col gap-2">
-                                <h2 className="text-3xl font-bold text-foreground tracking-tight">{t('dashboard.operationsHub')}</h2>
-                                <p className="text-muted-foreground text-lg font-sans">{t('dashboard.operationsDesc')}</p>
+                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden">
+                        <div className="flex flex-col h-full">
+                            <div className="flex-none px-4 pt-4 lg:px-6 lg:pt-6">
+                                <div className="flex flex-col gap-2 mb-6">
+                                    <h2 className="text-3xl font-bold text-foreground tracking-tight">{t('dashboard.operationsHub')}</h2>
+                                    <p className="text-muted-foreground text-lg font-sans">{t('dashboard.operationsDesc')}</p>
+                                </div>
                             </div>
 
-                            <Tabs defaultValue="messaging" className="space-y-8">
-                                <TabsList className="bg-muted/50 p-1 rounded-xl border border-border h-12 w-full justify-start overflow-x-auto whitespace-nowrap no-scrollbar">
-                                    <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                        <MessageCircle className="w-4 h-4" />
-                                        <span className="hidden sm:inline">{t('module.messaging')}</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                        <ShieldAlert className="w-4 h-4" />
-                                        <span className="hidden sm:inline">{t('module.complaints')}</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="off-days" id="tour-offdays" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                        <CalendarDays className="w-4 h-4" />
-                                        <span className="hidden sm:inline">{t('module.offDays')}</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="tours" id="tour-tours" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                        <Map className="w-4 h-4" />
-                                        <span className="hidden sm:inline">{t('module.tours')}</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                        <CreditCard className="w-4 h-4" />
-                                        <span className="hidden sm:inline">{t('module.sales')}</span>
-                                    </TabsTrigger>
-                                </TabsList>
+                            <Tabs defaultValue="messaging" className="flex-1 flex flex-col min-h-0">
+                                <div className="flex-none px-4 lg:px-6 mb-4">
+                                    <TabsList className="bg-muted/50 p-1 rounded-xl border border-border h-12 w-full justify-start overflow-x-auto whitespace-nowrap no-scrollbar">
+                                        <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <MessageCircle className="w-4 h-4" />
+                                            <span className="hidden sm:inline">{t('module.messaging')}</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <ShieldAlert className="w-4 h-4" />
+                                            <span className="hidden sm:inline">{t('module.complaints')}</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="off-days" id="tour-offdays" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <CalendarDays className="w-4 h-4" />
+                                            <span className="hidden sm:inline">{t('module.offDays')}</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="tours" id="tour-tours" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <Map className="w-4 h-4" />
+                                            <span className="hidden sm:inline">{t('module.tours')}</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <CreditCard className="w-4 h-4" />
+                                            <span className="hidden sm:inline">{t('module.sales')}</span>
+                                        </TabsTrigger>
+                                    </TabsList>
+                                </div>
 
-                                <div className="mt-8">
-                                    <TabsContent value="messaging" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                <div className="flex-1 min-h-0 bg-background/50 border-t border-border/50">
+                                    <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none">
                                         <MessagingPanel />
                                     </TabsContent>
-                                    <TabsContent value="feedback" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                    <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none">
+                                        <SalesPanel />
+                                    </TabsContent>
+
+                                    {/* Scrollable Containers for other tabs */}
+                                    <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <FeedbackSection />
                                     </TabsContent>
-                                    <TabsContent value="off-days" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                    <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <OffDayScheduler />
                                     </TabsContent>
-                                    <TabsContent value="tours" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
+                                    <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <TourCatalogue />
-                                    </TabsContent>
-                                    <TabsContent value="sales" className="mt-0 ring-0 focus-visible:ring-0 outline-none">
-                                        <SalesPanel />
                                     </TabsContent>
                                 </div>
                             </Tabs>
                         </div>
                     </TabsContent>
                 </Tabs>
-            </main>
+            </main >
 
             {/* Modals */}
-            <RoomManagementModal
+            < RoomManagementModal
                 isOpen={isRoomManagerOpen}
-                onClose={() => setIsRoomManagerOpen(false)}
+                onClose={() => setIsRoomManagerOpen(false)
+                }
             />
 
-            <HandoverWizard
+            < HandoverWizard
                 isOpen={isHandoverOpen}
                 onClose={() => setIsHandoverOpen(false)}
                 hotelId={hotel?.id || ''}
                 onComplete={handleHandoverComplete}
             />
             <AnnouncementModal />
-        </div>
+        </div >
     )
 }

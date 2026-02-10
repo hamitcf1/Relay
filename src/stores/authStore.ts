@@ -8,6 +8,9 @@ import {
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import type { User, UserRole } from '@/types'
+import { useHotelStore } from './hotelStore'
+import { useNotificationStore } from './notificationStore'
+import { useShiftStore } from './shiftStore'
 
 interface AuthState {
     user: User | null
@@ -19,6 +22,7 @@ interface AuthState {
 
 interface AuthActions {
     signIn: (email: string, password: string) => Promise<void>
+    loginAsDemo: (role: UserRole) => Promise<void>
     signOut: () => Promise<void>
     clearError: () => void
     initialize: () => () => void
@@ -86,10 +90,75 @@ export const useAuthStore = create<AuthStore>((set) => ({
         }
     },
 
+    loginAsDemo: async (role: UserRole) => {
+        set({ loading: true, error: null })
+
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1500))
+
+        const demoUid = 'demo-user-' + role
+        const demoHotelId = 'demo-hotel-id'
+
+        const demoUser: User = {
+            uid: demoUid,
+            email: `demo.${role}@relay.app`,
+            name: role === 'gm' ? 'Demo Manager' : 'Demo Staff',
+            role: role,
+            hotel_id: demoHotelId,
+            current_shift_type: role === 'gm' ? null : 'A',
+            settings: { language: 'tr' }
+        }
+
+        // Mock Firebase User
+        const demoFirebaseUser = {
+            uid: demoUid,
+            email: demoUser.email,
+            emailVerified: true,
+            isAnonymous: true,
+            providerData: [],
+            refreshToken: '',
+            tenantId: null,
+            delete: async () => { },
+            getIdToken: async () => 'demo-token',
+            getIdTokenResult: async () => ({
+                token: 'demo-token',
+                signInProvider: 'custom',
+                claims: {},
+                authTime: Date.now().toString(),
+                issuedAtTime: Date.now().toString(),
+                expirationTime: (Date.now() + 3600000).toString(),
+            }),
+            reload: async () => { },
+            toJSON: () => ({}),
+            displayName: demoUser.name,
+            phoneNumber: null,
+            photoURL: null,
+            metadata: {
+                creationTime: new Date().toISOString(),
+                lastSignInTime: new Date().toISOString(),
+            }
+        } as unknown as FirebaseUser
+
+        set({
+            user: demoUser,
+            firebaseUser: demoFirebaseUser,
+            loading: false
+        })
+    },
+
     signOut: async () => {
         set({ loading: true })
         try {
             await firebaseSignOut(auth)
+
+            // Clear all stores to prevent data leaks between users
+            useHotelStore.setState({ hotel: null, error: null, loading: true })
+            useNotificationStore.setState({ notifications: [], unreadCount: 0, error: null, loading: true })
+            useShiftStore.setState({ currentShift: null, loading: true, error: null })
+
+            // Note: We might want to import other stores to clear them too if they hold sensitive data
+            // but these are the critical ones for the reported issue.
+
             set({ user: null, firebaseUser: null, loading: false })
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Logout failed'

@@ -30,6 +30,12 @@
     --input: 240 5.9% 90%;
     --ring: 239 84% 67%;
     --radius: 0.75rem;
+
+    /* Safe Area Variables */
+    --sat: env(safe-area-inset-top);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+    --sar: env(safe-area-inset-right);
   }
 
   .dark {
@@ -64,6 +70,63 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     color-scheme: light dark;
+    /* Prevent text selection for app-like feel */
+    user-select: none;
+    -webkit-user-select: none;
+    /* Full screen height */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    /* Disable tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Safe Header Utility */
+.safe-header {
+  padding-top: max(1rem, var(--sat));
+  height: auto;
+  min-height: calc(4rem + var(--sat));
+}
+
+/* Safe Area Utilities */
+@layer utilities {
+  .pt-safe {
+    padding-top: var(--sat);
+  }
+
+  .pb-safe {
+    padding-bottom: var(--sab);
+  }
+
+  .pl-safe {
+    padding-left: var(--sal);
+  }
+
+  .pr-safe {
+    padding-right: var(--sar);
+  }
+
+  .mt-safe {
+    margin-top: var(--sat);
+  }
+
+  .mb-safe {
+    margin-bottom: var(--sab);
+  }
+
+  .h-safe-screen {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  /* Hide scrollbar for clean UI */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
