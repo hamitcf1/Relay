@@ -67,6 +67,44 @@ export const useLogsStore = create<LogsStore>((set, get) => ({
         const logsRef = collection(db, 'hotels', hotelId, 'logs')
         const logsQuery = query(logsRef, orderBy('created_at', 'desc'))
 
+        // Mock Logs for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            const mockLogs: Log[] = [
+                {
+                    id: 'log-1',
+                    type: 'maintenance',
+                    content: 'Air conditioning in Room 101 is leaking.',
+                    room_number: '101',
+                    urgency: 'critical',
+                    status: 'open',
+                    created_at: new Date(),
+                    created_by: 'demo-user-staff',
+                    created_by_name: 'Receptionist',
+                    is_pinned: true
+                },
+                {
+                    id: 'log-2',
+                    type: 'guest_request',
+                    content: 'Guest in 204 requested extra pillows.',
+                    room_number: '204',
+                    urgency: 'medium',
+                    status: 'resolved',
+                    created_at: new Date(Date.now() - 3600000),
+                    created_by: 'demo-user-staff',
+                    created_by_name: 'Receptionist',
+                    is_pinned: false
+                }
+            ]
+
+            set({
+                logs: mockLogs,
+                pinnedLogs: mockLogs.filter(l => l.is_pinned),
+                loading: false,
+                error: null
+            })
+            return () => { }
+        }
+
         // Subscribe to real-time updates
         const unsubscribe = onSnapshot(
             logsQuery,

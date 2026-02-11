@@ -53,6 +53,49 @@ export const useNotesStore = create<NotesStore>((set) => ({
         const notesRef = collection(db, 'hotels', hotelId, 'shift_notes')
         const notesQuery = query(notesRef, orderBy('created_at', 'desc'))
 
+        // Mock Notes for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            const mockNotes: ShiftNote[] = [
+                {
+                    id: 'note-1',
+                    category: 'handover',
+                    content: 'VIP guest in Room 204 requires 6:00 AM wake-up call.',
+                    room_number: '204',
+                    is_relevant: true,
+                    status: 'active',
+                    amount_due: null,
+                    is_paid: false,
+                    created_at: new Date(),
+                    created_by: 'demo-user-gm',
+                    created_by_name: 'Manager',
+                    shift_id: 'DEMO_SHIFT_A',
+                    resolved_at: null,
+                    resolved_by: null,
+                    is_anonymous: false
+                },
+                {
+                    id: 'note-2',
+                    category: 'minibar',
+                    content: 'Room 101 consumed 2 Cokes and 1 Water.',
+                    room_number: '101',
+                    is_relevant: true,
+                    status: 'active',
+                    amount_due: 150,
+                    is_paid: false,
+                    created_at: new Date(Date.now() - 7200000),
+                    created_by: 'demo-user-staff',
+                    created_by_name: 'Receptionist',
+                    shift_id: 'DEMO_SHIFT_A',
+                    resolved_at: null,
+                    resolved_by: null,
+                    is_anonymous: false
+                }
+            ]
+
+            set({ notes: mockNotes, loading: false, error: null })
+            return () => { }
+        }
+
         const unsubscribe = onSnapshot(
             notesQuery,
             (snapshot) => {

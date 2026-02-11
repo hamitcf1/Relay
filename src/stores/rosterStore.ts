@@ -42,6 +42,35 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
         const rosterRef = collection(db, 'hotels', hotelId, 'roster')
 
+        // Mock Roster for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            const startOfCurrentWeek = new Date() // Simplified for demo
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            const mockSchedule: Record<string, Record<string, ShiftType>> = {
+                'demo-user-gm': {},
+                'demo-user-staff': {}
+            }
+
+            // Populate mock schedule for this week
+            for (let i = 0; i < 7; i++) {
+                const date = addDays(startOfCurrentWeek, i - startOfCurrentWeek.getDay() + 1) // Rough approximation of week
+                const dateKey = format(date, 'yyyy-MM-dd')
+                mockSchedule['demo-user-gm'][dateKey] = 'A'
+                mockSchedule['demo-user-staff'][dateKey] = i % 2 === 0 ? 'B' : 'A'
+            }
+
+            set({
+                staff: [
+                    { uid: 'demo-user-gm', name: 'Demo Manager', role: 'gm' },
+                    { uid: 'demo-user-staff', name: 'Demo Staff', role: 'receptionist' }
+                ],
+                schedule: mockSchedule,
+                loading: false,
+                error: null
+            })
+            return () => { }
+        }
+
         const unsubscribe = onSnapshot(rosterRef, async (snapshot) => {
             const newSchedule: Record<string, Record<string, ShiftType>> = {}
             const userIds = new Set<string>()

@@ -30,6 +30,24 @@ export const useStaffMealStore = create<StaffMealStore>((set) => ({
         const today = new Date().toLocaleDateString('sv-SE')
         const menuRef = doc(db, 'hotels', hotelId, 'daily_menu', today)
 
+        // Mock Menu for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                todayMenu: {
+                    id: 'demo-menu',
+                    hotel_id: 'demo-hotel-id',
+                    date: today,
+                    menu: 'Grilled Chicken with Rice\nLentil Soup\nSalad',
+                    updated_at: new Date(),
+                    updated_by: 'demo-user-gm',
+                    updated_by_name: 'Manager',
+                },
+                loading: false,
+                error: null,
+            })
+            return () => { }
+        }
+
         const unsubscribe = onSnapshot(
             menuRef,
             (snapshot) => {

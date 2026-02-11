@@ -62,6 +62,37 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
             limit(50)
         )
 
+        // Mock Notifications for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            const mockNotifications: Notification[] = [
+                {
+                    id: 'note-1',
+                    type: 'system',
+                    title: 'Welcome to Relay Demo',
+                    content: 'This is a simulated environment. Feel free to explore!',
+                    timestamp: new Date(),
+                    is_read: false
+                },
+                {
+                    id: 'note-2',
+                    type: 'message',
+                    title: 'New Message from Housekeeping',
+                    content: 'Room 204 is ready for inspection.',
+                    timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+                    is_read: true,
+                    target_role: 'receptionist'
+                }
+            ]
+
+            set({
+                notifications: mockNotifications,
+                unreadCount: 1,
+                loading: false,
+                error: null
+            })
+            return () => { }
+        }
+
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const allNotifications: Notification[] = snapshot.docs.map(doc => {
                 const data = doc.data()

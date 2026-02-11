@@ -32,6 +32,19 @@ export const useRoomStore = create<RoomState>((set) => ({
 
     subscribeToRooms: (hotelId) => {
         set({ loading: true })
+
+        // Mock Rooms for Live Demo
+        if (hotelId === 'demo-hotel-id') {
+            const mockRooms: Room[] = [
+                { id: '101', number: '101', type: 'standard', status: 'dirty', occupancy: 'vacant', floor: 1 },
+                { id: '102', number: '102', type: 'standard', status: 'clean', occupancy: 'occupied', floor: 1 },
+                { id: '201', number: '201', type: 'corner', status: 'inspect', occupancy: 'occupied', floor: 2 },
+                { id: '204', number: '204', type: 'teras_suite', status: 'clean', occupancy: 'vacant', floor: 2 },
+            ]
+            set({ rooms: mockRooms, loading: false })
+            return () => { }
+        }
+
         const roomsRef = collection(db, 'hotels', hotelId, 'rooms')
         // Sort by room number by default
         const q = query(roomsRef, orderBy('number', 'asc'))
