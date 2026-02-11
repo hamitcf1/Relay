@@ -161,7 +161,7 @@ export function PricingPage() {
     )
 }
 
-function PricingCard({ title, price, desc, features, buttonText, onAction, isPopular, billing }: any) {
+function PricingCard({ title, price, desc, features, buttonText, onAction, isPopular }: any) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}

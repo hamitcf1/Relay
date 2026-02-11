@@ -45,7 +45,7 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         // Mock Roster for Live Demo
         if (hotelId === 'demo-hotel-id') {
             const startOfCurrentWeek = new Date() // Simplified for demo
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
             const mockSchedule: Record<string, Record<string, ShiftType>> = {
                 'demo-user-gm': {},
                 'demo-user-staff': {}
