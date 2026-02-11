@@ -81,9 +81,7 @@ export function LandingPage() {
                     <Button variant="ghost" onClick={() => navigate('/login')} className="text-zinc-400 hover:text-white hover:bg-white/5 hidden sm:flex">
                         {t('landing.nav.login')}
                     </Button>
-                    <Button onClick={() => navigate('/live-demo')} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-full px-6 transition-all duration-300 hover:scale-105">
-                        {t('landing.hero.cta.secondary')}
-                    </Button>
+
                     <Button onClick={() => navigate('/pricing')} className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] transition-all duration-300 hover:scale-105">
                         {t('landing.nav.getStarted')}
                     </Button>
