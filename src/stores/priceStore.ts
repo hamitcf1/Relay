@@ -13,7 +13,7 @@ interface PriceState {
 interface PriceActions {
     loadPrices: (hotelId: string, startDate: string, endDate: string) => Promise<void>
     subscribeToPrices: (hotelId: string, startDate: string, endDate: string) => () => void
-    setPrice: (hotelId: string, date: string, roomType: RoomType, tier: AgencyTier, amount: number, currency: Currency, userId: string) => Promise<void>
+    setPrice: (hotelId: string, date: string, roomType: RoomType, tier: AgencyTier, amount: number, currency: Currency, userId: string, agencyId?: string) => Promise<void>
     getPrice: (date: string, roomType: RoomType, tier: AgencyTier) => { amount: number, currency: Currency } | null
 }
 
@@ -77,7 +77,7 @@ export const usePriceStore = create<PriceStore>((set, get) => ({
         return unsubscribe
     },
 
-    setPrice: async (hotelId, date, roomType, tier, amount, currency, userId) => {
+    setPrice: async (hotelId, date, roomType, tier, amount, currency, userId, agencyId) => {
         try {
             const prices = get().prices
             const existingDay = prices[date] || {
@@ -95,13 +95,23 @@ export const usePriceStore = create<PriceStore>((set, get) => ({
             if (!updatedPrices[roomType]) {
                 updatedPrices[roomType] = {
                     standard: { amount: 0, currency: 'EUR' },
-                    special_group: { amount: 0, currency: 'EUR' }
+                    special_group: { amount: 0, currency: 'EUR' },
+                    agency_prices: {}
                 }
             }
 
-            // Update specific tier
-            if (updatedPrices[roomType]) {
-                updatedPrices[roomType][tier] = { amount, currency }
+            // Ensure agency_prices object exists
+            if (!updatedPrices[roomType].agency_prices) {
+                updatedPrices[roomType].agency_prices = {}
+            }
+
+            // Update specific tier or agency
+            if (agencyId) {
+                updatedPrices[roomType].agency_prices[agencyId] = { amount, currency }
+            } else {
+                if (tier === 'standard' || tier === 'special_group') {
+                    updatedPrices[roomType][tier] = { amount, currency }
+                }
             }
 
             const docRef = doc(db, 'hotels', hotelId, 'daily_prices', date)

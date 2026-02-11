@@ -315,6 +315,7 @@ export interface DailyPrice {
         [key in RoomType]?: {
             standard: { amount: number; currency: Currency }
             special_group: { amount: number; currency: Currency }
+            agency_prices?: Record<string, { amount: number; currency: Currency }>
         }
     }
     updated_at: Date

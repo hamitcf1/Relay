@@ -167,8 +167,20 @@ export const useHotelStore = create<HotelStore>((set) => ({
     updateHotelSettings: async (hotelId: string, settings: Partial<HotelSettings>) => {
         try {
             const hotelRef = doc(db, 'hotels', hotelId)
+            // Use updateDoc for specific fields to avoid overwriting the settings map if safe,
+            // or use setDoc with merge: true but we need to be careful.
+            // Best approach for deep updates is dot notation keys if possible, but settings is a structured object.
+            // Let's manually construct the update object to ensure we don't wipe existing settings
+
+            // Actually, we can just use setDoc with merge: true, BUT we must pass `settings: { ...settings }`.
+            // Firestore set(..., { merge: true }) merges fields. 
+            // If we send { settings: { new_field: val } }, it mirrors the document structure.
+            // If the document has { settings: { old_field: val } }, the result is { settings: { old_field: val, new_field: val } } 
+            // ONLY IF the input object is just partial. 
+            // However, verify if `special_group_agencies` (array) is being handled correctly. Arrays are replaced, not merged, which is what we want for that specific field.
+
             await setDoc(hotelRef, {
-                settings
+                settings: settings
             }, { merge: true })
         } catch (error) {
             console.error('Error updating hotel settings:', error)

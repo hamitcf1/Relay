@@ -92,28 +92,33 @@ export function CustomCursor() {
     return (
         <motion.div
             className={cn(
-                "fixed top-0 left-0 rounded-full pointer-events-none z-[9999] mix-blend-difference",
-                "border border-white flex items-center justify-center transition-opacity duration-300",
-                isTextInput ? "w-1 h-6 rounded-none border-none bg-white" : "w-8 h-8 rounded-full",
+                "fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference",
+                "flex items-center justify-center",
                 isHidden ? "opacity-0" : "opacity-100"
             )}
             style={{
                 translateX: cursorXSpring,
                 translateY: cursorYSpring,
                 x: '-50%',
-                y: '-50%'
+                y: '-50%',
+                // Keep border in style so it can be toggled without fighting animate
+                border: isTextInput ? 'none' : '1px solid white',
             }}
             animate={{
                 width: isTextInput ? 2 : 32,
                 height: isTextInput ? 24 : 32,
-                borderRadius: isTextInput ? 0 : 16, // 16px radius for 32px width = Circle
-                backgroundColor: isHovering && !isTextInput ? 'rgba(255, 255, 255, 1)' : (isTextInput ? 'hsl(var(--primary))' : 'rgba(255, 255, 255, 0)'),
+                borderRadius: isTextInput ? 1 : 9999,
+                backgroundColor: isHovering && !isTextInput
+                    ? 'rgba(255, 255, 255, 1)'
+                    : (isTextInput ? 'hsl(var(--primary))' : 'rgba(255, 255, 255, 0)'),
                 scale: isHovering && !isTextInput ? 1.5 : 1,
             }}
             transition={{
                 type: "spring",
                 stiffness: 400,
-                damping: 25
+                damping: 25,
+                // Make shape transitions snappier to avoid lingering square
+                borderRadius: { type: "spring", stiffness: 600, damping: 30 },
             }}
         >
             <motion.div
