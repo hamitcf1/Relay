@@ -83,34 +83,15 @@ export function ActivityTracker() {
             }
         }
 
-        // Also handle window focus/blur for desktop precision
-        const handleFocus = () => {
-            if (!sessionStartRef.current) {
-                sessionStartRef.current = new Date()
-                isVisibleRef.current = true
-            }
-        }
-
-        const handleBlur = () => {
-            // Treat blur as potential inactivity, but maybe user is looking at another window
-            // For simplicity, strict mode: blur = inactive
-            // flushData() 
-            // Actually, strict "active" means interacting or window is focused.
-            // Let's stick to visibilityChange for now as it covers tabs. 
-            // Focus/Blur might be too aggressive (e.g. user clicking on a second monitor).
-        }
-
         document.addEventListener('visibilitychange', handleVisibilityChange)
-        // window.addEventListener('focus', handleFocus)
-        // window.addEventListener('blur', handleBlur)
+
+        // Periodic sync to avoid data loss on crash
 
         // Periodic sync to avoid data loss on crash
         timeoutRef.current = setInterval(flushData, SYNC_INTERVAL_MS)
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange)
-            // window.removeEventListener('focus', handleFocus)
-            // window.removeEventListener('blur', handleBlur)
             if (timeoutRef.current) clearInterval(timeoutRef.current)
             flushData() // Final flush on unmount
         }
