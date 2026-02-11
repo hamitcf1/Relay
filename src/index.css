@@ -79,22 +79,25 @@
     /* Disable tap highlight on mobile */
     -webkit-tap-highlight-color: transparent;
 
-    /* Hide default cursor globally */
+    /* Hide default cursor only when custom cursor is active */
+  }
+
+  body.custom-cursor-active {
     cursor: none !important;
   }
 
-  /* Ensure interactive elements also hide cursor */
-  a,
-  button,
-  input,
-  select,
-  textarea,
-  [role="button"],
-  [type="text"],
-  [type="password"],
-  [type="email"],
-  [type="number"],
-  [contenteditable="true"] {
+  /* Ensure interactive elements also hide cursor when custom cursor active */
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active input,
+  body.custom-cursor-active select,
+  body.custom-cursor-active textarea,
+  body.custom-cursor-active [role="button"],
+  body.custom-cursor-active [type="text"],
+  body.custom-cursor-active [type="password"],
+  body.custom-cursor-active [type="email"],
+  body.custom-cursor-active [type="number"],
+  body.custom-cursor-active [contenteditable="true"] {
     cursor: none !important;
   }
 }

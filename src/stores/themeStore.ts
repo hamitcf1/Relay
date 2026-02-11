@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useAuthStore } from './authStore'
 
 export type Theme = 'light' | 'dark'
 
@@ -27,6 +28,7 @@ interface ThemeActions {
     setAccentColor: (color: string) => void
     toggleTheme: () => void
     applyTheme: () => void
+    syncFromUser: () => void
 }
 
 type ThemeStore = ThemeState & ThemeActions
@@ -40,17 +42,26 @@ export const useThemeStore = create<ThemeStore>()(
             setTheme: (theme) => {
                 set({ theme })
                 get().applyTheme()
+                // Persist to Firebase if user is logged in
+                const { user } = useAuthStore.getState()
+                if (user) {
+                    useAuthStore.getState().updateSettings({ theme })
+                }
             },
 
             setAccentColor: (accentColor) => {
                 set({ accentColor })
                 get().applyTheme()
+                // Persist to Firebase if user is logged in
+                const { user } = useAuthStore.getState()
+                if (user) {
+                    useAuthStore.getState().updateSettings({ accent_color: accentColor })
+                }
             },
 
             toggleTheme: () => {
                 const newTheme = get().theme === 'dark' ? 'light' : 'dark'
-                set({ theme: newTheme })
-                get().applyTheme()
+                get().setTheme(newTheme)
             },
 
             applyTheme: () => {
@@ -70,10 +81,43 @@ export const useThemeStore = create<ThemeStore>()(
                 if (metaThemeColor) {
                     metaThemeColor.setAttribute('content', theme === 'dark' ? '#09090b' : '#ffffff')
                 }
-            }
+            },
+
+            // Called after login to load user's saved preferences from Firebase
+            syncFromUser: () => {
+                const { user } = useAuthStore.getState()
+                if (!user?.settings) return
+
+                const { theme, accent_color } = user.settings
+                const updates: Partial<ThemeState> = {}
+
+                if (theme) updates.theme = theme
+                if (accent_color) updates.accentColor = accent_color
+
+                if (Object.keys(updates).length > 0) {
+                    set(updates)
+                    get().applyTheme()
+                }
+            },
         }),
         {
-            name: 'relay-theme-storage',
+            name: 'relay-theme-storage', // Keep localStorage as fallback for unauthenticated pages
         }
     )
 )
+
+// Sync theme with Firestore when user logs in
+useAuthStore.subscribe((state) => {
+    const settings = state.user?.settings
+    if (settings) {
+        const store = useThemeStore.getState()
+        if (settings.theme && settings.theme !== store.theme) {
+            useThemeStore.setState({ theme: settings.theme })
+            store.applyTheme()
+        }
+        if (settings.accent_color && settings.accent_color !== store.accentColor) {
+            useThemeStore.setState({ accentColor: settings.accent_color })
+            store.applyTheme()
+        }
+    }
+})

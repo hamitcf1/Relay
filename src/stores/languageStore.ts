@@ -413,6 +413,9 @@ type Translations = {
     'notifications.markAllRead': string
     'notifications.noNotifications': string
     'notifications.viewAll': string
+    'notifications.duePayments.title': string
+    'notifications.duePayments.content': string
+    'notifications.compliance.pending': string
 
     // Feedback - Expanded
     'feedback.placeholder': string
@@ -1229,6 +1232,9 @@ const translations: Record<Language, Translations> = {
         'notifications.markAllRead': 'Mark all read',
         'notifications.noNotifications': 'No new notifications',
         'notifications.viewAll': 'View All Activity',
+        'notifications.duePayments.title': 'Pending Payments',
+        'notifications.duePayments.content': '{count} sales have a total of {amount}€ uncollected.',
+        'notifications.compliance.pending': 'Shift {shift} compliance tasks (KBS/Agency) are still pending. Please complete them.',
 
         // Feedback
         'feedback.placeholder': 'Describe your concern or feedback here...',
@@ -1939,6 +1945,9 @@ const translations: Record<Language, Translations> = {
         'notifications.markAllRead': 'Tümünü okundu işaretle',
         'notifications.noNotifications': 'Yeni bildirim yok',
         'notifications.viewAll': 'Tüm Aktiviteyi Gör',
+        'notifications.duePayments.title': 'Bekleyen Ödemeler',
+        'notifications.duePayments.content': '{count} satışta toplam {amount}€ tahsil edilmedi.',
+        'notifications.compliance.pending': 'Vardiya {shift} uyum görevleri (KBS/Acente) hâlâ bekliyor. Lütfen tamamlayın.',
 
         // Feedback
         'feedback.placeholder': 'Şikayet veya geri bildiriminizi buraya yazın...',

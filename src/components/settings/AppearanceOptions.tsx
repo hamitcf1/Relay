@@ -1,10 +1,19 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Moon, Palette } from 'lucide-react'
+import { Sun, Moon, Palette, MousePointer2 } from 'lucide-react'
 import { useThemeStore, ACCENT_COLORS } from '@/stores/themeStore'
+import { getCursorEnabled, setCursorEnabled } from '@/components/ui/CustomCursor'
 import { cn } from '@/lib/utils'
 
 export function AppearanceOptions() {
     const { theme, setTheme, accentColor, setAccentColor } = useThemeStore()
+    const [cursorEnabled, setCursorEnabledLocal] = useState(getCursorEnabled)
+
+    const toggleCursor = () => {
+        const newVal = !cursorEnabled
+        setCursorEnabledLocal(newVal)
+        setCursorEnabled(newVal)
+    }
 
     return (
         <div className="space-y-6 p-1">
@@ -79,6 +88,41 @@ export function AppearanceOptions() {
                         </button>
                     ))}
                 </div>
+            </div>
+
+            {/* Custom Cursor Toggle */}
+            <div className="space-y-3">
+                <div className="flex items-center gap-2 px-2">
+                    <MousePointer2 className="w-3.5 h-3.5 text-zinc-500" />
+                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                        Custom Cursor
+                    </label>
+                </div>
+                <button
+                    onClick={toggleCursor}
+                    className={cn(
+                        "w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-200",
+                        cursorEnabled
+                            ? "bg-primary/10 border-primary/30 text-foreground"
+                            : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    )}
+                >
+                    <span className="text-xs font-medium">
+                        {cursorEnabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                    <div
+                        className={cn(
+                            "w-8 h-4 rounded-full relative transition-colors duration-200",
+                            cursorEnabled ? "bg-primary" : "bg-zinc-600"
+                        )}
+                    >
+                        <motion.div
+                            className="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm"
+                            animate={{ left: cursorEnabled ? 16 : 2 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                    </div>
+                </button>
             </div>
         </div>
     )

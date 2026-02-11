@@ -24,18 +24,17 @@ export function CollapsibleCard({
     defaultCollapsed = false,
     onToggle
 }: CollapsibleCardProps) {
-    const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        // Read initial state from localStorage
+        const saved = localStorage.getItem(`relay_card_collapsed_${id}`)
+        if (saved !== null) {
+            return saved === 'true'
+        }
+        return defaultCollapsed
+    })
     const [isFocused, setIsFocused] = useState(false)
     const cardRef = useRef<HTMLDivElement>(null)
     const [placeholderHeight, setPlaceholderHeight] = useState(0)
-
-    // Load state from localStorage on mount
-    useEffect(() => {
-        const savedState = localStorage.getItem(`relay_card_collapsed_${id}`)
-        if (savedState !== null) {
-            setIsCollapsed(savedState === 'true')
-        }
-    }, [id])
 
     // Handle Esc key to exit focus mode
     useEffect(() => {
@@ -52,6 +51,7 @@ export function CollapsibleCard({
         if (isFocused) return // Disable collapsing when focused
         const newState = !isCollapsed
         setIsCollapsed(newState)
+        // Persist to localStorage
         localStorage.setItem(`relay_card_collapsed_${id}`, String(newState))
         if (onToggle) onToggle(newState)
     }

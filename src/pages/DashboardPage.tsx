@@ -69,11 +69,12 @@ export function DashboardPage() {
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
     const [showDateTime, setShowDateTime] = useState(() => {
         const saved = localStorage.getItem('relay_show_datetime')
-        return saved !== null ? JSON.parse(saved) : true
+        return saved !== 'false' // default: true
     })
 
+    // Persist showDateTime changes to localStorage
     useEffect(() => {
-        localStorage.setItem('relay_show_datetime', JSON.stringify(showDateTime))
+        localStorage.setItem('relay_show_datetime', String(showDateTime))
     }, [showDateTime])
 
     // Update activeTab when location changes (e.g. via navigate('/operations'))
@@ -118,34 +119,29 @@ export function DashboardPage() {
     }, [initAuth])
 
     // Get user's hotel and set up subscription
+    const userHotelId = user?.hotel_id
+
     useEffect(() => {
-        const setupHotel = async () => {
-            if (!user) return
-
-            const hotelId = user.hotel_id
-
-            if (!hotelId) {
-                navigate('/setup-hotel')
-                return
-            }
-
-            const unsubHotel = subscribeToHotel(hotelId)
-            const unsubShift = subscribeToCurrentShift(hotelId)
-            const unsubNotes = subscribeToNotes(hotelId)
-            const unsubRoster = subscribeToRoster(hotelId)
-            const unsubMenu = subscribeToTodayMenu(hotelId)
-
-            return () => {
-                unsubHotel()
-                unsubShift()
-                unsubNotes()
-                unsubRoster()
-                unsubMenu()
-            }
+        if (!userHotelId) {
+            // Only redirect if explicitly not loading and no hotelId (handled in auth guard usually)
+            return
         }
 
-        setupHotel()
-    }, [user, navigate, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes])
+        const unsubHotel = subscribeToHotel(userHotelId)
+        const unsubShift = subscribeToCurrentShift(userHotelId)
+        const unsubNotes = subscribeToNotes(userHotelId)
+        const unsubRoster = subscribeToRoster(userHotelId)
+        const unsubMenu = subscribeToTodayMenu(userHotelId)
+
+        return () => {
+            unsubHotel()
+            unsubShift()
+            unsubNotes()
+            unsubRoster()
+            unsubMenu()
+        }
+    }, [userHotelId, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu])
+
 
     // Handlers
     const handleKBSCheck = async () => {

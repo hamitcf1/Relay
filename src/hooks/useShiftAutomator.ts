@@ -3,6 +3,7 @@ import { format, isWithinInterval, parse, addDays } from 'date-fns'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useNotificationStore } from '@/stores/notificationStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import type { ShiftType } from '@/types'
 
 const SHIFT_TIMES = {
@@ -43,7 +44,7 @@ export function useShiftAutomator(hotelId: string | null) {
                 const config = SHIFT_TIMES[currentShift.type as keyof typeof SHIFT_TIMES]
                 if (config) {
                     const [endH, endM] = config.end.split(':').map(Number)
-                    
+
                     // CRITICAL: Use the shift's own date as the base for end time
                     const shiftDate = parse(currentShift.date, 'yyyy-MM-dd', new Date())
                     const end = new Date(shiftDate)
@@ -56,9 +57,8 @@ export function useShiftAutomator(hotelId: string | null) {
 
                     // If current time is past the end time of the active shift, close it
                     if (now >= end) {
-                        console.log(`[Automator] Shift ${currentShift.type} (${currentShift.date}) ended at ${config.end}. Auto-closing...`)
                         await endShift(hotelId, currentShift.cash_start, 'Automatically closed by system roster.')
-                        return 
+                        return
                     }
                 }
             }
@@ -84,7 +84,6 @@ export function useShiftAutomator(hotelId: string | null) {
                     }
 
                     if (isWithinInterval(now, { start: startTime, end: endTime })) {
-                        console.log(`[Automator] Time for Shift ${shiftInfo.shift} (${config.start}-${config.end}). Auto-starting...`)
 
                         // Get all staff for this shift
                         const staffIds = todayShifts
@@ -110,10 +109,11 @@ export function useShiftAutomator(hotelId: string | null) {
 
                 if (nowMs - lastComplianceNotificationRef.current > twoHoursMs) {
                     const { addNotification } = useNotificationStore.getState()
+                    const { t } = useLanguageStore.getState()
                     await addNotification(hotelId, {
                         type: 'compliance',
-                        title: 'Compliance Checklist Pending',
-                        content: `Shift ${currentShift.type} compliance tasks (KBS/Agency) are still pending. Please complete them.`,
+                        title: t('notifications.duePayments.title'),
+                        content: t('notifications.compliance.pending', { shift: currentShift.type }),
                         target_role: 'receptionist',
                         link: '/'
                     })

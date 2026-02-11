@@ -36,12 +36,19 @@ export interface User {
     role: UserRole
     hotel_id?: string | null
     current_shift_type: ShiftType | null
-    settings?: {
-        language?: 'en' | 'tr'
-        onboarding_seen?: boolean
-        dismissed_announcements?: string[]
-    }
+    settings?: UserSettings
     is_hidden_in_roster?: boolean
+}
+
+export interface UserSettings {
+    language?: 'en' | 'tr'
+    onboarding_seen?: boolean
+    dismissed_announcements?: string[]
+    theme?: 'light' | 'dark'
+    accent_color?: string
+    custom_cursor_enabled?: boolean
+    show_datetime?: boolean
+    collapsed_cards?: Record<string, boolean>
 }
 
 export interface HotelInfo {
@@ -88,9 +95,11 @@ export interface Log {
     guest_name?: string
 }
 
+import { FieldValue } from 'firebase/firestore'
+
 // Input type for creating new logs
 export type LogInput = Omit<Log, 'id' | 'created_at'> & {
-    created_at?: any // Can be FieldValue on write
+    created_at?: FieldValue | Date
 }
 
 export interface ShiftCompliance {

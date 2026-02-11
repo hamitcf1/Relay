@@ -52,7 +52,7 @@ export function LandingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none flex flex-col">
+        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 flex flex-col">
 
 
             {/* Hero Section */}
@@ -234,7 +234,7 @@ function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: stri
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 }
             }}
-            className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group cursor-none"
+            className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group"
         >
             <div className="mb-6 p-4 rounded-2xl bg-black/50 w-fit group-hover:scale-110 transition-transform duration-500 border border-white/5">
                 {icon}

@@ -48,8 +48,6 @@ function App() {
                 {/* Public Routes with Layout */}
                 <Route element={<PublicLayout />}>
                     <Route path="/" element={<LandingPage />} />
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/legal/privacy" element={<PrivacyPage />} />
                     <Route path="/legal/privacy" element={<PrivacyPage />} />
                     <Route path="/legal/terms" element={<TermsPage />} />
                     <Route path="/legal/status" element={<StatusPage />} />

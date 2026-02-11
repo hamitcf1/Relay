@@ -2,27 +2,82 @@ import { useEffect, useState } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
+const CURSOR_STORAGE_KEY = 'relay_custom_cursor_enabled'
+
+export function getCursorEnabled(): boolean {
+    const saved = localStorage.getItem(CURSOR_STORAGE_KEY)
+    return saved !== 'false' // default: enabled
+}
+
+export function setCursorEnabled(enabled: boolean) {
+    localStorage.setItem(CURSOR_STORAGE_KEY, String(enabled))
+    window.dispatchEvent(new Event('cursor-setting-changed'))
+}
+
 export function CustomCursor() {
-    const [isHovering, setIsHovering] = useState(false)
-    const [isTextInput, setIsTextInput] = useState(false)
+    const [cursorEnabled, setCursorEnabledState] = useState(getCursorEnabled)
+
+    // Listen for toggle changes from AppearanceOptions
+    useEffect(() => {
+        const handler = () => setCursorEnabledState(getCursorEnabled())
+        window.addEventListener('cursor-setting-changed', handler)
+        return () => window.removeEventListener('cursor-setting-changed', handler)
+    }, [])
+
+    // Toggle cursor visibility via class + inline style for reliability
+    useEffect(() => {
+        if (cursorEnabled) {
+            document.body.classList.add('custom-cursor-active')
+            // Clear any lingering inline cursor styles
+            document.documentElement.style.cursor = ''
+            document.body.style.cursor = ''
+        } else {
+            document.body.classList.remove('custom-cursor-active')
+            // Force system cursor visible
+            document.documentElement.style.cursor = 'auto'
+            document.body.style.cursor = 'auto'
+        }
+    }, [cursorEnabled])
+
+    if (!cursorEnabled) return null
+
+    return <CursorRenderer />
+}
+
+function CursorRenderer() {
     const cursorX = useMotionValue(-100)
     const cursorY = useMotionValue(-100)
 
-    // "stiffness" determines how fast it catches up (higher = faster/less laggy)
-    // "damping" determines how much it resists oscillation (higher = less bouncy)
     const springConfig = { damping: 50, stiffness: 1000 }
     const cursorXSpring = useSpring(cursorX, springConfig)
     const cursorYSpring = useSpring(cursorY, springConfig)
 
+    const [isHovering, setIsHovering] = useState(false)
+    const [isTextInput, setIsTextInput] = useState(false)
     const [isHidden, setIsHidden] = useState(false)
+    const [primaryColor, setPrimaryColor] = useState('rgba(99, 102, 241, 1)')
+
+    // Resolve CSS variable --primary to a concrete color framer-motion can animate
+    useEffect(() => {
+        const resolvePrimary = () => {
+            const raw = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
+            if (raw) {
+                setPrimaryColor(`hsl(${raw})`)
+            }
+        }
+        resolvePrimary()
+
+        // Re-resolve when theme/accent changes
+        const observer = new MutationObserver(resolvePrimary)
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] })
+        return () => observer.disconnect()
+    }, [])
 
     useEffect(() => {
         const updateCursorState = (e: MouseEvent) => {
-            // Update position
             cursorX.set(e.clientX)
             cursorY.set(e.clientY)
 
-            // Check if on scrollbar (right or bottom edge)
             const isOnVerticalScrollbar = e.clientX > document.documentElement.clientWidth
             const isOnHorizontalScrollbar = e.clientY > document.documentElement.clientHeight
 
@@ -33,10 +88,7 @@ export function CustomCursor() {
                 setIsHidden(false)
             }
 
-            // Target detection checks
             const target = e.target as HTMLElement
-
-            // Check computed style for cursor pointer
             const style = window.getComputedStyle(target)
             const isPointer = style.cursor === 'pointer'
 
@@ -53,7 +105,6 @@ export function CustomCursor() {
             const isTextArea = target.tagName === 'TEXTAREA'
             const isContentEditable = target.isContentEditable || target.getAttribute('contenteditable') === 'true'
 
-            // Exclude non-text inputs from being treated as text
             const isText =
                 isTextArea ||
                 isContentEditable ||
@@ -65,13 +116,8 @@ export function CustomCursor() {
             setIsTextInput(!!isText)
         }
 
-        const handleMouseLeave = () => {
-            setIsHidden(true)
-        }
-
-        const handleMouseEnter = () => {
-            setIsHidden(false)
-        }
+        const handleMouseLeave = () => setIsHidden(true)
+        const handleMouseEnter = () => setIsHidden(false)
 
         window.addEventListener('mousemove', updateCursorState)
         document.addEventListener('mouseleave', handleMouseLeave)
@@ -84,7 +130,6 @@ export function CustomCursor() {
         }
     }, [cursorX, cursorY])
 
-    // Hide cursor on touch devices to prevent weird artifacts
     if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) {
         return null
     }
@@ -101,7 +146,6 @@ export function CustomCursor() {
                 translateY: cursorYSpring,
                 x: '-50%',
                 y: '-50%',
-                // Keep border in style so it can be toggled without fighting animate
                 border: isTextInput ? 'none' : '1px solid white',
             }}
             animate={{
@@ -110,14 +154,13 @@ export function CustomCursor() {
                 borderRadius: isTextInput ? 1 : 9999,
                 backgroundColor: isHovering && !isTextInput
                     ? 'rgba(255, 255, 255, 1)'
-                    : (isTextInput ? 'hsl(var(--primary))' : 'rgba(255, 255, 255, 0)'),
+                    : (isTextInput ? primaryColor : 'rgba(255, 255, 255, 0)'),
                 scale: isHovering && !isTextInput ? 1.5 : 1,
             }}
             transition={{
                 type: "spring",
                 stiffness: 400,
                 damping: 25,
-                // Make shape transitions snappier to avoid lingering square
                 borderRadius: { type: "spring", stiffness: 600, damping: 30 },
             }}
         >

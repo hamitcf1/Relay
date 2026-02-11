@@ -3,10 +3,11 @@ import { useSalesStore } from '@/stores/salesStore'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 /**
  * Hook that checks for outstanding payments and triggers notifications.
- * Runs on dashboard load and every 2 hours thereafter.
+ * Runs on dashboard load and every 4 hours thereafter.
  */
 export function useDuePaymentNotifier() {
     const { getDueSales } = useSalesStore()
@@ -43,11 +44,16 @@ export function useDuePaymentNotifier() {
                 return sum + (sale.total_price - sale.collected_amount)
             }, 0)
 
+            const { t } = useLanguageStore.getState()
+
             // Create a summary notification
             await addNotification(hotel.id, {
                 type: 'compliance',
-                title: 'Bekleyen Ödemeler',
-                content: `${dueSales.length} satışta toplam ${totalDue}€ tahsil edilmedi.`
+                title: t('notifications.duePayments.title'),
+                content: t('notifications.duePayments.content', {
+                    count: dueSales.length.toString(),
+                    amount: totalDue.toString()
+                })
             })
         }
 

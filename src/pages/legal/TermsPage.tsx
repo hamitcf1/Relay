@@ -8,7 +8,7 @@ export function TermsPage() {
     const { t } = useLanguageStore()
 
     return (
-        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none relative overflow-hidden">
+        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 relative overflow-hidden">
 
 
             {/* Background */}

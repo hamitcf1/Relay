@@ -613,7 +613,6 @@ export function SalesPanel() {
                                                 <Select
                                                     value={sale.status || 'waiting'}
                                                     onValueChange={(val: any) => {
-                                                        console.log('Updating sale status:', sale.id, val)
                                                         if (hotel?.id) {
                                                             updateSale(hotel.id, sale.id, { status: val })
                                                         }

@@ -22,7 +22,7 @@ export function LiveDemoPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none relative overflow-hidden flex flex-col">
+        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 relative overflow-hidden flex flex-col">
             <CustomCursor />
 
             {/* Background */}

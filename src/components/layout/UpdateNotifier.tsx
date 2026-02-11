@@ -29,7 +29,6 @@ export function UpdateNotifier() {
                 const localVersion = Number(__BUILD_VERSION__)
 
                 if (serverVersion > localVersion) {
-                    console.log('Update detected:', { serverVersion, localVersion })
                     setUpdateAvailable(true)
                 }
             } catch (error) {
