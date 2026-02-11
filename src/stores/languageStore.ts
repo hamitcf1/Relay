@@ -161,35 +161,38 @@ type Translations = {
     'module.pricing_label': string
     'module.team_label': string
 
-    // Pricing Module
-    'pricing.manager.title': string
-    'pricing.manager.desc': string
-    'pricing.inquiry.title': string
-    'pricing.inquiry.desc': string
-    'pricing.mode.single': string
-    'pricing.mode.range': string
-    'pricing.date.selected': string
-    'pricing.date.start': string
-    'pricing.date.end': string
-    'pricing.days': string
-    'pricing.table.roomType': string
-    'pricing.table.standard': string
-    'pricing.table.special': string
-    'pricing.table.allDays': string
-    'pricing.info.range': string
-    'pricing.info.single': string
-    'pricing.save.range': string
-    'pricing.save.single': string
-    'pricing.selectRoom': string
-    'pricing.tier.standard': string
-    'pricing.tier.special': string
-    'pricing.perNight': string
-    'pricing.noPrices': string
+    // Pricing Module (v2)
+    'pricing.base.title': string
+    'pricing.base.desc': string
     'pricing.agencies.title': string
+    'pricing.agencies.desc': string
     'pricing.agencies.add': string
     'pricing.agencies.placeholder': string
     'pricing.agencies.empty': string
-    'pricing.agencies.included': string
+    'pricing.overrides.title': string
+    'pricing.overrides.add': string
+    'pricing.overrides.empty': string
+    'pricing.lookup.title': string
+    'pricing.lookup.desc': string
+    'pricing.lookup.date': string
+    'pricing.lookup.agency': string
+    'pricing.lookup.effective': string
+    'pricing.lookup.basePriceUsed': string
+    'pricing.lookup.overrideUsed': string
+    'pricing.save.success': string
+    'pricing.save.error': string
+    'pricing.currency.select': string
+    'pricing.perNight': string
+    'pricing.bulk.title': string
+    'pricing.bulk.desc': string
+    'pricing.bulk.everyone': string
+    'pricing.bulk.apply': string
+    'pricing.date.start': string
+    'pricing.date.end': string
+    'pricing.global_overrides.title': string
+    'pricing.global_overrides.desc': string
+    'pricing.ai.title': string
+    'pricing.ai.desc': string
 
     // Room Types
     'room.standard': string
@@ -828,34 +831,37 @@ const translations: Record<Language, Translations> = {
         'pricing.back': 'Back',
 
         // Pricing Module (New)
-        'pricing.manager.title': 'Agency Pricing Manager',
-        'pricing.manager.desc': 'Set daily rates for standard agencies and special groups.',
-        'pricing.inquiry.title': 'Agency Price Check',
-        'pricing.inquiry.desc': 'Quickly check room rates for agencies.',
-        'pricing.mode.single': 'Single Day',
-        'pricing.mode.range': 'Range',
-        'pricing.date.selected': 'Selected Date',
+        'pricing.base.title': 'Base Prices',
+        'pricing.base.desc': 'Set default rates for each room type. These apply to all agencies unless overridden by a special date range.',
+        'pricing.agencies.title': 'Agency Rates',
+        'pricing.agencies.desc': 'Manage special rates for specific travel agencies.',
+        'pricing.agencies.add': 'Add Agency',
+        'pricing.agencies.placeholder': 'Agency Name (e.g. TUI, Booking)',
+        'pricing.agencies.empty': 'No agencies added yet.',
+        'pricing.overrides.title': 'Special Date Ranges',
+        'pricing.overrides.add': 'Add New Range',
+        'pricing.overrides.empty': 'No special date ranges for this agency.',
+        'pricing.lookup.title': 'Price Lookup',
+        'pricing.lookup.desc': 'Quickly check the effective price for any date and agency.',
+        'pricing.lookup.date': 'Select Date',
+        'pricing.lookup.agency': 'Select Agency (Optional)',
+        'pricing.lookup.effective': 'Effective Price',
+        'pricing.lookup.basePriceUsed': 'Using Base Price',
+        'pricing.lookup.overrideUsed': 'Using Agency Override',
+        'pricing.save.success': 'Prices updated successfully',
+        'pricing.save.error': 'Failed to save prices',
+        'pricing.currency.select': 'Currency',
+        'pricing.perNight': 'per night',
+        'pricing.bulk.title': 'Bulk Rate Editor',
+        'pricing.bulk.desc': 'Apply prices to a date range for everyone or an agency',
+        'pricing.bulk.everyone': 'Everyone',
+        'pricing.bulk.apply': 'Apply Range Prices',
         'pricing.date.start': 'Start Date',
         'pricing.date.end': 'End Date',
-        'pricing.days': 'days',
-        'pricing.table.roomType': 'Room Type',
-        'pricing.table.standard': 'Standard Price',
-        'pricing.table.special': 'Special Group Price',
-        'pricing.table.allDays': 'All Days',
-        'pricing.info.range': 'Prices will be applied to every day in the selected range.',
-        'pricing.info.single': 'Prices apply only to the selected date.',
-        'pricing.save.range': 'Save Range',
-        'pricing.save.single': 'Save Changes',
-        'pricing.selectRoom': 'Select room type',
-        'pricing.tier.standard': 'Standard Agency',
-        'pricing.tier.special': 'Special Group',
-        'pricing.perNight': '/night',
-        'pricing.noPrices': 'No prices set for this date.',
-        'pricing.agencies.title': 'Special Group Agencies',
-        'pricing.agencies.add': 'Add Agency',
-        'pricing.agencies.placeholder': 'Enter agency name...',
-        'pricing.agencies.empty': 'No agencies defined for special group.',
-        'pricing.agencies.included': 'Included Agencies:',
+        'pricing.global_overrides.title': 'Special Periods (Everyone)',
+        'pricing.global_overrides.desc': 'Prices defined here apply to all agencies during the specified dates.',
+        'pricing.ai.title': 'AI Pricing Agent',
+        'pricing.ai.desc': 'Paste date ranges and prices in text or table format.',
 
         // Room Types
         'room.standard': 'Standard Room',
@@ -1682,34 +1688,37 @@ const translations: Record<Language, Translations> = {
         'module.team_label': 'Ekip',
 
         // Pricing Module (New)
-        'pricing.manager.title': 'Acente Fiyat Yöneticisi',
-        'pricing.manager.desc': 'Standart acenteler ve özel gruplar için günlük fiyatları belirleyin.',
-        'pricing.inquiry.title': 'Acente Fiyat Sorgulama',
-        'pricing.inquiry.desc': 'Acenteler için oda fiyatlarını hızlıca kontrol edin.',
-        'pricing.mode.single': 'Tek Gün',
-        'pricing.mode.range': 'Tarih Aralığı',
-        'pricing.date.selected': 'Seçilen Tarih',
+        'pricing.base.title': 'Taban Fiyatlar',
+        'pricing.base.desc': 'Her oda tipi için varsayılan fiyatları belirleyin. Bu fiyatlar, özel bir tarih aralığı tanımlanmadığı sürece tüm acenteler için geçerlidir.',
+        'pricing.agencies.title': 'Acente Fiyatları',
+        'pricing.agencies.desc': 'Belirli seyahat acenteleri için özel fiyatları yönetin.',
+        'pricing.agencies.add': 'Acente Ekle',
+        'pricing.agencies.placeholder': 'Acente Adı (Örn: TUI, Booking)',
+        'pricing.agencies.empty': 'Henüz acente eklenmedi.',
+        'pricing.overrides.title': 'Özel Tarih Aralıkları',
+        'pricing.overrides.add': 'Yeni Aralık Ekle',
+        'pricing.overrides.empty': 'Bu acente için özel tarih aralığı bulunmuyor.',
+        'pricing.lookup.title': 'Fiyat Sorgulama',
+        'pricing.lookup.desc': 'Herhangi bir tarih ve acente için geçerli fiyatı hızlıca kontrol edin.',
+        'pricing.lookup.date': 'Tarih Seçin',
+        'pricing.lookup.agency': 'Acente Seçin (Opsiyonel)',
+        'pricing.lookup.effective': 'Geçerli Fiyat',
+        'pricing.lookup.basePriceUsed': 'Taban Fiyat Kullanılıyor',
+        'pricing.lookup.overrideUsed': 'Acente Özel Fiyatı Kullanılıyor',
+        'pricing.save.success': 'Fiyatlar başarıyla güncellendi',
+        'pricing.save.error': 'Fiyatlar kaydedilemedi',
+        'pricing.currency.select': 'Para Birimi',
+        'pricing.perNight': 'gecelik',
+        'pricing.bulk.title': 'Toplu Fiyat Düzenleyici',
+        'pricing.bulk.desc': 'Belirli bir tarih aralığı için toplu fiyat uygula',
+        'pricing.bulk.everyone': 'Herkes',
+        'pricing.bulk.apply': 'Aralık Fiyatlarını Uygula',
         'pricing.date.start': 'Başlangıç Tarihi',
         'pricing.date.end': 'Bitiş Tarihi',
-        'pricing.days': 'gün',
-        'pricing.table.roomType': 'Oda Tipi',
-        'pricing.table.standard': 'Standart Fiyat',
-        'pricing.table.special': 'Özel Grup Fiyatı',
-        'pricing.table.allDays': 'Tüm Günler',
-        'pricing.info.range': 'Fiyatlar seçilen aralıktaki her güne uygulanacaktır.',
-        'pricing.info.single': 'Fiyatlar sadece seçilen tarih için geçerlidir.',
-        'pricing.save.range': 'Aralığı Kaydet',
-        'pricing.save.single': 'Değişiklikleri Kaydet',
-        'pricing.selectRoom': 'Oda tipi seçin',
-        'pricing.tier.standard': 'Standart Acente',
-        'pricing.tier.special': 'Özel Grup',
-        'pricing.perNight': '/gece',
-        'pricing.noPrices': 'Bu tarih için fiyat belirlenmemiş.',
-        'pricing.agencies.title': 'Özel Grup Acenteleri',
-        'pricing.agencies.add': 'Acente Ekle',
-        'pricing.agencies.placeholder': 'Acente adı girin...',
-        'pricing.agencies.empty': 'Özel grup için acente tanımlanmamış.',
-        'pricing.agencies.included': 'Dahil Olan Acenteler:',
+        'pricing.global_overrides.title': 'Özel Dönemler (Herkes)',
+        'pricing.global_overrides.desc': 'Burada tanımlanan fiyatlar belirtilen tarihlerde tüm acenteler için geçerlidir.',
+        'pricing.ai.title': 'AI Fiyat Asistanı',
+        'pricing.ai.desc': 'Tarih aralıklarını ve fiyatları metin veya tablo formatında yapıştırın.',
 
         // Room Types
         'room.standard': 'Standart Oda',

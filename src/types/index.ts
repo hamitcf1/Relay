@@ -71,7 +71,7 @@ export interface HotelSettings {
     }
     fixture_prices?: Record<string, number>
     minibar_prices?: Record<string, number>
-    special_group_agencies?: string[]
+
 }
 
 export interface Hotel {
@@ -312,23 +312,41 @@ export interface PaymentEntry {
 }
 
 // ============================================
-// Agency Pricing
+// Agency Pricing (v2)
 // ============================================
 
-export type AgencyTier = 'standard' | 'special_group'
+export type PricingCurrency = 'USD' | 'EUR'
 
-export interface DailyPrice {
-    id: string // YYYY-MM-DD
-    date: string
-    prices: {
-        [key in RoomType]?: {
-            standard: { amount: number; currency: Currency }
-            special_group: { amount: number; currency: Currency }
-            agency_prices?: Record<string, { amount: number; currency: Currency }>
-        }
-    }
+export interface RoomPriceEntry {
+    amount: number
+    currency: PricingCurrency
+}
+
+export interface BasePrices {
+    prices: { [key in RoomType]?: RoomPriceEntry }
     updated_at: Date
     updated_by: string
+}
+
+export interface AgencyOverride {
+    id: string
+    start_date: string // YYYY-MM-DD
+    end_date: string   // YYYY-MM-DD
+    prices: { [key in RoomType]?: RoomPriceEntry }
+}
+
+export interface BaseOverride {
+    id: string
+    start_date: string // YYYY-MM-DD
+    end_date: string   // YYYY-MM-DD
+    prices: { [key in RoomType]?: RoomPriceEntry }
+}
+
+export interface Agency {
+    id: string
+    name: string
+    overrides: AgencyOverride[]
+    updated_at: Date
 }
 
 // ============================================

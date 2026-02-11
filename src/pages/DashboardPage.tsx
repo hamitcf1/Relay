@@ -43,10 +43,9 @@ import { FeedbackSection } from '@/components/feedback/FeedbackSection'
 import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
 import { TourCatalogue } from '@/components/tours/TourCatalogue'
 import { SalesPanel } from '@/components/sales/SalesPanel'
-import { PriceManager } from '@/components/pricing/PriceManager'
-import { PriceInquiry } from '@/components/pricing/PriceInquiry'
+import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, Euro } from 'lucide-react'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
@@ -408,7 +407,7 @@ export function DashboardPage() {
                                             <span className="hidden sm:inline">{t('module.sales')}</span>
                                         </TabsTrigger>
                                         <TabsTrigger value="pricing" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <Euro className="w-4 h-4" />
+                                            <DollarSign className="w-4 h-4" />
                                             <span className="inline">{t('module.pricing_label')}</span>
                                         </TabsTrigger>
                                         <TabsTrigger value="team" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
@@ -438,10 +437,7 @@ export function DashboardPage() {
                                         <TourCatalogue />
                                     </TabsContent>
                                     <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                                            <PriceInquiry />
-                                            {user?.role === 'gm' && <PriceManager />}
-                                        </div>
+                                        <PricingPanel />
                                     </TabsContent>
                                     <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <LeaderboardPanel />

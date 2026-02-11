@@ -159,9 +159,9 @@ function CursorRenderer() {
             }}
             transition={{
                 type: "spring",
-                stiffness: 400,
-                damping: 25,
-                borderRadius: { type: "spring", stiffness: 600, damping: 30 },
+                stiffness: 500,
+                damping: 30,
+                mass: 0.8,
             }}
         >
             <motion.div
