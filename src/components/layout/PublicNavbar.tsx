@@ -3,15 +3,17 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Globe, ArrowLeft } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function PublicNavbar() {
     const navigate = useNavigate()
     const location = useLocation()
     const { t, language, setLanguage } = useLanguageStore()
-
-    const toggleLanguage = () => {
-        setLanguage(language === 'tr' ? 'en' : 'tr')
-    }
 
     const isLandingPage = location.pathname === '/'
 
@@ -42,9 +44,23 @@ export function PublicNavbar() {
             </div>
 
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-zinc-400 hover:text-white hover:bg-white/5">
-                    <Globe className="w-5 h-5" />
-                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white hover:bg-white/5">
+                            <Globe className="w-5 h-5" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-black/90 backdrop-blur-xl border-white/10 text-white">
+                        <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-white/10 cursor-pointer">
+                            English
+                            {language === 'en' && <span className="ml-2 text-primary">✓</span>}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setLanguage('tr')} className="hover:bg-white/10 cursor-pointer">
+                            Türkçe
+                            {language === 'tr' && <span className="ml-2 text-primary">✓</span>}
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
                 {location.pathname !== '/login' && location.pathname !== '/register' && (
                     <>

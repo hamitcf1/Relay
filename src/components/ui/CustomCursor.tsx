@@ -4,10 +4,13 @@ import { cn } from '@/lib/utils'
 
 export function CustomCursor() {
     const [isHovering, setIsHovering] = useState(false)
+    const [isTextInput, setIsTextInput] = useState(false)
     const cursorX = useMotionValue(-100)
     const cursorY = useMotionValue(-100)
 
-    const springConfig = { damping: 25, stiffness: 700 }
+    // "stiffness" determines how fast it catches up (higher = faster/less laggy)
+    // "damping" determines how much it resists oscillation (higher = less bouncy)
+    const springConfig = { damping: 50, stiffness: 1000 }
     const cursorXSpring = useSpring(cursorX, springConfig)
     const cursorYSpring = useSpring(cursorY, springConfig)
 
@@ -26,7 +29,14 @@ export function CustomCursor() {
                 target.closest('a') ||
                 target.classList.contains('cursor-pointer')
 
+            const isText =
+                target.tagName === 'INPUT' ||
+                target.tagName === 'TEXTAREA' ||
+                target.isContentEditable ||
+                target.getAttribute('contenteditable') === 'true'
+
             setIsHovering(!!isClickable)
+            setIsTextInput(!!isText)
         }
 
         window.addEventListener('mousemove', moveCursor)
@@ -46,8 +56,9 @@ export function CustomCursor() {
     return (
         <motion.div
             className={cn(
-                "fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-[9999] mix-blend-difference",
-                "border border-white flex items-center justify-center transition-opacity duration-300"
+                "fixed top-0 left-0 rounded-full pointer-events-none z-[9999] mix-blend-difference",
+                "border border-white flex items-center justify-center transition-opacity duration-300",
+                isTextInput ? "w-1 h-6 rounded-none border-none bg-white" : "w-8 h-8 rounded-full"
             )}
             style={{
                 translateX: cursorXSpring,
@@ -56,14 +67,22 @@ export function CustomCursor() {
                 y: '-50%'
             }}
             animate={{
-                scale: isHovering ? 1.5 : 1,
-                backgroundColor: isHovering ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0)'
+                width: isTextInput ? 2 : 32,
+                height: isTextInput ? 24 : 32,
+                borderRadius: isTextInput ? 0 : 16, // 16px radius for 32px width = Circle
+                backgroundColor: isHovering && !isTextInput ? 'rgba(255, 255, 255, 1)' : (isTextInput ? 'hsl(var(--primary))' : 'rgba(255, 255, 255, 0)'),
+                scale: isHovering && !isTextInput ? 1.5 : 1,
+            }}
+            transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 25
             }}
         >
             <motion.div
                 className="w-1 h-1 bg-white rounded-full"
                 animate={{
-                    scale: isHovering ? 0 : 1
+                    scale: isHovering && !isTextInput ? 0 : (isTextInput ? 0 : 1)
                 }}
             />
         </motion.div>

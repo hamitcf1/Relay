@@ -2026,7 +2026,7 @@ const translations: Record<Language, Translations> = {
         'ai.cancel': 'İptal',
 
         // Landing Page
-        'landing.hero.trusted': "500+ Lüks Otel Tarafından Kullanılıyor",
+        'landing.hero.trusted': "500'den Fazla Otel Tarafından Kullanılıyor",
         'landing.hero.title.prefix': 'Yeni Nesil',
         'landing.hero.title.suffix': 'Konaklama', // This will cycle
         'landing.hero.subtitle': "Modern oteller için akıllı işletim sistemi. Sorunsuz devir teslimler, gerçek zamanlı senkronizasyon ve operasyon otomasyonu.",

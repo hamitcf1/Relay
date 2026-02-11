@@ -15,6 +15,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TabNotifications } from '@/components/ui/TabNotifications'
 import { UpdateNotifier } from '@/components/layout/UpdateNotifier'
 import { PublicLayout } from '@/components/layout/PublicLayout'
+import { CustomCursor } from '@/components/ui/CustomCursor'
 
 import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
@@ -40,6 +41,7 @@ function App() {
         <BrowserRouter>
             <UpdateNotifier />
             <TabNotifications />
+            <CustomCursor />
             <Routes>
 
                 {/* Public Routes with Layout */}
@@ -90,7 +92,7 @@ function App() {
                     }
                 />
             </Routes>
-        </BrowserRouter>
+        </BrowserRouter >
     )
 }
 
