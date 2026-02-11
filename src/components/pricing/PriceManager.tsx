@@ -248,13 +248,13 @@ export function PriceManager() {
     }
 
     // Get base special group price for reference in agency-specific view
-    const getBaseSpecialPrice = (roomId: string): string => {
+    const getBaseSpecialPrice = (roomId: RoomType): string => {
         const dayPrices = prices[startDate]
         const priceData = dayPrices?.prices?.[roomId]
         return priceData?.special_group?.amount?.toString() || '—'
     }
 
-    const getBaseSpecialCurrency = (roomId: string): string => {
+    const getBaseSpecialCurrency = (roomId: RoomType): string => {
         const dayPrices = prices[startDate]
         const priceData = dayPrices?.prices?.[roomId]
         return priceData?.special_group?.currency || ''
