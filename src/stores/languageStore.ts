@@ -586,10 +586,149 @@ type Translations = {
     'landing.feature.vault.desc': string
     'landing.feature.tasks.title': string
     'landing.feature.tasks.desc': string
+
+    // Landing Page Navbar & Footer
+    'landing.nav.features': string
+    'landing.nav.pricing': string
+    'landing.nav.status': string
+    'landing.nav.login': string
+    'landing.nav.getStarted': string
+    'landing.footer.privacy': string
+    'landing.footer.terms': string
+    'landing.footer.status': string
+
+    // Pricing Page
+    'pricing.title': string
+    'pricing.subtitle': string
+    'pricing.monthly': string
+    'pricing.annual': string
+    'pricing.saveBadge': string
+    'pricing.plan.starter': string
+    'pricing.plan.starter.desc': string
+    'pricing.plan.pro': string
+    'pricing.plan.pro.desc': string
+    'pricing.plan.enterprise': string
+    'pricing.plan.enterprise.desc': string
+    'pricing.button.free': string
+    'pricing.button.trial': string
+    'pricing.button.contact': string
+    'pricing.mostPopular': string
+    'pricing.feature.5staff': string
+    'pricing.feature.logs': string
+    'pricing.feature.7day': string
+    'pricing.feature.support': string
+    'pricing.feature.analytics': string
+    'pricing.feature.unlimited': string
+    'pricing.feature.autoReminders': string
+    'pricing.feature.unlimitedHistory': string
+    'pricing.feature.prioritySupport': string
+    'pricing.feature.advAnalytics': string
+    'pricing.feature.roles': string
+    'pricing.feature.multiLang': string
+    'pricing.feature.multiProp': string
+    'pricing.feature.api': string
+    'pricing.feature.successManager': string
+    'pricing.feature.sla': string
+    'pricing.feature.onPrem': string
+    'pricing.feature.branding': string
+    'pricing.feature.sso': string
+    'pricing.faq.title': string
+    'pricing.faq.upgrade.q': string
+    'pricing.faq.upgrade.a': string
+    'pricing.faq.trial.q': string
+    'pricing.faq.trial.a': string
+    'pricing.faq.payment.q': string
+    'pricing.faq.payment.a': string
+    'pricing.faq.security.q': string
+    'pricing.faq.security.a': string
+    'pricing.contactSales': string
+    'pricing.needHelp': string
+    'pricing.back': string
+
+    // Demo Page
+    'demo.title': string
+    'demo.subtitle': string
+    'demo.gm': string
+    'demo.gm.desc': string
+    'demo.staff': string
+    'demo.staff.desc': string
+    'demo.enter.gm': string
+    'demo.enter.staff': string
+    'demo.back': string
+
 }
 
 const translations: Record<Language, Translations> = {
     en: {
+        // Landing Page Navbar & Footer
+        'landing.nav.features': 'Features',
+        'landing.nav.pricing': 'Pricing',
+        'landing.nav.status': 'Status',
+        'landing.nav.login': 'Login',
+        'landing.nav.getStarted': 'Get Started',
+        'landing.footer.privacy': 'Privacy Policy',
+        'landing.footer.terms': 'Terms of Service',
+        'landing.footer.status': 'System Status',
+
+        // Pricing Page
+        'pricing.title': 'Plans & Pricing',
+        'pricing.subtitle': 'Simple, transparent pricing that grows with your business. No hidden fees.',
+        'pricing.monthly': 'Monthly',
+        'pricing.annual': 'Annual',
+        'pricing.saveBadge': 'Save 20%',
+        'pricing.plan.starter': 'Starter',
+        'pricing.plan.starter.desc': 'For small boutique hotels getting started.',
+        'pricing.plan.pro': 'Pro',
+        'pricing.plan.pro.desc': 'For growing hotels needing automation.',
+        'pricing.plan.enterprise': 'Enterprise',
+        'pricing.plan.enterprise.desc': 'For hotel chains and large resorts.',
+        'pricing.button.free': 'Start Free',
+        'pricing.button.trial': 'Start Trial',
+        'pricing.button.contact': 'Contact Sales',
+        'pricing.mostPopular': 'Most Popular',
+        'pricing.feature.5staff': 'Up to 5 Staff Types',
+        'pricing.feature.logs': 'Basic Handover Logs',
+        'pricing.feature.7day': '7-Day History Retention',
+        'pricing.feature.support': 'Standard Email Support',
+        'pricing.feature.analytics': 'Basic Analytics',
+        'pricing.feature.unlimited': 'Unlimited Staff',
+        'pricing.feature.autoReminders': 'Automated Shift Reminders',
+        'pricing.feature.unlimitedHistory': 'Unlimited History',
+        'pricing.feature.prioritySupport': 'Priority 24/7 Support',
+        'pricing.feature.advAnalytics': 'Advanced Analytics & Export',
+        'pricing.feature.roles': 'Custom Role Permissions',
+        'pricing.feature.multiLang': 'Multi-language Support',
+        'pricing.feature.multiProp': 'Multi-Property Management',
+        'pricing.feature.api': 'Custom API Integrations',
+        'pricing.feature.successManager': 'Dedicated Success Manager',
+        'pricing.feature.sla': 'SLA Guarantees',
+        'pricing.feature.onPrem': 'On-premise Deployment',
+        'pricing.feature.branding': 'Custom Branding',
+        'pricing.feature.sso': 'SSO Authentication',
+        'pricing.faq.title': 'Frequently Asked Questions',
+        'pricing.faq.upgrade.q': 'Can I upgrade later?',
+        'pricing.faq.upgrade.a': 'Yes, you can upgrade or downgrade your plan at any time directly from the dashboard.',
+        'pricing.faq.trial.q': 'Is there a free trial for Pro?',
+        'pricing.faq.trial.a': 'Absolutely. You get 14 days of free Pro access when you sign up, no credit card required.',
+        'pricing.faq.payment.q': 'What payment methods do you accept?',
+        'pricing.faq.payment.a': 'We accept all major credit cards and bank transfers for Enterprise plans.',
+        'pricing.faq.security.q': 'Is my data secure?',
+        'pricing.faq.security.a': 'Yes. We use industry-standard encryption for data in transit and at rest.',
+        'pricing.contactSales': 'Contact Sales',
+        'pricing.needHelp': 'Need help choosing?',
+        'pricing.back': 'Back',
+
+        // Demo Page
+        'demo.title': 'Interactive Live Demo',
+        'demo.subtitle': 'Experience the power of Relay firsthand. Choose a persona to explore the dashboard.',
+        'demo.gm': 'General Manager',
+        'demo.gm.desc': 'Full access to all settings, analytics, staff management, and hotel configuration.',
+        'demo.staff': 'Staff Member',
+        'demo.staff.desc': 'Focused view for daily operations, shift logs, messaging, and task completion.',
+        'demo.enter.gm': 'Enter as Manager',
+        'demo.enter.staff': 'Enter as Receptionist',
+        'demo.back': 'Back to Home',
+
         // Auth & Setup
         'auth.login': 'Login',
         'auth.register': 'Register',
@@ -1739,6 +1878,75 @@ const translations: Record<Language, Translations> = {
         'landing.feature.vault.desc': 'Acente girişleri ve KBS için şifre korumalı depolama.',
         'landing.feature.tasks.title': 'Otomatik Görevler',
         'landing.feature.tasks.desc': 'Tekrarlayan kontrol listeleri her gün uyumluluğu sağlar.',
+
+        // Landing Page Navbar & Footer
+        'landing.nav.features': 'Özellikler',
+        'landing.nav.pricing': 'Fiyatlandırma',
+        'landing.nav.status': 'Durum',
+        'landing.nav.login': 'Giriş',
+        'landing.nav.getStarted': 'Hemen Başla',
+        'landing.footer.privacy': 'Gizlilik Politikası',
+        'landing.footer.terms': 'Hizmet Şartları',
+        'landing.footer.status': 'Sistem Durumu',
+
+        // Pricing Page
+        'pricing.title': 'Planlar ve Fiyatlandırma',
+        'pricing.subtitle': 'İşletmenizle büyüyen basit, şeffaf fiyatlandırma. Gizli ücret yok.',
+        'pricing.monthly': 'Aylık',
+        'pricing.annual': 'Yıllık',
+        'pricing.saveBadge': '%20 Tasarruf',
+        'pricing.plan.starter': 'Başlangıç',
+        'pricing.plan.starter.desc': 'Yeni başlayan butik oteller için.',
+        'pricing.plan.pro': 'Pro',
+        'pricing.plan.pro.desc': 'Otomasyona ihtiyaç duyan büyüyen oteller için.',
+        'pricing.plan.enterprise': 'Kurumsal',
+        'pricing.plan.enterprise.desc': 'Otel zincirleri ve büyük tatil köyleri için.',
+        'pricing.button.free': 'Ücretsiz Başla',
+        'pricing.button.trial': 'Denemeye Başla',
+        'pricing.button.contact': 'Satış Ekibi',
+        'pricing.mostPopular': 'En Popüler',
+        'pricing.feature.5staff': '5 Personel Tipine Kadar',
+        'pricing.feature.logs': 'Temel Devir Kayıtları',
+        'pricing.feature.7day': '7 Günlük Geçmiş',
+        'pricing.feature.support': 'Standart E-posta Desteği',
+        'pricing.feature.analytics': 'Temel Analizler',
+        'pricing.feature.unlimited': 'Sınırsız Personel',
+        'pricing.feature.autoReminders': 'Otomatik Vardiya Hatırlatıcıları',
+        'pricing.feature.unlimitedHistory': 'Sınırsız Geçmiş',
+        'pricing.feature.prioritySupport': 'Öncelikli 7/24 Destek',
+        'pricing.feature.advAnalytics': 'Gelişmiş Analiz ve Dışa Aktarma',
+        'pricing.feature.roles': 'Özel Rol İzinleri',
+        'pricing.feature.multiLang': 'Çoklu Dil Desteği',
+        'pricing.feature.multiProp': 'Çoklu Tesis Yönetimi',
+        'pricing.feature.api': 'Özel API Entegrasyonları',
+        'pricing.feature.successManager': 'Özel Başarı Yöneticisi',
+        'pricing.feature.sla': 'SLA Garantileri',
+        'pricing.feature.onPrem': 'Yerinde Kurulum',
+        'pricing.feature.branding': 'Özel Markalama',
+        'pricing.feature.sso': 'SSO Kimlik Doğrulama',
+        'pricing.faq.title': 'Sıkça Sorulan Sorular',
+        'pricing.faq.upgrade.q': 'Daha sonra yükseltebilir miyim?',
+        'pricing.faq.upgrade.a': 'Evet, planınızı istediğiniz zaman doğrudan panelden yükseltebilir veya düşürebilirsiniz.',
+        'pricing.faq.trial.q': 'Pro için ücretsiz deneme var mı?',
+        'pricing.faq.trial.a': 'Kesinlikle. Kaydolduğunuzda 14 günlük ücretsiz Pro erişimi alırsınız, kredi kartı gerekmez.',
+        'pricing.faq.payment.q': 'Hangi ödeme yöntemlerini kabul ediyorsunuz?',
+        'pricing.faq.payment.a': 'Tüm büyük kredi kartlarını ve Kurumsal planlar için banka havalelerini kabul ediyoruz.',
+        'pricing.faq.security.q': 'Verilerim güvende mi?',
+        'pricing.faq.security.a': 'Evet. Verileriniz iletilirken ve saklanırken endüstri standardı şifreleme kullanıyoruz.',
+        'pricing.contactSales': 'Satış Ekibi',
+        'pricing.needHelp': 'Seçim yapmakta zorlanıyor musunuz?',
+        'pricing.back': 'Geri',
+
+        // Demo Page
+        'demo.title': 'İnteraktif Canlı Demo',
+        'demo.subtitle': "Relay'in gücünü ilk elden deneyimleyin. Paneli keşfetmek için bir persona seçin.",
+        'demo.gm': 'Genel Müdür',
+        'demo.gm.desc': 'Tüm ayarlara, analizlere, personel yönetimine ve otel yapılandırmasına tam erişim.',
+        'demo.staff': 'Personel',
+        'demo.staff.desc': 'Günlük operasyonlar, vardiya kayıtları, mesajlaşma ve görev tamamlama için odaklanmış görünüm.',
+        'demo.enter.gm': 'Yönetici Olarak Gir',
+        'demo.enter.staff': 'Resepsiyonist Olarak Gir',
+        'demo.back': 'Ana Sayfaya Dön',
     },
 }
 

@@ -4,13 +4,21 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, User, Hotel } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
+import { useState } from 'react'
+import { useLanguageStore } from '@/stores/languageStore'
 
 export function LiveDemoPage() {
     const navigate = useNavigate()
 
+    const [isLoading, setIsLoading] = useState(false)
+    const { t } = useLanguageStore()
+
     const startDemo = async (role: 'gm' | 'receptionist') => {
+        setIsLoading(true)
+        // Short delay for UX to show "Setting up..." state
+        await new Promise(resolve => setTimeout(resolve, 800))
         await useAuthStore.getState().loginAsDemo(role)
-        navigate('/')
+        navigate('/dashboard')
     }
 
     return (
@@ -26,7 +34,7 @@ export function LiveDemoPage() {
             <div className="container mx-auto px-6 py-12 flex-1 flex flex-col justify-center relative z-10">
                 <Link to="/" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-12 absolute top-12 left-6 group">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Home
+                    {t('demo.back')}
                 </Link>
 
                 <div className="text-center mb-16 max-w-2xl mx-auto">
@@ -35,9 +43,9 @@ export function LiveDemoPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h1 className="text-5xl font-bold text-white mb-6">Interactive Live Demo</h1>
+                        <h1 className="text-5xl font-bold text-white mb-6">{t('demo.title')}</h1>
                         <p className="text-xl text-zinc-400">
-                            Experience the power of Relay firsthand. Choose a persona to explore the dashboard from different perspectives.
+                            {t('demo.subtitle')}
                         </p>
                     </motion.div>
                 </div>
@@ -56,15 +64,16 @@ export function LiveDemoPage() {
                             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center mb-6 shadow-xl shadow-primary/20">
                                 <Hotel className="w-8 h-8 text-white" />
                             </div>
-                            <h2 className="text-3xl font-bold text-white mb-2">General Manager</h2>
+                            <h2 className="text-3xl font-bold text-white mb-2">{t('demo.gm')}</h2>
                             <p className="text-zinc-400 mb-8 flex-1">
-                                Full access to all settings, analytics, staff management, and hotel configuration. See the big picture.
+                                {t('demo.gm.desc')}
                             </p>
                             <Button
                                 onClick={() => startDemo('gm')}
-                                className="w-full h-14 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-lg"
+                                disabled={isLoading}
+                                className="w-full h-14 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Enter as Helper Manager
+                                {isLoading ? t('common.loading') : t('demo.enter.gm')}
                             </Button>
                         </div>
                     </motion.div>
@@ -82,15 +91,16 @@ export function LiveDemoPage() {
                             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 shadow-xl shadow-blue-500/20">
                                 <User className="w-8 h-8 text-white" />
                             </div>
-                            <h2 className="text-3xl font-bold text-white mb-2">Staff Member</h2>
+                            <h2 className="text-3xl font-bold text-white mb-2">{t('demo.staff')}</h2>
                             <p className="text-zinc-400 mb-8 flex-1">
-                                Focused view for daily operations, shift logs, messaging, and task completion. Streamlined for efficiency.
+                                {t('demo.staff.desc')}
                             </p>
                             <Button
                                 onClick={() => startDemo('receptionist')}
-                                className="w-full h-14 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-lg"
+                                disabled={isLoading}
+                                className="w-full h-14 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Enter as Receptionist
+                                {isLoading ? t('common.loading') : t('demo.enter.staff')}
                             </Button>
                         </div>
                     </motion.div>

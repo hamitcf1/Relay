@@ -3,9 +3,19 @@ import { CustomCursor } from '@/components/ui/CustomCursor'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Check, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { useLanguageStore } from '@/stores/languageStore'
 
 export function PricingPage() {
     const navigate = useNavigate()
+    const { t } = useLanguageStore()
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
+
+    const prices = {
+        starter: { monthly: '$0', annual: '$0' },
+        pro: { monthly: '$49', annual: '$39' },
+        enterprise: { monthly: 'Custom', annual: 'Custom' }
+    }
 
     return (
         <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none relative overflow-hidden">
@@ -18,99 +28,131 @@ export function PricingPage() {
             </div>
 
             {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/50 backdrop-blur-md border-b border-white/5">
+            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/60 backdrop-blur-md border-b border-white/5 supports-[backdrop-filter]:bg-black/30">
                 <Link to="/" className="flex items-center gap-3 group">
                     <ArrowLeft className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
-                    <span className="font-bold text-xl tracking-tight text-white">Back</span>
+                    <span className="font-bold text-xl tracking-tight text-white">{t('pricing.back')}</span>
                 </Link>
                 <div className="flex items-center gap-4">
-                    <p className="text-sm text-zinc-400 hidden sm:block">Need help choosing?</p>
-                    <a href="mailto:hamitfindik2@gmail.com" className="text-sm text-white underline hover:text-primary">Contact Sales</a>
+                    <p className="text-sm text-zinc-400 hidden sm:block">{t('pricing.needHelp')}</p>
+                    <a href="mailto:hamitfindik2@gmail.com" className="text-sm text-white underline hover:text-primary">{t('pricing.contactSales')}</a>
                 </div>
             </nav>
 
             <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
-                <div className="text-center mb-20">
+                <div className="text-center mb-16">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">Plans & Pricing</h1>
-                        <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-                            Simple, transparent pricing that grows with your business. No hidden fees.
+                        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">{t('pricing.title')}</h1>
+                        <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
+                            {t('pricing.subtitle')}
                         </p>
+
+                        {/* Billing Toggle */}
+                        <div className="flex items-center justify-center gap-4 mb-10">
+                            <span className={`text-lg transition-colors cursor-pointer ${billingCycle === 'monthly' ? 'text-white' : 'text-zinc-500'}`} onClick={() => setBillingCycle('monthly')}>
+                                {t('pricing.monthly')}
+                            </span>
+
+                            <button
+                                onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+                                className="w-14 h-8 bg-zinc-800 rounded-full p-1 relative transition-colors hover:bg-zinc-700"
+                            >
+                                <motion.div
+                                    className="w-6 h-6 bg-white rounded-full shadow-lg"
+                                    animate={{ x: billingCycle === 'annual' ? 24 : 0 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                />
+                            </button>
+
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setBillingCycle('annual')}>
+                                <span className={`text-lg transition-colors ${billingCycle === 'annual' ? 'text-white' : 'text-zinc-500'}`}>
+                                    {t('pricing.annual')}
+                                </span>
+                                {billingCycle === 'annual' && (
+                                    <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider border border-primary/20">
+                                        {t('pricing.saveBadge')}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     </motion.div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-32">
                     <PricingCard
-                        title="Starter"
-                        price="$0"
-                        desc="For small boutique hotels getting started."
+                        title={t('pricing.plan.starter')}
+                        price={prices.starter[billingCycle]}
+                        desc={t('pricing.plan.starter.desc')}
                         features={[
-                            'Up to 5 Staff Types',
-                            'Basic Handover Logs',
-                            '7-Day History Retention',
-                            'Standard Email Support',
-                            'Basic Analytics'
+                            t('pricing.feature.5staff'),
+                            t('pricing.feature.logs'),
+                            t('pricing.feature.7day'),
+                            t('pricing.feature.support'),
+                            t('pricing.feature.analytics')
                         ]}
-                        buttonText="Start Free"
+                        buttonText={t('pricing.button.free')}
                         onAction={() => navigate('/register')}
+                        billing={billingCycle}
                     />
                     <PricingCard
-                        title="Pro"
-                        price="$49"
-                        desc="For growing hotels needing automation."
+                        title={t('pricing.plan.pro')}
+                        price={prices.pro[billingCycle]}
+                        desc={t('pricing.plan.pro.desc')}
                         isPopular
                         features={[
-                            'Unlimited Staff',
-                            'Automated Shift Reminders',
-                            'Unlimited History',
-                            'Priority 24/7 Support',
-                            'Advanced Analytics & Export',
-                            'Custom Role Permissions',
-                            'Multi-language Support'
+                            t('pricing.feature.unlimited'),
+                            t('pricing.feature.autoReminders'),
+                            t('pricing.feature.unlimitedHistory'),
+                            t('pricing.feature.prioritySupport'),
+                            t('pricing.feature.advAnalytics'),
+                            t('pricing.feature.roles'),
+                            t('pricing.feature.multiLang')
                         ]}
-                        buttonText="Start Trial"
+                        buttonText={t('pricing.button.trial')}
                         onAction={() => navigate('/register')}
+                        billing={billingCycle}
                     />
                     <PricingCard
-                        title="Enterprise"
-                        price="Custom"
-                        desc="For hotel chains and large resorts."
+                        title={t('pricing.plan.enterprise')}
+                        price={'Custom'}
+                        desc={t('pricing.plan.enterprise.desc')}
                         features={[
-                            'Multi-Property Management',
-                            'Custom API Integrations',
-                            'Dedicated Success Manager',
-                            'SLA Guarantees',
-                            'On-premise Deployment',
-                            'Custom Branding',
-                            'SSO Authentication'
+                            t('pricing.feature.multiProp'),
+                            t('pricing.feature.api'),
+                            t('pricing.feature.successManager'),
+                            t('pricing.feature.sla'),
+                            t('pricing.feature.onPrem'),
+                            t('pricing.feature.branding'),
+                            t('pricing.feature.sso')
                         ]}
-                        buttonText="Contact Sales"
+                        buttonText={t('pricing.button.contact')}
                         onAction={() => window.location.href = 'mailto:hamitfindik2@gmail.com'}
+                        billing={billingCycle}
                     />
                 </div>
 
                 {/* FAQ */}
                 <div className="max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-bold text-white mb-12 text-center">Frequently Asked Questions</h2>
+                    <h2 className="text-3xl font-bold text-white mb-12 text-center">{t('pricing.faq.title')}</h2>
                     <div className="space-y-6">
                         <FAQItem
-                            q="Can I upgrade later?"
-                            a="Yes, you can upgrade or downgrade your plan at any time directly from the dashboard."
+                            q={t('pricing.faq.upgrade.q')}
+                            a={t('pricing.faq.upgrade.a')}
                         />
                         <FAQItem
-                            q="Is there a free trial for Pro?"
-                            a="Absolutely. You get 14 days of free Pro access when you sign up, no credit card required."
+                            q={t('pricing.faq.trial.q')}
+                            a={t('pricing.faq.trial.a')}
                         />
                         <FAQItem
-                            q="What payment methods do you accept?"
-                            a="We accept all major credit cards (Visa, Mastercard, Amex) and bank transfers for Enterprise plans."
+                            q={t('pricing.faq.payment.q')}
+                            a={t('pricing.faq.payment.a')}
                         />
                         <FAQItem
-                            q="Is my data secure?"
-                            a="Yes. We use industry-standard encryption for data in transit and at rest. We never sell your data."
+                            q={t('pricing.faq.security.q')}
+                            a={t('pricing.faq.security.a')}
                         />
                     </div>
                 </div>
@@ -119,17 +161,18 @@ export function PricingPage() {
     )
 }
 
-function PricingCard({ title, price, desc, features, buttonText, onAction, isPopular }: any) {
+function PricingCard({ title, price, desc, features, buttonText, onAction, isPopular, billing }: any) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             whileHover={{ y: -10 }}
-            className={`p-8 rounded-3xl border flex flex-col relative ${isPopular ? 'bg-white/10 border-primary/50 shadow-2xl shadow-primary/10' : 'bg-white/5 border-white/10'}`}
+            className={`p-8 rounded-3xl border flex flex-col relative transition-colors duration-300 ${isPopular ? 'bg-white/10 border-primary/50 shadow-2xl shadow-primary/10' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
         >
             {isPopular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-primary text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-primary/40">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full bg-primary text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-primary/40 whitespace-nowrap">
+                    {/* Hardcoded 'Most Popular' or key, passed as prop or translated here */}
                     Most Popular
                 </div>
             )}
@@ -163,7 +206,7 @@ function PricingCard({ title, price, desc, features, buttonText, onAction, isPop
 
 function FAQItem({ q, a }: { q: string, a: string }) {
     return (
-        <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
+        <div className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
             <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
                 <HelpCircle className="w-5 h-5 text-zinc-500" />
                 {q}

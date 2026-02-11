@@ -59,7 +59,7 @@ export function LandingPage() {
             <CustomCursor />
 
             {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/50 backdrop-blur-md border-b border-white/5">
+            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/60 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-black/30">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
                         <span className="font-bold text-white">R</span>
@@ -67,26 +67,25 @@ export function LandingPage() {
                     <span className="font-bold text-xl tracking-tight text-white">Relay</span>
                 </div>
                 <div className="hidden md:flex items-center gap-8">
-                    <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm text-zinc-400 hover:text-white transition-colors">
-                        {language === 'tr' ? 'Özellikler' : 'Features'}
+                    <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                        {t('landing.nav.features')}
                     </button>
-                    <Link to="/pricing" className="text-sm text-zinc-400 hover:text-white transition-colors">
-                        {language === 'tr' ? 'Fiyatlandırma' : 'Pricing'}
+                    <Link to="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                        {t('landing.nav.pricing')}
                     </Link>
-                    <Link to="/legal/status" className="text-sm text-zinc-400 hover:text-white transition-colors">Status</Link>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-zinc-400 hover:text-white">
+                    <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-zinc-400 hover:text-white hover:bg-white/5">
                         <Globe className="w-5 h-5" />
                     </Button>
-                    <Button variant="ghost" onClick={() => navigate('/login')} className="text-zinc-400 hover:text-white hidden sm:flex">
-                        {t('auth.login')}
+                    <Button variant="ghost" onClick={() => navigate('/login')} className="text-zinc-400 hover:text-white hover:bg-white/5 hidden sm:flex">
+                        {t('landing.nav.login')}
                     </Button>
-                    <Button onClick={() => navigate('/live-demo')} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-full px-6">
+                    <Button onClick={() => navigate('/live-demo')} className="bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-full px-6 transition-all duration-300 hover:scale-105">
                         {t('landing.hero.cta.secondary')}
                     </Button>
-                    <Button onClick={() => navigate('/pricing')} className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]">
-                        {language === 'tr' ? 'Başlayın' : 'Get Started'}
+                    <Button onClick={() => navigate('/pricing')} className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] transition-all duration-300 hover:scale-105">
+                        {t('landing.nav.getStarted')}
                     </Button>
                 </div>
             </nav>
@@ -107,21 +106,22 @@ export function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm font-medium mb-8 backdrop-blur-sm">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm font-medium mb-8 backdrop-blur-sm shadow-xl">
                             <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                             <span>{t('landing.hero.trusted')}</span>
                         </div>
                         <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 flex flex-col items-center justify-center gap-2">
                             <span>{t('landing.hero.title.prefix')}</span>
-                            <div className="h-[1.1em] relative overflow-hidden flex justify-center w-full">
+                            {/* Fixed width container to prevent cutout/jump */}
+                            <div className="h-[1.2em] relative overflow-hidden flex justify-center w-full min-w-[300px]">
                                 <AnimatePresence mode="wait">
                                     <motion.span
                                         key={words[index]}
-                                        initial={{ y: 40, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        exit={{ y: -40, opacity: 0 }}
-                                        transition={{ duration: 0.5, ease: "circOut" }}
-                                        className="absolute text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-500 whitespace-nowrap"
+                                        initial={{ y: 50, opacity: 0, rotateX: -90 }}
+                                        animate={{ y: 0, opacity: 1, rotateX: 0 }}
+                                        exit={{ y: -50, opacity: 0, rotateX: 90 }}
+                                        transition={{ duration: 0.5, ease: "backOut" }}
+                                        className="absolute text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-500 whitespace-nowrap pb-2"
                                     >
                                         {words[index]}
                                     </motion.span>
@@ -136,7 +136,7 @@ export function LandingPage() {
                             <Button
                                 size="lg"
                                 onClick={() => navigate('/pricing')}
-                                className="h-14 px-8 text-lg bg-white text-black hover:bg-zinc-200 rounded-full w-full sm:w-auto transition-transform hover:scale-105"
+                                className="h-14 px-8 text-lg bg-white text-black hover:bg-zinc-200 rounded-full w-full sm:w-auto transition-transform hover:scale-105 shadow-xl shadow-white/10"
                             >
                                 {t('landing.hero.cta.primary')}
                             </Button>
@@ -144,7 +144,7 @@ export function LandingPage() {
                                 size="lg"
                                 variant="outline"
                                 onClick={() => navigate('/live-demo')}
-                                className="h-14 px-8 text-lg border-white/20 text-white hover:bg-white/10 rounded-full w-full sm:w-auto"
+                                className="h-14 px-8 text-lg border-white/20 text-white hover:bg-white/10 rounded-full w-full sm:w-auto backdrop-blur-sm"
                             >
                                 <Play className="w-4 h-4 mr-2" /> {t('landing.hero.cta.secondary')}
                             </Button>
@@ -273,9 +273,9 @@ export function LandingPage() {
                     </div>
 
                     <div className="flex gap-6">
-                        <Link to="/legal/privacy" className="text-zinc-500 hover:text-white transition-colors text-sm">{t('offday.petitions')}</Link>
-                        <Link to="/legal/terms" className="text-zinc-500 hover:text-white transition-colors text-sm">Terms</Link>
-                        <Link to="/legal/status" className="text-zinc-500 hover:text-white transition-colors text-sm">Status</Link>
+                        <Link to="/legal/privacy" className="text-zinc-500 hover:text-white transition-colors text-sm">{t('landing.footer.privacy')}</Link>
+                        <Link to="/legal/terms" className="text-zinc-500 hover:text-white transition-colors text-sm">{t('landing.footer.terms')}</Link>
+                        <Link to="/legal/status" className="text-zinc-500 hover:text-white transition-colors text-sm">{t('landing.footer.status')}</Link>
                     </div>
 
                     <a
