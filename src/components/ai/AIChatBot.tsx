@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
@@ -36,6 +37,13 @@ const QUICK_SUGGESTIONS = [
     { label: '📊 Vardiya durumu', text: 'Mevcut vardiya durumunu özetle' },
     { label: '🏨 Oda durumu', text: 'Tüm odaların durumunu göster' },
     { label: '💱 Döviz kurları', text: 'Güncel döviz kurlarını göster' },
+]
+
+const SUPPORT_SUGGESTIONS = [
+    { label: '🚀 Relay nedir?', text: 'Relay platformu hakkında bilgi verir misin?' },
+    { label: '💎 Fiyatlandırma?', text: 'Fiyatlandırma planlarınız nasıl?' },
+    { label: '🛡️ Güvenlik?', text: 'Veri güvenliğini nasıl sağlıyorsunuz?' },
+    { label: '📱 Mobil uygulama?', text: 'Mobil uygulamanız var mı?' },
 ]
 
 const MODELS: { id: AIModelType; name: string; desc: string }[] = [
@@ -340,15 +348,22 @@ function KBEditor() {
 
 export function AIChatBot() {
     const {
-        threads, activeThreadId, isOpen, showSidebar, loading,
-        toggleOpen, sendMessage, createThread, toggleSidebar
+        threads, activeThreadId, isOpen, showSidebar, loading, isPublic,
+        toggleOpen, sendMessage, createThread, toggleSidebar, setIsPublic
     } = useChatStore()
     const { user } = useAuthStore()
+    const location = useLocation()
     const [input, setInput] = useState('')
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const [showKB, setShowKB] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
+
+    // Location detection
+    useEffect(() => {
+        const publicPaths = ['/', '/pricing', '/legal/privacy', '/legal/terms', '/legal/status']
+        setIsPublic(publicPaths.includes(location.pathname))
+    }, [location.pathname, setIsPublic])
 
     const isGM = user?.role === 'gm'
     const activeThread = threads.find(t => t.id === activeThreadId)
@@ -473,7 +488,7 @@ export function AIChatBot() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    {isGM && (
+                                    {!isPublic && isGM && (
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -484,15 +499,17 @@ export function AIChatBot() {
                                             <BrainIcon className="w-4 h-4" />
                                         </Button>
                                     )}
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className={cn("h-8 w-8 rounded-lg", showSettings ? "text-violet-400" : "text-muted-foreground hover:text-violet-400")}
-                                        onClick={() => setShowSettings(!showSettings)}
-                                        title="Model & Mod"
-                                    >
-                                        <Settings2 className="w-4 h-4" />
-                                    </Button>
+                                    {!isPublic && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className={cn("h-8 w-8 rounded-lg", showSettings ? "text-violet-400" : "text-muted-foreground hover:text-violet-400")}
+                                            onClick={() => setShowSettings(!showSettings)}
+                                            title="Model & Mod"
+                                        >
+                                            <Settings2 className="w-4 h-4" />
+                                        </Button>
+                                    )}
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -544,13 +561,18 @@ export function AIChatBot() {
                                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-600/20 flex items-center justify-center mb-4 border border-violet-500/20">
                                             <MessageCircle className="w-8 h-8 text-violet-400" />
                                         </div>
-                                        <h4 className="text-base font-bold text-foreground mb-1">Relay AI Asistanı</h4>
+                                        <h4 className="text-base font-bold text-foreground mb-1">
+                                            {isPublic ? 'Relay Müşteri Desteği' : 'Relay AI Asistanı'}
+                                        </h4>
                                         <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
-                                            Otel verilerinize tam erişimim var. Vardiya, fiyat, satış, notlar, odalar, turlar, döviz kurları hakkında her şeyi sorabilirsiniz.
+                                            {isPublic
+                                                ? 'Hoş geldiniz! Relay hakkında merak ettiğiniz her şeyi sorabilirsiniz. Size nasıl yardımcı olabilirim?'
+                                                : 'Otel verilerinize tam erişimim var. Vardiya, fiyat, satış, notlar, odalar, turlar, döviz kurları hakkında her şeyi sorabilirsiniz.'
+                                            }
                                         </p>
 
                                         <div className="grid grid-cols-2 gap-2 w-full">
-                                            {QUICK_SUGGESTIONS.map((s, i) => (
+                                            {(isPublic ? SUPPORT_SUGGESTIONS : QUICK_SUGGESTIONS).map((s, i) => (
                                                 <motion.button
                                                     key={i}
                                                     initial={{ opacity: 0, y: 10 }}

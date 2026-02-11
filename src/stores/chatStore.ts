@@ -39,6 +39,7 @@ interface ChatState {
     loading: boolean
     selectedModel: AIModelType
     selectedTask: AITaskType
+    isPublic: boolean
 }
 
 interface ChatActions {
@@ -51,6 +52,7 @@ interface ChatActions {
     toggleSidebar: () => void
     setModel: (model: AIModelType) => void
     setTask: (task: AITaskType) => void
+    setIsPublic: (isPublic: boolean) => void
 }
 
 type ChatStore = ChatState & ChatActions
@@ -214,25 +216,33 @@ function buildContext(): string {
     return parts.join('\n')
 }
 
-const SYSTEM_PROMPT = `You are Relay AI, the intelligent assistant for a hotel management platform called "Relay".
-You have real-time access to ALL of the hotel's data including: current shift, active notes, sales, pricing, roster, rooms, tours, maintenance logs/tickets, exchange rates, staff menu, off-day requests, and anonymous feedback.
+const PUBLIC_SYSTEM_PROMPT = `You are Relay Customer Support AI. You are a helpful assistant for the "Relay" hotel management platform.
+Your goal is to help potential clients, travelers, or curious users understand what Relay is and how it can help their business.
 
-Your responsibilities:
-- Answer questions about the hotel's current operational state
-- Help with pricing queries (room prices, agency prices, overrides, tour prices)
-- Summarize active notes, sales, shift information, and open tickets
-- Provide room status and occupancy information
-- Share exchange rates and do currency conversions
-- Report on staff roster, off-day requests, and daily menu
-- Help draft emails, reports, or review responses based on the selected task mode
-- Answer general hospitality questions
+Scope:
+- Explain Relay's features (Shift transfers, operational logs, maintenance tickets, compliance checks, staff rosters).
+- Discuss pricing plans and general benefits.
+- Help with onboarding related questions or demo requests.
+- Provide general hospitality best practices.
 
 Rules:
-- Be concise and professional
-- Respond in the same language the user writes in (Turkish or English)
-- When providing prices, always include the currency
-- Reference specific data from the context when relevant
-- If you don't have enough data to answer, say so clearly`
+- You DO NOT have access to any specific hotel's private data right now.
+- DO NOT share room numbers, guest names, sales data, or internal notes.
+- If asked about specific hotel operations, explain that you are the general support bot and they should log in to see their hotel's data.
+- Be extremely professional, welcoming, and sales-oriented.`
+
+const INTERNAL_SYSTEM_PROMPT = `You are Relay AI, the intelligent assistant for the hotel management platform "Relay".
+You have real-time access to the hotel's operational data.
+
+Your responsibilities:
+- Answer questions about the hotel's current state (shifts, notes, sales, pricing, roster, rooms, tours, logs).
+- Help draft operational content (emails, reports, review responses).
+- Reference specific data from the context when relevant.
+
+Rules:
+- Be concise and professional.
+- When providing prices, always include the currency.
+- Respond in the same language the user writes in.`
 
 function generateTitle(firstMessage: string): string {
     const text = firstMessage.trim()
@@ -248,9 +258,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     loading: false,
     selectedModel: 'gemini-2.5-flash',
     selectedTask: 'general',
+    isPublic: true,
 
     toggleOpen: () => set(s => ({ isOpen: !s.isOpen })),
     setOpen: (open) => set({ isOpen: open }),
+    setIsPublic: (isPublic) => set({ isPublic }),
     toggleSidebar: () => set(s => ({ showSidebar: !s.showSidebar })),
     setModel: (model) => set({ selectedModel: model }),
     setTask: (task) => set({ selectedTask: task }),
@@ -287,7 +299,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     },
 
     sendMessage: async (text: string) => {
-        let { activeThreadId, selectedModel, selectedTask } = get()
+        let { activeThreadId, selectedModel, selectedTask, isPublic } = get()
 
         // Auto-create thread if none active
         if (!activeThreadId) {
@@ -318,19 +330,21 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         }))
 
         try {
-            const context = buildContext()
+            // Context restricted if public
+            const context = isPublic ? "PUBLIC SUPPORT MODE: No private hotel data accessible. Access denied to internal stores (rooms, sales, logs, etc.). Answer based on general Relay product info only." : buildContext()
             const thread = get().threads.find(t => t.id === activeThreadId)
             const history = (thread?.messages || []).slice(-10).map(m =>
                 `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
             ).join('\n')
 
             const fullPrompt = history ? `${history}\nUser: ${text}` : text
+            const systemPrompt = isPublic ? PUBLIC_SYSTEM_PROMPT : INTERNAL_SYSTEM_PROMPT
 
             const result = await useAIStore.getState().generate(
                 fullPrompt,
                 selectedModel,
                 selectedTask,
-                `${SYSTEM_PROMPT}\n\n[HOTEL DATA CONTEXT]\n${context}`
+                `${systemPrompt}\n\n[HOTEL DATA CONTEXT]\n${context}`
             )
 
             const aiMsg: ChatMessage = {
