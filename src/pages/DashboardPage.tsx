@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
-import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
+
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
 import { RoomManagementModal } from '@/components/rooms/RoomManagementModal'
 import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
@@ -36,6 +36,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useSalesStore } from '@/stores/salesStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useStaffMealStore } from '@/stores/staffMealStore'
+import { useChatStore } from '@/stores/chatStore'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessagingPanel } from '@/components/messaging/MessagingPanel'
@@ -60,7 +61,9 @@ export function DashboardPage() {
     const { subscribeToNotes } = useNotesStore()
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
+    const { setOpen: setAIChatOpen, setTask: setAIChatTask } = useChatStore()
     const { t } = useLanguageStore()
+
 
 
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
@@ -161,12 +164,11 @@ export function DashboardPage() {
         navigate('/shift-start') // Or wherever appropriate
     }
 
-    const [isAIModalOpen, setIsAIModalOpen] = useState(false)
-    const [aiInitialTask, setAiInitialTask] = useState<'general' | 'report' | 'email' | 'review'>('general')
 
-    const openAI = (mode: typeof aiInitialTask = 'general') => {
-        setAiInitialTask(mode)
-        setIsAIModalOpen(true)
+
+    const handleOpenAI = (mode: 'general' | 'report' | 'email' | 'review') => {
+        setAIChatTask(mode)
+        setAIChatOpen(true)
     }
 
     const [showTutorial, setShowTutorial] = useState(false)
@@ -181,11 +183,7 @@ export function DashboardPage() {
 
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
-            <AIAssistantModal
-                isOpen={isAIModalOpen}
-                onClose={() => setIsAIModalOpen(false)}
-                initialTask={aiInitialTask}
-            />
+
             <ComplianceAlert />
             {/* Header */}
             <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50 transition-all duration-300 relative">
@@ -248,7 +246,7 @@ export function DashboardPage() {
                     {/* User Profile - Consolidated Actions */}
                     <div id="tour-profile">
                         <UserNav
-                            onOpenAI={openAI}
+                            onOpenAI={handleOpenAI}
                             onOpenRoomManager={() => setIsRoomManagerOpen(true)}
                             onOpenHandover={() => setIsHandoverOpen(true)}
                         />
@@ -284,11 +282,11 @@ export function DashboardPage() {
             </div >
 
             {/* Main Content Area */}
-            < main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6 transition-all duration-300" >
+            <main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col transition-all duration-300">
                 <AnnouncementBanner />
-                <Tabs value={activeTab} className="h-full border-none p-0 bg-transparent shadow-none">
-                    <TabsContent value="overview" className="h-full m-0 border-none p-0 outline-none">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
+                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
                             {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
                             <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
                                 <div id="tour-logs">

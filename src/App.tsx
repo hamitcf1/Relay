@@ -20,6 +20,7 @@ import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
 import { useMobileCapabilities } from '@/hooks/useMobileCapabilities'
 import { ActivityTracker } from '@/components/tracking/ActivityTracker'
+import { AIChatBot } from '@/components/ai/AIChatBot'
 
 function App() {
     useMobileCapabilities()
@@ -92,6 +93,7 @@ function App() {
                     }
                 />
             </Routes>
+            <AIChatBot />
         </BrowserRouter >
     )
 }

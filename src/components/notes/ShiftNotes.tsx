@@ -16,7 +16,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useHotelStore } from '@/stores/hotelStore'
-import { AIAssistantModal } from '@/components/ai/AIAssistantModal'
+import { useChatStore } from '@/stores/chatStore'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
 import { useFormatting } from '@/hooks/useFormatting'
@@ -69,7 +69,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const editFormatting = useFormatting(editContent, setEditContent, editContentRef)
 
     const [loading, setLoading] = useState(false)
-    const [isAIModalOpen, setIsAIModalOpen] = useState(false)
+    const { setOpen: setAIChatOpen, setTask: setAIChatTask } = useChatStore()
     const [statusFilter, setStatusFilter] = useState<NoteStatus | 'all'>('active')
     const [filter, setFilter] = useState<NoteCategory | 'all'>('all')
 
@@ -560,7 +560,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => setIsAIModalOpen(true)}
+                                        onClick={() => { setAIChatTask('report'); setAIChatOpen(true) }}
                                         className="h-6 text-[9px] text-primary hover:text-primary/80 hover:bg-primary/10 gap-1"
                                     >
                                         <Wand2 className="w-3 h-3" />
@@ -583,12 +583,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                 />
                             </div>
 
-                            <AIAssistantModal
-                                isOpen={isAIModalOpen}
-                                onClose={() => setIsAIModalOpen(false)}
-                                initialTask="report"
-                                initialPrompt={newContent}
-                            />
+
 
                             {/* Actions */}
                             <div className="flex gap-2">
