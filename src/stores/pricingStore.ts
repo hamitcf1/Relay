@@ -22,6 +22,7 @@ interface PricingActions {
     removeAgency: (hotelId: string, agencyId: string) => Promise<void>
     setAgencyOverride: (hotelId: string, agencyId: string, override: AgencyOverride) => Promise<void>
     removeAgencyOverride: (hotelId: string, agencyId: string, overrideId: string) => Promise<void>
+    updateAgencyBasePrices: (hotelId: string, agencyId: string, prices: { [key in RoomType]?: RoomPriceEntry }) => Promise<void>
     getEffectivePrice: (date: string, roomType: RoomType, agencyId?: string) => RoomPriceEntry | null
 }
 
@@ -87,6 +88,7 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
                 agencies.push({
                     id: doc.id,
                     name: data.name,
+                    base_prices: data.base_prices || {},
                     overrides: (data.overrides || []).map((o: AgencyOverride) => ({
                         id: o.id,
                         start_date: o.start_date,
@@ -159,6 +161,11 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
         await setDoc(docRef, { overrides: newOverrides, updated_at: Timestamp.now() }, { merge: true })
     },
 
+    updateAgencyBasePrices: async (hotelId, agencyId, base_prices) => {
+        const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', agencyId)
+        await setDoc(docRef, { base_prices, updated_at: Timestamp.now() }, { merge: true })
+    },
+
     getEffectivePrice: (date, roomType, agencyId?) => {
         const { basePrices, baseOverrides, agencies } = get()
         if (agencyId) {
@@ -166,6 +173,7 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
             if (agency) {
                 const override = agency.overrides.find(o => date >= o.start_date && date <= o.end_date)
                 if (override?.prices[roomType]) return override.prices[roomType]!
+                if (agency.base_prices?.[roomType]) return agency.base_prices[roomType]!
             }
         }
         const baseOverride = baseOverrides.find(o => date >= o.start_date && date <= o.end_date)

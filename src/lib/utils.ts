@@ -18,11 +18,13 @@ export function getDateLocale() {
 export function formatDisplayDate(date: Date | string | number) {
     if (!date) return ''
     const d = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date
+    if (isNaN(d.getTime())) return String(date)
     return format(d, 'dd-MM-yyyy')
 }
 
 export function formatDisplayDateTime(date: Date | string | number) {
     if (!date) return ''
     const d = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date
+    if (isNaN(d.getTime())) return String(date)
     return format(d, 'dd-MM-yyyy HH:mm')
 }

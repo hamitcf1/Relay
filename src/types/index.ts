@@ -345,6 +345,7 @@ export interface BaseOverride {
 export interface Agency {
     id: string
     name: string
+    base_prices?: { [key in RoomType]?: RoomPriceEntry }
     overrides: AgencyOverride[]
     updated_at: Date
 }
