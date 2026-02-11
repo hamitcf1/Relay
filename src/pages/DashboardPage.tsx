@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     LayoutDashboard,
-    Activity
+    Activity,
+    Users
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -42,7 +43,10 @@ import { FeedbackSection } from '@/components/feedback/FeedbackSection'
 import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
 import { TourCatalogue } from '@/components/tours/TourCatalogue'
 import { SalesPanel } from '@/components/sales/SalesPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff } from 'lucide-react'
+import { PriceManager } from '@/components/pricing/PriceManager'
+import { PriceInquiry } from '@/components/pricing/PriceInquiry'
+import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, Euro } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
@@ -172,7 +176,7 @@ export function DashboardPage() {
     const [showTutorial, setShowTutorial] = useState(false)
 
     return (
-        <div className="h-[100dvh] overflow-hidden bg-black text-foreground flex flex-col font-sans selection:bg-primary/30 relative">
+        <div className="h-[100dvh] overflow-hidden bg-background text-foreground flex flex-col font-sans selection:bg-primary/30 relative">
             {/* Background Gradients (Cyber Theme) */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px]" />
@@ -188,7 +192,7 @@ export function DashboardPage() {
             />
             <ComplianceAlert />
             {/* Header */}
-            <header className="safe-header border-b border-white/10 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50 transition-all duration-300 relative">
+            <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50 transition-all duration-300 relative">
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20">
@@ -407,6 +411,15 @@ export function DashboardPage() {
                                             <CreditCard className="w-4 h-4" />
                                             <span className="hidden sm:inline">{t('module.sales')}</span>
                                         </TabsTrigger>
+                                        <TabsTrigger value="pricing" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <Euro className="w-4 h-4" />
+                                            <span className="inline">{t('module.pricing_label')}</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="team" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <Users className="w-4 h-4" />
+                                            <span className="inline">{t('module.team_label')}</span>
+                                        </TabsTrigger>
+
                                     </TabsList>
                                 </div>
 
@@ -427,6 +440,15 @@ export function DashboardPage() {
                                     </TabsContent>
                                     <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <TourCatalogue />
+                                    </TabsContent>
+                                    <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                                            <PriceInquiry />
+                                            {user?.role === 'gm' && <PriceManager />}
+                                        </div>
+                                    </TabsContent>
+                                    <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <LeaderboardPanel />
                                     </TabsContent>
                                 </div>
                             </Tabs>

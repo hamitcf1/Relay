@@ -64,6 +64,7 @@ export interface HotelSettings {
     }
     fixture_prices?: Record<string, number>
     minibar_prices?: Record<string, number>
+    special_group_agencies?: string[]
 }
 
 export interface Hotel {
@@ -299,6 +300,46 @@ export interface PaymentEntry {
     timestamp: Date
     method?: string // 'cash', 'card', 'room_charge'
     recorded_by?: string
+}
+
+// ============================================
+// Agency Pricing
+// ============================================
+
+export type AgencyTier = 'standard' | 'special_group'
+
+export interface DailyPrice {
+    id: string // YYYY-MM-DD
+    date: string
+    prices: {
+        [key in RoomType]?: {
+            standard: { amount: number; currency: Currency }
+            special_group: { amount: number; currency: Currency }
+        }
+    }
+    updated_at: Date
+    updated_by: string
+}
+
+// ============================================
+// Activity Tracking
+// ============================================
+
+export interface ActivitySession {
+    start: Date
+    end: Date | null
+    duration_minutes: number
+}
+
+export interface ActivityLog {
+    id: string // userId_YYYY-MM-DD
+    user_id: string
+    user_name: string
+    hotel_id: string
+    date: string // YYYY-MM-DD
+    total_active_minutes: number
+    sessions: ActivitySession[]
+    last_active: Date
 }
 
 export interface Sale {

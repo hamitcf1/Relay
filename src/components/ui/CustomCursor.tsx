@@ -14,37 +14,73 @@ export function CustomCursor() {
     const cursorXSpring = useSpring(cursorX, springConfig)
     const cursorYSpring = useSpring(cursorY, springConfig)
 
+    const [isHidden, setIsHidden] = useState(false)
+
     useEffect(() => {
-        const moveCursor = (e: MouseEvent) => {
+        const updateCursorState = (e: MouseEvent) => {
+            // Update position
             cursorX.set(e.clientX)
             cursorY.set(e.clientY)
-        }
 
-        const handleMouseOver = (e: MouseEvent) => {
+            // Check if on scrollbar (right or bottom edge)
+            const isOnVerticalScrollbar = e.clientX > document.documentElement.clientWidth
+            const isOnHorizontalScrollbar = e.clientY > document.documentElement.clientHeight
+
+            if (isOnVerticalScrollbar || isOnHorizontalScrollbar) {
+                setIsHidden(true)
+                return
+            } else {
+                setIsHidden(false)
+            }
+
+            // Target detection checks
             const target = e.target as HTMLElement
+
+            // Check computed style for cursor pointer
+            const style = window.getComputedStyle(target)
+            const isPointer = style.cursor === 'pointer'
+
             const isClickable =
                 target.tagName === 'BUTTON' ||
                 target.tagName === 'A' ||
                 target.closest('button') ||
                 target.closest('a') ||
-                target.classList.contains('cursor-pointer')
+                target.classList.contains('cursor-pointer') ||
+                isPointer
 
+            const isInput = target.tagName === 'INPUT'
+            const inputType = isInput ? (target as HTMLInputElement).type : ''
+            const isTextArea = target.tagName === 'TEXTAREA'
+            const isContentEditable = target.isContentEditable || target.getAttribute('contenteditable') === 'true'
+
+            // Exclude non-text inputs from being treated as text
             const isText =
-                target.tagName === 'INPUT' ||
-                target.tagName === 'TEXTAREA' ||
-                target.isContentEditable ||
-                target.getAttribute('contenteditable') === 'true'
+                isTextArea ||
+                isContentEditable ||
+                (isInput &&
+                    !['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color', 'file', 'image', 'hidden'].includes(inputType)
+                )
 
             setIsHovering(!!isClickable)
             setIsTextInput(!!isText)
         }
 
-        window.addEventListener('mousemove', moveCursor)
-        window.addEventListener('mouseover', handleMouseOver)
+        const handleMouseLeave = () => {
+            setIsHidden(true)
+        }
+
+        const handleMouseEnter = () => {
+            setIsHidden(false)
+        }
+
+        window.addEventListener('mousemove', updateCursorState)
+        document.addEventListener('mouseleave', handleMouseLeave)
+        document.addEventListener('mouseenter', handleMouseEnter)
 
         return () => {
-            window.removeEventListener('mousemove', moveCursor)
-            window.removeEventListener('mouseover', handleMouseOver)
+            window.removeEventListener('mousemove', updateCursorState)
+            document.removeEventListener('mouseleave', handleMouseLeave)
+            document.removeEventListener('mouseenter', handleMouseEnter)
         }
     }, [cursorX, cursorY])
 
@@ -58,7 +94,8 @@ export function CustomCursor() {
             className={cn(
                 "fixed top-0 left-0 rounded-full pointer-events-none z-[9999] mix-blend-difference",
                 "border border-white flex items-center justify-center transition-opacity duration-300",
-                isTextInput ? "w-1 h-6 rounded-none border-none bg-white" : "w-8 h-8 rounded-full"
+                isTextInput ? "w-1 h-6 rounded-none border-none bg-white" : "w-8 h-8 rounded-full",
+                isHidden ? "opacity-0" : "opacity-100"
             )}
             style={{
                 translateX: cursorXSpring,

@@ -158,6 +158,53 @@ type Translations = {
     'module.offDays': string
     'module.tours': string
     'module.sales': string
+    'module.pricing_label': string
+    'module.team_label': string
+
+    // Pricing Module
+    'pricing.manager.title': string
+    'pricing.manager.desc': string
+    'pricing.inquiry.title': string
+    'pricing.inquiry.desc': string
+    'pricing.mode.single': string
+    'pricing.mode.range': string
+    'pricing.date.selected': string
+    'pricing.date.start': string
+    'pricing.date.end': string
+    'pricing.days': string
+    'pricing.table.roomType': string
+    'pricing.table.standard': string
+    'pricing.table.special': string
+    'pricing.table.allDays': string
+    'pricing.info.range': string
+    'pricing.info.single': string
+    'pricing.save.range': string
+    'pricing.save.single': string
+    'pricing.selectRoom': string
+    'pricing.tier.standard': string
+    'pricing.tier.special': string
+    'pricing.perNight': string
+    'pricing.noPrices': string
+    'pricing.agencies.title': string
+    'pricing.agencies.add': string
+    'pricing.agencies.placeholder': string
+    'pricing.agencies.empty': string
+    'pricing.agencies.included': string
+
+    // Room Types
+    'room.standard': string
+    'room.corner': string
+    'room.corner_jacuzzi': string
+    'room.triple': string
+    'room.teras_suite': string
+
+    // Leaderboard
+    'leaderboard.title': string
+    'leaderboard.desc': string
+    'leaderboard.today': string
+    'leaderboard.thisWeek': string
+    'leaderboard.noActivity': string
+    'leaderboard.activeDuration': string
     'log.stickyBoard': string
     'compliance.kbsLate': string
 
@@ -777,6 +824,51 @@ const translations: Record<Language, Translations> = {
         'pricing.needHelp': 'Need help choosing?',
         'pricing.back': 'Back',
 
+        // Pricing Module (New)
+        'pricing.manager.title': 'Agency Pricing Manager',
+        'pricing.manager.desc': 'Set daily rates for standard agencies and special groups.',
+        'pricing.inquiry.title': 'Agency Price Check',
+        'pricing.inquiry.desc': 'Quickly check room rates for agencies.',
+        'pricing.mode.single': 'Single Day',
+        'pricing.mode.range': 'Range',
+        'pricing.date.selected': 'Selected Date',
+        'pricing.date.start': 'Start Date',
+        'pricing.date.end': 'End Date',
+        'pricing.days': 'days',
+        'pricing.table.roomType': 'Room Type',
+        'pricing.table.standard': 'Standard Price',
+        'pricing.table.special': 'Special Group Price',
+        'pricing.table.allDays': 'All Days',
+        'pricing.info.range': 'Prices will be applied to every day in the selected range.',
+        'pricing.info.single': 'Prices apply only to the selected date.',
+        'pricing.save.range': 'Save Range',
+        'pricing.save.single': 'Save Changes',
+        'pricing.selectRoom': 'Select room type',
+        'pricing.tier.standard': 'Standard Agency',
+        'pricing.tier.special': 'Special Group',
+        'pricing.perNight': '/night',
+        'pricing.noPrices': 'No prices set for this date.',
+        'pricing.agencies.title': 'Special Group Agencies',
+        'pricing.agencies.add': 'Add Agency',
+        'pricing.agencies.placeholder': 'Enter agency name...',
+        'pricing.agencies.empty': 'No agencies defined for special group.',
+        'pricing.agencies.included': 'Included Agencies:',
+
+        // Room Types
+        'room.standard': 'Standard Room',
+        'room.corner': 'Corner Suite',
+        'room.corner_jacuzzi': 'Corner Jacuzzi',
+        'room.triple': 'Triple Room',
+        'room.teras_suite': 'Terrace Suite',
+
+        // Leaderboard
+        'leaderboard.title': 'Team Leaderboard',
+        'leaderboard.desc': 'Most active staff members based on engagement time.',
+        'leaderboard.today': 'Today',
+        'leaderboard.thisWeek': 'This Week',
+        'leaderboard.noActivity': 'No activity recorded for this period yet.',
+        'leaderboard.activeDuration': 'ACTIVE DURATION',
+
         // Demo Page
         'demo.title': 'Interactive Live Demo',
         'demo.subtitle': 'Experience the power of Relay firsthand. Choose a persona to explore the dashboard.',
@@ -942,6 +1034,8 @@ const translations: Record<Language, Translations> = {
         'module.offDays': 'Off-Days',
         'module.tours': 'Tours',
         'module.sales': 'Sales',
+        'module.pricing_label': 'Pricing',
+        'module.team_label': 'Team',
         'log.stickyBoard': 'Sticky Board',
         'compliance.kbsLate': 'KBS System check is required immediately! Please verify guest identities.',
 
@@ -1578,6 +1672,53 @@ const translations: Record<Language, Translations> = {
         'module.offDays': 'İzin Günleri',
         'module.tours': 'Turlar',
         'module.sales': 'Satışlar',
+        'module.pricing_label': 'Fiyatlar',
+        'module.team_label': 'Ekip',
+
+        // Pricing Module (New)
+        'pricing.manager.title': 'Acente Fiyat Yöneticisi',
+        'pricing.manager.desc': 'Standart acenteler ve özel gruplar için günlük fiyatları belirleyin.',
+        'pricing.inquiry.title': 'Acente Fiyat Sorgulama',
+        'pricing.inquiry.desc': 'Acenteler için oda fiyatlarını hızlıca kontrol edin.',
+        'pricing.mode.single': 'Tek Gün',
+        'pricing.mode.range': 'Tarih Aralığı',
+        'pricing.date.selected': 'Seçilen Tarih',
+        'pricing.date.start': 'Başlangıç Tarihi',
+        'pricing.date.end': 'Bitiş Tarihi',
+        'pricing.days': 'gün',
+        'pricing.table.roomType': 'Oda Tipi',
+        'pricing.table.standard': 'Standart Fiyat',
+        'pricing.table.special': 'Özel Grup Fiyatı',
+        'pricing.table.allDays': 'Tüm Günler',
+        'pricing.info.range': 'Fiyatlar seçilen aralıktaki her güne uygulanacaktır.',
+        'pricing.info.single': 'Fiyatlar sadece seçilen tarih için geçerlidir.',
+        'pricing.save.range': 'Aralığı Kaydet',
+        'pricing.save.single': 'Değişiklikleri Kaydet',
+        'pricing.selectRoom': 'Oda tipi seçin',
+        'pricing.tier.standard': 'Standart Acente',
+        'pricing.tier.special': 'Özel Grup',
+        'pricing.perNight': '/gece',
+        'pricing.noPrices': 'Bu tarih için fiyat belirlenmemiş.',
+        'pricing.agencies.title': 'Özel Grup Acenteleri',
+        'pricing.agencies.add': 'Acente Ekle',
+        'pricing.agencies.placeholder': 'Acente adı girin...',
+        'pricing.agencies.empty': 'Özel grup için acente tanımlanmamış.',
+        'pricing.agencies.included': 'Dahil Olan Acenteler:',
+
+        // Room Types
+        'room.standard': 'Standart Oda',
+        'room.corner': 'Corner Süit',
+        'room.corner_jacuzzi': 'Corner Jakuzi',
+        'room.triple': 'Üç Kişilik Oda',
+        'room.teras_suite': 'Teras Süit',
+
+        // Leaderboard
+        'leaderboard.title': 'Ekip Liderlik Tablosu',
+        'leaderboard.desc': 'Etkileşim süresine göre en aktif personel.',
+        'leaderboard.today': 'Bugün',
+        'leaderboard.thisWeek': 'Bu Hafta',
+        'leaderboard.noActivity': 'Bu dönem için henüz aktivite kaydedilmedi.',
+        'leaderboard.activeDuration': 'AKTİF SÜRE',
         'log.stickyBoard': 'Önemli Notlar',
         'compliance.kbsLate': 'KBS Kontrolü hemen yapılmalıdır! Lütfen misafir kimliklerini doğrulayın.',
 

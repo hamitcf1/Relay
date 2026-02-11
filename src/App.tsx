@@ -4,7 +4,6 @@ import { RegisterPage } from '@/pages/RegisterPage'
 import { SetupHotelPage } from '@/pages/SetupHotelPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { LandingPage } from '@/pages/LandingPage'
-import { PricingPage } from '@/pages/PricingPage'
 import { LiveDemoPage } from '@/pages/LiveDemoPage'
 import { PrivacyPage } from '@/pages/legal/PrivacyPage'
 import { TermsPage } from '@/pages/legal/TermsPage'
@@ -20,6 +19,7 @@ import { CustomCursor } from '@/components/ui/CustomCursor'
 import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
 import { useMobileCapabilities } from '@/hooks/useMobileCapabilities'
+import { ActivityTracker } from '@/components/tracking/ActivityTracker'
 
 function App() {
     useMobileCapabilities()
@@ -42,12 +42,14 @@ function App() {
             <UpdateNotifier />
             <TabNotifications />
             <CustomCursor />
+            <ActivityTracker />
             <Routes>
 
                 {/* Public Routes with Layout */}
                 <Route element={<PublicLayout />}>
                     <Route path="/" element={<LandingPage />} />
-                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/legal/privacy" element={<PrivacyPage />} />
                     <Route path="/legal/privacy" element={<PrivacyPage />} />
                     <Route path="/legal/terms" element={<TermsPage />} />
                     <Route path="/legal/status" element={<StatusPage />} />

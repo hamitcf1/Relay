@@ -244,12 +244,28 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                         {/* Notes */}
                         <div>
-                            <label className="text-xs text-muted-foreground">{t('hotel.additionalNotes')}</label>
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="text-xs text-muted-foreground">{t('hotel.additionalNotes')}</label>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-5 px-2 text-[10px] text-muted-foreground hover:text-foreground"
+                                    onClick={() => {
+                                        setEditInfo(prev => ({
+                                            ...prev,
+                                            notes: prev.notes ? prev.notes + '\n• ' : '• '
+                                        }))
+                                    }}
+                                >
+                                    + {t('common.formatting.bulletList')}
+                                </Button>
+                            </div>
                             <textarea
                                 placeholder={t('hotel.notesPlaceholder')}
                                 value={editInfo.notes}
                                 onChange={(e) => setEditInfo((prev) => ({ ...prev, notes: e.target.value }))}
-                                rows={3}
+                                rows={5}
                                 className="w-full rounded-lg border border-input bg-muted/30 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
                             />
                         </div>
@@ -268,8 +284,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                     </motion.div>
                 ) : (
                     <div className="space-y-4">
-                        {/* IBAN Display */}
-                        {/* Hotel Code Display or Generation */}
+                        {/* IBAN Display - Unchanged */}
                         {isGM && (
                             <div className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
                                 <div className="flex items-center gap-2">
@@ -368,10 +383,24 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             })}
                         </div>
 
-                        {/* Notes */}
+                        {/* Notes with Bullet Point Support */}
                         {info.notes && (
-                            <div className="text-sm text-muted-foreground p-2 bg-muted/30 rounded">
-                                {info.notes}
+                            <div className="text-sm text-muted-foreground p-3 bg-muted/30 rounded space-y-1">
+                                {info.notes.split('\n').map((line, i) => {
+                                    const trimmed = line.trim()
+                                    // Check for standard bullet markers
+                                    const isBullet = trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')
+
+                                    if (isBullet) {
+                                        return (
+                                            <div key={i} className="flex gap-2 pl-1">
+                                                <span className="text-primary font-bold">•</span>
+                                                <span className="flex-1">{trimmed.substring(2)}</span>
+                                            </div>
+                                        )
+                                    }
+                                    return <div key={i} className="min-h-[20px]">{line}</div>
+                                })}
                             </div>
                         )}
 
