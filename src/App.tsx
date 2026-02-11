@@ -14,6 +14,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 import { TabNotifications } from '@/components/ui/TabNotifications'
 import { UpdateNotifier } from '@/components/layout/UpdateNotifier'
+import { PublicLayout } from '@/components/layout/PublicLayout'
 
 import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
@@ -40,17 +41,20 @@ function App() {
             <UpdateNotifier />
             <TabNotifications />
             <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<LandingPage />} />
+
+                {/* Public Routes with Layout */}
+                <Route element={<PublicLayout />}>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/legal/privacy" element={<PrivacyPage />} />
+                    <Route path="/legal/terms" element={<TermsPage />} />
+                    <Route path="/legal/status" element={<StatusPage />} />
+                </Route>
+
+                {/* Auth & Demo Pages (No Layout for now, or maybe wrap if desired, keeping separate for unique design) */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/live-demo" element={<LiveDemoPage />} />
-
-                {/* Legal Routes */}
-                <Route path="/legal/privacy" element={<PrivacyPage />} />
-                <Route path="/legal/terms" element={<TermsPage />} />
-                <Route path="/legal/status" element={<StatusPage />} />
 
                 {/* Protected Routes */}
                 <Route

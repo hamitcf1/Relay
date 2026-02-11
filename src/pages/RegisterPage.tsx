@@ -52,14 +52,14 @@ export function RegisterPage() {
         let validatedHotelId: string | null = null
         if (!isGM) {
             if (!hotelCode.trim()) {
-                setError("Please enter a Hotel Code to join your team.")
+                setError(t('auth.error.joinHotelCode'))
                 return
             }
             setLoading(true)
             validatedHotelId = await validateHotelCode(hotelCode.trim().toUpperCase())
             if (!validatedHotelId) {
                 setLoading(false)
-                setError("Invalid Hotel Code. Please check with your manager.")
+                setError(t('auth.error.invalidJoinCode'))
                 return
             }
         }
@@ -170,7 +170,7 @@ export function RegisterPage() {
                         className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-8 group/back relative z-10"
                     >
                         <ArrowLeft className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" />
-                        Back to Home
+                        {t('auth.backToHome')}
                     </Link>
 
                     {/* Header */}
@@ -188,7 +188,7 @@ export function RegisterPage() {
                     <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                         {/* Role Selection & GM Toggle */}
                         <div className="space-y-3">
-                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider pl-1">I am a...</p>
+                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider pl-1">{t('auth.role.selection')}</p>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
@@ -200,8 +200,8 @@ export function RegisterPage() {
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 transition-opacity duration-500 ${!isGM ? 'opacity-100' : ''}`} />
                                     <div className="relative z-10">
-                                        <div className="font-bold text-sm mb-1">Staff Member</div>
-                                        <div className="text-[11px] opacity-70">Joining a team</div>
+                                        <div className="font-bold text-sm mb-1">{t('auth.role.staff')}</div>
+                                        <div className="text-[11px] opacity-70">{t('auth.role.staffDesc')}</div>
                                     </div>
                                 </button>
                                 <button
@@ -214,8 +214,8 @@ export function RegisterPage() {
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 transition-opacity duration-500 ${isGM ? 'opacity-100' : ''}`} />
                                     <div className="relative z-10">
-                                        <div className="font-bold text-sm mb-1">Manager</div>
-                                        <div className="text-[11px] opacity-70">Creating a hotel</div>
+                                        <div className="font-bold text-sm mb-1">{t('auth.role.manager')}</div>
+                                        <div className="text-[11px] opacity-70">{t('auth.role.managerDesc')}</div>
                                     </div>
                                 </button>
                             </div>
@@ -234,13 +234,13 @@ export function RegisterPage() {
                                         value={hotelCode}
                                         onChange={(e) => setHotelCode(e.target.value.toUpperCase())}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 font-mono tracking-wider uppercase text-sm"
-                                        placeholder="HOTEL CODE"
+                                        placeholder={t('auth.placeholder.hotelCode')}
                                         maxLength={10}
                                         required
                                     />
                                 </div>
                                 <p className="text-[11px] text-zinc-500 pl-1">
-                                    Ask your manager for the hotel code.
+                                    {t('auth.helper.askManager')}
                                 </p>
                             </motion.div>
                         )}

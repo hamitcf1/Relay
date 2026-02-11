@@ -1,16 +1,15 @@
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Star, Globe, Shield, Smartphone, Mail, Zap, Lock, BarChart3, Clock, Users, MessageSquare, Download, Apple, Play } from 'lucide-react'
+import { Star, Globe, Shield, Smartphone, Zap, Lock, BarChart3, Clock, Users, MessageSquare, Download, Apple, Play } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useEffect, useRef, useState } from 'react'
-import { CustomCursor } from '@/components/ui/CustomCursor'
 
 export function LandingPage() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
-    const { t, language, setLanguage } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const targetRef = useRef<HTMLDivElement>(null)
     const { scrollYProgress } = useScroll({
         target: targetRef,
@@ -32,7 +31,7 @@ export function LandingPage() {
             setIndex((prev) => (prev + 1) % words.length)
         }, 3000)
         return () => clearInterval(interval)
-    }, [words.length])
+    }, [words]) // Changed dependency from words.length to words
 
     useEffect(() => {
         if (user) {
@@ -40,9 +39,7 @@ export function LandingPage() {
         }
     }, [user, navigate])
 
-    const toggleLanguage = () => {
-        setLanguage(language === 'tr' ? 'en' : 'tr')
-    }
+
 
     const staggerContainer = {
         hidden: { opacity: 0 },
@@ -56,37 +53,7 @@ export function LandingPage() {
 
     return (
         <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none flex flex-col">
-            <CustomCursor />
 
-            {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/60 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-black/30">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
-                        <span className="font-bold text-white">R</span>
-                    </div>
-                    <span className="font-bold text-xl tracking-tight text-white">Relay</span>
-                </div>
-                <div className="hidden md:flex items-center gap-8">
-                    <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
-                        {t('landing.nav.features')}
-                    </button>
-                    <Link to="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
-                        {t('landing.nav.pricing')}
-                    </Link>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={toggleLanguage} className="text-zinc-400 hover:text-white hover:bg-white/5">
-                        <Globe className="w-5 h-5" />
-                    </Button>
-                    <Button variant="ghost" onClick={() => navigate('/login')} className="text-zinc-400 hover:text-white hover:bg-white/5 hidden sm:flex">
-                        {t('landing.nav.login')}
-                    </Button>
-
-                    <Button onClick={() => navigate('/pricing')} className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] transition-all duration-300 hover:scale-105">
-                        {t('landing.nav.getStarted')}
-                    </Button>
-                </div>
-            </nav>
 
             {/* Hero Section */}
             <section ref={targetRef} className="h-screen relative flex items-center justify-center overflow-hidden shrink-0">
@@ -256,35 +223,6 @@ export function LandingPage() {
                     </Button>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="py-12 bg-zinc-950 border-t border-white/5 relative z-20 h-auto sm:h-auto overflow-visible">
-                <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
-                                <span className="font-bold text-white text-xs">R</span>
-                            </div>
-                            <span className="font-bold text-white">Relay</span>
-                        </div>
-                        <p className="text-sm text-zinc-500">© 2026 Relay Systems Inc.</p>
-                    </div>
-
-                    <div className="flex gap-6">
-                        <Link to="/legal/privacy" className="text-zinc-500 hover:text-white transition-colors text-sm">{t('landing.footer.privacy')}</Link>
-                        <Link to="/legal/terms" className="text-zinc-500 hover:text-white transition-colors text-sm">{t('landing.footer.terms')}</Link>
-                        <Link to="/legal/status" className="text-zinc-500 hover:text-white transition-colors text-sm">{t('landing.footer.status')}</Link>
-                    </div>
-
-                    <a
-                        href="mailto:hamitfindik2@gmail.com"
-                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-sm font-medium transition-colors border border-white/10 text-zinc-300"
-                    >
-                        <Mail className="w-4 h-4" />
-                        <span>{t('landing.footer.contact')}</span>
-                    </a>
-                </div>
-            </footer>
         </div>
     )
 }

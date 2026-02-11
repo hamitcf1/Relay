@@ -29,6 +29,65 @@ type Translations = {
     'auth.createAccount': string
     'auth.logout': string
     'auth.switchAccount': string
+    'auth.backToHome': string
+    'auth.cycling.1': string
+    'auth.cycling.2': string
+    'auth.cycling.3': string
+    'auth.cycling.4': string
+    'auth.error.hotelCodeRequired': string
+    'auth.error.invalidHotelCode': string
+    'auth.error.hotelNotFound': string
+    'auth.error.verificationFailed': string
+    'auth.placeholder.hotelCode': string
+    'auth.role.selection': string
+    'auth.role.staff': string
+    'auth.role.staffDesc': string
+    'auth.role.manager': string
+    'auth.role.managerDesc': string
+    'auth.error.joinHotelCode': string
+    'auth.error.invalidJoinCode': string
+    'auth.helper.askManager': string
+
+    'status.title': string
+    'status.subtitle': string
+    'status.operational': string
+    'status.uptime': string
+    'status.lastUpdated': string
+    'status.systems.api': string
+    'status.systems.db': string
+    'status.systems.messaging': string
+    'status.systems.notifications': string
+    'status.systems.auth': string
+
+    'privacy.title': string
+    'privacy.lastUpdated': string
+    'privacy.intro.title': string
+    'privacy.intro.desc': string
+    'privacy.intro.list1': string
+    'privacy.intro.list2': string
+    'privacy.intro.list3': string
+    'privacy.use.title': string
+    'privacy.use.desc': string
+    'privacy.use.list1': string
+    'privacy.use.list2': string
+    'privacy.use.list3': string
+    'privacy.security.title': string
+    'privacy.security.desc': string
+    'privacy.contact.title': string
+    'privacy.contact.desc': string
+
+    'terms.title': string
+    'terms.lastUpdated': string
+    'terms.acceptance.title': string
+    'terms.acceptance.desc': string
+    'terms.license.title': string
+    'terms.license.desc': string
+    'terms.responsibilities.title': string
+    'terms.responsibilities.desc': string
+    'terms.availability.title': string
+    'terms.availability.desc': string
+    'terms.contact.title': string
+    'terms.contact.desc': string
 
     'setup.title': string
     'setup.subtitle': string
@@ -753,6 +812,66 @@ const translations: Record<Language, Translations> = {
         'auth.createAccount': 'Create Account',
         'auth.logout': 'Logout',
         'auth.switchAccount': 'Switch Hotel',
+        'auth.backToHome': 'Back to Home',
+
+        'auth.cycling.1': 'Digital Handover System',
+        'auth.cycling.2': 'Forget About Notepads',
+        'auth.cycling.3': 'AI Assisted Replies',
+        'auth.cycling.4': 'Seamless Shifts',
+        'auth.error.hotelCodeRequired': 'Hotel Code is required for this hotel.',
+        'auth.error.invalidHotelCode': 'Invalid Hotel Code.',
+        'auth.error.hotelNotFound': 'Account configuration error: Hotel not found.',
+        'auth.error.verificationFailed': 'Verification failed. Please try again.',
+        'auth.placeholder.hotelCode': 'HOTEL CODE',
+        'auth.role.selection': 'I am a...',
+        'auth.role.staff': 'Staff Member',
+        'auth.role.staffDesc': 'Joining a team',
+        'auth.role.manager': 'Manager',
+        'auth.role.managerDesc': 'Creating a hotel',
+        'auth.error.joinHotelCode': 'Please enter a Hotel Code to join your team.',
+        'auth.error.invalidJoinCode': 'Invalid Hotel Code. Please check with your manager.',
+        'auth.helper.askManager': 'Ask your manager for the hotel code.',
+
+        'status.title': 'All Systems Operational',
+        'status.subtitle': 'Everything is running smoothly.',
+        'status.operational': 'Operational',
+        'status.uptime': 'Uptime',
+        'status.lastUpdated': 'Last updated: Just now',
+        'status.systems.api': 'API Gateway',
+        'status.systems.db': 'Database Clusters',
+        'status.systems.messaging': 'Real-time Messaging',
+        'status.systems.notifications': 'Notifications',
+        'status.systems.auth': 'Auth Services',
+
+        'privacy.title': 'Privacy Policy',
+        'privacy.lastUpdated': 'Last updated: February 11, 2026',
+        'privacy.intro.title': '1. Information We Collect',
+        'privacy.intro.desc': 'We collect information you provide directly to us, such as when you create an account, update your profile, or use our communication features. This includes:',
+        'privacy.intro.list1': 'Account information (name, email, hotel affiliation)',
+        'privacy.intro.list2': 'Operational data (shift logs, messages, task status)',
+        'privacy.intro.list3': 'Usage data (login times, feature interaction)',
+        'privacy.use.title': '2. How We Use Information',
+        'privacy.use.desc': 'We use the information we collect to operate, maintain, and improve our services, such as:',
+        'privacy.use.list1': 'Facilitating shift handovers and staff communication',
+        'privacy.use.list2': 'Providing analytics to hotel management',
+        'privacy.use.list3': 'Sending technical notices and security alerts',
+        'privacy.security.title': '3. Data Security',
+        'privacy.security.desc': 'We use "Military-Grade" encryption for sensitive data, including hotel access codes and financial logs. Access to data is strictly role-based and logged.',
+        'privacy.contact.title': '4. Contact Us',
+        'privacy.contact.desc': 'If you have questions about this Privacy Policy, please contact us at: ',
+
+        'terms.title': 'Terms of Service',
+        'terms.lastUpdated': 'Last updated: February 11, 2026',
+        'terms.acceptance.title': '1. Acceptance of Terms',
+        'terms.acceptance.desc': 'By accessing or using Relay, you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the service.',
+        'terms.license.title': '2. Use License',
+        'terms.license.desc': 'Relay grants you a limited, non-exclusive, non-transferable, revocable license to use the Service for your internal business operations (hotel management).',
+        'terms.responsibilities.title': '3. User Responsibilities',
+        'terms.responsibilities.desc': 'You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must immediately notify us of any unauthorized use.',
+        'terms.availability.title': '4. Availability',
+        'terms.availability.desc': 'While we strive for 99.9% uptime, we do not guarantee that the service will be uninterrupted or error-free. We reserve the right to modify or discontinue the service at any time.',
+        'terms.contact.title': '5. Contact',
+        'terms.contact.desc': 'Questions? Email us at ',
 
         'setup.title': 'Hotel Setup',
         'setup.subtitle': 'Join an existing hotel or create a new one to begin.',
@@ -1328,6 +1447,66 @@ const translations: Record<Language, Translations> = {
         'auth.createAccount': 'Hesap Oluştur',
         'auth.logout': 'Çıkış Yap',
         'auth.switchAccount': 'Otel Değiştir',
+        'auth.backToHome': 'Ana Sayfaya Dön',
+
+        'auth.cycling.1': 'Dijital Devir Teslim Sistemi',
+        'auth.cycling.2': 'Not Defterlerini Unutun',
+        'auth.cycling.3': 'AI Destekli Yanıtlar',
+        'auth.cycling.4': 'Sorunsuz Vardiyalar',
+        'auth.error.hotelCodeRequired': 'Bu otel için Otel Kodu gereklidir.',
+        'auth.error.invalidHotelCode': 'Geçersiz Otel Kodu.',
+        'auth.error.hotelNotFound': 'Hesap yapılandırma hatası: Otel bulunamadı.',
+        'auth.error.verificationFailed': 'Doğrulama başarısız. Lütfen tekrar deneyin.',
+        'auth.placeholder.hotelCode': 'OTEL KODU',
+        'auth.role.selection': 'Ben bir...',
+        'auth.role.staff': 'Personel',
+        'auth.role.staffDesc': 'Bir ekibe katılıyorum',
+        'auth.role.manager': 'Yönetici',
+        'auth.role.managerDesc': 'Bir otel oluşturuyorum',
+        'auth.error.joinHotelCode': 'Ekibinize katılmak için lütfen bir Otel Kodu girin.',
+        'auth.error.invalidJoinCode': 'Geçersiz Otel Kodu. Lütfen yöneticinizle kontrol edin.',
+        'auth.helper.askManager': 'Sormak için yöneticinizle iletişime geçin.',
+
+        'status.title': 'Tüm Sistemler Çalışıyor',
+        'status.subtitle': 'Her şey sorunsuz çalışıyor.',
+        'status.operational': 'Çalışıyor',
+        'status.uptime': 'Çalışma Süresi',
+        'status.lastUpdated': 'Son güncelleme: Az önce',
+        'status.systems.api': 'API Ağ Geçidi',
+        'status.systems.db': 'Veritabanı Kümeleri',
+        'status.systems.messaging': 'Gerçek Zamanlı Mesajlaşma',
+        'status.systems.notifications': 'Bildirimler',
+        'status.systems.auth': 'Kimlik Doğrulama Servisleri',
+
+        'privacy.title': 'Gizlilik Politikası',
+        'privacy.lastUpdated': 'Son güncelleme: 11 Şubat 2026',
+        'privacy.intro.title': '1. Topladığımız Bilgiler',
+        'privacy.intro.desc': 'Hesap oluşturduğunuzda, profilinizi güncellediğinizde veya iletişim özelliklerimizi kullandığınızda bize doğrudan sağladığınız bilgileri topluyoruz. Bunlar şunları içerir:',
+        'privacy.intro.list1': 'Hesap bilgileri (isim, e-posta, otel bağlantısı)',
+        'privacy.intro.list2': 'Operasyonel veriler (vardiya kayıtları, mesajlar, görev durumu)',
+        'privacy.intro.list3': 'Kullanım verileri (giriş zamanları, özellik etkileşimleri)',
+        'privacy.use.title': '2. Bilgileri Nasıl Kullanıyoruz',
+        'privacy.use.desc': 'Topladığımız bilgileri hizmetlerimizi işletmek, sürdürmek ve iyileştirmek için kullanıyoruz, örneğin:',
+        'privacy.use.list1': 'Vardiya devir teslimlerini ve personel iletişimini kolaylaştırmak',
+        'privacy.use.list2': 'Otel yönetimine analiz sağlamak',
+        'privacy.use.list3': 'Teknik bildirimler ve güvenlik uyarıları göndermek',
+        'privacy.security.title': '3. Veri Güvenliği',
+        'privacy.security.desc': 'Otel erişim kodları ve finansal kayıtlar dahil olmak üzere hassas veriler için "Askeri Düzeyde" şifreleme kullanıyoruz. Verilere erişim kesinlikle rol tabanlıdır ve kaydedilir.',
+        'privacy.contact.title': '4. Bize Ulaşın',
+        'privacy.contact.desc': 'Bu Gizlilik Politikası hakkında sorularınız varsa, lütfen şu adresten bizimle iletişime geçin: ',
+
+        'terms.title': 'Hizmet Şartları',
+        'terms.lastUpdated': 'Son güncelleme: 11 Şubat 2026',
+        'terms.acceptance.title': '1. Şartların Kabulü',
+        'terms.acceptance.desc': 'Relay\'e erişerek veya kullanarak, bu Şartlara bağlı kalmayı kabul edersiniz. Şartların herhangi bir kısmını kabul etmiyorsanız, hizmete erişemezsiniz.',
+        'terms.license.title': '2. Kullanım Lisansı',
+        'terms.license.desc': 'Relay, Hizmeti dahili iş operasyonlarınız (otel yönetimi) için kullanmanız üzere size sınırlı, münhasır olmayan, devredilemez, iptal edilebilir bir lisans verir.',
+        'terms.responsibilities.title': '3. Kullanıcı Sorumlulukları',
+        'terms.responsibilities.desc': 'Hesap bilgilerinizin gizliliğini korumaktan ve hesabınız altında gerçekleşen tüm faaliyetlerden siz sorumlusunuz. Herhangi bir yetkisiz kullanımı derhal bize bildirmelisiniz.',
+        'terms.availability.title': '4. Kullanılabilirlik',
+        'terms.availability.desc': '%99,9 çalışma süresi için çabalasak da, hizmetin kesintisiz veya hatasız olacağını garanti etmiyoruz. Hizmeti herhangi bir zamanda değiştirme veya sonlandırma hakkımızı saklı tutuyoruz.',
+        'terms.contact.title': '5. İletişim',
+        'terms.contact.desc': 'Sorunuz mu var? Bize şu adresten ulaşın: ',
 
         'setup.title': 'Otel Kurulumu',
         'setup.subtitle': 'Başlamak için mevcut bir otele katılın veya yeni bir tane oluşturun.',

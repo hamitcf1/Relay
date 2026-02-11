@@ -19,10 +19,10 @@ export function LoginPage() {
 
     // Cycling Text Logic
     const texts = [
-        "Digital Handover System",
-        "Forget About Notepads",
-        "AI Assisted Replies",
-        "Seamless Shifts"
+        t('auth.cycling.1'),
+        t('auth.cycling.2'),
+        t('auth.cycling.3'),
+        t('auth.cycling.4')
     ]
     const [textIndex, setTextIndex] = useState(0)
 
@@ -31,7 +31,7 @@ export function LoginPage() {
             setTextIndex((prev) => (prev + 1) % texts.length)
         }, 3000)
         return () => clearInterval(interval)
-    }, [])
+    }, [texts.length]) // slightly imperfect dependency but fine for now, or remove dependancy since t changes rarely in this view
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -60,12 +60,12 @@ export function LoginPage() {
                         // CASE 1: Hotel HAS a code (Standard Security)
                         if (actualCode) {
                             if (!hotelCode.trim()) {
-                                setLoginError("Hotel Code is required for this hotel.")
+                                setLoginError(t('auth.error.hotelCodeRequired'))
                                 await useAuthStore.getState().signOut()
                                 return
                             }
                             if (actualCode !== hotelCode.trim().toUpperCase()) {
-                                setLoginError("Invalid Hotel Code.")
+                                setLoginError(t('auth.error.invalidHotelCode'))
                                 await useAuthStore.getState().signOut()
                                 return
                             }
@@ -75,7 +75,7 @@ export function LoginPage() {
                         // Ideally, we restrict this to GM only, but for now allow all to avoid lockout.
                     } else {
                         // Hotel doesn't exist?
-                        setLoginError("Account configuration error: Hotel not found.")
+                        setLoginError(t('auth.error.hotelNotFound'))
                         await useAuthStore.getState().signOut()
                         return
                     }
@@ -88,7 +88,7 @@ export function LoginPage() {
                 }
             } catch (err) {
                 console.error("Error verifying hotel code:", err)
-                setLoginError("Verification failed. Please try again.")
+                setLoginError(t('auth.error.verificationFailed'))
                 await useAuthStore.getState().signOut()
                 return
             }
@@ -161,7 +161,7 @@ export function LoginPage() {
                         className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-6 group/back relative z-10"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6" /></svg>
-                        Back to Home
+                        {t('auth.backToHome')}
                     </Link>
 
                     {/* Logo Section */}
@@ -211,7 +211,7 @@ export function LoginPage() {
                                     value={hotelCode}
                                     onChange={(e) => setHotelCode(e.target.value.toUpperCase())}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 font-mono tracking-wider uppercase text-sm"
-                                    placeholder="HOTEL CODE"
+                                    placeholder={t('auth.placeholder.hotelCode')}
                                     maxLength={10}
                                 />
                             </div>

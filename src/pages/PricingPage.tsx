@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
-import { CustomCursor } from '@/components/ui/CustomCursor'
-import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Check, HelpCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Check, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -19,7 +18,7 @@ export function PricingPage() {
 
     return (
         <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none relative overflow-hidden">
-            <CustomCursor />
+
 
             {/* Background */}
             <div className="absolute inset-0 z-0 pointer-events-none">
@@ -27,17 +26,7 @@ export function PricingPage() {
                 <div className="absolute top-[20%] left-[20%] w-[600px] h-[600px] rounded-full bg-indigo-500/5 blur-[150px]" />
             </div>
 
-            {/* Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/60 backdrop-blur-md border-b border-white/5 supports-[backdrop-filter]:bg-black/30">
-                <Link to="/" className="flex items-center gap-3 group">
-                    <ArrowLeft className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
-                    <span className="font-bold text-xl tracking-tight text-white">{t('pricing.back')}</span>
-                </Link>
-                <div className="flex items-center gap-4">
-                    <p className="text-sm text-zinc-400 hidden sm:block">{t('pricing.needHelp')}</p>
-                    <a href="mailto:hamitfindik2@gmail.com" className="text-sm text-white underline hover:text-primary">{t('pricing.contactSales')}</a>
-                </div>
-            </nav>
+
 
             <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
                 <div className="text-center mb-16">

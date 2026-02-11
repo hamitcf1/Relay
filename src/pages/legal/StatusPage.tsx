@@ -1,20 +1,23 @@
 import { motion } from 'framer-motion'
-import { CustomCursor } from '@/components/ui/CustomCursor'
+
 import { Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle, Clock } from 'lucide-react'
+import { useLanguageStore } from '@/stores/languageStore'
 
 export function StatusPage() {
+    const { t } = useLanguageStore()
+
     const systems = [
-        { name: 'API Gateway', status: 'operational', uptime: '99.99%' },
-        { name: 'Database Clusters', status: 'operational', uptime: '99.98%' },
-        { name: 'Real-time Messaging', status: 'operational', uptime: '100%' },
-        { name: 'Notifications', status: 'operational', uptime: '99.95%' },
-        { name: 'Auth Services', status: 'operational', uptime: '100%' },
+        { name: t('status.systems.api'), status: 'operational', uptime: '99.99%' },
+        { name: t('status.systems.db'), status: 'operational', uptime: '99.98%' },
+        { name: t('status.systems.messaging'), status: 'operational', uptime: '100%' },
+        { name: t('status.systems.notifications'), status: 'operational', uptime: '99.95%' },
+        { name: t('status.systems.auth'), status: 'operational', uptime: '100%' },
     ]
 
     return (
         <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 cursor-none relative overflow-hidden">
-            <CustomCursor />
+
 
             {/* Background */}
             <div className="absolute inset-0 z-0 pointer-events-none">
@@ -25,7 +28,7 @@ export function StatusPage() {
             <div className="container mx-auto px-6 py-12 relative z-10 max-w-3xl">
                 <Link to="/" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-12 group">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Home
+                    {t('auth.backToHome')}
                 </Link>
 
                 <motion.div
@@ -34,8 +37,8 @@ export function StatusPage() {
                     className="mb-12 p-8 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-col text-center"
                 >
                     <CheckCircle className="w-16 h-16 text-emerald-500 mb-4" />
-                    <h1 className="text-3xl font-bold text-white mb-2">All Systems Operational</h1>
-                    <p className="text-emerald-200/70">Everything is running smoothly.</p>
+                    <h1 className="text-3xl font-bold text-white mb-2">{t('status.title')}</h1>
+                    <p className="text-emerald-200/70">{t('status.subtitle')}</p>
                 </motion.div>
 
                 <div className="space-y-4">
@@ -52,9 +55,9 @@ export function StatusPage() {
                                 <span className="font-medium text-white">{sys.name}</span>
                             </div>
                             <div className="flex items-center gap-6">
-                                <span className="text-sm text-zinc-500 hidden sm:block">Uptime {sys.uptime}</span>
+                                <span className="text-sm text-zinc-500 hidden sm:block">{t('status.uptime')} {sys.uptime}</span>
                                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">
-                                    Operational
+                                    {t('status.operational')}
                                 </span>
                             </div>
                         </motion.div>
@@ -64,7 +67,7 @@ export function StatusPage() {
                 <div className="mt-12 pt-8 border-t border-white/10 text-center">
                     <p className="text-zinc-500 flex items-center justify-center gap-2">
                         <Clock className="w-4 h-4" />
-                        Last updated: Just now
+                        {t('status.lastUpdated')}
                     </p>
                 </div>
             </div>
