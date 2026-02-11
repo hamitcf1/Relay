@@ -14,6 +14,8 @@ import {
 import { db } from '@/lib/firebase'
 import type { ShiftNote, NoteCategory, NoteStatus } from '@/types'
 import { syncNoteToCalendar, removeNoteFromCalendar } from '@/lib/calendar-sync'
+import { useAuthStore } from './authStore'
+import { useActivityStore } from './activityStore'
 
 export type { NoteCategory, NoteStatus }
 
@@ -162,6 +164,15 @@ export const useNotesStore = create<NotesStore>((set) => ({
                 }
                 await syncNoteToCalendar(hotelId, newNote)
             }
+
+            // Log activity
+            const user = useAuthStore.getState().user
+            if (user) {
+                useActivityStore.getState().logActivity(
+                    hotelId, user.uid, user.name, user.role,
+                    'note_create', noteData.content?.substring(0, 60) || 'New note'
+                )
+            }
         } catch (error) {
             console.error('Error adding note:', error)
             throw error
@@ -265,6 +276,15 @@ export const useNotesStore = create<NotesStore>((set) => ({
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
             await deleteDoc(noteRef)
             await removeNoteFromCalendar(hotelId, noteId)
+
+            // Log activity
+            const user = useAuthStore.getState().user
+            if (user) {
+                useActivityStore.getState().logActivity(
+                    hotelId, user.uid, user.name, user.role,
+                    'note_delete'
+                )
+            }
         } catch (error) {
             console.error('Error deleting note:', error)
             throw error

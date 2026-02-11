@@ -45,7 +45,8 @@ import { TourCatalogue } from '@/components/tours/TourCatalogue'
 import { SalesPanel } from '@/components/sales/SalesPanel'
 import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign } from 'lucide-react'
+import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
@@ -414,6 +415,12 @@ export function DashboardPage() {
                                             <Users className="w-4 h-4" />
                                             <span className="inline">{t('module.team_label')}</span>
                                         </TabsTrigger>
+                                        {user?.role === 'gm' && (
+                                            <TabsTrigger value="activity" className="rounded-lg gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white px-4 shrink-0">
+                                                <ScrollText className="w-4 h-4" />
+                                                <span className="inline">Aktivite</span>
+                                            </TabsTrigger>
+                                        )}
 
                                     </TabsList>
                                 </div>
@@ -442,6 +449,11 @@ export function DashboardPage() {
                                     <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <LeaderboardPanel />
                                     </TabsContent>
+                                    {user?.role === 'gm' && (
+                                        <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <ActivityLogPanel />
+                                        </TabsContent>
+                                    )}
                                 </div>
                             </Tabs>
                         </div>

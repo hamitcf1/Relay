@@ -347,7 +347,15 @@ function AIPricingAgent({ hotelId }: { hotelId: string }) {
                     const roomRaw = p.substring(0, colonIndex).trim().toLowerCase()
                     const valRaw = p.substring(colonIndex + 1).trim()
 
-                    // Handle European decimals and currencies
+                    // Detect currency from symbols or text before stripping
+                    let detectedCurrency: PricingCurrency = 'EUR' // default
+                    if (valRaw.includes('$') || valRaw.toLowerCase().includes('usd')) {
+                        detectedCurrency = 'USD'
+                    } else if (valRaw.includes('€') || valRaw.toLowerCase().includes('eur')) {
+                        detectedCurrency = 'EUR'
+                    }
+
+                    // Handle European decimals and strip non-numeric
                     const cleanVal = valRaw.replace(',', '.').replace(/[^0-9.]/g, '')
                     const amount = parseFloat(cleanVal)
 
@@ -363,7 +371,7 @@ function AIPricingAgent({ hotelId }: { hotelId: string }) {
                         }
 
                         if (matchedRoom) {
-                            prices[matchedRoom] = { amount, currency: 'EUR' }
+                            prices[matchedRoom] = { amount, currency: detectedCurrency }
                         }
                     }
                 })

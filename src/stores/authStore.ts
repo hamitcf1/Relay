@@ -11,6 +11,7 @@ import type { User, UserRole } from '@/types'
 import { useHotelStore } from './hotelStore'
 import { useNotificationStore } from './notificationStore'
 import { useShiftStore } from './shiftStore'
+import { useActivityStore } from './activityStore'
 
 interface AuthState {
     user: User | null
@@ -64,6 +65,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
                     firebaseUser: credential.user,
                     loading: false,
                 })
+                // Log login activity
+                if (userData.hotel_id) {
+                    useActivityStore.getState().logActivity(
+                        userData.hotel_id, credential.user.uid,
+                        userData.name || 'User', (userData.role as UserRole) || 'receptionist',
+                        'login'
+                    )
+                }
             } else {
                 // User exists in Auth but not in Firestore
                 // Create a default user object
@@ -149,6 +158,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
     signOut: async () => {
         set({ loading: true })
         try {
+            // Log logout activity before clearing state
+            const currentUser = useAuthStore.getState().user
+            if (currentUser?.hotel_id) {
+                await useActivityStore.getState().logActivity(
+                    currentUser.hotel_id, currentUser.uid,
+                    currentUser.name, currentUser.role,
+                    'logout'
+                )
+            }
             await firebaseSignOut(auth)
 
             // Clear all stores to prevent data leaks between users

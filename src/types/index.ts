@@ -25,6 +25,17 @@ export type ShiftStatus = 'active' | 'closed'
 // Vault Categories
 export type VaultCategory = 'financial' | 'tours' | 'transfer'
 
+// Activity Log Actions
+export type ActivityAction =
+    | 'login' | 'logout'
+    | 'shift_start' | 'shift_end'
+    | 'note_create' | 'note_edit' | 'note_delete'
+    | 'message_send'
+    | 'pricing_update' | 'roster_update'
+    | 'compliance_check'
+    | 'sale_create' | 'sale_update'
+    | 'feedback_create'
+
 // ============================================
 // Firestore Document Types
 // ============================================

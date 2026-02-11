@@ -15,6 +15,8 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { Shift, ShiftType, ShiftCompliance } from '@/types'
+import { useAuthStore } from './authStore'
+import { useActivityStore } from './activityStore'
 
 interface ShiftState {
     currentShift: Shift | null
@@ -132,6 +134,15 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
                 started_at: serverTimestamp(),
             })
 
+            // Log activity
+            const user = useAuthStore.getState().user
+            if (user) {
+                useActivityStore.getState().logActivity(
+                    hotelId, user.uid, user.name, user.role,
+                    'shift_start', `Shift ${type}`
+                )
+            }
+
         } catch (error) {
             console.error('Error starting shift:', error)
             throw error
@@ -186,6 +197,15 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
                 status: 'closed',
                 ended_at: serverTimestamp(),
             })
+
+            // Log activity
+            const user = useAuthStore.getState().user
+            if (user) {
+                useActivityStore.getState().logActivity(
+                    hotelId, user.uid, user.name, user.role,
+                    'shift_end', `Shift ${currentShift.type}`
+                )
+            }
 
         } catch (error) {
             console.error('Error ending shift:', error)

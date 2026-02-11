@@ -13,6 +13,8 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { Sale, SaleType, PaymentStatus, Currency, PaymentEntry, SaleStatus } from '@/types'
+import { useAuthStore } from './authStore'
+import { useActivityStore } from './activityStore'
 
 // Helper to get display info for sale types
 export const saleTypeInfo: Record<SaleType, { label: string; icon: string; color: string }> = {
@@ -160,6 +162,15 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             }
         }
 
+        // Log activity
+        const user = useAuthStore.getState().user
+        if (user) {
+            useActivityStore.getState().logActivity(
+                hotelId, user.uid, user.name, user.role,
+                'sale_create', `${saleData.type}: ${saleData.name}`
+            )
+        }
+
         return saleId
     },
 
@@ -205,6 +216,15 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     console.error("Failed to sync calendar event:", err)
                 }
             }
+        }
+
+        // Log activity
+        const authUser = useAuthStore.getState().user
+        if (authUser) {
+            useActivityStore.getState().logActivity(
+                hotelId, authUser.uid, authUser.name, authUser.role,
+                'sale_update', `Sale ${saleId}`
+            )
         }
     },
 

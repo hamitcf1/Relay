@@ -120,6 +120,13 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow write: if isGM();
       }
+      
+      // ACTIVITY_LOGS - Staff activity audit trail (GM read only, immutable)
+      match /activity_logs/{logId} {
+        allow read: if isGM() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update, delete: if false;
+      }
     }
   }
 }

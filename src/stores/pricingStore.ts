@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { collection, doc, setDoc, deleteDoc, onSnapshot, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { BasePrices, Agency, AgencyOverride, RoomPriceEntry, RoomType, BaseOverride } from '@/types'
+import { useAuthStore } from './authStore'
+import { useActivityStore } from './activityStore'
 
 interface PricingState {
     basePrices: BasePrices | null
@@ -114,6 +116,15 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
             updated_at: Timestamp.now(),
             updated_by: userId,
         }, { merge: true })
+
+        // Log activity
+        const user = useAuthStore.getState().user
+        if (user) {
+            useActivityStore.getState().logActivity(
+                hotelId, user.uid, user.name, user.role,
+                'pricing_update', 'Updated base prices'
+            )
+        }
     },
 
     setBaseOverride: async (hotelId, override) => {
@@ -164,6 +175,15 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
     updateAgencyBasePrices: async (hotelId, agencyId, base_prices) => {
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', agencyId)
         await setDoc(docRef, { base_prices, updated_at: Timestamp.now() }, { merge: true })
+
+        // Log activity
+        const user = useAuthStore.getState().user
+        if (user) {
+            useActivityStore.getState().logActivity(
+                hotelId, user.uid, user.name, user.role,
+                'pricing_update', `Updated agency prices: ${agencyId}`
+            )
+        }
     },
 
     getEffectivePrice: (date, roomType, agencyId?) => {
