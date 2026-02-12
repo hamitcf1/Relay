@@ -7,8 +7,6 @@ import {
     StopCircle,
     Globe,
     Check,
-    BedDouble,
-    Sparkles,
     Palette,
 } from 'lucide-react'
 import {
@@ -36,13 +34,8 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useShiftStore } from '@/stores/shiftStore'
 import { cn } from '@/lib/utils'
 
-interface UserNavProps {
-    onOpenAI: (mode: 'general' | 'report' | 'email' | 'review') => void
-    onOpenRoomManager: () => void
-    onOpenHandover: () => void
-}
-
-export function UserNav({ onOpenAI, onOpenRoomManager, onOpenHandover }: UserNavProps) {
+export function UserNav({ onOpenHandover }: { onOpenHandover: () => void; onOpenAI: any; onOpenRoomManager: any }) {
+    // Keeping props for compatibility but ignoring unused ones for now to avoid refactoring parent
     const navigate = useNavigate()
     const { user, signOut } = useAuthStore()
     const { t, language, setLanguage } = useLanguageStore()
@@ -134,15 +127,8 @@ export function UserNav({ onOpenAI, onOpenRoomManager, onOpenHandover }: UserNav
                     <div className="space-y-1 mt-2">
                         <DropdownMenuLabel className="text-[10px] text-muted-foreground font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
 
-                        <DropdownMenuItem onClick={() => onOpenAI('general')} className="flex items-center gap-2 text-foreground hover:bg-primary/10 cursor-pointer px-3 py-2 rounded-lg transition-colors">
-                            <Sparkles className="w-4 h-4 text-primary" />
-                            <span className="text-xs font-medium">Assistant AI</span>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem onClick={onOpenRoomManager} className="flex items-center gap-2 text-foreground hover:bg-amber-500/10 cursor-pointer px-3 py-2 rounded-lg transition-colors">
-                            <BedDouble className="w-4 h-4 text-amber-500" />
-                            <span className="text-xs font-medium">{t('dashboard.rooms')}</span>
-                        </DropdownMenuItem>
+                        {/* AI Button Removed - Now Floating FAB */}
+                        {/* Rooms Button Removed - Now in Operations Hub */}
 
                         <DropdownMenuSeparator className="bg-border" />
 

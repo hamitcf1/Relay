@@ -55,9 +55,9 @@ export interface UserSettings {
     language?: 'en' | 'tr'
     onboarding_seen?: boolean
     dismissed_announcements?: string[]
-    theme?: 'light' | 'dark'
+    theme?: 'light' | 'dark' | 'comfort'
     accent_color?: string
-    custom_cursor_enabled?: boolean
+    notifications?: boolean
     show_datetime?: boolean
     collapsed_cards?: Record<string, boolean>
 }

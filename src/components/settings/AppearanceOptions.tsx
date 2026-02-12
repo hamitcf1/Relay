@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Moon, Palette, MousePointer2 } from 'lucide-react'
+import { Sun, Moon, Palette, MousePointer2, Sparkles } from 'lucide-react'
 import { useThemeStore, ACCENT_COLORS } from '@/stores/themeStore'
 import { getCursorEnabled, setCursorEnabled } from '@/components/ui/CustomCursor'
 import { cn } from '@/lib/utils'
@@ -22,7 +22,7 @@ export function AppearanceOptions() {
                 <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider px-2">
                     Visual Theme
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                     <button
                         onClick={() => setTheme('light')}
                         className={cn(
@@ -33,7 +33,19 @@ export function AppearanceOptions() {
                         )}
                     >
                         <Sun className="w-4 h-4" />
-                        <span className="text-sm font-medium">Light</span>
+                        <span className="text-xs font-medium">Light</span>
+                    </button>
+                    <button
+                        onClick={() => setTheme('comfort')}
+                        className={cn(
+                            "flex items-center justify-center gap-2 py-2 px-3 rounded-xl border transition-all duration-200",
+                            theme === 'comfort'
+                                ? "bg-zinc-800 border-primary text-primary shadow-sm"
+                                : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        )}
+                    >
+                        <Sparkles className="w-4 h-4" />
+                        <span className="text-xs font-medium">Comfort</span>
                     </button>
                     <button
                         onClick={() => setTheme('dark')}
@@ -45,7 +57,7 @@ export function AppearanceOptions() {
                         )}
                     >
                         <Moon className="w-4 h-4" />
-                        <span className="text-sm font-medium">Dark</span>
+                        <span className="text-xs font-medium">Dark</span>
                     </button>
                 </div>
             </div>

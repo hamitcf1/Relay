@@ -126,7 +126,20 @@ function buildContext(): string {
         })
     }
     if (agencies.length > 0) {
-        parts.push(`[AGENCIES] ${agencies.map(a => a.name).join(', ')}`)
+        parts.push(`[AGENCY PRICES (Base + Active Overrides)]`)
+        agencies.forEach(a => {
+            const activeOverride = a.overrides.find(o => {
+                const now = new Date().toISOString().split('T')[0]
+                return now >= o.start_date && now <= o.end_date
+            })
+
+            const prices = activeOverride?.prices || a.base_prices || {}
+            const priceList = Object.entries(prices)
+                .map(([room, price]) => `${room}: ${price.amount} ${price.currency}`)
+                .join(', ')
+
+            parts.push(`  - ${a.name}: ${priceList || 'No prices set'} ${activeOverride ? '(Active Override)' : ''}`)
+        })
     }
 
     // ── ROSTER ────────────────────────────────

@@ -13,7 +13,8 @@ import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
-import { RoomManagementModal } from '@/components/rooms/RoomManagementModal'
+// import { RoomManagementModal } from '@/components/rooms/RoomManagementModal' // Removed
+import { RoomManagementPanel } from '@/components/rooms/RoomManagementPanel' // Added
 import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
 import { HandoverWizard } from '@/components/handover/HandoverWizard'
 import { ComplianceChecklist } from '@/components/compliance/ComplianceChecklist'
@@ -47,7 +48,7 @@ import { SalesPanel } from '@/components/sales/SalesPanel'
 import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText } from 'lucide-react'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText, BedDouble } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
@@ -67,7 +68,7 @@ export function DashboardPage() {
 
 
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
-    const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false)
+    // const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false) // Removed
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
     const [showDateTime, setShowDateTime] = useState(() => {
@@ -247,7 +248,7 @@ export function DashboardPage() {
                     <div id="tour-profile">
                         <UserNav
                             onOpenAI={handleOpenAI}
-                            onOpenRoomManager={() => setIsRoomManagerOpen(true)}
+                            onOpenRoomManager={() => { }} // Deprecated in UserNav, effectively no-op or removed
                             onOpenHandover={() => setIsHandoverOpen(true)}
                         />
                     </div>
@@ -401,6 +402,10 @@ export function DashboardPage() {
                                             <Map className="w-4 h-4" />
                                             <span className="hidden sm:inline">{t('module.tours')}</span>
                                         </TabsTrigger>
+                                        <TabsTrigger value="rooms" id="tour-rooms" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
+                                            <BedDouble className="w-4 h-4" />
+                                            <span className="hidden sm:inline">{t('dashboard.rooms')}</span>
+                                        </TabsTrigger>
                                         <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
                                             <CreditCard className="w-4 h-4" />
                                             <span className="hidden sm:inline">{t('module.sales')}</span>
@@ -441,6 +446,9 @@ export function DashboardPage() {
                                     <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <TourCatalogue />
                                     </TabsContent>
+                                    <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <RoomManagementPanel />
+                                    </TabsContent>
                                     <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
                                         <PricingPanel />
                                     </TabsContent>
@@ -460,11 +468,7 @@ export function DashboardPage() {
             </main >
 
             {/* Modals */}
-            < RoomManagementModal
-                isOpen={isRoomManagerOpen}
-                onClose={() => setIsRoomManagerOpen(false)
-                }
-            />
+            {/* < RoomManagementModal isOpen={isRoomManagerOpen} onClose={() => setIsRoomManagerOpen(false)} /> */}
 
             < HandoverWizard
                 isOpen={isHandoverOpen}

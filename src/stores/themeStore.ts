@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useAuthStore } from './authStore'
 
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'comfort'
 
 export interface AccentColor {
     name: string
@@ -60,8 +60,10 @@ export const useThemeStore = create<ThemeStore>()(
             },
 
             toggleTheme: () => {
-                const newTheme = get().theme === 'dark' ? 'light' : 'dark'
-                get().setTheme(newTheme)
+                const { theme } = get()
+                const nextTheme = theme === 'light' ? 'comfort' : theme === 'comfort' ? 'dark' : 'light'
+                set({ theme: nextTheme })
+                get().applyTheme()
             },
 
             applyTheme: () => {
@@ -69,7 +71,7 @@ export const useThemeStore = create<ThemeStore>()(
                 const root = window.document.documentElement
 
                 // Toggle classes
-                root.classList.remove('light', 'dark')
+                root.classList.remove('light', 'dark', 'comfort')
                 root.classList.add(theme)
 
                 // Apply CSS Variables
@@ -79,7 +81,8 @@ export const useThemeStore = create<ThemeStore>()(
                 // Update meta theme-color
                 const metaThemeColor = window.document.querySelector('meta[name="theme-color"]')
                 if (metaThemeColor) {
-                    metaThemeColor.setAttribute('content', theme === 'dark' ? '#09090b' : '#ffffff')
+                    const content = theme === 'dark' ? '#09090b' : theme === 'comfort' ? '#222226' : '#ffffff'
+                    metaThemeColor.setAttribute('content', content)
                 }
             },
 

@@ -22,6 +22,8 @@ import {
     Mail,
     FileText,
     Brain as BrainIcon,
+    Copy,
+    CheckCircle2,
 } from 'lucide-react'
 import { useChatStore, type ChatMessage } from '@/stores/chatStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -74,7 +76,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.2 }}
             className={cn(
-                "flex gap-2 max-w-[90%]",
+                "flex gap-2 max-w-[90%] group", // Added group for hover effects
                 isUser ? "ml-auto flex-row-reverse" : "mr-auto"
             )}
         >
@@ -84,20 +86,44 @@ function MessageBubble({ message }: { message: ChatMessage }) {
                 </div>
             )}
             <div className={cn(
-                "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
+                "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm relative select-text", // Added select-text
                 isUser
                     ? "bg-primary text-primary-foreground rounded-br-md"
                     : "bg-muted/80 text-foreground border border-border/30 rounded-bl-md"
             )}>
                 <div className="whitespace-pre-wrap break-words">{message.content}</div>
-                <div className={cn(
-                    "text-[10px] mt-1.5 opacity-50 text-right",
-                    isUser ? "text-primary-foreground" : "text-muted-foreground"
-                )}>
-                    {format(message.timestamp, 'HH:mm')}
+
+                {/* Footer / Meta */}
+                <div className="flex items-center justify-end gap-2 mt-1.5 opacity-50">
+                    <span className={cn("text-[10px]", isUser ? "text-primary-foreground" : "text-muted-foreground")}>
+                        {format(message.timestamp, 'HH:mm')}
+                    </span>
+                    {!isUser && (
+                        <CopyButton text={message.content} />
+                    )}
                 </div>
             </div>
         </motion.div>
+    )
+}
+
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false)
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(text)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/5 p-1 rounded-md"
+            title="Kopyala"
+        >
+            {copied ? <CheckCircle2 className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+        </button>
     )
 }
 
@@ -414,6 +440,7 @@ export function AIChatBot() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={toggleOpen}
+                        id="ai-toggle-btn"
                         className={cn(
                             "fixed bottom-6 right-6",
                             "w-14 h-14 rounded-2xl",
@@ -455,6 +482,21 @@ export function AIChatBot() {
                                 // Desktop: Floating Window
                                 "md:w-[450px] md:h-[650px] md:rounded-2xl md:border md:border-border/50 md:bottom-6 md:right-6 md:left-auto"
                             )}
+                            ref={(node) => {
+                                if (node) {
+                                    // Click outside listener
+                                    const handleClickOutside = (e: MouseEvent) => {
+                                        if (node && !node.contains(e.target as Node)) {
+                                            // Check if click was on the toggle button (to prevent immediate reopen)
+                                            const toggleBtn = document.getElementById('ai-toggle-btn')
+                                            if (toggleBtn && toggleBtn.contains(e.target as Node)) return
+                                            toggleOpen()
+                                        }
+                                    }
+                                    document.addEventListener('mousedown', handleClickOutside)
+                                    return () => document.removeEventListener('mousedown', handleClickOutside)
+                                }
+                            }}
                         >
                             {/* Sidebar Overlay */}
                             <AnimatePresence>

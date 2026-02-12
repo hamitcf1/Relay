@@ -579,7 +579,7 @@ export function SalesPanel() {
                                             ? 'bg-emerald-500/5 border-emerald-500/10 hover:border-emerald-500/30'
                                             : sale.payment_status === 'partial'
                                                 ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/30'
-                                                : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800'
+                                                : 'bg-card border-border hover:border-primary/50 hover:bg-accent/40'
                                     )}
                                 >
                                     <div className="flex items-start justify-between gap-3">

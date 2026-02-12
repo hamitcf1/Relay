@@ -14,11 +14,11 @@ const buttonVariants = cva(
                 destructive:
                     "bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-lg glow-critical hover:from-rose-600 hover:to-red-700",
                 outline:
-                    "border border-zinc-700 bg-transparent hover:bg-zinc-800 hover:border-zinc-600",
+                    "border border-border bg-transparent hover:bg-accent hover:text-accent-foreground",
                 secondary:
-                    "bg-zinc-800 text-zinc-100 hover:bg-zinc-700",
+                    "bg-secondary text-secondary-foreground hover:bg-secondary/80",
                 ghost:
-                    "hover:bg-zinc-800/50 hover:text-zinc-100",
+                    "hover:bg-accent hover:text-accent-foreground",
                 link:
                     "text-indigo-400 underline-offset-4 hover:underline",
                 success:
