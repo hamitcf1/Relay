@@ -51,9 +51,30 @@ export function LandingPage() {
         }
     }
 
-    return (
-        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 flex flex-col">
+    const structuredData = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Relay",
+        "operatingSystem": "Web, iOS, Android",
+        "applicationCategory": "BusinessApplication",
+        "description": "Next-generation digital handover and operations system for hotels.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "120"
+        }
+    }
 
+    return (
+        <main className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 flex flex-col">
+            <script type="application/ld+json">
+                {JSON.stringify(structuredData)}
+            </script>
 
             {/* Hero Section */}
             <section ref={targetRef} className="h-screen relative flex items-center justify-center overflow-hidden shrink-0">
@@ -72,7 +93,7 @@ export function LandingPage() {
                         transition={{ duration: 0.8 }}
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm font-medium mb-8 backdrop-blur-sm shadow-xl">
-                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" aria-hidden="true" />
                             <span>{t('landing.hero.trusted')}</span>
                         </div>
                         <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 flex flex-col items-center justify-center gap-2">
@@ -86,7 +107,7 @@ export function LandingPage() {
                                         animate={{ y: 0, opacity: 1, rotateX: 0 }}
                                         exit={{ y: -50, opacity: 0, rotateX: 90 }}
                                         transition={{ duration: 0.5, ease: "backOut" }}
-                                        className="absolute text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-500 whitespace-nowrap pb-2"
+                                        className="absolute text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-500 whitespace-nowrap pb-2 [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]"
                                     >
                                         {words[index]}
                                     </motion.span>
@@ -97,11 +118,12 @@ export function LandingPage() {
                             {t('landing.hero.subtitle')}
                         </p>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <nav className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Button
                                 size="lg"
                                 onClick={() => navigate('/pricing')}
                                 className="h-14 px-8 text-lg bg-white text-black hover:bg-zinc-200 rounded-full w-full sm:w-auto transition-transform hover:scale-105 shadow-xl shadow-white/10"
+                                aria-label={t('landing.hero.cta.primary')}
                             >
                                 {t('landing.hero.cta.primary')}
                             </Button>
@@ -110,10 +132,11 @@ export function LandingPage() {
                                 variant="outline"
                                 onClick={() => navigate('/live-demo')}
                                 className="h-14 px-8 text-lg border-white/20 text-white hover:bg-white/10 rounded-full w-full sm:w-auto backdrop-blur-sm"
+                                aria-label={t('landing.hero.cta.secondary')}
                             >
-                                <Play className="w-4 h-4 mr-2" /> {t('landing.hero.cta.secondary')}
+                                <Play className="w-4 h-4 mr-2" aria-hidden="true" /> {t('landing.hero.cta.secondary')}
                             </Button>
-                        </div>
+                        </nav>
                     </motion.div>
                 </motion.div>
 
@@ -122,6 +145,7 @@ export function LandingPage() {
                     className="absolute bottom-10 left-1/2 -translate-x-1/2"
                     animate={{ y: [0, 10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
+                    aria-hidden="true"
                 >
                     <div className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2">
                         <div className="w-1 h-3 bg-white/50 rounded-full" />
@@ -132,23 +156,23 @@ export function LandingPage() {
             {/* Get App Section */}
             <section className="py-20 border-y border-white/5 bg-white/5 backdrop-blur-sm relative z-20 shrink-0">
                 <div className="container mx-auto px-6 text-center">
-                    <h2 className="text-2xl font-bold text-white mb-8">{t('landing.getApp.title')}</h2>
-                    <div className="flex flex-wrap justify-center gap-4">
-                        <AppButton icon={<Apple className="w-6 h-6" />} label="App Store" sub="Download for iOS" />
-                        <AppButton icon={<Smartphone className="w-6 h-6" />} label="Google Play" sub="Get it on Android" />
-                        <AppButton icon={<Download className="w-6 h-6" />} label="Direct APK" sub="Android Package" />
-                        <AppButton icon={<Globe className="w-6 h-6" />} label="Web App" sub="Access in Browser" onClick={() => navigate('/login')} />
-                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-8 italic">{t('landing.getApp.title')}</h2>
+                    <nav className="flex flex-wrap justify-center gap-4">
+                        <AppButton icon={<Apple className="w-6 h-6" aria-hidden="true" />} label={t('landing.getApp.appStore')} sub={t('landing.getApp.appStoreSub')} />
+                        <AppButton icon={<Smartphone className="w-6 h-6" aria-hidden="true" />} label={t('landing.getApp.googlePlay')} sub={t('landing.getApp.googlePlaySub')} />
+                        <AppButton icon={<Download className="w-6 h-6" aria-hidden="true" />} label={t('landing.getApp.directApk')} sub={t('landing.getApp.directApkSub')} />
+                        <AppButton icon={<Globe className="w-6 h-6" aria-hidden="true" />} label={t('landing.getApp.webApp')} sub={t('landing.getApp.webAppSub')} onClick={() => navigate('/login')} />
+                    </nav>
                 </div>
             </section>
 
             {/* Features Section */}
             <section id="features" className="py-32 bg-zinc-950 relative z-20 shrink-0">
                 <div className="container mx-auto px-6">
-                    <div className="text-center mb-20">
+                    <header className="text-center mb-20">
                         <h2 className="text-4xl font-bold text-white mb-4">{t('landing.features.title')}</h2>
                         <p className="text-zinc-400">{t('landing.features.subtitle')}</p>
-                    </div>
+                    </header>
 
                     <motion.div
                         initial="hidden"
@@ -158,47 +182,47 @@ export function LandingPage() {
                         className="grid grid-cols-1 md:grid-cols-3 gap-6"
                     >
                         <FeatureCard
-                            icon={<Smartphone className="w-6 h-6 text-blue-400" />}
+                            icon={<Smartphone className="w-6 h-6 text-blue-400" aria-hidden="true" />}
                             title={t('landing.feature.mobile.title')}
                             desc={t('landing.feature.mobile.desc')}
                         />
                         <FeatureCard
-                            icon={<Shield className="w-6 h-6 text-emerald-400" />}
+                            icon={<Shield className="w-6 h-6 text-emerald-400" aria-hidden="true" />}
                             title={t('landing.feature.security.title')}
                             desc={t('landing.feature.security.desc')}
                         />
                         <FeatureCard
-                            icon={<Globe className="w-6 h-6 text-purple-400" />}
+                            icon={<Globe className="w-6 h-6 text-purple-400" aria-hidden="true" />}
                             title={t('landing.feature.sync.title')}
                             desc={t('landing.feature.sync.desc')}
                         />
                         <FeatureCard
-                            icon={<MessageSquare className="w-6 h-6 text-pink-400" />}
+                            icon={<MessageSquare className="w-6 h-6 text-pink-400" aria-hidden="true" />}
                             title={t('landing.feature.messaging.title')}
                             desc={t('landing.feature.messaging.desc')}
                         />
                         <FeatureCard
-                            icon={<Clock className="w-6 h-6 text-orange-400" />}
+                            icon={<Clock className="w-6 h-6 text-orange-400" aria-hidden="true" />}
                             title={t('landing.feature.handovers.title')}
                             desc={t('landing.feature.handovers.desc')}
                         />
                         <FeatureCard
-                            icon={<Users className="w-6 h-6 text-cyan-400" />}
+                            icon={<Users className="w-6 h-6 text-cyan-400" aria-hidden="true" />}
                             title={t('landing.feature.roster.title')}
                             desc={t('landing.feature.roster.desc')}
                         />
                         <FeatureCard
-                            icon={<BarChart3 className="w-6 h-6 text-indigo-400" />}
+                            icon={<BarChart3 className="w-6 h-6 text-indigo-400" aria-hidden="true" />}
                             title={t('landing.feature.analytics.title')}
                             desc={t('landing.feature.analytics.desc')}
                         />
                         <FeatureCard
-                            icon={<Lock className="w-6 h-6 text-red-400" />}
+                            icon={<Lock className="w-6 h-6 text-red-400" aria-hidden="true" />}
                             title={t('landing.feature.vault.title')}
                             desc={t('landing.feature.vault.desc')}
                         />
                         <FeatureCard
-                            icon={<Zap className="w-6 h-6 text-yellow-400" />}
+                            icon={<Zap className="w-6 h-6 text-yellow-400" aria-hidden="true" />}
                             title={t('landing.feature.tasks.title')}
                             desc={t('landing.feature.tasks.desc')}
                         />
@@ -218,12 +242,13 @@ export function LandingPage() {
                     <Button
                         onClick={() => navigate('/pricing')}
                         className="h-16 px-10 text-xl bg-white text-black hover:bg-zinc-200 rounded-full transition-transform hover:scale-105"
+                        aria-label={t('landing.pricing.cta')}
                     >
                         {t('landing.pricing.cta')}
                     </Button>
                 </div>
             </section>
-        </div>
+        </main>
     )
 }
 

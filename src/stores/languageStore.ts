@@ -15,6 +15,7 @@ type Translations = {
     'auth.noAccount': string
     'auth.haveAccount': string
     'auth.contactGM': string
+    'auth.contactSales': string
     'auth.error.enterName': string
     'auth.error.passwordLength': string
     'auth.error.passwordMismatch': string
@@ -160,6 +161,7 @@ type Translations = {
     'module.sales': string
     'module.pricing_label': string
     'module.team_label': string
+    'module.activity': string
 
     // Pricing Module (v2)
     'pricing.base.title': string
@@ -193,6 +195,7 @@ type Translations = {
     'pricing.global_overrides.desc': string
     'pricing.ai.title': string
     'pricing.ai.desc': string
+    'pricing.price.custom': string
 
     // Room Types
     'room.standard': string
@@ -375,6 +378,7 @@ type Translations = {
     'common.reopen': string
     'common.resolve': string
     'common.dismiss': string
+    'common.backToHome': string
 
     // Calendar
     'calendar.noShifts': string
@@ -605,67 +609,6 @@ type Translations = {
     'menu.lunchTime': string
     'menu.dinnerTime': string
 
-    // Hotel Info - New
-    'hotel.secure.title': string
-    'hotel.secure.encrypted': string
-    'hotel.secure.safeCode': string
-    'hotel.secure.agency': string
-    'hotel.secure.other': string
-    'hotel.secure.kbs': string
-    'hotel.secure.safeInfo': string
-    'hotel.settings.fixturePrices': string
-    'fixture.hand_towel': string
-    'fixture.bath_towel': string
-    'fixture.bed_sheet': string
-    'fixture.pillow_case': string
-    'fixture.duvet_cover': string
-    'fixture.bathrobe': string
-    'fixture.mattress_protector': string
-
-    // Off Day - New
-    'offday.management.title': string
-    'offday.management.desc': string
-    'offday.pending': string
-    'offday.history': string
-    'offday.petitions': string
-
-    // Messages & Feedback - New
-    'messages.title': string
-    'messages.search': string
-    'messages.announcements': string
-    'messages.broadcast': string
-    'feedback.anonymous.title': string
-    'feedback.anonymous.subtitle': string
-    'feedback.privacy.title': string
-    'feedback.privacy.desc': string
-    'feedback.submit.title': string
-    'feedback.submit.desc': string
-    'feedback.management.view': string
-
-    // AI Modal - New
-    'ai.title': string
-    'ai.poweredBy': string
-    'ai.model': string
-    'ai.mode.assistant': string
-    'ai.mode.quota': string
-    'ai.task.general': string
-    'ai.task.generalDesc': string
-    'ai.task.incident': string
-    'ai.task.incidentDesc': string
-    'ai.task.email': string
-    'ai.task.emailDesc': string
-    'ai.task.review': string
-    'ai.task.reviewDesc': string
-    'ai.context.title': string
-    'ai.context.desc': string
-    'ai.context.save': string
-    'ai.generate': string
-    'ai.cancel': string
-
-    // Shift Notes - New
-    'notes.edited': string
-    'notes.label': string
-
     // Landing Page
     'landing.hero.trusted': string
     'landing.hero.title.prefix': string
@@ -679,7 +622,28 @@ type Translations = {
     'landing.pricing.title': string
     'landing.pricing.subtitle': string
     'landing.pricing.cta': string
+    'landing.getApp.appStore': string
+    'landing.getApp.appStoreSub': string
+    'landing.getApp.googlePlay': string
+    'landing.getApp.googlePlaySub': string
+    'landing.getApp.directApk': string
+    'landing.getApp.directApkSub': string
+    'landing.getApp.webApp': string
+    'landing.getApp.webAppSub': string
     'landing.footer.contact': string
+    'landing.footer.product': string
+    'landing.footer.info': string
+    'landing.footer.support': string
+    'landing.footer.features': string
+    'landing.footer.pricing': string
+    'landing.footer.howItWorks': string
+    'landing.footer.demo': string
+    'landing.footer.blog': string
+    'landing.footer.updates': string
+    'landing.footer.status': string
+    'landing.footer.privacy': string
+    'landing.footer.terms': string
+    'landing.footer.rights': string
     'landing.feature.mobile.title': string
     'landing.feature.mobile.desc': string
     'landing.feature.security.title': string
@@ -699,65 +663,167 @@ type Translations = {
     'landing.feature.tasks.title': string
     'landing.feature.tasks.desc': string
 
-    // Landing Page Navbar & Footer
+    // Landing Page Navbar
     'landing.nav.features': string
     'landing.nav.pricing': string
     'landing.nav.status': string
     'landing.nav.login': string
+    'landing.nav.howItWorks': string
+    'landing.nav.blog': string
+    'landing.nav.updates': string
     'landing.nav.getStarted': string
-    'landing.footer.privacy': string
-    'landing.footer.terms': string
-    'landing.footer.status': string
 
-    // Pricing Page
+    // Expansion Pages
+    'features.title': string
+    'features.subtitle': string
+    'features.handovers.title': string
+    'features.handovers.desc': string
+    'features.roster.title': string
+    'features.roster.desc': string
+    'features.ai.title': string
+    'features.ai.desc': string
+    'features.analytics.title': string
+    'features.analytics.desc': string
+    'features.messaging.title': string
+    'features.messaging.desc': string
+    'features.cloud.title': string
+    'features.cloud.desc': string
+
+    'howItWorks.title': string
+    'howItWorks.subtitle': string
+    'howItWorks.step1.title': string
+    'howItWorks.step1.desc': string
+    'howItWorks.step2.title': string
+    'howItWorks.step2.desc': string
+    'howItWorks.step3.title': string
+    'howItWorks.step3.desc': string
+    'howItWorks.step4.title': string
+    'howItWorks.step4.desc': string
+
+    'updates.title': string
+    'updates.subtitle': string
+    'updates.v1.version': string
+    'updates.v1.date': string
+    'updates.v1.title': string
+    'updates.v1.desc': string
+    'updates.changelog': string
+
+    'blog.title': string
+    'blog.subtitle': string
+    'blog.post1.title': string
+    'blog.post1.excerpt': string
+    'blog.post1.date': string
+    'blog.post2.title': string
+    'blog.post2.excerpt': string
+    'blog.post2.date': string
+    'blog.post1.content': string
+    'blog.post2.content': string
+    'blog.readMore': string
+    'blog.author.team': string
+    'blog.author.strategy': string
+    'blog.category.hospitality': string
+    'blog.category.ai': string
+
+    // Hotel Info
+    'hotel.secure.title': string
+    'hotel.secure.encrypted': string
+    'hotel.secure.safeCode': string
+    'hotel.secure.agency': string
+    'hotel.secure.other': string
+    'hotel.secure.kbs': string
+    'hotel.secure.safeInfo': string
+    'hotel.settings.fixturePrices': string
+    'fixture.hand_towel': string
+    'fixture.bath_towel': string
+    'fixture.bed_sheet': string
+    'fixture.pillow_case': string
+    'fixture.duvet_cover': string
+    'fixture.bathrobe': string
+    'fixture.mattress_protector': string
+
+    // Off Day
+    'offday.management.title': string
+    'offday.management.desc': string
+    'offday.pending': string
+    'offday.history': string
+    'offday.petitions': string
+
+    // Messages & Feedback
+    'messages.title': string
+    'messages.search': string
+    'messages.announcements': string
+    'messages.broadcast': string
+    'feedback.anonymous.title': string
+    'feedback.anonymous.subtitle': string
+    'feedback.privacy.title': string
+    'feedback.privacy.desc': string
+    'feedback.submit.title': string
+    'feedback.submit.desc': string
+    'feedback.management.view': string
+
+    // AI Modal
+    'ai.title': string
+    'ai.poweredBy': string
+    'ai.model': string
+    'ai.mode.assistant': string
+    'ai.mode.quota': string
+    'ai.task.general': string
+    'ai.task.generalDesc': string
+    'ai.task.incident': string
+    'ai.task.incidentDesc': string
+    'ai.task.email': string
+    'ai.task.emailDesc': string
+    'ai.task.review': string
+    'ai.task.reviewDesc': string
+    'ai.context.title': string
+    'ai.context.desc': string
+    'ai.context.save': string
+    'ai.generate': string
+    'ai.cancel': string
+
+    // Shift Notes
+    'notes.edited': string
+    'notes.label': string
+
+    // Pricing
     'pricing.title': string
     'pricing.subtitle': string
+    'pricing.popular': string
+    'common.month': string
     'pricing.monthly': string
     'pricing.annual': string
     'pricing.saveBadge': string
-    'pricing.plan.starter': string
-    'pricing.plan.starter.desc': string
+    'pricing.plan.lite': string
+    'pricing.plan.lite.desc': string
     'pricing.plan.pro': string
     'pricing.plan.pro.desc': string
     'pricing.plan.enterprise': string
     'pricing.plan.enterprise.desc': string
-    'pricing.button.free': string
-    'pricing.button.trial': string
+    'pricing.button.getStarted': string
     'pricing.button.contact': string
-    'pricing.mostPopular': string
-    'pricing.feature.5staff': string
-    'pricing.feature.logs': string
-    'pricing.feature.7day': string
+    'pricing.feature.shiftLogs': string
+    'pricing.feature.basicLogs': string
     'pricing.feature.support': string
-    'pricing.feature.analytics': string
-    'pricing.feature.unlimited': string
-    'pricing.feature.autoReminders': string
-    'pricing.feature.unlimitedHistory': string
+    'pricing.feature.matrixRoster': string
+    'pricing.feature.aiAssistant': string
+    'pricing.feature.unlimitedLogs': string
     'pricing.feature.prioritySupport': string
-    'pricing.feature.advAnalytics': string
-    'pricing.feature.roles': string
-    'pricing.feature.multiLang': string
-    'pricing.feature.multiProp': string
-    'pricing.feature.api': string
-    'pricing.feature.successManager': string
-    'pricing.feature.sla': string
-    'pricing.feature.onPrem': string
-    'pricing.feature.branding': string
-    'pricing.feature.sso': string
+    'pricing.feature.multiHotel': string
+    'pricing.feature.apiAccess': string
+    'pricing.feature.whiteLabel': string
+    'pricing.feature.customSupport': string
+
+    // FAQ
     'pricing.faq.title': string
-    'pricing.faq.upgrade.q': string
-    'pricing.faq.upgrade.a': string
-    'pricing.faq.trial.q': string
-    'pricing.faq.trial.a': string
-    'pricing.faq.payment.q': string
-    'pricing.faq.payment.a': string
-    'pricing.faq.security.q': string
-    'pricing.faq.security.a': string
+    'pricing.faq.q1': string
+    'pricing.faq.a1': string
+    'pricing.faq.q2': string
+    'pricing.faq.a2': string
     'pricing.contactSales': string
     'pricing.needHelp': string
     'pricing.back': string
 
-    // Demo Page
+    // Demo
     'demo.title': string
     'demo.subtitle': string
     'demo.gm': string
@@ -767,7 +833,6 @@ type Translations = {
     'demo.enter.gm': string
     'demo.enter.staff': string
     'demo.back': string
-
 }
 
 const translations: Record<Language, Translations> = {
@@ -777,55 +842,107 @@ const translations: Record<Language, Translations> = {
         'landing.nav.pricing': 'Pricing',
         'landing.nav.status': 'Status',
         'landing.nav.login': 'Login',
+        'landing.nav.howItWorks': 'How it Works',
+        'landing.nav.blog': 'Blog',
+        'landing.nav.updates': 'Updates',
         'landing.nav.getStarted': 'Get Started',
         'landing.footer.privacy': 'Privacy Policy',
         'landing.footer.terms': 'Terms of Service',
         'landing.footer.status': 'System Status',
 
+        // Expansion Pages
+        'features.title': 'Technical Deep Dive',
+        'features.subtitle': 'Relay combines everything a hotel needs for daily operations into a single platform.',
+        'features.handovers.title': 'Digital Shift Handovers',
+        'features.handovers.desc': 'Replace paper logs with AI-summarized, secure, and searchable shift transfers.',
+        'features.roster.title': 'Matrix Roster System',
+        'features.roster.desc': 'Drag-and-drop weekly scheduling for GMs with automated shift conflict detection.',
+        'features.ai.title': 'Advanced AI Assistant',
+        'features.ai.desc': 'Context-aware AI that understands hotel data, generates reports, and assists operations.',
+        'features.analytics.title': 'Financial Analytics',
+        'features.analytics.desc': 'Real-time tracking of daily revenue, tour sales, and incident-related costs.',
+        'features.messaging.title': 'Internal Messaging',
+        'features.messaging.desc': 'Dedicated team communication hub focused on tasks and guest requests.',
+        'features.cloud.title': 'Cloud Synchronization',
+        'features.cloud.desc': 'Enterprise-grade infrastructure ensuring data is always accessible on any device.',
+
+        'howItWorks.title': 'Operational Alchemy',
+        'howItWorks.subtitle': 'Relay eliminates complexity while digitalizing your hotel operations.',
+        'howItWorks.step1.title': 'Quick Onboarding',
+        'howItWorks.step1.desc': 'Import your hotel data in 5 minutes and invite your team to the platform.',
+        'howItWorks.step2.title': 'Real-time Tracking',
+        'howItWorks.step2.desc': 'Monitor all operational flow, sales, and notes from a live central dashboard.',
+        'howItWorks.step3.title': 'Seamless Handover',
+        'howItWorks.step3.desc': 'Critical info is automatically summarized and transferred during shift changes.',
+        'howItWorks.step4.title': 'Mobile Empowerment',
+        'howItWorks.step4.desc': 'Field staff enters data anywhere via mobile, instantly syncing with HQ.',
+        'updates.title': 'Product Updates',
+        'updates.subtitle': 'Relay is constantly evolving. Here is what we have been building.',
+        'updates.v1.version': 'v1.2.0',
+        'updates.v1.date': 'Feb 2026',
+        'updates.v1.title': 'AI Revolution',
+        'updates.v1.desc': 'Google Gemini integration with automated shift summaries and prioritization.',
+        'updates.changelog': 'Full Changelog',
+        'landing.footer.product': 'Product',
+        'landing.footer.info': 'Information',
+        'landing.footer.support': 'Support',
+        'landing.footer.features': 'Features',
+        'landing.footer.pricing': 'Pricing',
+        'landing.footer.howItWorks': 'How It Works',
+        'landing.footer.demo': 'Live Demo',
+        'landing.footer.blog': 'Blog',
+        'landing.footer.updates': 'Updates',
+        'landing.footer.rights': 'All rights reserved.',
+        'landing.footer.contact': 'Contact Admin',
+
+        'blog.title': 'Relay Blog',
+        'blog.subtitle': 'Insights and strategies for modern hotel management.',
+        'blog.post1.title': 'The End of Paper Logbooks',
+        'blog.post1.excerpt': 'Discover why modern hotels are ditching physical books for digital systems.',
+        'blog.post1.date': 'Feb 12, 2026',
+        'blog.post1.content': 'Traditional paper logbooks are no longer sufficient for today\'s fast-paced hotel operations. Lost info, illegible handwriting, and the difficulty of searching historical data reduce operational efficiency. With Relay\'s digital logging process, you gain instant access, searchability, and the ability to make data-driven decisions.',
+        'blog.post2.title': 'Maximizing ADR with AI',
+        'blog.post2.excerpt': 'How artificial intelligence helps front office teams optimize room rates in real-time.',
+        'blog.post2.date': 'Feb 10, 2026',
+        'blog.post2.content': 'Managing room rates manually is a thing of the past. Relay AI analyzes occupancy, competitor rates, and local events to provide optimal price recommendations for the highest ADR (Average Daily Rate). In this article, we explore how AI is revolutionizing revenue management and how front office teams can use these tools to be more profitable.',
+        'blog.readMore': 'Read Full Insight',
+        'blog.author.team': 'Relay Team',
+        'blog.author.strategy': 'Product Strategy',
+        'blog.category.hospitality': 'Hospitality',
+        'blog.category.ai': 'AI & Data',
+
         // Pricing Page
         'pricing.title': 'Plans & Pricing',
         'pricing.subtitle': 'Simple, transparent pricing that grows with your business. No hidden fees.',
+        'pricing.popular': 'MOST POPULAR',
+        'common.month': 'month',
         'pricing.monthly': 'Monthly',
         'pricing.annual': 'Annual',
         'pricing.saveBadge': 'Save 20%',
-        'pricing.plan.starter': 'Starter',
-        'pricing.plan.starter.desc': 'For small boutique hotels getting started.',
+        'pricing.plan.lite': 'Lite',
+        'pricing.plan.lite.desc': 'For small hotels starting their digital journey.',
         'pricing.plan.pro': 'Pro',
-        'pricing.plan.pro.desc': 'For growing hotels needing automation.',
+        'pricing.plan.pro.desc': 'Advanced features for professional operations.',
         'pricing.plan.enterprise': 'Enterprise',
-        'pricing.plan.enterprise.desc': 'For hotel chains and large resorts.',
-        'pricing.button.free': 'Start Free',
-        'pricing.button.trial': 'Start Trial',
+        'pricing.plan.enterprise.desc': 'Scale with multi-hotel management and API access.',
+        'pricing.button.getStarted': 'Get Started',
         'pricing.button.contact': 'Contact Sales',
-        'pricing.mostPopular': 'Most Popular',
-        'pricing.feature.5staff': 'Up to 5 Staff Types',
-        'pricing.feature.logs': 'Basic Handover Logs',
-        'pricing.feature.7day': '7-Day History Retention',
-        'pricing.feature.support': 'Standard Email Support',
-        'pricing.feature.analytics': 'Basic Analytics',
-        'pricing.feature.unlimited': 'Unlimited Staff',
-        'pricing.feature.autoReminders': 'Automated Shift Reminders',
-        'pricing.feature.unlimitedHistory': 'Unlimited History',
-        'pricing.feature.prioritySupport': 'Priority 24/7 Support',
-        'pricing.feature.advAnalytics': 'Advanced Analytics & Export',
-        'pricing.feature.roles': 'Custom Role Permissions',
-        'pricing.feature.multiLang': 'Multi-language Support',
-        'pricing.feature.multiProp': 'Multi-Property Management',
-        'pricing.feature.api': 'Custom API Integrations',
-        'pricing.feature.successManager': 'Dedicated Success Manager',
-        'pricing.feature.sla': 'SLA Guarantees',
-        'pricing.feature.onPrem': 'On-premise Deployment',
-        'pricing.feature.branding': 'Custom Branding',
-        'pricing.feature.sso': 'SSO Authentication',
+        'pricing.feature.shiftLogs': 'Digital Shift Logs',
+        'pricing.feature.basicLogs': 'Fundamental Logging',
+        'pricing.feature.support': 'Standard Support',
+        'pricing.feature.matrixRoster': 'Matrix Roster System',
+        'pricing.feature.aiAssistant': 'AI Assistant Integration',
+        'pricing.feature.unlimitedLogs': 'Unlimited Cloud Storage',
+        'pricing.feature.prioritySupport': 'Priority Tech Support',
+        'pricing.feature.multiHotel': 'Multi-Hotel Management',
+        'pricing.feature.apiAccess': 'External API Access',
+        'pricing.feature.whiteLabel': 'White-label Options',
+        'pricing.feature.customSupport': '24/7 Dedicated Manager',
         'pricing.faq.title': 'Frequently Asked Questions',
-        'pricing.faq.upgrade.q': 'Can I upgrade later?',
-        'pricing.faq.upgrade.a': 'Yes, you can upgrade or downgrade your plan at any time directly from the dashboard.',
-        'pricing.faq.trial.q': 'Is there a free trial for Pro?',
-        'pricing.faq.trial.a': 'Absolutely. You get 14 days of free Pro access when you sign up, no credit card required.',
-        'pricing.faq.payment.q': 'What payment methods do you accept?',
-        'pricing.faq.payment.a': 'We accept all major credit cards and bank transfers for Enterprise plans.',
-        'pricing.faq.security.q': 'Is my data secure?',
-        'pricing.faq.security.a': 'Yes. We use industry-standard encryption for data in transit and at rest.',
+        'pricing.faq.q1': 'Can I upgrade my plan later?',
+        'pricing.faq.a1': 'Yes, you can upgrade or downgrade your plan at any time from your settings.',
+        'pricing.faq.q2': 'Is there a free trial?',
+        'pricing.faq.a2': 'The Lite plan is free forever for small teams. For Pro, we offer a 14-day trial.',
         'pricing.contactSales': 'Contact Sales',
         'pricing.needHelp': 'Need help choosing?',
         'pricing.back': 'Back',
@@ -862,6 +979,7 @@ const translations: Record<Language, Translations> = {
         'pricing.global_overrides.desc': 'Prices defined here apply to all agencies during the specified dates.',
         'pricing.ai.title': 'AI Pricing Agent',
         'pricing.ai.desc': 'Paste date ranges and prices in text or table format.',
+        'pricing.price.custom': 'Custom',
 
         // Room Types
         'room.standard': 'Standard Room',
@@ -898,7 +1016,8 @@ const translations: Record<Language, Translations> = {
         'auth.confirmPassword': 'Confirm Password',
         'auth.noAccount': "Don't have an account? Contact GM",
         'auth.haveAccount': 'Already have an account?',
-        'auth.contactGM': 'Contact Management',
+        'auth.contactGM': 'Please contact your General Manager (GM) to be registered for your hotel.',
+        'auth.contactSales': 'Contact Sales Team',
         'auth.error.enterName': 'Please enter your full name',
         'auth.error.passwordLength': 'Password must be at least 6 characters',
         'auth.error.passwordMismatch': 'Passwords do not match',
@@ -1038,6 +1157,7 @@ const translations: Record<Language, Translations> = {
         'module.system': 'System',
         'module.overview': 'Overview',
         'module.operations': 'Operations Hub',
+        'module.activity': 'Activity',
         'module.messaging': 'Messaging',
         'module.complaints': 'Complaints',
         'module.offDays': 'Off-Days',
@@ -1453,7 +1573,6 @@ const translations: Record<Language, Translations> = {
         'app.cashBalance': 'Cash Balance',
         'app.systemTitle': 'Relay Hotel Operations System',
 
-        'common.dismiss': 'Dismiss',
         'common.add': 'Add',
         'common.cancel': 'Cancel',
         'common.save': 'Save',
@@ -1485,6 +1604,8 @@ const translations: Record<Language, Translations> = {
         'common.finish': 'Finish',
         'common.reopen': 'Reopen',
         'common.resolve': 'Resolve',
+        'common.dismiss': 'Dismiss',
+        'common.backToHome': 'Back to Home',
 
         'currency.title': 'Exchange Rates (TCMB)',
         'currency.buying': 'Bank Buys (Bozma)',
@@ -1494,26 +1615,36 @@ const translations: Record<Language, Translations> = {
         'announcement.deleteConfirm': 'Are you sure you want to delete this announcement?',
         'common.clear': 'Clear Chat',
 
-        // Landing Page
-        'landing.hero.trusted': 'Trusted by 500+ Luxury Hotels',
-        'landing.hero.title.prefix': 'Next-Gen',
+        'landing.feature.vault.desc': 'Password-protected storage for agency logins and KBS.',
+        'landing.feature.tasks.title': 'Automated Tasks',
+        'landing.feature.tasks.desc': 'Recurring checklists ensure compliance every day.',
+
+        'landing.hero.trusted': "Trusted by over 500 Hotels",
+        'landing.hero.title.prefix': 'Next Gen',
         'landing.hero.title.suffix': 'Hospitality',
-        'landing.hero.subtitle': 'The intelligent operating system for modern hotels. Seamless handovers, real-time sync, and operations automation.',
-        'landing.hero.cta.primary': 'Start Free Trial',
+        'landing.hero.subtitle': 'Smart operating system for modern hotels. Seamless shift transfers, real-time sync, and operations automation.',
+        'landing.hero.cta.primary': 'Try for Free',
         'landing.hero.cta.secondary': 'Live Demo',
-        'landing.features.title': 'Complete Hotel Operations',
-        'landing.features.subtitle': 'Everything you need to run a modern hotel efficiently.',
-        'landing.getApp.title': 'Download Relay for Mobile',
+        'landing.features.title': 'Full-Spectrum Hotel Operations',
+        'landing.features.subtitle': 'Everything you need to manage a modern hotel efficiently.',
+        'landing.getApp.title': 'Download Relay',
         'landing.pricing.title': 'Ready to upgrade your hotel?',
-        'landing.pricing.subtitle': 'Join 500+ hotels using Relay to streamline their operations today.',
-        'landing.pricing.cta': 'View Pricing Plans',
-        'landing.footer.contact': 'Contact Admin',
+        'landing.pricing.subtitle': 'Join over 500 hotels using Relay to streamline their operations.',
+        'landing.pricing.cta': 'View Plans',
+        'landing.getApp.appStore': 'App Store',
+        'landing.getApp.appStoreSub': 'Download for iOS',
+        'landing.getApp.googlePlay': 'Google Play',
+        'landing.getApp.googlePlaySub': 'Get it on Android',
+        'landing.getApp.directApk': 'Direct APK',
+        'landing.getApp.directApkSub': 'Android Package',
+        'landing.getApp.webApp': 'Web App',
+        'landing.getApp.webAppSub': 'Access in Browser',
         'landing.feature.mobile.title': 'Mobile First',
-        'landing.feature.mobile.desc': 'Designed for staff on the move. Works perfectly on any device.',
+        'landing.feature.mobile.desc': 'Built for staff on the move. Works perfectly on any device.',
         'landing.feature.security.title': 'Military-Grade Security',
-        'landing.feature.security.desc': 'Encrypted vaults for your most sensitive data and codes.',
-        'landing.feature.sync.title': 'Real-Time Sync',
-        'landing.feature.sync.desc': 'Changes update instantly across all devices context.',
+        'landing.feature.security.desc': 'Encrypted vaults for your most sensitive data and passwords.',
+        'landing.feature.sync.title': 'Real-time Sync',
+        'landing.feature.sync.desc': 'Changes are updated instantly across all devices.',
         'landing.feature.messaging.title': 'Instant Messaging',
         'landing.feature.messaging.desc': 'Secure internal comms replacing WhatsApp groups.',
         'landing.feature.handovers.title': 'Smart Handovers',
@@ -1523,9 +1654,6 @@ const translations: Record<Language, Translations> = {
         'landing.feature.analytics.title': 'Analytics Dashboard',
         'landing.feature.analytics.desc': 'Visual insights into hotel performance and efficiency.',
         'landing.feature.vault.title': 'Secret Vault',
-        'landing.feature.vault.desc': 'Password-protected storage for agency logins and KBS.',
-        'landing.feature.tasks.title': 'Automated Tasks',
-        'landing.feature.tasks.desc': 'Recurring checklists ensure compliance every day.',
 
     },
     tr: {
@@ -1538,7 +1666,8 @@ const translations: Record<Language, Translations> = {
         'auth.confirmPassword': 'Şifreyi Onayla',
         'auth.noAccount': 'Hesabınız yok mu? GM ile görüşün',
         'auth.haveAccount': 'Zaten hesabınız var mı?',
-        'auth.contactGM': 'Yönetimle İletişime Geçin',
+        'auth.contactGM': 'Otelinize kayıt olmak için lütfen Genel Müdürünüze (GM) danışın.',
+        'auth.contactSales': 'Satış Ekibiyle İletişime Geçin',
         'auth.error.enterName': 'Lütfen tam adınızı girin',
         'auth.error.passwordLength': 'Şifre en az 6 karakter olmalıdır',
         'auth.error.passwordMismatch': 'Şifreler eşleşmiyor',
@@ -1602,7 +1731,7 @@ const translations: Record<Language, Translations> = {
         'privacy.contact.desc': 'Bu Gizlilik Politikası hakkında sorularınız varsa, lütfen şu adresten bizimle iletişime geçin: ',
 
         'terms.title': 'Hizmet Şartları',
-        'terms.lastUpdated': 'Son güncelleme: 11 Şubat 2026',
+        'terms.lastUpdated': 'Last updated: February 11, 2026',
         'terms.acceptance.title': '1. Şartların Kabulü',
         'terms.acceptance.desc': 'Relay\'e erişerek veya kullanarak, bu Şartlara bağlı kalmayı kabul edersiniz. Şartların herhangi bir kısmını kabul etmiyorsanız, hizmete erişemezsiniz.',
         'terms.license.title': '2. Kullanım Lisansı',
@@ -1679,6 +1808,7 @@ const translations: Record<Language, Translations> = {
         'module.system': 'Sistem',
         'module.overview': 'Genel Bakış',
         'module.operations': 'Operasyon Merkezi',
+        'module.activity': 'Aktivite',
         'module.messaging': 'Mesajlaşma',
         'module.complaints': 'Şikayetler',
         'module.offDays': 'İzin Günleri',
@@ -1824,6 +1954,7 @@ const translations: Record<Language, Translations> = {
         'hotel.notesPlaceholder': 'Diğer önemli bilgiler...',
         'hotel.bankAccount': 'Banka Hesabı',
         'hotel.settings.minibarPrices': 'Minibar Fiyatları',
+        'hotel.settings.fixturePrices': 'Demirbaş Hasar Fiyatları',
         'hotel.noInfo': 'Otel bilgisi ayarlanmamış',
         'hotel.clickEdit': 'Eklemek için düzenleye tıklayın',
         'hotel.secure.title': 'Gizli Bilgiler (KBS / Acente)',
@@ -1833,7 +1964,6 @@ const translations: Record<Language, Translations> = {
         'hotel.secure.other': 'Diğer Kasa Bilgileri',
         'hotel.secure.kbs': 'KBS Giriş Bilgileri',
         'hotel.secure.safeInfo': 'Kasa ve Anahtar Bilgileri',
-        'hotel.settings.fixturePrices': 'Demirbaş Hasar Fiyatları',
 
         // Log
         'log.new': 'Yeni Kayıt Girişi',
@@ -1846,7 +1976,7 @@ const translations: Record<Language, Translations> = {
         'log.save': 'Değişiklikleri Kaydet',
         'log.enterContent': 'Lütfen bir açıklama girin',
         'log.mustLogin': 'Giriş yapmış olmalısınız',
-        'log.aiHelp': 'AI Yardımı',
+        'log.aiHelp': 'AI Asistan',
         'log.roomPlaceholder': 'örn. 101',
         'log.feed.noActive': 'Aktif kayıt yok',
         'log.feed.noResolved': 'Çözülmüş kayıt yok',
@@ -1878,7 +2008,6 @@ const translations: Record<Language, Translations> = {
         'app.cashBalance': 'Kasa Bakiyesi',
         'app.systemTitle': 'Relay Otel Operasyon Sistemi',
 
-        'common.dismiss': 'Kapat',
         'common.add': 'Ekle',
         'common.cancel': 'İptal',
         'common.save': 'Kaydet',
@@ -1910,6 +2039,8 @@ const translations: Record<Language, Translations> = {
         'common.finish': 'Bitir',
         'common.reopen': 'Yeniden Aç',
         'common.resolve': 'Çöz',
+        'common.dismiss': 'Kapat',
+        'common.backToHome': 'Anasayfaya Dön',
         'common.clear': 'Sohbeti Temizle',
 
         // Calendar
@@ -2184,11 +2315,71 @@ const translations: Record<Language, Translations> = {
         'ai.generate': 'Oluştur',
         'ai.cancel': 'İptal',
 
-        // Landing Page
+        // Landing Page Navbar & Footer
+        'landing.nav.features': 'Özellikler',
+        'landing.nav.pricing': 'Fiyatlandırma',
+        'landing.nav.status': 'Durum',
+        'landing.nav.login': 'Giriş',
+        'landing.nav.howItWorks': 'Nasıl Çalışır?',
+        'landing.nav.blog': 'Blog',
+        'landing.nav.updates': 'Güncellemeler',
+        'landing.nav.getStarted': 'Hemen Başla',
+        'landing.footer.privacy': 'Gizlilik Politikası',
+        'landing.footer.terms': 'Hizmet Şartları',
+        'landing.footer.status': 'Sistem Durumu',
+
+        // Expansion Pages
+        'features.title': 'Teknik Derinlemesine Bakış',
+        'features.subtitle': 'Relay, bir otelin günlük operasyonel ihtiyacı olan her şeyi tek bir platformda toplar.',
+        'features.handovers.title': 'Dijital Vardiya Devir Teslimi',
+        'features.handovers.desc': 'Kağıt kayıtların yerini alan, otomatik özetlenen ve güvenli vardiya transferleri.',
+        'features.roster.title': 'Matrix Roster Sistemi',
+        'features.roster.desc': 'GM için personeli sürükle-bırak ile planlayabildiği gelişmiş haftalık çizelge.',
+        'features.ai.title': 'Gelişmiş AI Asistan',
+        'features.ai.desc': 'Otel verilerine hakim, rapor hazırlayan ve operasyonel kararları destekleyen yapay zeka.',
+        'features.analytics.title': 'Finansal Analiz & Satış',
+        'features.analytics.desc': 'Günlük gelirleri, tur satışlarını ve ekstraları anlık takip edebileceğiniz finans modülü.',
+        'features.messaging.title': 'İç Yazışma & Mesajlaşma',
+        'features.messaging.desc': 'Ekip içi kopukluğu önleyen, görev odaklı dahili mesajlaşma altyapısı.',
+        'features.cloud.title': 'Bulut Senkronizasyonu',
+        'features.cloud.desc': 'Tüm veriler Cloudflare altyapısında, her cihazdan anlık olarak erişilebilir.',
+
+        'howItWorks.title': 'Operasyonel Simya',
+        'howItWorks.subtitle': 'Relay, otel operasyonlarınızı dijitalleştirirken karmaşıklığı ortadan kaldırır.',
+        'howItWorks.step1.title': 'Hızlı Kurulum',
+        'howItWorks.step1.desc': 'Otelinizin verilerini 5 dakikada platforma aktarın ve ekibinizi davet edin.',
+        'howItWorks.step2.title': 'Gerçek Zamanlı Takip',
+        'howItWorks.step2.desc': 'Tüm operasyonel akışı, satışları ve notları canlı panelden izleyin.',
+        'howItWorks.step3.title': 'Kusursuz Devir',
+        'howItWorks.step3.desc': 'Vardiya değişimlerinde kritik bilgiler otomatik özetlenir ve yeni ekibe aktarılır.',
+        'howItWorks.step4.title': 'Mobil Erişim',
+        'howItWorks.step4.desc': 'Saha personeli mobil uygulama üzerinden her yerden veri girişi yapabilir.',
+        'updates.title': 'Ürün Güncellemeleri',
+        'updates.subtitle': 'Relay sürekli gelişiyor. İşte platforma eklediğimiz en yeni özellikler.',
+        'updates.v1.version': 'v1.2.0',
+        'updates.v1.date': 'Şub 2026',
+        'updates.v1.title': 'Yapay Zeka Devrimi',
+        'updates.v1.desc': 'Google Gemini entegrasyonu ile otomatik vardiya özetleri ve önceliklendirme.',
+        'updates.changelog': 'Tüm Değişiklikler',
+        'blog.title': 'Relay Blog',
+        'blog.subtitle': 'Modern otel yönetimi için stratejiler ve içgörüler.',
+        'blog.post1.title': 'Kağıt Log Defterlerinin Sonu',
+        'blog.post1.excerpt': 'Modern otellerin neden fiziksel defterleri bırakıp dijital devir sistemlerine geçtiğini keşfedin.',
+        'blog.post1.date': '12 Şub 2026',
+        'blog.post1.content': 'Geleneksel kağıt log defterleri artık günümüzün hızlı tempolu otel operasyonları için yeterli değil. Bilginin kaybolması, okunaksız el yazıları ve geçmişe dönük arama yapmanın zorluğu operasyonel verimliliği düşürüyor. Relay ile dijitalleşen log tutma süreci, anlık erişim, aranabilirlik ve veriye dayalı kararlar almanızı sağlar.',
+        'blog.post2.title': 'AI ile ADR Maksimizasyonu',
+        'blog.post2.excerpt': 'Yapay zekanın ön büro ekiplerine oda fiyatlarını gerçek zamanlı optimize etmede nasıl yardımcı olduğunu görün.',
+        'blog.post2.date': '10 Şub 2026',
+        'blog.post2.content': 'Oda fiyatlarını manuel olarak yönetmek artık geçmişte kaldı. Relay AI, otelinizin doluluk oranlarını, rakip fiyatlarını ve yerel etkinlikleri analiz ederek en optimum ADR (Average Daily Rate) için fiyat önerileri sunar. Bu makalede, yapay zekanın gelir yönetiminde nasıl devrim yarattığını ve ön büro ekiplerinin bu araçları kullanarak nasıl daha karlı olabileceğini inceliyoruz.',
+        'blog.readMore': 'Tamamını Oku',
+        'blog.author.team': 'Relay Ekibi',
+        'blog.author.strategy': 'Ürün Stratejisi',
+        'blog.category.hospitality': 'Konaklama',
+        'blog.category.ai': 'AI & Veri',
         'landing.hero.trusted': "500'den Fazla Otel Tarafından Kullanılıyor",
         'landing.hero.title.prefix': 'Yeni Nesil',
-        'landing.hero.title.suffix': 'Konaklama', // This will cycle
-        'landing.hero.subtitle': "Modern oteller için akıllı işletim sistemi. Sorunsuz devir teslimler, gerçek zamanlı senkronizasyon ve operasyon otomasyonu.",
+        'landing.hero.title.suffix': 'Konaklama',
+        'landing.hero.subtitle': 'Modern oteller için akıllı işletim sistemi. Sorunsuz devir teslimler, gerçek zamanlı senkronizasyon ve operasyon otomasyonu.',
         'landing.hero.cta.primary': 'Ücretsiz Deneyin',
         'landing.hero.cta.secondary': 'Canlı Demo',
         'landing.features.title': 'Tam Kapsamlı Otel Operasyonları',
@@ -2197,7 +2388,25 @@ const translations: Record<Language, Translations> = {
         'landing.pricing.title': 'Otelini yükseltmeye hazır mısın?',
         'landing.pricing.subtitle': 'Operasyonlarını kolaylaştırmak için Relay kullanan 500+ otele katılın.',
         'landing.pricing.cta': 'Planları İncele',
+        'landing.getApp.appStore': 'App Store',
+        'landing.getApp.appStoreSub': 'iOS için İndir',
+        'landing.getApp.googlePlay': 'Google Play',
+        'landing.getApp.googlePlaySub': 'Android için Edin',
+        'landing.getApp.directApk': 'Doğrudan APK',
+        'landing.getApp.directApkSub': 'Android Paketi',
+        'landing.getApp.webApp': 'Web Uygulaması',
+        'landing.getApp.webAppSub': 'Tarayıcıda Aç',
         'landing.footer.contact': 'Yönetici ile İletişim',
+        'landing.footer.product': 'Ürün',
+        'landing.footer.info': 'Bilgi',
+        'landing.footer.support': 'Destek',
+        'landing.footer.features': 'Özellikler',
+        'landing.footer.pricing': 'Fiyatlandırma',
+        'landing.footer.howItWorks': 'Nasıl Çalışır?',
+        'landing.footer.demo': 'Canlı Demo',
+        'landing.footer.blog': 'Blog',
+        'landing.footer.updates': 'Güncellemeler',
+        'landing.footer.rights': 'Tüm hakları saklıdır.',
         'landing.feature.mobile.title': 'Mobil Öncelikli',
         'landing.feature.mobile.desc': 'Hareket halindeki personel için tasarlandı. Her cihazda mükemmel çalışır.',
         'landing.feature.security.title': 'Askeri Düzeyde Güvenlik',
@@ -2217,61 +2426,40 @@ const translations: Record<Language, Translations> = {
         'landing.feature.tasks.title': 'Otomatik Görevler',
         'landing.feature.tasks.desc': 'Tekrarlayan kontrol listeleri her gün uyumluluğu sağlar.',
 
-        // Landing Page Navbar & Footer
-        'landing.nav.features': 'Özellikler',
-        'landing.nav.pricing': 'Fiyatlandırma',
-        'landing.nav.status': 'Durum',
-        'landing.nav.login': 'Giriş',
-        'landing.nav.getStarted': 'Hemen Başla',
-        'landing.footer.privacy': 'Gizlilik Politikası',
-        'landing.footer.terms': 'Hizmet Şartları',
-        'landing.footer.status': 'Sistem Durumu',
-
         // Pricing Page
         'pricing.title': 'Planlar ve Fiyatlandırma',
         'pricing.subtitle': 'İşletmenizle büyüyen basit, şeffaf fiyatlandırma. Gizli ücret yok.',
+        'pricing.popular': 'EN POPÜLER',
+        'common.month': 'ay',
         'pricing.monthly': 'Aylık',
         'pricing.annual': 'Yıllık',
         'pricing.saveBadge': '%20 Tasarruf',
-        'pricing.plan.starter': 'Başlangıç',
-        'pricing.plan.starter.desc': 'Yeni başlayan butik oteller için.',
+        'pricing.plan.lite': 'Lite',
+        'pricing.plan.lite.desc': 'Dijital yolculuğuna başlayan küçük oteller için.',
         'pricing.plan.pro': 'Pro',
-        'pricing.plan.pro.desc': 'Otomasyona ihtiyaç duyan büyüyen oteller için.',
-        'pricing.plan.enterprise': 'Kurumsal',
-        'pricing.plan.enterprise.desc': 'Otel zincirleri ve büyük tatil köyleri için.',
-        'pricing.button.free': 'Ücretsiz Başla',
-        'pricing.button.trial': 'Denemeye Başla',
-        'pricing.button.contact': 'Satış Ekibi',
-        'pricing.mostPopular': 'En Popüler',
-        'pricing.feature.5staff': '5 Personel Tipine Kadar',
-        'pricing.feature.logs': 'Temel Devir Kayıtları',
-        'pricing.feature.7day': '7 Günlük Geçmiş',
-        'pricing.feature.support': 'Standart E-posta Desteği',
-        'pricing.feature.analytics': 'Temel Analizler',
-        'pricing.feature.unlimited': 'Sınırsız Personel',
-        'pricing.feature.autoReminders': 'Otomatik Vardiya Hatırlatıcıları',
-        'pricing.feature.unlimitedHistory': 'Sınırsız Geçmiş',
-        'pricing.feature.prioritySupport': 'Öncelikli 7/24 Destek',
-        'pricing.feature.advAnalytics': 'Gelişmiş Analiz ve Dışa Aktarma',
-        'pricing.feature.roles': 'Özel Rol İzinleri',
-        'pricing.feature.multiLang': 'Çoklu Dil Desteği',
-        'pricing.feature.multiProp': 'Çoklu Tesis Yönetimi',
-        'pricing.feature.api': 'Özel API Entegrasyonları',
-        'pricing.feature.successManager': 'Özel Başarı Yöneticisi',
-        'pricing.feature.sla': 'SLA Garantileri',
-        'pricing.feature.onPrem': 'Yerinde Kurulum',
-        'pricing.feature.branding': 'Özel Markalama',
-        'pricing.feature.sso': 'SSO Kimlik Doğrulama',
+        'pricing.plan.pro.desc': 'Profesyonel operasyonlar için gelişmiş özellikler.',
+        'pricing.plan.enterprise': 'Enterprise',
+        'pricing.plan.enterprise.desc': 'Çoklu otel yönetimi ve API erişimi ile ölçeklenin.',
+        'pricing.button.getStarted': 'Hemen Başla',
+        'pricing.button.contact': 'Satışla Görüşün',
+        'pricing.feature.shiftLogs': 'Dijital Vardiya Kayıtları',
+        'pricing.feature.basicLogs': 'Temel Log Sistemi',
+        'pricing.feature.support': 'Standart Destek',
+        'pricing.feature.matrixRoster': 'Matrix Roster Sistemi',
+        'pricing.feature.aiAssistant': 'AI Asistan Entegrasyonu',
+        'pricing.feature.unlimitedLogs': 'Sınırsız Bulut Depolama',
+        'pricing.feature.prioritySupport': 'Öncelikli Teknik Destek',
+        'pricing.feature.multiHotel': 'Çoklu Otel Yönetimi',
+        'pricing.feature.apiAccess': 'Harici API Erişimi',
+        'pricing.feature.whiteLabel': 'White-label Seçenekleri',
+        'pricing.feature.customSupport': '7/24 Özel Temsilci',
         'pricing.faq.title': 'Sıkça Sorulan Sorular',
-        'pricing.faq.upgrade.q': 'Daha sonra yükseltebilir miyim?',
-        'pricing.faq.upgrade.a': 'Evet, planınızı istediğiniz zaman doğrudan panelden yükseltebilir veya düşürebilirsiniz.',
-        'pricing.faq.trial.q': 'Pro için ücretsiz deneme var mı?',
-        'pricing.faq.trial.a': 'Kesinlikle. Kaydolduğunuzda 14 günlük ücretsiz Pro erişimi alırsınız, kredi kartı gerekmez.',
-        'pricing.faq.payment.q': 'Hangi ödeme yöntemlerini kabul ediyorsunuz?',
-        'pricing.faq.payment.a': 'Tüm büyük kredi kartlarını ve Kurumsal planlar için banka havalelerini kabul ediyoruz.',
-        'pricing.faq.security.q': 'Verilerim güvende mi?',
-        'pricing.faq.security.a': 'Evet. Verileriniz iletilirken ve saklanırken endüstri standardı şifreleme kullanıyoruz.',
+        'pricing.faq.q1': 'Planımı daha sonra yükseltebilir miyim?',
+        'pricing.faq.a1': 'Evet, dilediğiniz zaman ayarlar kısmından planınızı yükseltebilir veya düşürebilirsiniz.',
+        'pricing.faq.q2': 'Ücretsiz deneme var mı?',
+        'pricing.faq.a2': 'Lite planı küçük ekipler için sonsuza kadar ücretsizdir. Pro için 14 günlük deneme sunuyoruz.',
         'pricing.contactSales': 'Satış Ekibi',
+        'pricing.price.custom': 'Özel',
         'pricing.needHelp': 'Seçim yapmakta zorlanıyor musunuz?',
         'pricing.back': 'Geri',
 

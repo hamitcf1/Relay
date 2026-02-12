@@ -15,16 +15,6 @@ export function PublicNavbar() {
     const location = useLocation()
     const { t, language, setLanguage } = useLanguageStore()
 
-    const isLandingPage = location.pathname === '/'
-
-    const scrollToFeatures = () => {
-        if (isLandingPage) {
-            document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
-        } else {
-            navigate('/?features=true')
-        }
-    }
-
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/60 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-black/30">
             <Link to="/" className="flex items-center gap-3 group">
@@ -35,11 +25,20 @@ export function PublicNavbar() {
             </Link>
 
             <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-                <button onClick={scrollToFeatures} className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                <Link to="/features" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
                     {t('landing.nav.features')}
-                </button>
+                </Link>
+                <Link to="/how-it-works" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                    {t('landing.nav.howItWorks')}
+                </Link>
                 <Link to="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
                     {t('landing.nav.pricing')}
+                </Link>
+                <Link to="/blog" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                    {t('landing.nav.blog')}
+                </Link>
+                <Link to="/updates" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                    {t('landing.nav.updates')}
                 </Link>
             </div>
 

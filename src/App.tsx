@@ -1,14 +1,23 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { LoginPage } from '@/pages/LoginPage'
-import { RegisterPage } from '@/pages/RegisterPage'
-import { SetupHotelPage } from '@/pages/SetupHotelPage'
-import { DashboardPage } from '@/pages/DashboardPage'
-import { LandingPage } from '@/pages/LandingPage'
-import { LiveDemoPage } from '@/pages/LiveDemoPage'
+import {
+    LandingPage,
+    LoginPage,
+    RegisterPage,
+    SetupHotelPage,
+    DashboardPage,
+    LiveDemoPage,
+    ShiftStartPage,
+    PricingPage,
+    HowItWorksPage,
+    BlogPage,
+    UpdatesPage,
+    FeaturesPage,
+    BlogPostPage,
+    ContactPage
+} from '@/pages'
 import { PrivacyPage } from '@/pages/legal/PrivacyPage'
 import { TermsPage } from '@/pages/legal/TermsPage'
 import { StatusPage } from '@/pages/legal/StatusPage'
-import ShiftStartPage from '@/pages/ShiftStartPage'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
 import { TabNotifications } from '@/components/ui/TabNotifications'
@@ -52,6 +61,13 @@ function App() {
                     <Route path="/legal/privacy" element={<PrivacyPage />} />
                     <Route path="/legal/terms" element={<TermsPage />} />
                     <Route path="/legal/status" element={<StatusPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/how-it-works" element={<HowItWorksPage />} />
+                    <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/blog/:id" element={<BlogPostPage />} />
+                    <Route path="/updates" element={<UpdatesPage />} />
+                    <Route path="/features" element={<FeaturesPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
                 </Route>
 
                 {/* Auth & Demo Pages (No Layout for now, or maybe wrap if desired, keeping separate for unique design) */}

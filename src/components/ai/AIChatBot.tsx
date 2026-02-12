@@ -31,6 +31,8 @@ import { useAuthStore } from '@/stores/authStore'
 import type { AIModelType, AITaskType } from '@/stores/aiStore'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const QUICK_SUGGESTIONS = [
     { label: '📋 Aktif notlar', text: 'Aktif notları özetle' },
@@ -91,7 +93,26 @@ function MessageBubble({ message }: { message: ChatMessage }) {
                     ? "bg-primary text-primary-foreground rounded-br-md"
                     : "bg-muted/80 text-foreground border border-border/30 rounded-bl-md"
             )}>
-                <div className="whitespace-pre-wrap break-words">{message.content}</div>
+                <div className="prose prose-sm prose-invert max-w-none">
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                            ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                            li: ({ children }) => <li className="mb-0.5">{children}</li>,
+                            h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3 text-white">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-base font-bold mb-1.5 mt-2.5 text-white">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2 text-white">{children}</h3>,
+                            strong: ({ children }) => <strong className="font-bold text-violet-400">{children}</strong>,
+                            code: ({ children }) => <code className="bg-black/30 px-1 rounded text-violet-300 font-mono text-[12px]">{children}</code>,
+                            blockquote: ({ children }) => <blockquote className="border-l-2 border-violet-500/50 pl-3 italic my-2 text-muted-foreground">{children}</blockquote>,
+                            a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:underline">{children}</a>
+                        }}
+                    >
+                        {message.content}
+                    </ReactMarkdown>
+                </div>
 
                 {/* Footer / Meta */}
                 <div className="flex items-center justify-end gap-2 mt-1.5 opacity-50">

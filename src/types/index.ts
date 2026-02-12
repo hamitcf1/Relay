@@ -49,6 +49,7 @@ export interface User {
     current_shift_type: ShiftType | null
     settings?: UserSettings
     is_hidden_in_roster?: boolean
+    is_demo?: boolean
 }
 
 export interface UserSettings {

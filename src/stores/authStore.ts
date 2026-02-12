@@ -115,7 +115,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
             role: role,
             hotel_id: demoHotelId,
             current_shift_type: role === 'gm' ? null : 'A',
-            settings: { language: 'tr' }
+            settings: { language: 'tr' },
+            is_demo: true
         }
 
         // Mock Firebase User
@@ -188,6 +189,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
     initialize: () => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            // Priority: If we already have a demo user, don't let Firebase overwrite it
+            const currentUser = useAuthStore.getState().user
+            if (currentUser?.is_demo) {
+                set({ initialized: true, loading: false })
+                return
+            }
+
             if (firebaseUser) {
                 // User is signed in, fetch their data
                 try {

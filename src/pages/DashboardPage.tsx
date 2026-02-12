@@ -421,7 +421,7 @@ export function DashboardPage() {
                                         {user?.role === 'gm' && (
                                             <TabsTrigger value="activity" className="rounded-lg gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white px-4 shrink-0">
                                                 <ScrollText className="w-4 h-4" />
-                                                <span className="inline">Aktivite</span>
+                                                <span className="inline">{t('module.activity')}</span>
                                             </TabsTrigger>
                                         )}
 
