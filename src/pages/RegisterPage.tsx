@@ -107,7 +107,7 @@ export function RegisterPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden font-sans selection:bg-primary/30 py-10">
+        <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden font-sans selection:bg-primary/30 py-10 pt-[calc(2.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
             {/* Cyber-Concierge Background */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(76,29,149,0.1),rgba(0,0,0,0))]" />
@@ -359,6 +359,20 @@ export function RegisterPage() {
                             )}
                         </Button>
                     </form>
+                    {/* Footer */}
+                    <motion.div
+                        className="text-center mt-8 relative z-10"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                    >
+                        <p className="text-zinc-500 text-sm">
+                            {t('auth.haveAccount')}{' '}
+                            <Link to="/login" className="text-white hover:text-primary transition-colors font-semibold hover:underline decoration-primary underline-offset-4">
+                                {t('auth.login')}
+                            </Link>
+                        </p>
+                    </motion.div>
                 </div>
 
                 {/* Bottom Glow */}

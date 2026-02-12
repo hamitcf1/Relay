@@ -20,16 +20,12 @@ import { TermsPage } from '@/pages/legal/TermsPage'
 import { StatusPage } from '@/pages/legal/StatusPage'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 
-import { TabNotifications } from '@/components/ui/TabNotifications'
-import { UpdateNotifier } from '@/components/layout/UpdateNotifier'
 import { PublicLayout } from '@/components/layout/PublicLayout'
-import { CustomCursor } from '@/components/ui/CustomCursor'
+import { AppShell } from '@/components/layout/AppShell'
 
 import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
 import { useMobileCapabilities } from '@/hooks/useMobileCapabilities'
-import { ActivityTracker } from '@/components/tracking/ActivityTracker'
-import { AIChatBot } from '@/components/ai/AIChatBot'
 
 function App() {
     useMobileCapabilities()
@@ -49,10 +45,6 @@ function App() {
 
     return (
         <BrowserRouter>
-            <UpdateNotifier />
-            <TabNotifications />
-            <CustomCursor />
-            <ActivityTracker />
             <Routes>
 
                 {/* Public Routes with Layout */}
@@ -70,46 +62,24 @@ function App() {
                     <Route path="/contact" element={<ContactPage />} />
                 </Route>
 
-                {/* Auth & Demo Pages (No Layout for now, or maybe wrap if desired, keeping separate for unique design) */}
+                {/* Auth & Demo Pages */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/live-demo" element={<LiveDemoPage />} />
 
-                {/* Protected Routes */}
-                <Route
-                    path="/setup-hotel"
-                    element={
-                        <ProtectedRoute>
-                            <SetupHotelPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/shift-start"
-                    element={
-                        <ProtectedRoute>
-                            <ShiftStartPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <DashboardPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/operations"
-                    element={
-                        <ProtectedRoute>
-                            <DashboardPage />
-                        </ProtectedRoute>
-                    }
-                />
+                {/* Authenticated Application Shell */}
+                <Route element={
+                    <ProtectedRoute>
+                        <AppShell />
+                    </ProtectedRoute>
+                }>
+                    <Route path="/setup-hotel" element={<SetupHotelPage />} />
+                    <Route path="/shift-start" element={<ShiftStartPage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/operations" element={<DashboardPage />} />
+                    {/* Add other authenticated routes here */}
+                </Route>
             </Routes>
-            <AIChatBot />
         </BrowserRouter >
     )
 }
