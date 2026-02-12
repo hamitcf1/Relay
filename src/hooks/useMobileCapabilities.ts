@@ -39,8 +39,5 @@ export function useMobileCapabilities() {
         }
     };
 
-    return {
-        triggerHaptic,
-        isNative: Capacitor.isNativePlatform()
-    };
+    return { triggerHaptic };
 }

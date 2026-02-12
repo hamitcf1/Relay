@@ -16,7 +16,7 @@ export function PublicNavbar() {
     const { t, language, setLanguage } = useLanguageStore()
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] flex items-center justify-between bg-black/60 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-black/30">
+        <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 flex items-center justify-between bg-black/60 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-black/30">
             <Link to="/" className="flex items-center gap-3 group">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
                     <span className="font-bold text-white">R</span>

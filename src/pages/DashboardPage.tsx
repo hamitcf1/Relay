@@ -1,9 +1,12 @@
 import { useEffect, useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
+    LayoutDashboard,
+    Activity,
     Users
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
@@ -25,7 +28,6 @@ import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 import { TourOverlay } from '@/components/onboarding/TourOverlay'
 import { CurrencyWidget } from '@/components/dashboard/CurrencyWidget'
-import { PullToRefresh } from '@/components/ui/PullToRefresh'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -46,8 +48,9 @@ import { SalesPanel } from '@/components/sales/SalesPanel'
 import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, DollarSign, ScrollText, BedDouble } from 'lucide-react'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText, BedDouble } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
+import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
 
 export function DashboardPage() {
@@ -63,10 +66,29 @@ export function DashboardPage() {
     const { t } = useLanguageStore()
 
 
-    const activeTab = location.pathname === '/operations' ? 'operations' : 'overview'
 
-    const [showTour, setShowTour] = useState(false)
     const [isHandoverOpen, setIsHandoverOpen] = useState(false)
+    // const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false) // Removed
+    const [showTour, setShowTour] = useState(false)
+    const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
+    const [showDateTime, setShowDateTime] = useState(() => {
+        const saved = localStorage.getItem('relay_show_datetime')
+        return saved !== 'false' // default: true
+    })
+
+    // Persist showDateTime changes to localStorage
+    useEffect(() => {
+        localStorage.setItem('relay_show_datetime', String(showDateTime))
+    }, [showDateTime])
+
+    // Update activeTab when location changes (e.g. via navigate('/operations'))
+    useEffect(() => {
+        if (location.pathname === '/operations') {
+            setActiveTab('operations')
+        } else if (location.pathname === '/dashboard' || location.pathname === '/') {
+            setActiveTab('overview')
+        }
+    }, [location.pathname])
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
@@ -150,12 +172,6 @@ export function DashboardPage() {
         setAIChatOpen(true)
     }
 
-    const handleRefresh = async () => {
-        // Simulated refresh for real-time data
-        // In a real scenario, we might force a re-fetch of non-realtime data or check connection
-        await new Promise(resolve => setTimeout(resolve, 1500))
-    }
-
     const [showTutorial, setShowTutorial] = useState(false)
 
     return (
@@ -170,20 +186,47 @@ export function DashboardPage() {
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
 
             <ComplianceAlert />
-            <ComplianceAlert />
+            {/* Header */}
+            <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50 transition-all duration-300 relative">
+                <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                            <span className="font-bold text-primary-foreground">R</span>
+                        </div>
+                        <div>
+                            <h1 className="font-semibold text-lg tracking-tight">Relay</h1>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{hotel?.info.name}</p>
+                        </div>
+                    </div>
 
+                    {/* Dashboard Tabs List */}
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="hidden md:block">
+                        <TabsList className="bg-muted/50 border border-border h-9">
+                            <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
+                                {t('module.overview') || 'Genel Bakış'}
+                            </TabsTrigger>
+                            <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
+                                {t('module.operations') || 'Operasyon Merkezi'}
+                            </TabsTrigger>
+                        </TabsList>
+                    </Tabs>
 
-            {/* Header - SIMPLIFIED / REMOVED (Handled by AppShell or integrated into content)
-                For now, we can keep a minimal header or remove it if AppShell has one.
-                Given AppShell is just a wrapper, we might want a 'Page Header'.
-                For native feel, 'Overview' usually has a big bold title at top.
-             */}
-            <header className="px-6 py-4 flex items-center justify-between shrink-0">
-                <div>
-                    <h1 className="font-bold text-2xl tracking-tight">{hotel?.info.name}</h1>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                        {location.pathname === '/operations' ? t('module.operations') : t('module.overview')}
-                    </p>
+                    <div className="hidden lg:flex items-center gap-2">
+                        <AnimatePresence>
+                            {showDateTime && (
+                                <DateTimeWidget />
+                            )}
+                        </AnimatePresence>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => setShowDateTime(!showDateTime)}
+                            title={showDateTime ? "Hide Time" : "Show Time"}
+                        >
+                            {showDateTime ? <EyeOff className="w-3.5 h-3.5" /> : <ClockIcon className="w-3.5 h-3.5" />}
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -201,17 +244,43 @@ export function DashboardPage() {
                         <NotificationDropdown />
                     </div>
 
+                    {/* User Profile - Consolidated Actions */}
                     <div id="tour-profile">
                         <UserNav
                             onOpenAI={handleOpenAI}
-                            onOpenRoomManager={() => { }}
+                            onOpenRoomManager={() => { }} // Deprecated in UserNav, effectively no-op or removed
                             onOpenHandover={() => setIsHandoverOpen(true)}
                         />
                     </div>
                 </div>
-            </header>
 
-            {/* Mobile Bottom Navigation (Fixed) - REMOVED, Handled by AppShell */}
+            </header >
+
+            {/* Mobile Bottom Navigation (Fixed) */}
+            < div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border pb-safe" >
+                <nav className="flex items-center justify-around h-16 px-2">
+                    <button
+                        onClick={() => setActiveTab('overview')}
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform",
+                            activeTab === 'overview' ? "text-primary" : "text-muted-foreground"
+                        )}
+                    >
+                        <LayoutDashboard className="w-6 h-6" />
+                        <span className="text-[10px] font-medium">{t('module.overview') || 'Overview'}</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('operations')}
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform",
+                            activeTab === 'operations' ? "text-primary" : "text-muted-foreground"
+                        )}
+                    >
+                        <Activity className="w-6 h-6" />
+                        <span className="text-[10px] font-medium">{t('module.operations') || 'Operations'}</span>
+                    </button>
+                </nav>
+            </div >
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col transition-all duration-300">
@@ -220,10 +289,7 @@ export function DashboardPage() {
                     <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
                             {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
-                            <PullToRefresh
-                                onRefresh={handleRefresh}
-                                className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 pr-2 scrollbar-thin"
-                            >
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
                                 <div id="tour-logs">
                                     <ShiftNotes hotelId={hotel?.id || ''} />
                                 </div>
@@ -239,17 +305,20 @@ export function DashboardPage() {
                                         />
                                     </div>
                                 )}
-                            </PullToRefresh>
+                            </div>
 
-                            {/* -- CENTER COLUMN: Operations (Scrollable via PullToRefresh) -- */}
-                            <PullToRefresh
-                                onRefresh={handleRefresh}
-                                className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 pr-2 scrollbar-thin"
-                            >
+                            {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
                                 {/* 1. Current Shift & Pulse */}
                                 <div className="space-y-4">
                                     <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
                                 </div>
+
+                                {/* 2. Sticky Board & Logs (REMOVED) */}
+                                {/* The user requested to remove the log system. Keeping the column structure for now or we can collapse it?
+                                    Actually, if we remove this, the center column has mainly CurrentShiftDisplay.
+                                    We'll keep the column but empty for now aside from ShiftDisplay.
+                                */}
 
                                 {/* 3. Roster (Weekly Program) */}
                                 {(user?.role === 'gm' || user?.role === 'receptionist') && (
@@ -261,13 +330,10 @@ export function DashboardPage() {
                                         <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                     </motion.div>
                                 )}
-                            </PullToRefresh>
+                            </div>
 
                             {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
-                            <PullToRefresh
-                                onRefresh={handleRefresh}
-                                className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 pr-2 scrollbar-thin"
-                            >
+                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
                                 {/* 3. Hotel Info */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
@@ -304,7 +370,7 @@ export function DashboardPage() {
                                 >
                                     <CalendarWidget hotelId={hotel?.id || ''} />
                                 </motion.div>
-                            </PullToRefresh>
+                            </div>
                         </div>
                     </TabsContent>
 

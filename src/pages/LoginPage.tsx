@@ -98,7 +98,7 @@ export function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden font-sans selection:bg-primary/30 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden font-sans selection:bg-primary/30">
             {/* Cyber-Concierge Background */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(76,29,149,0.1),rgba(0,0,0,0))]" />
