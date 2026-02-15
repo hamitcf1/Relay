@@ -16,6 +16,16 @@ import {
 import { db } from '@/lib/firebase'
 import type { OffDayRequest, OffDayStatus } from '@/types'
 
+const cleanObject = (obj: any) => {
+    const newObj = { ...obj }
+    Object.keys(newObj).forEach(key => {
+        if (newObj[key] === undefined) {
+            delete newObj[key]
+        }
+    })
+    return newObj
+}
+
 interface OffDayState {
     requests: OffDayRequest[]
     loading: boolean
@@ -85,11 +95,11 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
     submitRequest: async (hotelId, requestData) => {
         try {
             const requestsRef = collection(db, 'hotels', hotelId, 'off_day_requests')
-            await addDoc(requestsRef, {
+            await addDoc(requestsRef, cleanObject({
                 ...requestData,
                 status: 'pending',
                 created_at: serverTimestamp()
-            })
+            }))
         } catch (error: any) {
             console.error("Error submitting off-day request:", error)
             throw error
@@ -99,10 +109,10 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
     updateRequest: async (hotelId, requestId, updates) => {
         try {
             const docRef = doc(db, 'hotels', hotelId, 'off_day_requests', requestId)
-            await updateDoc(docRef, {
+            await updateDoc(docRef, cleanObject({
                 ...updates,
                 updated_at: serverTimestamp() // Optional: add updated_at field
-            })
+            }))
         } catch (error: any) {
             console.error("Error updating off-day request:", error)
             throw error

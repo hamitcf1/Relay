@@ -45,24 +45,32 @@ export function OffDayScheduler() {
         setSubmitting(true)
         try {
             if (editingId) {
-                await updateRequest(hotel.id, editingId, {
+                const payload: any = {
                     date: validDates[0],
                     reason: reason.trim(),
                     type: requestType,
-                    shift_name: requestType === 'shift' ? shiftName : undefined
-                })
+                }
+                if (requestType === 'shift') {
+                    payload.shift_name = shiftName
+                }
+
+                await updateRequest(hotel.id, editingId, payload)
                 setEditingId(null)
             } else {
                 // Submit multiple requests if multiple dates
                 for (const d of validDates) {
-                    await submitRequest(hotel.id, {
+                    const payload: any = {
                         staff_id: user.uid,
                         staff_name: user.name,
                         date: d,
                         reason: reason.trim(),
                         type: requestType,
-                        shift_name: requestType === 'shift' ? shiftName : undefined
-                    })
+                    }
+                    if (requestType === 'shift') {
+                        payload.shift_name = shiftName
+                    }
+
+                    await submitRequest(hotel.id, payload)
                 }
             }
             // Reset form
