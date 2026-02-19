@@ -1,10 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-    LayoutDashboard,
-    Activity,
-    Users
-} from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -48,10 +43,13 @@ import { SalesPanel } from '@/components/sales/SalesPanel'
 import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText, BedDouble } from 'lucide-react'
+import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText, BedDouble, Users } from 'lucide-react'
 import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
+import { MobileNav } from '@/components/layout/MobileNav'
+import { OperationsGrid } from '@/components/dashboard/OperationsGrid'
+import { ChevronLeft } from 'lucide-react'
 
 export function DashboardPage() {
     const navigate = useNavigate()
@@ -71,6 +69,17 @@ export function DashboardPage() {
     // const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false) // Removed
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
+    const [operationTab, setOperationTab] = useState('messaging') // Controlled state for operations tab
+
+    // Mobile Detection
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768)
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
     const [showDateTime, setShowDateTime] = useState(() => {
         const saved = localStorage.getItem('relay_show_datetime')
         return saved !== 'false' // default: true
@@ -187,15 +196,15 @@ export function DashboardPage() {
 
             <ComplianceAlert />
             {/* Header */}
-            <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50 transition-all duration-300 relative">
+            <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 z-50 transition-all duration-300 relative">
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
                             <span className="font-bold text-primary-foreground">R</span>
                         </div>
-                        <div>
+                        <div className="hidden sm:block">
                             <h1 className="font-semibold text-lg tracking-tight">Relay</h1>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{hotel?.info.name}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium max-w-[150px] truncate">{hotel?.info.name}</p>
                         </div>
                     </div>
 
@@ -257,30 +266,18 @@ export function DashboardPage() {
             </header >
 
             {/* Mobile Bottom Navigation (Fixed) */}
-            < div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border pb-safe" >
-                <nav className="flex items-center justify-around h-16 px-2">
-                    <button
-                        onClick={() => setActiveTab('overview')}
-                        className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform",
-                            activeTab === 'overview' ? "text-primary" : "text-muted-foreground"
-                        )}
-                    >
-                        <LayoutDashboard className="w-6 h-6" />
-                        <span className="text-[10px] font-medium">{t('module.overview') || 'Overview'}</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('operations')}
-                        className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-transform",
-                            activeTab === 'operations' ? "text-primary" : "text-muted-foreground"
-                        )}
-                    >
-                        <Activity className="w-6 h-6" />
-                        <span className="text-[10px] font-medium">{t('module.operations') || 'Operations'}</span>
-                    </button>
-                </nav>
-            </div >
+            <MobileNav
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onOpenProfile={() => {
+                    // Trigger UserNav dropdown - for now we might need a better mobile profile solution
+                    // This is a temporary placeholder or we can route to settings
+                    // navigate('/settings') 
+                    // Or simple toggle:
+                    const trigger = document.querySelector('[data-radix-collection-item]') as HTMLElement;
+                    if (trigger) trigger.click();
+                }}
+            />
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col transition-all duration-300">
@@ -383,8 +380,23 @@ export function DashboardPage() {
                                 </div>
                             </div>
 
-                            <Tabs defaultValue="messaging" className="flex-1 flex flex-col min-h-0">
-                                <div className="flex-none px-4 lg:px-6 mb-4">
+                            <Tabs
+                                value={operationTab}
+                                onValueChange={setOperationTab}
+                                className="flex-1 flex flex-col min-h-0"
+                            >
+                                {/* Mobile Header for Sub-pages */}
+                                {isMobile && activeTab === 'operations' && operationTab !== 'grid' && (
+                                    <div className="flex items-center gap-2 px-4 py-2 border-b border-border/50">
+                                        <Button variant="ghost" size="icon" onClick={() => setOperationTab('grid')} className="-ml-2">
+                                            <ChevronLeft className="w-5 h-5" />
+                                        </Button>
+                                        <span className="font-semibold text-lg capitalize">{t(`module.${operationTab}` as any) || operationTab}</span>
+                                    </div>
+                                )}
+
+                                {/* Desktop Tabs List - Hide on mobile if we are in 'grid' view (which is default for operations root) */}
+                                <div className={cn("flex-none px-4 lg:px-6 mb-4", isMobile ? "hidden" : "block")}>
                                     <TabsList className="bg-muted/50 p-1 rounded-xl border border-border h-12 w-full justify-start overflow-x-auto whitespace-nowrap no-scrollbar">
                                         <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
                                             <MessageCircle className="w-4 h-4" />
@@ -429,37 +441,45 @@ export function DashboardPage() {
                                 </div>
 
                                 <div className="flex-1 min-h-0 bg-background/50 border-t border-border/50">
-                                    <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none">
-                                        <MessagingPanel />
-                                    </TabsContent>
-                                    <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none">
-                                        <SalesPanel />
-                                    </TabsContent>
-
-                                    {/* Scrollable Containers for other tabs */}
-                                    <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                        <FeedbackSection />
-                                    </TabsContent>
-                                    <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                        <OffDayScheduler />
-                                    </TabsContent>
-                                    <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                        <TourCatalogue />
-                                    </TabsContent>
-                                    <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                        <RoomManagementPanel />
-                                    </TabsContent>
-                                    <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                        <PricingPanel />
-                                    </TabsContent>
-                                    <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                        <LeaderboardPanel />
-                                    </TabsContent>
-                                    {user?.role === 'gm' && (
-                                        <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
-                                            <ActivityLogPanel />
-                                        </TabsContent>
+                                    {/* Mobile Grid View */}
+                                    {isMobile && operationTab === 'grid' && (
+                                        <OperationsGrid onSelect={(id) => setOperationTab(id)} userRole={user?.role} />
                                     )}
+
+                                    {/* Standard Tab Contents - hidden if mobile grid is active */}
+                                    <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
+                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none">
+                                            <MessagingPanel />
+                                        </TabsContent>
+                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none">
+                                            <SalesPanel />
+                                        </TabsContent>
+
+                                        {/* Scrollable Containers for other tabs */}
+                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <FeedbackSection />
+                                        </TabsContent>
+                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <OffDayScheduler />
+                                        </TabsContent>
+                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <TourCatalogue />
+                                        </TabsContent>
+                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <RoomManagementPanel />
+                                        </TabsContent>
+                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <PricingPanel />
+                                        </TabsContent>
+                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <LeaderboardPanel />
+                                        </TabsContent>
+                                        {user?.role === 'gm' && (
+                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                                <ActivityLogPanel />
+                                            </TabsContent>
+                                        )}
+                                    </div>
                                 </div>
                             </Tabs>
                         </div>

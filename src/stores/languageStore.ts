@@ -379,6 +379,7 @@ type Translations = {
     'common.resolve': string
     'common.dismiss': string
     'common.backToHome': string
+    'common.profile': string
 
     // Calendar
     'calendar.noShifts': string
@@ -1606,6 +1607,7 @@ const translations: Record<Language, Translations> = {
         'common.resolve': 'Resolve',
         'common.dismiss': 'Dismiss',
         'common.backToHome': 'Back to Home',
+        'common.profile': 'Profile',
 
         'currency.title': 'Exchange Rates (TCMB)',
         'currency.buying': 'Bank Buys (Bozma)',
@@ -2041,6 +2043,7 @@ const translations: Record<Language, Translations> = {
         'common.resolve': 'Çöz',
         'common.dismiss': 'Kapat',
         'common.backToHome': 'Anasayfaya Dön',
+        'common.profile': 'Profil',
         'common.clear': 'Sohbeti Temizle',
 
         // Calendar

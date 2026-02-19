@@ -105,6 +105,7 @@
     min-height: -webkit-fill-available;
     /* Disable tap highlight on mobile */
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
 
     /* Hide default cursor only when custom cursor is active */
   }
