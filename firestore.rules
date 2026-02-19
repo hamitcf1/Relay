@@ -121,11 +121,84 @@ service cloud.firestore {
         allow write: if isGM();
       }
       
-      // ACTIVITY_LOGS - Staff activity audit trail (GM read only, immutable)
+      // ACTIVITY_LOGS - Staff activity audit trail
       match /activity_logs/{logId} {
         allow read: if isGM() && belongsToHotel(hotelId);
+        allow create, update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if false;
+      }
+
+      // NOTIFICATIONS
+      match /notifications/{notifId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isAuthenticated() && belongsToHotel(hotelId);
+      }
+
+      // DAILY_MENU
+      match /daily_menu/{menuId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isGM();
+      }
+
+      // TOURS
+      match /tours/{tourId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isGM();
+      }
+
+      // ROOMS
+      match /rooms/{roomId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isGM();
+      }
+
+      // SALES
+      match /sales/{saleId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update, delete: if false;
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isGM();
+      }
+
+      // CALENDAR_EVENTS
+      match /calendar_events/{eventId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isAuthenticated() && belongsToHotel(hotelId);
+      }
+
+      // OFF_DAY_REQUESTS
+      match /off_day_requests/{requestId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isGM() || (isAuthenticated() && resource.data.staff_id == request.auth.uid);
+      }
+
+      // MESSAGES - Private messaging
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isGM();
+      }
+
+      // ANONYMOUS_FEEDBACK
+      match /anonymous_feedback/{feedbackId} {
+        allow read: if isGM() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated(); // Allow any staff to submit anonymously
+        allow update, delete: if isGM();
+      }
+
+      // PRICING - Complex nested structure
+      match /pricing/{configId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow write: if isGM();
+        
+        // Handle sub-subcollections under pricing
+        match /{allChildren=**} {
+           allow read: if isAuthenticated() && belongsToHotel(hotelId);
+           allow write: if isGM();
+        }
       }
     }
   }
