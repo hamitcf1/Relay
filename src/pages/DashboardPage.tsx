@@ -49,6 +49,7 @@ import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { OperationsGrid } from '@/components/dashboard/OperationsGrid'
+import { OverviewGrid } from '@/components/dashboard/OverviewGrid'
 import { ChevronLeft } from 'lucide-react'
 
 export function DashboardPage() {
@@ -69,7 +70,8 @@ export function DashboardPage() {
     // const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false) // Removed
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
-    const [operationTab, setOperationTab] = useState('messaging') // Controlled state for operations tab
+    const [operationTab, setOperationTab] = useState('messaging')
+    const [overviewTab, setOverviewTab] = useState('grid') // New state for mobile overview navigation
 
     // Mobile Detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -96,6 +98,7 @@ export function DashboardPage() {
             setActiveTab('operations')
         } else if (location.pathname === '/dashboard' || location.pathname === '/') {
             setActiveTab('overview')
+            setOverviewTab('grid') // Reset to grid when navigating back to root
         }
     }, [location.pathname])
 
@@ -283,92 +286,133 @@ export function DashboardPage() {
             <main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col transition-all duration-300">
                 <AnnouncementBanner />
                 <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
-                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-                            {/* -- LEFT COLUMN: Shift Notes (Full Height) -- */}
-                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
-                                <div id="tour-logs">
-                                    <ShiftNotes hotelId={hotel?.id || ''} />
-                                </div>
+                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden">
 
-                                {/* Compliance Checklist */}
-                                {currentShift && (
-                                    <div id="tour-shift-start">
-                                        <ComplianceChecklist
-                                            compliance={currentShift.compliance}
-                                            onKBSCheck={handleKBSCheck}
-                                            onAgencyCheck={handleAgencyCheck}
-                                            disabled={false}
-                                        />
+                        {/* Mobile Header for Overview Sub-pages */}
+                        {isMobile && overviewTab !== 'grid' && (
+                            <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20">
+                                <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
+                                    <ChevronLeft className="w-5 h-5" />
+                                </Button>
+                                {/* We can map IDs to labels or just use a generic title */}
+                                <span className="font-semibold text-lg capitalize">
+                                    {overviewTab === 'notes' ? t('module.shiftNotes') :
+                                        overviewTab === 'compliance' ? t('module.compliance') :
+                                            overviewTab === 'hotel-info' ? t('module.hotelInfo') :
+                                                overviewTab === 'calendar' ? t('module.calendar') :
+                                                    overviewTab === 'menu' ? 'Daily Menu' :
+                                                        overviewTab === 'currency' ? t('currency.title') :
+                                                            overviewTab === 'roster' ? t('module.roster') : 'Overview'}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Mobile Grid View */}
+                        {isMobile && overviewTab === 'grid' ? (
+                            <OverviewGrid onSelect={(id) => setOverviewTab(id)} userRole={user?.role} />
+                        ) : (
+                            /* Desktop Grid OR Mobile Sub-view (when overviewTab != grid) */
+                            /* We use the same grid structure but conditionally hide columns/items based on overviewTab on mobile */
+                            <div className={cn("grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 h-auto lg:h-full",
+                                isMobile ? "p-4 pb-24" : "" /* Add padding on mobile view */
+                            )}>
+                                {/* -- LEFT COLUMN: Shift Notes -- */}
+                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin",
+                                    isMobile && overviewTab !== 'notes' && overviewTab !== 'compliance' && "hidden"
+                                )}>
+                                    <div id="tour-logs" className={cn(isMobile && overviewTab !== 'notes' && "hidden")}>
+                                        <ShiftNotes hotelId={hotel?.id || ''} />
                                     </div>
-                                )}
-                            </div>
 
-                            {/* -- CENTER COLUMN: Operations (Scrollable) -- */}
-                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
-                                {/* 1. Current Shift & Pulse */}
-                                <div className="space-y-4">
-                                    <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
+                                    {/* Compliance Checklist */}
+                                    {currentShift && (
+                                        <div id="tour-shift-start" className={cn(isMobile && overviewTab !== 'compliance' && "hidden")}>
+                                            <ComplianceChecklist
+                                                compliance={currentShift.compliance}
+                                                onKBSCheck={handleKBSCheck}
+                                                onAgencyCheck={handleAgencyCheck}
+                                                disabled={false}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* 2. Sticky Board & Logs (REMOVED) */}
-                                {/* The user requested to remove the log system. Keeping the column structure for now or we can collapse it?
-                                    Actually, if we remove this, the center column has mainly CurrentShiftDisplay.
-                                    We'll keep the column but empty for now aside from ShiftDisplay.
-                                */}
+                                {/* -- CENTER COLUMN: Operations -- */}
+                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin",
+                                    isMobile && overviewTab !== 'roster' && "hidden lg:flex" /* Show on desktop always, hide on mobile unless active */
+                                )}>
+                                    {/* 1. Current Shift & Pulse - Show only on Desktop or if we had a specific tab for it? 
+                                        Actually CurrentShiftDisplay is vital. Maybe keep it on top of Grid? 
+                                        For now, we'll hide it in grid view and show it if any tab is open? 
+                                        Wait, user wants card system. So we should hide this column unless a specific item is selected.
+                                        But 'roster' is the only item in this column mapped in grid.
+                                        Let's show CurrentShiftDisplay ONLY on Desktop or maybe add a 'Shift' card?
+                                        For now, we will hide CurrentShiftDisplay on mobile grid view completely.
+                                    */}
+                                    <div className="space-y-4 hidden lg:block">
+                                        <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
+                                    </div>
 
-                                {/* 3. Roster (Weekly Program) */}
-                                {(user?.role === 'gm' || user?.role === 'receptionist') && (
+                                    {/* 3. Roster (Weekly Program) */}
+                                    {(user?.role === 'gm' || user?.role === 'receptionist') && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
+                                            transition={{ duration: 0.5, delay: 0.2 }}
+                                            className={cn(isMobile && overviewTab !== 'roster' && "hidden")}
+                                        >
+                                            <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                        </motion.div>
+                                    )}
+                                </div>
+
+                                {/* -- RIGHT COLUMN: Admin & Management -- */}
+                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin pb-20 lg:pb-0",
+                                    isMobile && !['hotel-info', 'menu', 'currency', 'calendar'].includes(overviewTab) && "hidden lg:flex"
+                                )}>
+                                    {/* 3. Hotel Info */}
                                     <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ duration: 0.5, delay: 0.2 }}
+                                        transition={{ delay: 0.3 }}
+                                        className={cn(isMobile && overviewTab !== 'hotel-info' && "hidden")}
                                     >
-                                        <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                        <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                     </motion.div>
-                                )}
+
+                                    {/* 3. Daily Menu */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
+                                        transition={{ delay: 0.3 }}
+                                        className={cn(isMobile && overviewTab !== 'menu' && "hidden")}
+                                    >
+                                        <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                    </motion.div>
+
+                                    {/* 1. Currency Widget */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
+                                        transition={{ delay: 0.1 }}
+                                        className={cn(isMobile && overviewTab !== 'currency' && "hidden")}
+                                    >
+                                        {/* Currency Widget with TCMB Rates */}
+                                        <CurrencyWidget />
+                                    </motion.div>
+
+                                    {/* 1. Calendar Widget */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
+                                        transition={{ delay: 0.1 }}
+                                        className={cn(isMobile && overviewTab !== 'calendar' && "hidden")}
+                                    >
+                                        <CalendarWidget hotelId={hotel?.id || ''} />
+                                    </motion.div>
+                                </div>
                             </div>
-
-                            {/* -- RIGHT COLUMN: Admin & Management (Scrollable) -- */}
-                            <div className="lg:col-span-1 h-full flex flex-col min-h-0 gap-6 overflow-y-auto pr-2 scrollbar-thin">
-                                {/* 3. Hotel Info */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                    transition={{ delay: 0.3 }}
-                                >
-                                    <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                </motion.div>
-
-                                {/* 3. Daily Menu */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                    transition={{ delay: 0.3 }}
-                                >
-                                    <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                </motion.div>
-
-                                {/* 1. Currency Widget */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                    transition={{ delay: 0.1 }}
-                                >
-                                    {/* Currency Widget with TCMB Rates */}
-                                    <CurrencyWidget />
-                                </motion.div>
-
-                                {/* 1. Calendar Widget */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                    transition={{ delay: 0.1 }}
-                                >
-                                    <CalendarWidget hotelId={hotel?.id || ''} />
-                                </motion.div>
-                            </div>
-                        </div>
+                        )}
                     </TabsContent>
 
                     <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden">
