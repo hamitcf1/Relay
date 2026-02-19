@@ -91,7 +91,7 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
     }
 
     return (
-        <div className="p-4 pb-32 overflow-y-auto h-full">
+        <div className="p-4 pb-32">
             <h2 className="text-2xl font-bold mb-6 px-1">{t('module.overview')}</h2>
 
             <motion.div

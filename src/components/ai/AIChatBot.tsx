@@ -421,10 +421,22 @@ export function AIChatBot() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages, loading])
 
-    // Focus input when opened
+    // Focus input when opened, but be polite (don't steal focus if user is typing elsewhere)
     useEffect(() => {
         if (isOpen) {
-            setTimeout(() => inputRef.current?.focus(), 300)
+            // Small delay to allow animation and React state updates
+            setTimeout(() => {
+                const active = document.activeElement
+                const isInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement
+
+                // If user is already in a text input, don't steal focus
+                // UNLESS the active element is the toggle button (meaning they just clicked it) or body
+                const isToggleBtn = active?.id === 'ai-toggle-btn'
+
+                if (!isInput || isToggleBtn) {
+                    inputRef.current?.focus()
+                }
+            }, 300)
         }
     }, [isOpen])
 
@@ -463,7 +475,7 @@ export function AIChatBot() {
                         onClick={toggleOpen}
                         id="ai-toggle-btn"
                         className={cn(
-                            "fixed bottom-6 right-6",
+                            "fixed bottom-24 right-4 md:bottom-6 md:right-6",
                             "w-14 h-14 rounded-2xl",
                             "bg-gradient-to-br from-violet-500 to-indigo-600",
                             "text-white shadow-2xl shadow-violet-500/30",

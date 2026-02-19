@@ -314,7 +314,7 @@ export function DashboardPage() {
                             /* Desktop Grid OR Mobile Sub-view (when overviewTab != grid) */
                             /* We use the same grid structure but conditionally hide columns/items based on overviewTab on mobile */
                             <div className={cn("grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 h-auto lg:h-full",
-                                isMobile ? "p-4 pb-24" : "" /* Add padding on mobile view */
+                                isMobile ? "p-4 pb-32" : "" /* Add generous padding on mobile view to clear floating nav */
                             )}>
                                 {/* -- LEFT COLUMN: Shift Notes -- */}
                                 <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin",
@@ -492,34 +492,34 @@ export function DashboardPage() {
 
                                     {/* Standard Tab Contents - hidden if mobile grid is active */}
                                     <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
-                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none">
+                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6">
                                             <MessagingPanel />
                                         </TabsContent>
-                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none">
+                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6">
                                             <SalesPanel />
                                         </TabsContent>
 
                                         {/* Scrollable Containers for other tabs */}
-                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
                                             <FeedbackSection />
                                         </TabsContent>
-                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
                                             <OffDayScheduler />
                                         </TabsContent>
-                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
                                             <TourCatalogue />
                                         </TabsContent>
-                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
                                             <RoomManagementPanel />
                                         </TabsContent>
-                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
                                             <PricingPanel />
                                         </TabsContent>
-                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
                                             <LeaderboardPanel />
                                         </TabsContent>
                                         {user?.role === 'gm' && (
-                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-24">
+                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
                                                 <ActivityLogPanel />
                                             </TabsContent>
                                         )}

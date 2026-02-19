@@ -612,7 +612,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 {filteredNotes.length === 0 ? (
                     <p className="text-muted-foreground text-sm text-center py-8">{t('notes.noNotes')}</p>
                 ) : (
-                    <div className="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar">
+                    <div className="space-y-2 md:max-h-[500px] md:overflow-y-auto custom-scrollbar">
                         {filteredNotes.map((note) => (
                             <motion.div
                                 key={note.id}

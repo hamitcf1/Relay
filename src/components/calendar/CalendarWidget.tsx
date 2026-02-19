@@ -389,7 +389,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                     {selectedDateEvents.length === 0 && !isAdding ? (
                                         <p className="text-xs text-zinc-500 text-center py-2">{t('calendar.noEvents')}</p>
                                     ) : (
-                                        <div className="space-y-1.5 max-h-32 overflow-y-auto scrollbar-thin">
+                                        <div className="space-y-1.5 md:max-h-32 md:overflow-y-auto scrollbar-thin">
                                             {selectedDateEvents.map((event) => (
                                                 <div
                                                     key={event.id}

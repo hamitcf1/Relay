@@ -32,8 +32,8 @@ export function MobileNav({ activeTab, setActiveTab, onOpenProfile }: MobileNavP
                 Floating Glass Container 
                 pointer-events-auto is crucial because the parent is none to let clicks pass through to side areas if any 
             */}
-            <div className="mx-auto max-w-sm pointer-events-auto">
-                <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex items-center justify-between p-2">
+            <div className="mx-auto max-w-sm pointer-events-none">
+                <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex items-center justify-between p-2 pointer-events-auto">
 
                     {/* Active Tab Indicator (Optional animated background) */}
                     {/* Simplified implementation for now: plain buttons */}
