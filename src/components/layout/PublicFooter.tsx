@@ -13,10 +13,10 @@ export function PublicFooter() {
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
                             <span className="font-bold text-white">R</span>
                         </div>
-                        <span className="font-bold text-white text-xl">Relay</span>
+                        <span className="font-bold text-white text-xl">Aetherius Relay</span>
                     </div>
                     <p className="text-sm text-zinc-500 mb-4">{t('app.description')}</p>
-                    <p className="text-xs text-zinc-600">© 2026 Relay Systems Inc. {t('landing.footer.rights')}</p>
+                    <p className="text-xs text-zinc-600">© 2026 Aetherius Relay Systems Inc. {t('landing.footer.rights')}</p>
                 </div>
 
                 <div>

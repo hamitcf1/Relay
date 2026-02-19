@@ -44,7 +44,7 @@ const QUICK_SUGGESTIONS = [
 ]
 
 const SUPPORT_SUGGESTIONS = [
-    { label: '🚀 Relay nedir?', text: 'Relay platformu hakkında bilgi verir misin?' },
+    { label: '🚀 Relay nedir?', text: 'Aetherius Relay platformu hakkında bilgi verir misin?' },
     { label: '💎 Fiyatlandırma?', text: 'Fiyatlandırma planlarınız nasıl?' },
     { label: '🛡️ Güvenlik?', text: 'Veri güvenliğini nasıl sağlıyorsunuz?' },
     { label: '📱 Mobil uygulama?', text: 'Mobil uygulamanız var mı?' },
@@ -553,7 +553,7 @@ export function AIChatBot() {
                                         </div>
                                         <div>
                                             <h3 className="text-sm font-bold text-foreground leading-tight">
-                                                {activeThread ? activeThread.title : 'Relay AI'}
+                                                {activeThread ? activeThread.title : 'Aetherius Relay AI'}
                                             </h3>
                                             <div className="flex items-center gap-1.5">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -637,11 +637,11 @@ export function AIChatBot() {
                                             <MessageCircle className="w-8 h-8 text-violet-400" />
                                         </div>
                                         <h4 className="text-base font-bold text-foreground mb-1">
-                                            {isPublic ? 'Relay Müşteri Desteği' : 'Relay AI Asistanı'}
+                                            {isPublic ? 'Aetherius Relay Müşteri Desteği' : 'Aetherius Relay AI Asistanı'}
                                         </h4>
                                         <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
                                             {isPublic
-                                                ? 'Hoş geldiniz! Relay hakkında merak ettiğiniz her şeyi sorabilirsiniz. Size nasıl yardımcı olabilirim?'
+                                                ? 'Hoş geldiniz! Aetherius Relay hakkında merak ettiğiniz her şeyi sorabilirsiniz. Size nasıl yardımcı olabilirim?'
                                                 : 'Otel verilerinize tam erişimim var. Vardiya, fiyat, satış, notlar, odalar, turlar, döviz kurları hakkında her şeyi sorabilirsiniz.'
                                             }
                                         </p>

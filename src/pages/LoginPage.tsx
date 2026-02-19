@@ -177,7 +177,7 @@ export function LoginPage() {
                                 <Hotel className="w-8 h-8 text-primary drop-shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
                             </div>
                         </div>
-                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight">Relay</h1>
+                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight text-center">Aetherius Relay</h1>
 
                         <div className="h-6 mt-2 relative w-full flex justify-center">
                             <AnimatePresence mode="wait">

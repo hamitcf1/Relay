@@ -853,7 +853,7 @@ const translations: Record<Language, Translations> = {
 
         // Expansion Pages
         'features.title': 'Technical Deep Dive',
-        'features.subtitle': 'Relay combines everything a hotel needs for daily operations into a single platform.',
+        'features.subtitle': 'Aetherius Relay combines everything a hotel needs for daily operations into a single platform.',
         'features.handovers.title': 'Digital Shift Handovers',
         'features.handovers.desc': 'Replace paper logs with AI-summarized, secure, and searchable shift transfers.',
         'features.roster.title': 'Matrix Roster System',
@@ -868,7 +868,7 @@ const translations: Record<Language, Translations> = {
         'features.cloud.desc': 'Enterprise-grade infrastructure ensuring data is always accessible on any device.',
 
         'howItWorks.title': 'Operational Alchemy',
-        'howItWorks.subtitle': 'Relay eliminates complexity while digitalizing your hotel operations.',
+        'howItWorks.subtitle': 'Aetherius Relay eliminates complexity while digitalizing your hotel operations.',
         'howItWorks.step1.title': 'Quick Onboarding',
         'howItWorks.step1.desc': 'Import your hotel data in 5 minutes and invite your team to the platform.',
         'howItWorks.step2.title': 'Real-time Tracking',
@@ -878,7 +878,7 @@ const translations: Record<Language, Translations> = {
         'howItWorks.step4.title': 'Mobile Empowerment',
         'howItWorks.step4.desc': 'Field staff enters data anywhere via mobile, instantly syncing with HQ.',
         'updates.title': 'Product Updates',
-        'updates.subtitle': 'Relay is constantly evolving. Here is what we have been building.',
+        'updates.subtitle': 'Aetherius Relay is constantly evolving. Here is what we have been building.',
         'updates.v1.version': 'v1.2.0',
         'updates.v1.date': 'Feb 2026',
         'updates.v1.title': 'AI Revolution',
@@ -896,18 +896,18 @@ const translations: Record<Language, Translations> = {
         'landing.footer.rights': 'All rights reserved.',
         'landing.footer.contact': 'Contact Admin',
 
-        'blog.title': 'Relay Blog',
+        'blog.title': 'Aetherius Relay Blog',
         'blog.subtitle': 'Insights and strategies for modern hotel management.',
         'blog.post1.title': 'The End of Paper Logbooks',
         'blog.post1.excerpt': 'Discover why modern hotels are ditching physical books for digital systems.',
         'blog.post1.date': 'Feb 12, 2026',
-        'blog.post1.content': 'Traditional paper logbooks are no longer sufficient for today\'s fast-paced hotel operations. Lost info, illegible handwriting, and the difficulty of searching historical data reduce operational efficiency. With Relay\'s digital logging process, you gain instant access, searchability, and the ability to make data-driven decisions.',
+        'blog.post1.content': 'Traditional paper logbooks are no longer sufficient for today\'s fast-paced hotel operations. Lost info, illegible handwriting, and the difficulty of searching historical data reduce operational efficiency. With Aetherius Relay\'s digital logging process, you gain instant access, searchability, and the ability to make data-driven decisions.',
         'blog.post2.title': 'Maximizing ADR with AI',
         'blog.post2.excerpt': 'How artificial intelligence helps front office teams optimize room rates in real-time.',
         'blog.post2.date': 'Feb 10, 2026',
-        'blog.post2.content': 'Managing room rates manually is a thing of the past. Relay AI analyzes occupancy, competitor rates, and local events to provide optimal price recommendations for the highest ADR (Average Daily Rate). In this article, we explore how AI is revolutionizing revenue management and how front office teams can use these tools to be more profitable.',
+        'blog.post2.content': 'Managing room rates manually is a thing of the past. Aetherius Relay AI analyzes occupancy, competitor rates, and local events to provide optimal price recommendations for the highest ADR (Average Daily Rate). In this article, we explore how AI is revolutionizing revenue management and how front office teams can use these tools to be more profitable.',
         'blog.readMore': 'Read Full Insight',
-        'blog.author.team': 'Relay Team',
+        'blog.author.team': 'Aetherius Relay Team',
         'blog.author.strategy': 'Product Strategy',
         'blog.category.hospitality': 'Hospitality',
         'blog.category.ai': 'AI & Data',
@@ -999,7 +999,7 @@ const translations: Record<Language, Translations> = {
 
         // Demo Page
         'demo.title': 'Interactive Live Demo',
-        'demo.subtitle': 'Experience the power of Relay firsthand. Choose a persona to explore the dashboard.',
+        'demo.subtitle': 'Experience the power of Aetherius Relay firsthand. Choose a persona to explore the dashboard.',
         'demo.gm': 'General Manager',
         'demo.gm.desc': 'Full access to all settings, analytics, staff management, and hotel configuration.',
         'demo.staff': 'Staff Member',
@@ -1084,9 +1084,9 @@ const translations: Record<Language, Translations> = {
         'terms.title': 'Terms of Service',
         'terms.lastUpdated': 'Last updated: February 11, 2026',
         'terms.acceptance.title': '1. Acceptance of Terms',
-        'terms.acceptance.desc': 'By accessing or using Relay, you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the service.',
+        'terms.acceptance.desc': 'By accessing or using Aetherius Relay, you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the service.',
         'terms.license.title': '2. Use License',
-        'terms.license.desc': 'Relay grants you a limited, non-exclusive, non-transferable, revocable license to use the Service for your internal business operations (hotel management).',
+        'terms.license.desc': 'Aetherius Relay grants you a limited, non-exclusive, non-transferable, revocable license to use the Service for your internal business operations (hotel management).',
         'terms.responsibilities.title': '3. User Responsibilities',
         'terms.responsibilities.desc': 'You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must immediately notify us of any unauthorized use.',
         'terms.availability.title': '4. Availability',
@@ -1499,7 +1499,7 @@ const translations: Record<Language, Translations> = {
         'compliance.kbs.checklistDesc': 'Daily compliance check before 23:00',
 
         // Onboarding
-        'onboarding.welcome.title': 'Welcome to Relay',
+        'onboarding.welcome.title': 'Welcome to Aetherius Relay',
         'onboarding.welcome.desc': 'Your digital operations hub. Let\'s get you set up.',
         'onboarding.activity.title': 'Operations Feed',
         'onboarding.activity.desc': 'View guest requests, maintenance logs, and shift notes in real-time.',
@@ -1512,7 +1512,7 @@ const translations: Record<Language, Translations> = {
         'onboarding.stepOf': 'Step {current} of {total}',
 
         // Interactive Tour
-        'tour.intro.title': 'Welcome to Relay',
+        'tour.intro.title': 'Welcome to Aetherius Relay',
         'tour.intro.desc': 'This is your digital handover platform. Let\'s take a quick tour.',
         'tour.compliance.title': 'Shift Compliance',
         'tour.compliance.desc': 'Track your mandatory KBS and Agency checks here. The pulse indicates urgency.',
@@ -1546,7 +1546,7 @@ const translations: Record<Language, Translations> = {
         'offday.petitions': 'Complaints & Petitions',
 
         // AI Modal
-        'ai.title': 'Relay AI Assistant',
+        'ai.title': 'Aetherius Relay AI Assistant',
         'ai.poweredBy': 'Powered by Gemini & Gemma',
         'ai.model': 'AI Model',
         'ai.mode.assistant': 'Assistant Mode',
@@ -1567,12 +1567,12 @@ const translations: Record<Language, Translations> = {
 
 
 
-        'app.welcome': 'Welcome to Relay',
+        'app.welcome': 'Welcome to Aetherius Relay',
         'app.description': 'Your digital handover system for seamless hotel operations.',
         'app.activeShift': 'Active Shift',
         'app.openTickets': 'Open Tickets',
         'app.cashBalance': 'Cash Balance',
-        'app.systemTitle': 'Relay Hotel Operations System',
+        'app.systemTitle': 'Aetherius Relay Hotel Operations System',
 
         'common.add': 'Add',
         'common.cancel': 'Cancel',
@@ -1629,9 +1629,9 @@ const translations: Record<Language, Translations> = {
         'landing.hero.cta.secondary': 'Live Demo',
         'landing.features.title': 'Full-Spectrum Hotel Operations',
         'landing.features.subtitle': 'Everything you need to manage a modern hotel efficiently.',
-        'landing.getApp.title': 'Download Relay',
+        'landing.getApp.title': 'Download Aetherius Relay',
         'landing.pricing.title': 'Ready to upgrade your hotel?',
-        'landing.pricing.subtitle': 'Join over 500 hotels using Relay to streamline their operations.',
+        'landing.pricing.subtitle': 'Join over 500 hotels using Aetherius Relay to streamline their operations.',
         'landing.pricing.cta': 'View Plans',
         'landing.getApp.appStore': 'App Store',
         'landing.getApp.appStoreSub': 'Download for iOS',
@@ -1735,9 +1735,9 @@ const translations: Record<Language, Translations> = {
         'terms.title': 'Hizmet Şartları',
         'terms.lastUpdated': 'Last updated: February 11, 2026',
         'terms.acceptance.title': '1. Şartların Kabulü',
-        'terms.acceptance.desc': 'Relay\'e erişerek veya kullanarak, bu Şartlara bağlı kalmayı kabul edersiniz. Şartların herhangi bir kısmını kabul etmiyorsanız, hizmete erişemezsiniz.',
+        'terms.acceptance.desc': 'Aetherius Relay\'e erişerek veya kullanarak, bu Şartlara bağlı kalmayı kabul edersiniz. Şartların herhangi bir kısmını kabul etmiyorsanız, hizmete erişemezsiniz.',
         'terms.license.title': '2. Kullanım Lisansı',
-        'terms.license.desc': 'Relay, Hizmeti dahili iş operasyonlarınız (otel yönetimi) için kullanmanız üzere size sınırlı, münhasır olmayan, devredilemez, iptal edilebilir bir lisans verir.',
+        'terms.license.desc': 'Aetherius Relay, Hizmeti dahili iş operasyonlarınız (otel yönetimi) için kullanmanız üzere size sınırlı, münhasır olmayan, devredilemez, iptal edilebilir bir lisans verir.',
         'terms.responsibilities.title': '3. Kullanıcı Sorumlulukları',
         'terms.responsibilities.desc': 'Hesap bilgilerinizin gizliliğini korumaktan ve hesabınız altında gerçekleşen tüm faaliyetlerden siz sorumlusunuz. Herhangi bir yetkisiz kullanımı derhal bize bildirmelisiniz.',
         'terms.availability.title': '4. Kullanılabilirlik',
@@ -2003,12 +2003,12 @@ const translations: Record<Language, Translations> = {
         'shift.loggedAs': 'Giriş yapan',
 
         // App & Common
-        'app.welcome': "Relay'e Hoşgeldiniz",
+        'app.welcome': "Aetherius Relay'e Hoşgeldiniz",
         'app.description': 'Dijital devir teslim sisteminiz. Vardiyaları yönetin, kayıtları takip edin ve uyumluluğu sağlayın - hepsi tek bir yerde.',
         'app.activeShift': 'Aktif Vardiya',
         'app.openTickets': 'Açık Kayıtlar',
         'app.cashBalance': 'Kasa Bakiyesi',
-        'app.systemTitle': 'Relay Otel Operasyon Sistemi',
+        'app.systemTitle': 'Aetherius Relay Otel Operasyon Sistemi',
 
         'common.add': 'Ekle',
         'common.cancel': 'İptal',
@@ -2245,7 +2245,7 @@ const translations: Record<Language, Translations> = {
         'compliance.kbs.checklistDesc': "23:00'den önce günlük uyumluluk kontrolü",
 
         // Onboarding
-        'onboarding.welcome.title': "Relay'e Hoşgeldiniz",
+        'onboarding.welcome.title': "Aetherius Relay'e Hoşgeldiniz",
         'onboarding.welcome.desc': 'Dijital operasyon merkeziniz. Hadi kuruluma başlayalım.',
         'onboarding.activity.title': 'Operasyon Akışı',
         'onboarding.activity.desc': 'Misafir taleplerini, teknik servis kayıtlarını ve vardiya notlarını canlı izleyin.',
@@ -2258,7 +2258,7 @@ const translations: Record<Language, Translations> = {
         'onboarding.stepOf': '{current} / {total}',
 
         // Interactive Tour
-        'tour.intro.title': "Relay'e Hoşgeldiniz",
+        'tour.intro.title': "Aetherius Relay'e Hoşgeldiniz",
         'tour.intro.desc': 'Bu sizin dijital devir teslim platformunuz. Hadi hızlı bir tura çıkalım.',
         'tour.compliance.title': 'Vardiya Uyumluluğu',
         'tour.compliance.desc': 'Zorunlu KBS ve Acente kontrollerinizi buradan takip edin. Nabız atışı aciliyeti belirtir.',
@@ -2299,7 +2299,7 @@ const translations: Record<Language, Translations> = {
         'offday.petitions': 'Şikayet ve Dilekçeler',
 
         // AI Modal
-        'ai.title': 'Relay AI Asistanı',
+        'ai.title': 'Aetherius Relay AI Asistanı',
         'ai.poweredBy': 'Gemini & Gemma tarafından desteklenmektedir',
         'ai.model': 'AI Modeli',
         'ai.mode.assistant': 'Asistan Modu',
@@ -2333,7 +2333,7 @@ const translations: Record<Language, Translations> = {
 
         // Expansion Pages
         'features.title': 'Teknik Derinlemesine Bakış',
-        'features.subtitle': 'Relay, bir otelin günlük operasyonel ihtiyacı olan her şeyi tek bir platformda toplar.',
+        'features.subtitle': 'Aetherius Relay, bir otelin günlük operasyonel ihtiyacı olan her şeyi tek bir platformda toplar.',
         'features.handovers.title': 'Dijital Vardiya Devir Teslimi',
         'features.handovers.desc': 'Kağıt kayıtların yerini alan, otomatik özetlenen ve güvenli vardiya transferleri.',
         'features.roster.title': 'Matrix Roster Sistemi',
@@ -2348,7 +2348,7 @@ const translations: Record<Language, Translations> = {
         'features.cloud.desc': 'Tüm veriler Cloudflare altyapısında, her cihazdan anlık olarak erişilebilir.',
 
         'howItWorks.title': 'Operasyonel Simya',
-        'howItWorks.subtitle': 'Relay, otel operasyonlarınızı dijitalleştirirken karmaşıklığı ortadan kaldırır.',
+        'howItWorks.subtitle': 'Aetherius Relay, otel operasyonlarınızı dijitalleştirirken karmaşıklığı ortadan kaldırır.',
         'howItWorks.step1.title': 'Hızlı Kurulum',
         'howItWorks.step1.desc': 'Otelinizin verilerini 5 dakikada platforma aktarın ve ekibinizi davet edin.',
         'howItWorks.step2.title': 'Gerçek Zamanlı Takip',
@@ -2358,24 +2358,24 @@ const translations: Record<Language, Translations> = {
         'howItWorks.step4.title': 'Mobil Erişim',
         'howItWorks.step4.desc': 'Saha personeli mobil uygulama üzerinden her yerden veri girişi yapabilir.',
         'updates.title': 'Ürün Güncellemeleri',
-        'updates.subtitle': 'Relay sürekli gelişiyor. İşte platforma eklediğimiz en yeni özellikler.',
+        'updates.subtitle': 'Aetherius Relay sürekli gelişiyor. İşte platforma eklediğimiz en yeni özellikler.',
         'updates.v1.version': 'v1.2.0',
         'updates.v1.date': 'Şub 2026',
         'updates.v1.title': 'Yapay Zeka Devrimi',
         'updates.v1.desc': 'Google Gemini entegrasyonu ile otomatik vardiya özetleri ve önceliklendirme.',
         'updates.changelog': 'Tüm Değişiklikler',
-        'blog.title': 'Relay Blog',
+        'blog.title': 'Aetherius Relay Blog',
         'blog.subtitle': 'Modern otel yönetimi için stratejiler ve içgörüler.',
         'blog.post1.title': 'Kağıt Log Defterlerinin Sonu',
         'blog.post1.excerpt': 'Modern otellerin neden fiziksel defterleri bırakıp dijital devir sistemlerine geçtiğini keşfedin.',
         'blog.post1.date': '12 Şub 2026',
-        'blog.post1.content': 'Geleneksel kağıt log defterleri artık günümüzün hızlı tempolu otel operasyonları için yeterli değil. Bilginin kaybolması, okunaksız el yazıları ve geçmişe dönük arama yapmanın zorluğu operasyonel verimliliği düşürüyor. Relay ile dijitalleşen log tutma süreci, anlık erişim, aranabilirlik ve veriye dayalı kararlar almanızı sağlar.',
+        'blog.post1.content': 'Geleneksel kağıt log defterleri artık günümüzün hızlı tempolu otel operasyonları için yeterli değil. Bilginin kaybolması, okunaksız el yazıları ve geçmişe dönük arama yapmanın zorluğu operasyonel verimliliği düşürüyor. Aetherius Relay ile dijitalleşen log tutma süreci, anlık erişim, aranabilirlik ve veriye dayalı kararlar almanızı sağlar.',
         'blog.post2.title': 'AI ile ADR Maksimizasyonu',
         'blog.post2.excerpt': 'Yapay zekanın ön büro ekiplerine oda fiyatlarını gerçek zamanlı optimize etmede nasıl yardımcı olduğunu görün.',
         'blog.post2.date': '10 Şub 2026',
-        'blog.post2.content': 'Oda fiyatlarını manuel olarak yönetmek artık geçmişte kaldı. Relay AI, otelinizin doluluk oranlarını, rakip fiyatlarını ve yerel etkinlikleri analiz ederek en optimum ADR (Average Daily Rate) için fiyat önerileri sunar. Bu makalede, yapay zekanın gelir yönetiminde nasıl devrim yarattığını ve ön büro ekiplerinin bu araçları kullanarak nasıl daha karlı olabileceğini inceliyoruz.',
+        'blog.post2.content': 'Oda fiyatlarını manuel olarak yönetmek artık geçmişte kaldı. Aetherius Relay AI, otelinizin doluluk oranlarını, rakip fiyatlarını ve yerel etkinlikleri analiz ederek en optimum ADR (Average Daily Rate) için fiyat önerileri sunar. Bu makalede, yapay zekanın gelir yönetiminde nasıl devrim yarattığını ve ön büro ekiplerinin bu araçları kullanarak nasıl daha karlı olabileceğini inceliyoruz.',
         'blog.readMore': 'Tamamını Oku',
-        'blog.author.team': 'Relay Ekibi',
+        'blog.author.team': 'Aetherius Relay Ekibi',
         'blog.author.strategy': 'Ürün Stratejisi',
         'blog.category.hospitality': 'Konaklama',
         'blog.category.ai': 'AI & Veri',
@@ -2387,9 +2387,9 @@ const translations: Record<Language, Translations> = {
         'landing.hero.cta.secondary': 'Canlı Demo',
         'landing.features.title': 'Tam Kapsamlı Otel Operasyonları',
         'landing.features.subtitle': 'Modern bir oteli verimli bir şekilde yönetmek için ihtiyacınız olan her şey.',
-        'landing.getApp.title': "Relay'i İndirin",
+        'landing.getApp.title': "Aetherius Relay'i İndirin",
         'landing.pricing.title': 'Otelini yükseltmeye hazır mısın?',
-        'landing.pricing.subtitle': 'Operasyonlarını kolaylaştırmak için Relay kullanan 500+ otele katılın.',
+        'landing.pricing.subtitle': 'Operasyonlarını kolaylaştırmak için Aetherius Relay kullanan 500+ otele katılın.',
         'landing.pricing.cta': 'Planları İncele',
         'landing.getApp.appStore': 'App Store',
         'landing.getApp.appStoreSub': 'iOS için İndir',

@@ -21,7 +21,7 @@ export function PublicNavbar() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
                     <span className="font-bold text-white">R</span>
                 </div>
-                <span className="font-bold text-xl tracking-tight text-white group-hover:text-primary transition-colors hidden sm:inline">Relay</span>
+                <span className="font-bold text-xl tracking-tight text-white group-hover:text-primary transition-colors hidden sm:inline">Aetherius Relay</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">

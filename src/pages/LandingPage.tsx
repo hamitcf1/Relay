@@ -54,7 +54,7 @@ export function LandingPage() {
     const structuredData = {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "Relay",
+        "name": "Aetherius Relay",
         "operatingSystem": "Web, iOS, Android",
         "applicationCategory": "BusinessApplication",
         "description": "Next-generation digital handover and operations system for hotels.",

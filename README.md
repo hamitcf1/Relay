@@ -1,17 +1,17 @@
-# 🏨 Relay - The Cyber-Concierge Operations Hub
+# 🏨 Aetherius Relay - The Cyber-Concierge Operations Hub
 
 [![Built with React](https://img.shields.io/badge/Frontend-React%2019-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Styled with Tailwind](https://img.shields.io/badge/Styling-Tailwind%20CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Backend: Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![Architecture: SaaS](https://img.shields.io/badge/Architecture-Multi--Tenant%20SaaS-indigo)](https://relay.hotel)
 
-**Relay** is a next-generation "Digital Handover" and hotel operations management system. Designed to replace outdated paper logbooks and fragmented messaging apps, Relay provides a centralized, real-time command center for modern hospitality teams.
+**Aetherius Relay** is a next-generation "Digital Handover" and hotel operations management system. Designed to replace outdated paper logbooks and fragmented messaging apps, Aetherius Relay provides a centralized, real-time command center for modern hospitality teams.
 
 ---
 
 ## ✨ Vision: The "Cyber-Concierge" Experience
 
-Relay isn't just a tool; it's a design-forward platform. Adhering to a **"Cyber-Concierge"** aesthetic, it features:
+Aetherius Relay isn't just a tool; it's a design-forward platform. Adhering to a **"Cyber-Concierge"** aesthetic, it features:
 - **Dark Mode Excellence:** A deep `zinc-950` interface with high-contrast glowing accents.
 - **Glassmorphism:** Elegant, translucent UI components that feel premium and modern.
 - **Fluid Animations:** Powered by `framer-motion` for a tactile, responsive user experience.
@@ -61,7 +61,7 @@ Relay isn't just a tool; it's a design-forward platform. Adhering to a **"Cyber-
 
 ## 📂 Architecture
 
-Relay is built on a **multi-tenant architecture**, ensuring data isolation and security for every hotel.
+Aetherius Relay is built on a **multi-tenant architecture**, ensuring data isolation and security for every hotel.
 
 ```text
 hotels/{hotelId}
@@ -118,4 +118,4 @@ hotels/{hotelId}
 This project is proprietary. All rights reserved.
 
 ---
-*Built for the future of hospitality by the Relay Team.*
+*Built for the future of hospitality by the Aetherius Relay Team.*

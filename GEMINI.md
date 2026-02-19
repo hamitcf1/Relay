@@ -1,9 +1,9 @@
-# GEMINI.md - Context & Instructions for Relay
+# GEMINI.md - Context & Instructions for Aetherius Relay
 
 
 ## 1. Project Overview
 
-**Project Name:** Relay
+**Project Name:** Aetherius Relay
 **Description:** A comprehensive "Digital Handover" system designed for modern hotels. It replaces traditional paper logbooks and messaging apps with a centralized platform for managing shift transfers, operational logs, maintenance tickets, compliance checks (KBS, Agency Messages), and staff rosters.
 **Design Aesthetic:** "Cyber-Concierge" (Dark Mode, Glassmorphism, Fluid Animations).
 

@@ -1,7 +1,7 @@
-# Project Relay: Hotel Handover & Operations System (Master Spec)
+# Project Aetherius Relay: Hotel Handover & Operations System (Master Spec)
 
 ## 1. Project Overview
-**App Name:** Relay
+**App Name:** Aetherius Relay
 **Platform:** Web (PWA-ready)
 **Stack:** React (Vite), TypeScript, Tailwind CSS, ShadCN UI, Framer Motion, Firebase (Auth, Firestore, Storage), Cloudflare Pages.
 **Design Aesthetic:** "Cyber-Concierge." High-end 2026 dark mode, fluid animations, glassmorphism, glowing accents for critical alerts.
