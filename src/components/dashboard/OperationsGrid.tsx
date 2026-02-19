@@ -27,56 +27,56 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             label: t('module.messaging'),
             icon: MessageCircle,
             color: 'bg-blue-500/10 text-blue-500',
-            desc: 'Chat & Updates'
+            desc: t('operations.messaging.desc')
         },
         {
             id: 'feedback',
             label: t('module.complaints'),
             icon: ShieldAlert,
             color: 'bg-red-500/10 text-red-500',
-            desc: 'Guest Issues'
+            desc: t('operations.feedback.desc')
         },
         {
             id: 'off-days',
             label: t('module.offDays'),
             icon: CalendarDays,
             color: 'bg-purple-500/10 text-purple-500',
-            desc: 'Staff Schedule'
+            desc: t('operations.offdays.desc')
         },
         {
             id: 'tours',
             label: t('module.tours'),
             icon: Map,
             color: 'bg-emerald-500/10 text-emerald-500',
-            desc: 'Book Activities'
+            desc: t('operations.tours.desc')
         },
         {
             id: 'rooms',
             label: t('dashboard.rooms'),
             icon: BedDouble,
             color: 'bg-indigo-500/10 text-indigo-500',
-            desc: 'Management'
+            desc: t('operations.rooms.desc')
         },
         {
             id: 'sales',
             label: t('module.sales'),
             icon: CreditCard,
             color: 'bg-amber-500/10 text-amber-500',
-            desc: 'Transactions'
+            desc: t('operations.sales.desc')
         },
         {
             id: 'pricing',
             label: t('module.pricing_label'),
             icon: DollarSign,
             color: 'bg-green-500/10 text-green-500',
-            desc: 'Rate Cards'
+            desc: t('operations.pricing.desc')
         },
         {
             id: 'team',
             label: t('module.team_label'),
             icon: Users,
             color: 'bg-pink-500/10 text-pink-500',
-            desc: 'Leaderboard'
+            desc: t('operations.team.desc')
         },
     ]
 
@@ -86,7 +86,7 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             label: t('module.activity'),
             icon: ScrollText,
             color: 'bg-orange-500/10 text-orange-500',
-            desc: 'System Logs'
+            desc: t('operations.activity.desc')
         })
     }
 

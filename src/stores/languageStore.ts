@@ -725,6 +725,26 @@ type Translations = {
     'blog.category.hospitality': string
     'blog.category.ai': string
 
+    // Mobile Overview Grid
+    'overview.menu.desc': string
+    'overview.notes.desc': string
+    'overview.compliance.desc': string
+    'overview.hotel.desc': string
+    'overview.calendar.desc': string
+    'overview.currency.desc': string
+    'overview.roster.desc': string
+
+    // Mobile Operations Grid
+    'operations.messaging.desc': string
+    'operations.feedback.desc': string
+    'operations.offdays.desc': string
+    'operations.tours.desc': string
+    'operations.rooms.desc': string
+    'operations.sales.desc': string
+    'operations.pricing.desc': string
+    'operations.team.desc': string
+    'operations.activity.desc': string
+
     // Hotel Info
     'hotel.secure.title': string
     'hotel.secure.encrypted': string
@@ -911,6 +931,26 @@ const translations: Record<Language, Translations> = {
         'blog.author.strategy': 'Product Strategy',
         'blog.category.hospitality': 'Hospitality',
         'blog.category.ai': 'AI & Data',
+
+        // Mobile Overview Grid
+        'overview.menu.desc': 'Staff Meal',
+        'overview.notes.desc': 'Log & Handover',
+        'overview.compliance.desc': 'KBS & Agency',
+        'overview.hotel.desc': 'Codes & Wifi',
+        'overview.calendar.desc': 'Events & Shifts',
+        'overview.currency.desc': 'Exchange Rates',
+        'overview.roster.desc': 'Weekly Schedule',
+
+        // Mobile Operations Grid
+        'operations.messaging.desc': 'Chat & Updates',
+        'operations.feedback.desc': 'Guest Issues',
+        'operations.offdays.desc': 'Staff Schedule',
+        'operations.tours.desc': 'Book Activities',
+        'operations.rooms.desc': 'Management',
+        'operations.sales.desc': 'Transactions',
+        'operations.pricing.desc': 'Rate Cards',
+        'operations.team.desc': 'Leaderboard',
+        'operations.activity.desc': 'System Logs',
 
         // Pricing Page
         'pricing.title': 'Plans & Pricing',
@@ -2379,6 +2419,26 @@ const translations: Record<Language, Translations> = {
         'blog.author.strategy': 'Ürün Stratejisi',
         'blog.category.hospitality': 'Konaklama',
         'blog.category.ai': 'AI & Veri',
+
+        // Mobile Overview Grid
+        'overview.menu.desc': 'Personel Yemeği',
+        'overview.notes.desc': 'Kayıt & Devir',
+        'overview.compliance.desc': 'KBS & Acente',
+        'overview.hotel.desc': 'Kodlar & Wifi',
+        'overview.calendar.desc': 'Olaylar & Vardiya',
+        'overview.currency.desc': 'Döviz Kurları',
+        'overview.roster.desc': 'Haftalık Program',
+
+        // Mobile Operations Grid
+        'operations.messaging.desc': 'Sohbet & Güncellemeler',
+        'operations.feedback.desc': 'Misafir Sorunları',
+        'operations.offdays.desc': 'Personel Programı',
+        'operations.tours.desc': 'Aktivite Rezervasyonu',
+        'operations.rooms.desc': 'Yönetim',
+        'operations.sales.desc': 'İşlemler',
+        'operations.pricing.desc': 'Fiyat Kartları',
+        'operations.team.desc': 'Liderlik Tablosu',
+        'operations.activity.desc': 'Sistem Kayıtları',
         'landing.hero.trusted': "500'den Fazla Otel Tarafından Kullanılıyor",
         'landing.hero.title.prefix': 'Yeni Nesil',
         'landing.hero.title.suffix': 'Konaklama',

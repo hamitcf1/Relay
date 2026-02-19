@@ -25,42 +25,42 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
             label: t('module.shiftNotes'),
             icon: ClipboardList,
             color: 'bg-blue-500/10 text-blue-500',
-            desc: 'Log & Handover'
+            desc: t('overview.notes.desc')
         },
         {
             id: 'compliance',
             label: t('module.compliance'),
             icon: CheckSquare,
             color: 'bg-red-500/10 text-red-500',
-            desc: 'KBS & Agency'
+            desc: t('overview.compliance.desc')
         },
         {
             id: 'hotel-info',
             label: t('module.hotelInfo'),
             icon: Hotel,
             color: 'bg-purple-500/10 text-purple-500',
-            desc: 'Codes & Wifi'
+            desc: t('overview.hotel.desc')
         },
         {
             id: 'calendar',
             label: t('module.calendar'),
             icon: Calendar,
             color: 'bg-emerald-500/10 text-emerald-500',
-            desc: 'Events & Shifts'
+            desc: t('overview.calendar.desc')
         },
         {
             id: 'menu',
-            label: 'Daily Menu', // TODO: Add translation key if missing, or use t('menu.title')
+            label: t('menu.title'),
             icon: Utensils,
             color: 'bg-orange-500/10 text-orange-500',
-            desc: 'Staff Meal'
+            desc: t('overview.menu.desc')
         },
         {
             id: 'currency',
             label: t('currency.title'),
             icon: DollarSign,
             color: 'bg-green-500/10 text-green-500',
-            desc: 'Exchange Rates'
+            desc: t('overview.currency.desc')
         },
     ]
 
@@ -71,7 +71,7 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
             label: t('module.roster'),
             icon: Users,
             color: 'bg-pink-500/10 text-pink-500',
-            desc: 'Weekly Schedule'
+            desc: t('overview.roster.desc')
         })
     }
 
