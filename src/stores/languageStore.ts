@@ -435,6 +435,7 @@ type Translations = {
 
     // Messaging - Expanded
     'messaging.everyone': string
+    'messaging.gmOnly': string
     'messaging.placeholder': string
     'messaging.noMessages': string
     'messaging.clearChatConfirm': string
@@ -1420,6 +1421,7 @@ const translations: Record<Language, Translations> = {
 
         // Messaging
         'messaging.everyone': 'Message everyone',
+        'messaging.gmOnly': 'Only General Managers can send announcements.',
         'messaging.placeholder': 'Message ...',
         'messaging.noMessages': 'No messages yet. Start the conversation!',
         'messaging.clearChatConfirm': 'Are you sure you want to clear this conversation? This action cannot be undone.',
@@ -2153,6 +2155,7 @@ const translations: Record<Language, Translations> = {
         'messages.announcements': 'Genel Duyurular',
         'messages.broadcast': 'Tüm personele yayınla',
         'messaging.everyone': 'Herkese mesaj yaz',
+        'messaging.gmOnly': 'Duyuruları sadece Genel Müdürler (GM) gönderebilir.',
         'messaging.placeholder': 'Mesaj ...',
         'messaging.noMessages': 'Henüz mesaj yok. Sohbeti başlatın!',
         'messaging.clearChatConfirm': 'Bu sohbeti temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz.',

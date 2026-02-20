@@ -131,6 +131,9 @@ export function MessagingPanel() {
         e.preventDefault()
         if (!newMessage.trim() || !hotel?.id || !user) return
 
+        const isAnnouncement = activeConversation === 'all'
+        if (isAnnouncement && user.role !== 'gm') return
+
         const content = newMessage.trim()
         setNewMessage('') // Optimistic clear
 
@@ -383,16 +386,20 @@ export function MessagingPanel() {
                     )}
                 </div>
 
-                {/* Input Area */}
                 <div className="p-4 bg-muted/20 border-t border-border">
                     <form onSubmit={handleSend} className="flex gap-3">
                         <Textarea
                             ref={messageInputRef}
-                            placeholder={activeConversation === 'all' ? t('messaging.everyone') : t('messaging.placeholder')}
+                            placeholder={
+                                activeConversation === 'all'
+                                    ? (user?.role === 'gm' ? t('messaging.everyone') : t('messaging.gmOnly'))
+                                    : t('messaging.placeholder')
+                            }
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onContextMenu={formatting.handleContextMenu}
-                            className="bg-background border-border focus-visible:ring-primary/50 min-h-[44px] max-h-[120px] py-3 resize-none"
+                            disabled={activeConversation === 'all' && user?.role !== 'gm'}
+                            className="bg-background border-border focus-visible:ring-primary/50 min-h-[44px] max-h-[120px] py-3 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault()
@@ -408,8 +415,8 @@ export function MessagingPanel() {
                         />
                         <Button
                             type="submit"
-                            disabled={!newMessage.trim()}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
+                            disabled={!newMessage.trim() || (activeConversation === 'all' && user?.role !== 'gm')}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Send className="w-4 h-4" />
                         </Button>
