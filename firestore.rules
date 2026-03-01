@@ -31,7 +31,8 @@ service cloud.firestore {
       // GMs can read any user in their hotel
       allow read: if isAuthenticated() && (
         request.auth.uid == userId ||
-        isGM()
+        isGM() ||
+        (resource != null && resource.data.hotel_id == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotel_id)
       );
       
       // Users can only be created during registration (by themselves)
@@ -123,7 +124,7 @@ service cloud.firestore {
       
       // ACTIVITY_LOGS - Staff activity audit trail
       match /activity_logs/{logId} {
-        allow read: if isGM() && belongsToHotel(hotelId);
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create, update: if isAuthenticated() && belongsToHotel(hotelId);
         allow delete: if false;
       }
