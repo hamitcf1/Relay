@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { useNotesStore, categoryInfo, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
+import { useNotesStore, categoryInfo, priorityInfo, type NoteCategory, type NoteStatus, type NotePriority } from '@/stores/notesStore'
 import { type ShiftNote } from '@/types'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -52,6 +52,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [newTime, setNewTime] = useState('')
     const [newGuest, setNewGuest] = useState('')
     const [newAssignedStaff, setNewAssignedStaff] = useState<string>('')
+    const [newCurrency, setNewCurrency] = useState<'TRY' | 'USD' | 'EUR' | 'GBP'>('TRY')
+    const [newPriority, setNewPriority] = useState<NotePriority>('low')
 
     const newContentRef = useRef<HTMLTextAreaElement>(null)
     const newFormatting = useFormatting(newContent, setNewContent, newContentRef)
@@ -64,6 +66,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [editTime, setEditTime] = useState('')
     const [editGuest, setEditGuest] = useState('')
     const [editAssignedStaff, setEditAssignedStaff] = useState('none')
+    const [editPriority, setEditPriority] = useState<NotePriority>('low')
 
     const editContentRef = useRef<HTMLTextAreaElement>(null)
     const editFormatting = useFormatting(editContent, setEditContent, editContentRef)
@@ -82,7 +85,19 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         })
     }, [notes, filter, statusFilter])
 
-    const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'upsell', 'restaurant', 'minibar'].includes(cat)
+    const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'payment_needed', 'restaurant', 'minibar'].includes(cat)
+
+    const CURRENCY_SYMBOLS: Record<string, string> = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }
+
+    // Map category keys to translation keys
+    const getCategoryLabel = (cat: string): string => {
+        const keyMap: Record<string, string> = {
+            guest_info: 'category.guestInfo',
+            early_checkout: 'category.earlyCheckout',
+            payment_needed: 'category.paymentNeeded',
+        }
+        return t((keyMap[cat] || `category.${cat}`) as any)
+    }
 
     const [selectedFixtures, setSelectedFixtures] = useState<Record<string, number>>({})
     const [selectedMinibar, setSelectedMinibar] = useState<Record<string, number>>({})
@@ -146,11 +161,13 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         try {
             await addNote(hotelId, {
                 category: newCategory,
+                priority: newPriority,
                 content: newContent.trim(),
                 room_number: newRoom.trim() || null,
                 is_relevant: true,
                 amount_due: isFinancialCategory(newCategory) && newAmount ? parseFloat(newAmount) : null,
                 is_paid: false,
+                currency: isFinancialCategory(newCategory) ? newCurrency : undefined,
                 created_by: user.uid,
                 created_by_name: user.name || 'Unknown',
                 shift_id: null,
@@ -168,8 +185,10 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
             setNewTime('')
             setNewGuest('')
             setNewAssignedStaff('')
-            setSelectedFixtures({}) // Reset fixtures
-            setSelectedMinibar({}) // Reset minibar
+            setNewCurrency('TRY')
+            setNewPriority('low')
+            setSelectedFixtures({})
+            setSelectedMinibar({})
             setIsAdding(false)
         } finally {
             setLoading(false)
@@ -206,6 +225,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         setEditTime(note.time || '')
         setEditGuest(note.guest_name || '')
         setEditAssignedStaff(note.assigned_staff_uid || 'none')
+        setEditPriority(note.priority || 'low')
 
         // Parse fixtures if damage category
         if (note.category === 'damage') {
@@ -251,6 +271,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
             await updateNote(hotelId, editingId, {
                 content: editContent,
                 category: editCategory,
+                priority: editPriority,
                 room_number: editRoom.trim() || null,
                 amount_due: isFinancialCategory(editCategory) && editAmount ? parseFloat(editAmount) : null,
                 time: editTime || null,
@@ -342,10 +363,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         { key: 'feedback' as const, ...categoryInfo.feedback, label: t('category.feedback') },
                         { key: 'damage' as const, ...categoryInfo.damage, label: t('category.damage') },
                         { key: 'upgrade' as const, ...categoryInfo.upgrade, label: t('category.upgrade') },
-                        { key: 'upsell' as const, ...categoryInfo.upsell, label: t('category.upsell') },
+                        { key: 'payment_needed' as const, ...categoryInfo.payment_needed, label: t('category.paymentNeeded') },
                         { key: 'restaurant' as const, ...categoryInfo.restaurant, label: t('category.restaurant') },
+                        { key: 'minibar' as const, ...categoryInfo.minibar, label: t('category.minibar') },
                         { key: 'guest_info' as const, ...categoryInfo.guest_info, label: t('category.guestInfo') },
                         { key: 'early_checkout' as const, ...categoryInfo.early_checkout, label: t('category.earlyCheckout') },
+                        { key: 'other' as const, ...categoryInfo.other, label: t('category.other') },
                     ].map((tab) => (
                         <button
                             key={tab.key}
@@ -388,9 +411,36 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         )}
                                     >
                                         {categoryInfo[cat].icon}
-                                        {t(`category.${cat === 'guest_info' ? 'guestInfo' : cat === 'early_checkout' ? 'earlyCheckout' : cat}` as any)}
+                                        {getCategoryLabel(cat)}
                                     </button>
                                 ))}
+                            </div>
+
+                            {/* Priority Selection */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground font-medium">{t('priority.label')}:</span>
+                                {(Object.keys(priorityInfo) as NotePriority[]).map((p) => {
+                                    const info = priorityInfo[p]
+                                    return (
+                                        <button
+                                            key={p}
+                                            type="button"
+                                            onClick={() => setNewPriority(p)}
+                                            className={cn(
+                                                'px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-all border',
+                                                newPriority === p
+                                                    ? `${info.color} ${info.textClass} ${info.glowClass} border-current bg-current/10`
+                                                    : 'text-muted-foreground border-transparent hover:bg-muted'
+                                            )}
+                                            title={t(`priority.${p}` as any)}
+                                        >
+                                            <span className={cn(info.textClass, newPriority === p ? info.color : '')}>
+                                                {info.symbol}
+                                            </span>
+                                            <span className="text-[10px]">{t(`priority.${p}` as any)}</span>
+                                        </button>
+                                    )
+                                })}
                             </div>
 
                             <div className="flex gap-2">
@@ -407,13 +457,49 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                     className="w-24 text-sm bg-muted/50"
                                 />
                                 {isFinancialCategory(newCategory) && (
-                                    <Input
-                                        placeholder={t('common.amount') + " ₺"}
-                                        type="number"
-                                        value={newAmount}
-                                        onChange={(e) => setNewAmount(e.target.value)}
-                                        className="w-24 text-sm bg-muted/50"
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    const menu = e.currentTarget.nextElementSibling as HTMLElement
+                                                    if (menu) menu.classList.toggle('hidden')
+                                                }}
+                                                className="h-9 px-3 flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 text-sm text-foreground hover:bg-muted transition-colors min-w-[80px]"
+                                            >
+                                                <span className="font-medium">{CURRENCY_SYMBOLS[newCurrency]}</span>
+                                                <span>{newCurrency}</span>
+                                                <svg className="w-3 h-3 ml-1 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div className="hidden absolute top-full left-0 mt-1 z-50 min-w-[100px] rounded-lg border border-border bg-card shadow-xl py-1">
+                                                {(['TRY', 'USD', 'EUR', 'GBP'] as const).map(cur => (
+                                                    <button
+                                                        key={cur}
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            setNewCurrency(cur)
+                                                            const menu = e.currentTarget.parentElement as HTMLElement
+                                                            if (menu) menu.classList.add('hidden')
+                                                        }}
+                                                        className={cn(
+                                                            'w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 hover:bg-muted transition-colors',
+                                                            newCurrency === cur ? 'text-primary font-semibold bg-primary/5' : 'text-foreground'
+                                                        )}
+                                                    >
+                                                        <span className="font-medium w-4">{CURRENCY_SYMBOLS[cur]}</span>
+                                                        <span>{cur}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <Input
+                                            placeholder={t('common.amount')}
+                                            type="number"
+                                            value={newAmount}
+                                            onChange={(e) => setNewAmount(e.target.value)}
+                                            className="w-28 text-sm bg-muted/50"
+                                        />
+                                    </div>
                                 )}
                             </div>
 
@@ -630,36 +716,62 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                     <div className="flex-1 min-w-0">
                                         {/* Header */}
                                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                                            <span className={cn(
-                                                'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded',
-                                                categoryInfo[note.category].color,
-                                                'text-white'
-                                            )}>
-                                                {categoryInfo[note.category].icon} {categoryInfo[note.category].label}
-                                            </span>
+                                            {(() => {
+                                                const catKey = note.category === 'upsell' as any ? 'payment_needed' : note.category
+                                                const info = categoryInfo[catKey] || categoryInfo.other
+                                                return (
+                                                    <span className={cn(
+                                                        'text-xs font-bold uppercase px-2 py-0.5 rounded',
+                                                        info.color,
+                                                        'text-white'
+                                                    )}>
+                                                        {info.icon} {getCategoryLabel(catKey)}
+                                                    </span>
+                                                )
+                                            })()}
+
+                                            {/* Priority Indicator */}
+                                            {(() => {
+                                                const p = note.priority || 'low'
+                                                if (p === 'low') return null
+                                                const pInfo = priorityInfo[p]
+                                                return (
+                                                    <span
+                                                        className={cn(
+                                                            pInfo.color,
+                                                            pInfo.textClass,
+                                                            pInfo.glowClass,
+                                                            'leading-none select-none'
+                                                        )}
+                                                        title={t(`priority.${p}` as any)}
+                                                    >
+                                                        {pInfo.symbol}
+                                                    </span>
+                                                )
+                                            })()}
 
                                             {note.room_number && (
-                                                <Badge variant="outline" className="text-[10px] h-4 bg-muted text-muted-foreground border-border">#{note.room_number}</Badge>
+                                                <Badge variant="outline" className="text-xs h-5 bg-muted text-muted-foreground border-border">#{note.room_number}</Badge>
                                             )}
                                             {note.guest_name && (
-                                                <Badge variant="outline" className="text-[10px] h-4 bg-muted text-muted-foreground border-border flex items-center gap-1">
-                                                    <User className="w-2.5 h-2.5" />
+                                                <Badge variant="outline" className="text-xs h-5 bg-muted text-muted-foreground border-border flex items-center gap-1">
+                                                    <User className="w-3 h-3" />
                                                     {note.guest_name}
                                                 </Badge>
                                             )}
 
                                             {isFinancialCategory(note.category) && note.amount_due && (
                                                 <span className={cn(
-                                                    'text-[10px] font-bold',
+                                                    'text-sm font-bold',
                                                     note.is_paid ? 'text-emerald-400' : 'text-rose-400'
                                                 )}>
-                                                    ₺{note.amount_due.toLocaleString()}
+                                                    {CURRENCY_SYMBOLS[note.currency || 'TRY']}{note.amount_due.toLocaleString()}
                                                     {note.is_paid && ' ✓'}
                                                 </span>
                                             )}
 
                                             <Badge variant="outline" className={cn(
-                                                "text-[9px] h-4 px-1 border-none",
+                                                "text-xs h-5 px-1.5 border-none font-semibold",
                                                 note.status === 'active' ? "text-emerald-500 bg-emerald-500/10" :
                                                     note.status === 'resolved' ? "text-indigo-500 bg-indigo-500/10" :
                                                         "text-zinc-500 bg-zinc-500/10"
@@ -683,10 +795,38 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                                     : 'bg-muted text-muted-foreground hover:bg-accent'
                                                             )}
                                                         >
-                                                            {categoryInfo[cat].icon} {categoryInfo[cat].label}
+                                                            {categoryInfo[cat].icon} {getCategoryLabel(cat)}
                                                         </button>
                                                     ))}
                                                 </div>
+
+                                                {/* Priority Selection (Edit) */}
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-muted-foreground font-medium">{t('priority.label')}:</span>
+                                                    {(Object.keys(priorityInfo) as NotePriority[]).map((p) => {
+                                                        const pInfo = priorityInfo[p]
+                                                        return (
+                                                            <button
+                                                                key={p}
+                                                                type="button"
+                                                                onClick={() => setEditPriority(p)}
+                                                                className={cn(
+                                                                    'px-2 py-0.5 rounded-lg flex items-center gap-1 transition-all border',
+                                                                    editPriority === p
+                                                                        ? `${pInfo.color} ${pInfo.textClass} ${pInfo.glowClass} border-current bg-current/10`
+                                                                        : 'text-muted-foreground border-transparent hover:bg-muted'
+                                                                )}
+                                                                title={t(`priority.${p}` as any)}
+                                                            >
+                                                                <span className={cn(pInfo.textClass, editPriority === p ? pInfo.color : '')}>
+                                                                    {pInfo.symbol}
+                                                                </span>
+                                                                <span className="text-[10px]">{t(`priority.${p}` as any)}</span>
+                                                            </button>
+                                                        )
+                                                    })}
+                                                </div>
+
                                                 <div className="flex gap-2">
                                                     <Textarea
                                                         ref={editContentRef}
@@ -867,11 +1007,11 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         )}
 
                                         {/* Footer */}
-                                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                             {/* Author - Hide for non-GMs if feedback */}
                                             {(user?.role === 'gm' || note.category !== 'feedback') && (
                                                 <span className="flex items-center gap-1">
-                                                    <User className="w-2.5 h-2.5" />
+                                                    <User className="w-3.5 h-3.5" />
                                                     {note.is_anonymous ? t('notes.anonymous') : note.created_by_name}
                                                 </span>
                                             )}
@@ -879,12 +1019,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             {/* Time - Hide for non-GMs if feedback */}
                                             {(user?.role === 'gm' || note.category !== 'feedback') && (
                                                 <span className="flex items-center gap-1">
-                                                    <Clock className="w-2.5 h-2.5" />
+                                                    <Clock className="w-3.5 h-3.5" />
                                                     {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
                                                     <span className="opacity-50 ml-1">({formatDisplayDateTime(note.created_at)})</span>
                                                     {note.updated_at && note.updated_at.getTime() !== note.created_at.getTime() && (
                                                         <span className="text-muted-foreground ml-1" title={formatDisplayDateTime(note.updated_at)}>
-                                                            (edited)
+                                                            ({t('common.edited') || 'edited'})
                                                         </span>
                                                     )}
                                                 </span>
@@ -893,15 +1033,15 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                         {isFinancialCategory(note.category) && !note.is_paid && note.amount_due && (
                                             <Button
                                                 size="icon"
                                                 variant="ghost"
                                                 onClick={() => handleMarkPaid(note.id)}
-                                                className="h-6 w-6 text-emerald-500 hover:bg-emerald-500/10"
+                                                className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10"
                                             >
-                                                <DollarSign className="w-3.5 h-3.5" />
+                                                <DollarSign className="w-4 h-4" />
                                             </Button>
                                         )}
 
@@ -909,7 +1049,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             value={note.status}
                                             onValueChange={(v) => handleStatusChange(note.id, v as NoteStatus)}
                                         >
-                                            <SelectTrigger className="h-6 w-24 bg-background border-border text-[10px] px-2">
+                                            <SelectTrigger className="h-8 w-28 bg-background border-border text-xs px-2">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -925,18 +1065,18 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                     size="icon"
                                                     variant="ghost"
                                                     onClick={() => handleConvertToLog(note.id)}
-                                                    className="h-6 w-6 text-indigo-400 hover:bg-indigo-500/10"
+                                                    className="h-8 w-8 text-indigo-400 hover:bg-indigo-500/10"
                                                     title="Convert to Log"
                                                 >
-                                                    <Wand2 className="w-3.5 h-3.5" />
+                                                    <Wand2 className="w-4 h-4" />
                                                 </Button>
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"
                                                     onClick={() => handleDelete(note.id)}
-                                                    className="h-6 w-6 text-rose-500 hover:bg-rose-500/10"
+                                                    className="h-8 w-8 text-rose-500 hover:bg-rose-500/10"
                                                 >
-                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                    <Trash2 className="w-4 h-4" />
                                                 </Button>
                                             </>
                                         )}
@@ -945,9 +1085,9 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             size="icon"
                                             variant="ghost"
                                             onClick={() => startEditing(note)}
-                                            className="h-6 w-6 text-indigo-400 hover:bg-indigo-500/10"
+                                            className="h-8 w-8 text-indigo-400 hover:bg-indigo-500/10"
                                         >
-                                            <Pencil className="w-3.5 h-3.5" />
+                                            <Pencil className="w-4 h-4" />
                                         </Button>
                                     </div>
                                 </div>

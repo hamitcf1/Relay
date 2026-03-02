@@ -6,7 +6,6 @@ import {
     SetupHotelPage,
     DashboardPage,
     LiveDemoPage,
-    ShiftStartPage,
     PricingPage,
     HowItWorksPage,
     BlogPage,
@@ -81,14 +80,6 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <SetupHotelPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/shift-start"
-                    element={
-                        <ProtectedRoute>
-                            <ShiftStartPage />
                         </ProtectedRoute>
                     }
                 />

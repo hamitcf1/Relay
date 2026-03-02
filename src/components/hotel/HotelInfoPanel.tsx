@@ -284,134 +284,8 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                     </motion.div>
                 ) : (
                     <div className="space-y-4">
-                        {/* IBAN Display - Unchanged */}
-                        {isGM && (
-                            <div className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <KeyRound className="w-4 h-4 text-primary" />
-                                    <span className="text-xs text-muted-foreground">Hotel Code:</span>
-                                    <div className="flex items-center gap-2">
-                                        {hotel?.code ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="bg-muted/50 px-3 py-1.5 rounded border border-primary/30 flex items-center gap-2">
-                                                    <span className="font-mono text-xl font-bold text-primary tracking-[0.2em]">{hotel.code}</span>
-                                                </div>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(hotel.code || '')
-                                                        const btn = document.activeElement as HTMLElement
-                                                        if (btn) {
-                                                            const originalHTML = btn.innerHTML
-                                                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 text-emerald-500"><path d="M20 6 9 17l-5-5"/></svg>'
-                                                            setTimeout(() => { btn.innerHTML = originalHTML }, 2000)
-                                                        }
-                                                    }}
-                                                    title="Copy Code"
-                                                >
-                                                    <div className="relative">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
-                                                    </div>
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={async (e) => {
-                                                    e.preventDefault()
-                                                    if (!hotel?.id) return
-                                                    setSaving(true)
-                                                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-                                                    let result = ''
-                                                    for (let i = 0; i < 6; i++) {
-                                                        result += chars.charAt(Math.floor(Math.random() * chars.length))
-                                                    }
-                                                    try {
-                                                        const { doc, updateDoc } = await import('firebase/firestore')
-                                                        const { db } = await import('@/lib/firebase')
-                                                        await updateDoc(doc(db, 'hotels', hotel.id), { code: result })
-                                                    } catch (e) {
-                                                        console.error("Code generation failed:", e)
-                                                        alert("Failed to generate code. Please try again.")
-                                                    } finally {
-                                                        setSaving(false)
-                                                    }
-                                                }}
-                                                className="h-7 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
-                                                disabled={saving}
-                                            >
-                                                {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <KeyRound className="w-3 h-3 mr-1" />}
-                                                Generate Hotel Code
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {info.iban && (
-                            <div className="p-3 bg-muted/50 rounded-lg">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <CreditCard className="w-4 h-4 text-primary" />
-                                    <span className="text-xs text-muted-foreground">{t('hotel.bankAccount')}</span>
-                                </div>
-                                <p className="font-mono text-sm text-foreground">{info.iban}</p>
-                                {info.bank_name && (
-                                    <p className="text-xs text-muted-foreground mt-1">{info.bank_name}</p>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Prices Grid */}
-                        <div className="grid grid-cols-2 gap-2">
-                            {priceItems.map((item) => {
-                                const value = info[item.key as keyof HotelInfoData]
-                                if (!value || value === 0) return null
-                                const Icon = item.icon
-                                return (
-                                    <div key={item.key} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
-                                        <Icon className="w-4 h-4 text-muted-foreground" />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-muted-foreground truncate">{item.label}</p>
-                                            <p className="text-sm font-bold text-foreground">₺{(value as number).toLocaleString()}</p>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-
-                        {/* Notes with Bullet Point Support */}
-                        {info.notes && (
-                            <div className="text-sm text-muted-foreground p-3 bg-muted/30 rounded space-y-1">
-                                {info.notes.split('\n').map((line, i) => {
-                                    const trimmed = line.trim()
-                                    // Check for standard bullet markers
-                                    const isBullet = trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')
-
-                                    if (isBullet) {
-                                        return (
-                                            <div key={i} className="flex gap-2 pl-1">
-                                                <span className="text-primary font-bold">•</span>
-                                                <span className="flex-1">{trimmed.substring(2)}</span>
-                                            </div>
-                                        )
-                                    }
-                                    return <div key={i} className="min-h-[20px]">{line}</div>
-                                })}
-                            </div>
-                        )}
-
-                        {!info.iban && !info.notes && priceItems.every((item) => !info[item.key as keyof HotelInfoData]) && (
-                            <p className="text-muted-foreground text-sm text-center py-4">
-                                {t('hotel.noInfo')}{canEdit && ` - ${t('hotel.clickEdit')}`}
-                            </p>
-                        )}
-
                         {/* Secret Info Section */}
-                        <div className="mt-6 pt-4 border-t border-border">
+                        <div className="mb-6 pb-4 border-b border-border">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2">
                                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
@@ -592,6 +466,134 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 </div>
                             )}
                         </div>
+
+                        {/* IBAN Display - Unchanged */}
+                        {isGM && (
+                            <div className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <KeyRound className="w-4 h-4 text-primary" />
+                                    <span className="text-xs text-muted-foreground">Hotel Code:</span>
+                                    <div className="flex items-center gap-2">
+                                        {hotel?.code ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="bg-muted/50 px-3 py-1.5 rounded border border-primary/30 flex items-center gap-2">
+                                                    <span className="font-mono text-xl font-bold text-primary tracking-[0.2em]">{hotel.code}</span>
+                                                </div>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(hotel.code || '')
+                                                        const btn = document.activeElement as HTMLElement
+                                                        if (btn) {
+                                                            const originalHTML = btn.innerHTML
+                                                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 text-emerald-500"><path d="M20 6 9 17l-5-5"/></svg>'
+                                                            setTimeout(() => { btn.innerHTML = originalHTML }, 2000)
+                                                        }
+                                                    }}
+                                                    title="Copy Code"
+                                                >
+                                                    <div className="relative">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                                                    </div>
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={async (e) => {
+                                                    e.preventDefault()
+                                                    if (!hotel?.id) return
+                                                    setSaving(true)
+                                                    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+                                                    let result = ''
+                                                    for (let i = 0; i < 6; i++) {
+                                                        result += chars.charAt(Math.floor(Math.random() * chars.length))
+                                                    }
+                                                    try {
+                                                        const { doc, updateDoc } = await import('firebase/firestore')
+                                                        const { db } = await import('@/lib/firebase')
+                                                        await updateDoc(doc(db, 'hotels', hotel.id), { code: result })
+                                                    } catch (e) {
+                                                        console.error("Code generation failed:", e)
+                                                        alert("Failed to generate code. Please try again.")
+                                                    } finally {
+                                                        setSaving(false)
+                                                    }
+                                                }}
+                                                className="h-7 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                                                disabled={saving}
+                                            >
+                                                {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <KeyRound className="w-3 h-3 mr-1" />}
+                                                Generate Hotel Code
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {info.iban && (
+                            <div className="p-3 bg-muted/50 rounded-lg">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <CreditCard className="w-4 h-4 text-primary" />
+                                    <span className="text-xs text-muted-foreground">{t('hotel.bankAccount')}</span>
+                                </div>
+                                <p className="font-mono text-sm text-foreground">{info.iban}</p>
+                                {info.bank_name && (
+                                    <p className="text-xs text-muted-foreground mt-1">{info.bank_name}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Prices Grid */}
+                        <div className="grid grid-cols-2 gap-2">
+                            {priceItems.map((item) => {
+                                const value = info[item.key as keyof HotelInfoData]
+                                if (!value || value === 0) return null
+                                const Icon = item.icon
+                                return (
+                                    <div key={item.key} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
+                                        <Icon className="w-4 h-4 text-muted-foreground" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs text-muted-foreground truncate">{item.label}</p>
+                                            <p className="text-sm font-bold text-foreground">₺{(value as number).toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+
+                        {/* Notes with Bullet Point Support */}
+                        {info.notes && (
+                            <div className="text-sm text-muted-foreground p-3 bg-muted/30 rounded space-y-1">
+                                {info.notes.split('\n').map((line, i) => {
+                                    const trimmed = line.trim()
+                                    // Check for standard bullet markers
+                                    const isBullet = trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')
+
+                                    if (isBullet) {
+                                        return (
+                                            <div key={i} className="flex gap-2 pl-1">
+                                                <span className="text-primary font-bold">•</span>
+                                                <span className="flex-1">{trimmed.substring(2)}</span>
+                                            </div>
+                                        )
+                                    }
+                                    return <div key={i} className="min-h-[20px]">{line}</div>
+                                })}
+                            </div>
+                        )}
+
+                        {!info.iban && !info.notes && priceItems.every((item) => !info[item.key as keyof HotelInfoData]) && (
+                            <p className="text-muted-foreground text-sm text-center py-4">
+                                {t('hotel.noInfo')}{canEdit && ` - ${t('hotel.clickEdit')}`}
+                            </p>
+                        )}
+
+
                     </div>
                 )}
             </div>

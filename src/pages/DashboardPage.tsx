@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -8,11 +8,7 @@ import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
-// import { RoomManagementModal } from '@/components/rooms/RoomManagementModal' // Removed
-import { RoomManagementPanel } from '@/components/rooms/RoomManagementPanel' // Added
-import { CurrentShiftDisplay } from '@/components/shift/CurrentShiftDisplay'
-import { HandoverWizard } from '@/components/handover/HandoverWizard'
-import { ComplianceChecklist } from '@/components/compliance/ComplianceChecklist'
+import { RoomManagementPanel } from '@/components/rooms/RoomManagementPanel'
 import { ShiftNotes } from '@/components/notes/ShiftNotes'
 import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
@@ -32,7 +28,6 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useSalesStore } from '@/stores/salesStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useStaffMealStore } from '@/stores/staffMealStore'
-import { useChatStore } from '@/stores/chatStore'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessagingPanel } from '@/components/messaging/MessagingPanel'
@@ -44,7 +39,6 @@ import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
 import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText, BedDouble, Users } from 'lucide-react'
-import { ComplianceAlert } from '@/components/compliance/ComplianceAlert'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
 import { MobileNav } from '@/components/layout/MobileNav'
@@ -53,25 +47,19 @@ import { OverviewGrid } from '@/components/dashboard/OverviewGrid'
 import { ChevronLeft } from 'lucide-react'
 
 export function DashboardPage() {
-    const navigate = useNavigate()
     const location = useLocation()
     const { user, initialize: initAuth } = useAuthStore()
     const { hotel, subscribeToHotel } = useHotelStore()
-    const { currentShift, subscribeToCurrentShift, endShift, updateCompliance } = useShiftStore()
+    const { subscribeToCurrentShift } = useShiftStore()
     const { subscribeToNotes } = useNotesStore()
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
-    const { setOpen: setAIChatOpen, setTask: setAIChatTask } = useChatStore()
     const { t } = useLanguageStore()
 
-
-
-    const [isHandoverOpen, setIsHandoverOpen] = useState(false)
-    // const [isRoomManagerOpen, setIsRoomManagerOpen] = useState(false) // Removed
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
     const [operationTab, setOperationTab] = useState('messaging')
-    const [overviewTab, setOverviewTab] = useState('grid') // New state for mobile overview navigation
+    const [overviewTab, setOverviewTab] = useState('grid')
 
     // Mobile Detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -119,14 +107,7 @@ export function DashboardPage() {
         }
     }, [hotel?.id, subscribeToSales])
 
-    // Calculate compliance percentage
-    const compliancePercentage = useMemo(() => {
-        if (!currentShift) return 0
-        let score = 0
-        if (currentShift.compliance.kbs_checked) score += 50
-        if (currentShift.compliance.agency_msg_checked_count > 0) score += 50
-        return score
-    }, [currentShift])
+
 
     // Initialize auth listener
     useEffect(() => {
@@ -159,30 +140,11 @@ export function DashboardPage() {
     }, [userHotelId, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu])
 
 
-    // Handlers
-    const handleKBSCheck = async () => {
-        if (!hotel?.id || !currentShift) return
-        await updateCompliance(hotel.id, 'kbs_checked', true)
-    }
-
-    const handleAgencyCheck = async () => {
-        if (!hotel?.id || !currentShift) return
-        await updateCompliance(hotel.id, 'agency_msg_checked_count', 1)
-    }
-
-    const handleHandoverComplete = async (cashEnd: number, notes: string) => {
-        if (!hotel?.id) return
-        await endShift(hotel.id, cashEnd, notes)
-        setIsHandoverOpen(false)
-        navigate('/shift-start') // Or wherever appropriate
-    }
 
 
 
-    const handleOpenAI = (mode: 'general' | 'report' | 'email' | 'review') => {
-        setAIChatTask(mode)
-        setAIChatOpen(true)
-    }
+
+
 
     const [showTutorial, setShowTutorial] = useState(false)
 
@@ -197,7 +159,6 @@ export function DashboardPage() {
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
 
-            <ComplianceAlert />
             {/* Header */}
             <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 z-50 transition-all duration-300 relative">
                 <div className="flex items-center gap-8">
@@ -242,27 +203,13 @@ export function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Compliance Pulse (Mini) */}
-                    {currentShift && (
-                        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border">
-                            <div className={cn("w-2 h-2 rounded-full animate-pulse",
-                                compliancePercentage === 100 ? "bg-emerald-500" : "bg-amber-500"
-                            )} />
-                            <span className="text-xs text-muted-foreground font-medium">{compliancePercentage}% {t('module.compliance')}</span>
-                        </div>
-                    )}
-
                     <div id="tour-notifications">
                         <NotificationDropdown />
                     </div>
 
-                    {/* User Profile - Consolidated Actions */}
+                    {/* User Profile */}
                     <div id="tour-profile">
-                        <UserNav
-                            onOpenAI={handleOpenAI}
-                            onOpenRoomManager={() => { }} // Deprecated in UserNav, effectively no-op or removed
-                            onOpenHandover={() => setIsHandoverOpen(true)}
-                        />
+                        <UserNav />
                     </div>
                 </div>
 
@@ -294,15 +241,13 @@ export function DashboardPage() {
                                 <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
                                     <ChevronLeft className="w-5 h-5" />
                                 </Button>
-                                {/* We can map IDs to labels or just use a generic title */}
                                 <span className="font-semibold text-lg capitalize">
                                     {overviewTab === 'notes' ? t('module.shiftNotes') :
-                                        overviewTab === 'compliance' ? t('module.compliance') :
-                                            overviewTab === 'hotel-info' ? t('module.hotelInfo') :
-                                                overviewTab === 'calendar' ? t('module.calendar') :
-                                                    overviewTab === 'menu' ? 'Daily Menu' :
-                                                        overviewTab === 'currency' ? t('currency.title') :
-                                                            overviewTab === 'roster' ? t('module.roster') : 'Overview'}
+                                        overviewTab === 'hotel-info' ? t('module.hotelInfo') :
+                                            overviewTab === 'calendar' ? t('module.calendar') :
+                                                overviewTab === 'menu' ? 'Daily Menu' :
+                                                    overviewTab === 'currency' ? t('currency.title') :
+                                                        overviewTab === 'roster' ? t('module.roster') : 'Overview'}
                                 </span>
                             </div>
                         )}
@@ -313,47 +258,18 @@ export function DashboardPage() {
                         ) : (
                             /* Desktop Grid OR Mobile Sub-view (when overviewTab != grid) */
                             /* We use the same grid structure but conditionally hide columns/items based on overviewTab on mobile */
-                            <div className={cn("grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 h-auto lg:h-full",
-                                isMobile ? "p-4 pb-32" : "" /* Add generous padding on mobile view to clear floating nav */
+                            <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0 h-auto lg:h-full",
+                                isMobile ? "p-4 pb-32" : ""
                             )}>
-                                {/* -- LEFT COLUMN: Shift Notes -- */}
+                                {/* -- LEFT COLUMN: Shift Notes + Roster -- */}
                                 <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin",
-                                    isMobile && overviewTab !== 'notes' && overviewTab !== 'compliance' && "hidden"
+                                    isMobile && overviewTab !== 'notes' && overviewTab !== 'roster' && "hidden"
                                 )}>
                                     <div id="tour-logs" className={cn(isMobile && overviewTab !== 'notes' && "hidden")}>
                                         <ShiftNotes hotelId={hotel?.id || ''} />
                                     </div>
 
-                                    {/* Compliance Checklist */}
-                                    {currentShift && (
-                                        <div id="tour-shift-start" className={cn(isMobile && overviewTab !== 'compliance' && "hidden")}>
-                                            <ComplianceChecklist
-                                                compliance={currentShift.compliance}
-                                                onKBSCheck={handleKBSCheck}
-                                                onAgencyCheck={handleAgencyCheck}
-                                                disabled={false}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* -- CENTER COLUMN: Operations -- */}
-                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin",
-                                    isMobile && overviewTab !== 'roster' && "hidden lg:flex" /* Show on desktop always, hide on mobile unless active */
-                                )}>
-                                    {/* 1. Current Shift & Pulse - Show only on Desktop or if we had a specific tab for it? 
-                                        Actually CurrentShiftDisplay is vital. Maybe keep it on top of Grid? 
-                                        For now, we'll hide it in grid view and show it if any tab is open? 
-                                        Wait, user wants card system. So we should hide this column unless a specific item is selected.
-                                        But 'roster' is the only item in this column mapped in grid.
-                                        Let's show CurrentShiftDisplay ONLY on Desktop or maybe add a 'Shift' card?
-                                        For now, we will hide CurrentShiftDisplay on mobile grid view completely.
-                                    */}
-                                    <div className="space-y-4 hidden lg:block">
-                                        <CurrentShiftDisplay hotelId={hotel?.id || ''} userId={user?.uid || ''} />
-                                    </div>
-
-                                    {/* 3. Roster (Weekly Program) */}
+                                    {/* Weekly Roster */}
                                     {(user?.role === 'gm' || user?.role === 'receptionist') && (
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
@@ -366,46 +282,45 @@ export function DashboardPage() {
                                     )}
                                 </div>
 
-                                {/* -- RIGHT COLUMN: Admin & Management -- */}
+                                {/* -- RIGHT COLUMN: Hotel Info, Exchange Rates, Menu, Calendar -- */}
                                 <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin pb-20 lg:pb-0",
                                     isMobile && !['hotel-info', 'menu', 'currency', 'calendar'].includes(overviewTab) && "hidden lg:flex"
                                 )}>
-                                    {/* 3. Hotel Info */}
+                                    {/* Hotel Info */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.3 }}
+                                        transition={{ delay: 0.1 }}
                                         className={cn(isMobile && overviewTab !== 'hotel-info' && "hidden")}
                                     >
                                         <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                     </motion.div>
 
-                                    {/* 3. Daily Menu */}
+                                    {/* Exchange Rates */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.3 }}
+                                        transition={{ delay: 0.15 }}
+                                        className={cn(isMobile && overviewTab !== 'currency' && "hidden")}
+                                    >
+                                        <CurrencyWidget />
+                                    </motion.div>
+
+                                    {/* Staff Daily Menu */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
+                                        transition={{ delay: 0.2 }}
                                         className={cn(isMobile && overviewTab !== 'menu' && "hidden")}
                                     >
                                         <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                     </motion.div>
 
-                                    {/* 1. Currency Widget */}
+                                    {/* Calendar */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.1 }}
-                                        className={cn(isMobile && overviewTab !== 'currency' && "hidden")}
-                                    >
-                                        {/* Currency Widget with TCMB Rates */}
-                                        <CurrencyWidget />
-                                    </motion.div>
-
-                                    {/* 1. Calendar Widget */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.1 }}
+                                        transition={{ delay: 0.25 }}
                                         className={cn(isMobile && overviewTab !== 'calendar' && "hidden")}
                                     >
                                         <CalendarWidget hotelId={hotel?.id || ''} />
@@ -531,15 +446,6 @@ export function DashboardPage() {
                 </Tabs>
             </main >
 
-            {/* Modals */}
-            {/* < RoomManagementModal isOpen={isRoomManagerOpen} onClose={() => setIsRoomManagerOpen(false)} /> */}
-
-            < HandoverWizard
-                isOpen={isHandoverOpen}
-                onClose={() => setIsHandoverOpen(false)}
-                hotelId={hotel?.id || ''}
-                onComplete={handleHandoverComplete}
-            />
             <AnnouncementModal />
         </div >
     )

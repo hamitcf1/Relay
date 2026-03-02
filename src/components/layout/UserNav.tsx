@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
     User,
     LogOut,
-    Play,
-    StopCircle,
     Globe,
     Check,
     Palette,
@@ -31,15 +28,12 @@ import {
 import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
-import { useShiftStore } from '@/stores/shiftStore'
 import { cn } from '@/lib/utils'
 
-export function UserNav({ onOpenHandover }: { onOpenHandover: () => void; onOpenAI: any; onOpenRoomManager: any }) {
-    // Keeping props for compatibility but ignoring unused ones for now to avoid refactoring parent
-    const navigate = useNavigate()
+export function UserNav() {
+
     const { user, signOut } = useAuthStore()
     const { t, language, setLanguage } = useLanguageStore()
-    const { currentShift } = useShiftStore()
 
     // Mobile Detection
     const [isMobile, setIsMobile] = useState(false)
@@ -127,22 +121,7 @@ export function UserNav({ onOpenHandover }: { onOpenHandover: () => void; onOpen
                     <div className="space-y-1 mt-2">
                         <DropdownMenuLabel className="text-[10px] text-muted-foreground font-normal uppercase px-2">{t('dashboard.actions')}</DropdownMenuLabel>
 
-                        {/* AI Button Removed - Now Floating FAB */}
-                        {/* Rooms Button Removed - Now in Operations Hub */}
 
-                        <DropdownMenuSeparator className="bg-border" />
-
-                        {!currentShift ? (
-                            <DropdownMenuItem onClick={() => navigate('/shift-start')} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-emerald-500/10 transition-colors">
-                                <Play className="w-4 h-4" />
-                                <span className="text-xs font-medium">{t('dashboard.startShift')}</span>
-                            </DropdownMenuItem>
-                        ) : (
-                            <DropdownMenuItem onClick={onOpenHandover} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 cursor-pointer px-3 py-2 rounded-lg focus:bg-rose-500/10 transition-colors">
-                                <StopCircle className="w-4 h-4" />
-                                <span className="text-xs font-medium">{t('dashboard.endShift')}</span>
-                            </DropdownMenuItem>
-                        )}
                     </div>
 
                     <DropdownMenuSeparator className="bg-border my-2" />

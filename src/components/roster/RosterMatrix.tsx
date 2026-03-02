@@ -81,12 +81,15 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     // Calculate dates for the header
     const weekDates = useMemo(() => {
         const start = new Date(weekStart)
+        const today = new Date()
         return Array.from({ length: 7 }).map((_, i) => {
             const date = new Date(start)
             date.setDate(start.getDate() + i)
+            const isToday = date.toDateString() === today.toDateString()
             return {
                 day: DAYS[i],
-                dateStr: formatDisplayDate(date)
+                dateStr: formatDisplayDate(date),
+                isToday
             }
         })
     }, [weekStart])
@@ -285,9 +288,15 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <span className="text-[10px] text-muted-foreground min-w-[70px] text-center font-mono">
-                        {formatDisplayDate(weekStart)}
-                    </span>
+                    {weekOffset === 0 ? (
+                        <span className="text-xs text-primary font-semibold min-w-[100px] text-center px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+                            {t('roster.currentWeek') || 'This Week'}
+                        </span>
+                    ) : (
+                        <span className="text-xs text-muted-foreground min-w-[100px] text-center font-mono">
+                            {formatDisplayDate(weekStart)}
+                        </span>
+                    )}
                     <Button
                         variant="ghost"
                         size="icon"
@@ -312,13 +321,23 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                         <thead>
                             <tr className="border-b border-border">
                                 {canEdit && <th className="w-8"></th>}
-                                <th className="text-left py-2 px-1 text-muted-foreground font-medium text-[10px] uppercase tracking-wider">{t('common.staff')}</th>
-                                {weekDates.map(({ day, dateStr }) => {
+                                <th className="text-left py-3 px-2 text-muted-foreground font-medium text-xs uppercase tracking-wider">{t('common.staff')}</th>
+                                {weekDates.map(({ day, dateStr, isToday }) => {
                                     const dayKey = `day.${day.toLowerCase()}` as any
                                     return (
-                                        <th key={day} className="text-center py-2 px-0.5 text-muted-foreground font-medium w-10">
-                                            <div className="text-[9px] opacity-50 mb-0.5 font-mono">{dateStr}</div>
-                                            <div className="text-[10px]">{t(dayKey)}</div>
+                                        <th key={day} className={cn(
+                                            "text-center py-3 px-1 font-medium min-w-[64px]",
+                                            isToday ? "text-primary" : "text-muted-foreground"
+                                        )}>
+                                            <div className={cn(
+                                                "text-xs mb-0.5 font-mono",
+                                                isToday ? "opacity-100" : "opacity-50"
+                                            )}>{dateStr}</div>
+                                            <div className={cn(
+                                                "text-sm",
+                                                isToday && "font-bold"
+                                            )}>{t(dayKey)}</div>
+                                            {isToday && <div className="h-0.5 w-4 mx-auto mt-0.5 rounded-full bg-primary" />}
                                         </th>
                                     )
                                 })}
@@ -330,67 +349,79 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                             values={sortedStaff}
                             onReorder={handleReorder}
                         >
-                            {sortedStaff.map((member) => (
-                                <Reorder.Item
-                                    key={member.uid}
-                                    value={member}
-                                    as="tr"
-                                    className="border-b border-border/50 bg-background/50"
-                                >
-                                    {canEdit && (
-                                        <td className="py-2 px-1 text-muted-foreground cursor-grab active:cursor-grabbing">
-                                            <GripVertical className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" />
-                                        </td>
-                                    )}
-                                    <td className="py-2 px-1 text-foreground whitespace-nowrap text-xs flex items-center gap-2">
-                                        <span className={cn(member.is_hidden_in_roster && "opacity-50 line-through decoration-muted-foreground")}>
-                                            {member.name}
-                                        </span>
-                                        {user?.role === 'gm' && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    if (hotelId) {
-                                                        toggleStaffVisibility(hotelId, member.uid, !member.is_hidden_in_roster)
-                                                            .then(() => {
-                                                                // Update local state to reflect change immediately
-                                                                setStaff(prev => prev.map(s => s.uid === member.uid ? { ...s, is_hidden_in_roster: !member.is_hidden_in_roster } : s))
-                                                            })
-                                                    }
-                                                }}
-                                                className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
-                                                title={member.is_hidden_in_roster ? t('roster.show') : t('roster.hide')}
-                                            >
-                                                {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                                            </button>
+                            {sortedStaff.map((member) => {
+                                const isCurrentUser = user?.uid === member.uid
+                                return (
+                                    <Reorder.Item
+                                        key={member.uid}
+                                        value={member}
+                                        as="tr"
+                                        className={cn(
+                                            "border-b border-border/50",
+                                            isCurrentUser
+                                                ? "bg-primary/5 border-l-2 border-l-primary"
+                                                : "bg-background/50"
                                         )}
-                                    </td>
-                                    {DAYS.map((day) => {
-                                        const shift = schedule[member.uid]?.[day]
-                                        return (
-                                            <td key={day} className="py-2 px-0.5 text-center">
-                                                <motion.button
-                                                    onClick={() => cycleShift(member.uid, day, 'forward')}
-                                                    onContextMenu={(e) => {
-                                                        e.preventDefault();
-                                                        cycleShift(member.uid, day, 'backward');
-                                                    }}
-                                                    disabled={!canEdit}
-                                                    className={cn(
-                                                        'w-9 h-7 rounded text-[10px] font-bold transition-all',
-                                                        shift ? SHIFT_COLORS[shift] : 'bg-zinc-800/50 text-zinc-600',
-                                                        canEdit && 'hover:opacity-80 cursor-pointer',
-                                                        !canEdit && 'cursor-default'
-                                                    )}
-                                                    whileTap={canEdit ? { scale: 0.9 } : undefined}
-                                                >
-                                                    {shift || '—'}
-                                                </motion.button>
+                                    >
+                                        {canEdit && (
+                                            <td className="py-2 px-1 text-muted-foreground cursor-grab active:cursor-grabbing">
+                                                <GripVertical className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" />
                                             </td>
-                                        )
-                                    })}
-                                </Reorder.Item>
-                            ))}
+                                        )}
+                                        <td className="py-3 px-2 text-foreground whitespace-nowrap text-sm flex items-center gap-2">
+                                            <span className={cn(member.is_hidden_in_roster && "opacity-50 line-through decoration-muted-foreground")}>
+                                                {member.name}
+                                            </span>
+                                            {user?.role === 'gm' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        if (hotelId) {
+                                                            toggleStaffVisibility(hotelId, member.uid, !member.is_hidden_in_roster)
+                                                                .then(() => {
+                                                                    // Update local state to reflect change immediately
+                                                                    setStaff(prev => prev.map(s => s.uid === member.uid ? { ...s, is_hidden_in_roster: !member.is_hidden_in_roster } : s))
+                                                                })
+                                                        }
+                                                    }}
+                                                    className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
+                                                    title={member.is_hidden_in_roster ? t('roster.show') : t('roster.hide')}
+                                                >
+                                                    {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                                </button>
+                                            )}
+                                        </td>
+                                        {DAYS.map((day, dayIdx) => {
+                                            const shift = schedule[member.uid]?.[day]
+                                            const isToday = weekDates[dayIdx]?.isToday
+                                            return (
+                                                <td key={day} className={cn(
+                                                    "py-3 px-1 text-center",
+                                                    isToday && "bg-primary/5"
+                                                )}>
+                                                    <motion.button
+                                                        onClick={() => cycleShift(member.uid, day, 'forward')}
+                                                        onContextMenu={(e) => {
+                                                            e.preventDefault();
+                                                            cycleShift(member.uid, day, 'backward');
+                                                        }}
+                                                        disabled={!canEdit}
+                                                        className={cn(
+                                                            'w-12 h-9 mx-auto rounded text-xs font-bold transition-all',
+                                                            shift ? SHIFT_COLORS[shift] : 'bg-zinc-800/50 text-zinc-600',
+                                                            canEdit && 'hover:opacity-80 cursor-pointer',
+                                                            !canEdit && 'cursor-default'
+                                                        )}
+                                                        whileTap={canEdit ? { scale: 0.9 } : undefined}
+                                                    >
+                                                        {shift || '—'}
+                                                    </motion.button>
+                                                </td>
+                                            )
+                                        })}
+                                    </Reorder.Item>
+                                )
+                            })}
                         </Reorder.Group>
                     </table>
                 )}

@@ -28,9 +28,9 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
             position: 'bottom'
         },
         {
-            target: 'tour-shift-start',
-            title: t('tour.compliance.title'),
-            content: t('tour.compliance.desc'),
+            target: 'shift-notes',
+            title: t('tour.feed.title'),
+            content: t('tour.feed.desc'),
             position: 'right'
         },
         {

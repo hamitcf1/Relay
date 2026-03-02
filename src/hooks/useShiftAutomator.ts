@@ -2,8 +2,6 @@ import { useEffect, useRef } from 'react'
 import { format, isWithinInterval, parse, addDays } from 'date-fns'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useShiftStore } from '@/stores/shiftStore'
-import { useNotificationStore } from '@/stores/notificationStore'
-import { useLanguageStore } from '@/stores/languageStore'
 import type { ShiftType } from '@/types'
 
 const SHIFT_TIMES = {
@@ -17,7 +15,6 @@ export function useShiftAutomator(hotelId: string | null) {
     const { getShiftsForDate, subscribeToRoster } = useRosterStore()
     const { currentShift, startShift, endShift, getLastClosedShift } = useShiftStore()
     const lastCheckRef = useRef<string | null>(null)
-    const lastComplianceNotificationRef = useRef<number>(0)
 
     // Ensure Roster is subscribed for the automator to work
     useEffect(() => {
@@ -102,24 +99,6 @@ export function useShiftAutomator(hotelId: string | null) {
                 }
             }
 
-            // 3. Compliance Notification (Every 2 hours)
-            if (currentShift && (!currentShift.compliance.kbs_checked || currentShift.compliance.agency_msg_checked_count === 0)) {
-                const twoHoursMs = 2 * 60 * 60 * 1000
-                const nowMs = now.getTime()
-
-                if (nowMs - lastComplianceNotificationRef.current > twoHoursMs) {
-                    const { addNotification } = useNotificationStore.getState()
-                    const { t } = useLanguageStore.getState()
-                    await addNotification(hotelId, {
-                        type: 'compliance',
-                        title: t('notifications.duePayments.title'),
-                        content: t('notifications.compliance.pending', { shift: currentShift.type }),
-                        target_role: 'receptionist',
-                        link: '/'
-                    })
-                    lastComplianceNotificationRef.current = nowMs
-                }
-            }
         }
 
         const timer = setInterval(checkShift, 30000) // Check every 30 seconds

@@ -126,8 +126,8 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
                         <div className={cn("p-3 rounded-xl mb-3 transition-colors group-hover:bg-white/10", item.color)}>
                             <item.icon className="w-6 h-6" />
                         </div>
-                        <span className="font-semibold text-sm tracking-tight mb-0.5">{item.label}</span>
-                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{item.desc}</span>
+                        <span className="font-bold text-base tracking-tight mb-1">{item.label}</span>
+                        <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider leading-snug">{item.desc}</span>
 
                         {/* Glow Effect */}
                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />

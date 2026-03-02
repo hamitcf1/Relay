@@ -175,8 +175,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
             useNotificationStore.setState({ notifications: [], unreadCount: 0, error: null, loading: true })
             useShiftStore.setState({ currentShift: null, loading: true, error: null })
 
-            // Note: We might want to import other stores to clear them too if they hold sensitive data
-            // but these are the critical ones for the reported issue.
+            // Clear localStorage to prevent stale data on next login
+            localStorage.clear()
 
             set({ user: null, firebaseUser: null, loading: false })
         } catch (error) {

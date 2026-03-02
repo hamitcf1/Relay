@@ -4,7 +4,7 @@ export * from './RegisterPage'
 export * from './SetupHotelPage'
 export * from './DashboardPage'
 export * from './LiveDemoPage'
-export { default as ShiftStartPage } from './ShiftStartPage'
+
 export * from './PricingPage'
 export * from './HowItWorksPage'
 export * from './BlogPage'

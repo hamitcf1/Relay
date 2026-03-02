@@ -175,7 +175,7 @@ export function SalesPanel() {
         if (shouldAddToNotes) {
             const noteContent = `${finalName} - Room ${formData.room_number}: ${totalPrice} ${isLaundry ? 'TRY' : formData.currency}${finalNotes ? ` (${finalNotes.replace(/\n/g, ' ')})` : ''}`
             await addNote(hotel.id, {
-                category: 'upsell',
+                category: 'payment_needed',
                 content: noteContent,
                 room_number: formData.room_number.trim(),
                 is_relevant: true,

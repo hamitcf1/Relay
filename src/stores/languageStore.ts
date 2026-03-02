@@ -238,7 +238,7 @@ type Translations = {
     'category.earlyCheckout': string
     'category.feedback': string
     'category.upgrade': string
-    'category.upsell': string
+    'category.paymentNeeded': string
     'category.restaurant': string
     'category.minibar': string
     'category.maintenance': string
@@ -246,6 +246,13 @@ type Translations = {
     'category.complaint': string
     'category.system': string
     'category.other': string
+
+    // Priority
+    'priority.label': string
+    'priority.low': string
+    'priority.medium': string
+    'priority.high': string
+    'priority.critical': string
 
     // Handover Wizard
     'handover.title': string
@@ -348,6 +355,7 @@ type Translations = {
     'app.systemTitle': string
     'common.add': string
     'common.cancel': string
+    'common.edited': string
     'common.save': string
     'common.delete': string
     'common.edit': string
@@ -459,6 +467,7 @@ type Translations = {
 
     // Roster
     'roster.title': string
+    'roster.currentWeek': string
     'roster.noStaff': string
     'roster.show': string
     'roster.hide': string
@@ -1309,6 +1318,7 @@ const translations: Record<Language, Translations> = {
         'shift.proceed': 'Proceed to Dashboard',
         'shift.loggedAs': 'Logged in as',
         'roster.title': 'Weekly Roster',
+        'roster.currentWeek': 'This Week',
         'roster.noStaff': 'No staff members found',
         'roster.show': 'Show in Roster',
         'roster.hide': 'Hide from Roster',
@@ -1360,7 +1370,7 @@ const translations: Record<Language, Translations> = {
         'category.earlyCheckout': 'Early Checkout',
         'category.feedback': 'Feedback',
         'category.upgrade': 'Upgrade (Room)',
-        'category.upsell': 'Upsell',
+        'category.paymentNeeded': 'Payment Needed',
         'category.restaurant': 'Restaurant/Bar',
         'category.minibar': 'Minibar',
         'category.maintenance': 'Maintenance',
@@ -1368,6 +1378,13 @@ const translations: Record<Language, Translations> = {
         'category.complaint': 'Complaint',
         'category.system': 'System',
         'category.other': 'Other',
+
+        // Priority
+        'priority.label': 'Priority',
+        'priority.low': 'Low',
+        'priority.medium': 'Medium',
+        'priority.high': 'High',
+        'priority.critical': 'Critical',
 
         // Notes
         'notes.activeCount': 'Active Notes',
@@ -1618,6 +1635,7 @@ const translations: Record<Language, Translations> = {
 
         'common.add': 'Add',
         'common.cancel': 'Cancel',
+        'common.edited': 'edited',
         'common.save': 'Save',
         'common.delete': 'Delete',
         'common.edit': 'Edit',
@@ -1935,7 +1953,7 @@ const translations: Record<Language, Translations> = {
         'category.earlyCheckout': 'Erken Çıkış',
         'category.feedback': 'Geri Bildirim',
         'category.upgrade': 'Upgrade (Oda)',
-        'category.upsell': 'Ekstra Satış',
+        'category.paymentNeeded': 'Ödeme Gerekli',
         'category.restaurant': 'Restoran/Bar',
         'category.minibar': 'Minibar',
         'category.maintenance': 'Bakım',
@@ -1943,6 +1961,13 @@ const translations: Record<Language, Translations> = {
         'category.complaint': 'Şikayet',
         'category.system': 'Sistem',
         'category.other': 'Diğer',
+
+        // Priority
+        'priority.label': 'Öncelik',
+        'priority.low': 'Düşük',
+        'priority.medium': 'Orta',
+        'priority.high': 'Yüksek',
+        'priority.critical': 'Kritik',
 
         // Handover Wizard
         'handover.title': 'Devir Teslim Sihirbazı',
@@ -2054,6 +2079,7 @@ const translations: Record<Language, Translations> = {
 
         'common.add': 'Ekle',
         'common.cancel': 'İptal',
+        'common.edited': 'düzenlendi',
         'common.save': 'Kaydet',
         'common.delete': 'Sil',
         'common.edit': 'Düzenle',
@@ -2175,6 +2201,7 @@ const translations: Record<Language, Translations> = {
 
         // Roster
         'roster.title': 'Haftalık Çizelge',
+        'roster.currentWeek': 'Bu Hafta',
         'roster.noStaff': 'Personel bulunamadı',
         'roster.show': 'Çizelgede Göster',
         'roster.hide': 'Çizelgeden Gizle',

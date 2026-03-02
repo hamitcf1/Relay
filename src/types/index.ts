@@ -174,17 +174,20 @@ export interface AuthState {
     loading: boolean
     error: string | null
 }
+// Note priority levels
+export type NotePriority = 'low' | 'medium' | 'high' | 'critical'
+
 // Note categories
 export type NoteCategory =
-    | 'handover'       // General handover notes
-    | 'damage'         // Property damage (payment collection)
-    | 'early_checkout' // Early checkout info
-    | 'guest_info'     // Guest-specific notes
-    | 'feedback'       // Merged Live Feedback
-    | 'upgrade'        // Room Upgrades (financial)
-    | 'upsell'         // Upselling services (financial)
-    | 'restaurant'     // Restaurant/Bar payments (financial)
-    | 'minibar'        // Minibar usage (financial)
+    | 'handover'        // General handover notes
+    | 'damage'          // Property damage (payment collection)
+    | 'early_checkout'  // Early checkout info
+    | 'guest_info'      // Guest-specific notes
+    | 'feedback'        // Merged Live Feedback
+    | 'upgrade'         // Room Upgrades (financial)
+    | 'payment_needed'  // Payment collection needed (financial)
+    | 'restaurant'      // Restaurant/Bar payments (financial)
+    | 'minibar'         // Minibar usage (financial)
     | 'other'
 
 export type NoteStatus = 'active' | 'resolved' | 'archived'
@@ -192,12 +195,14 @@ export type NoteStatus = 'active' | 'resolved' | 'archived'
 export interface ShiftNote {
     id: string
     category: NoteCategory
+    priority?: NotePriority      // Note priority level (defaults to 'low')
     content: string
     room_number: string | null
     is_relevant: boolean
     status: NoteStatus
-    amount_due: number | null  // For damage notes
-    is_paid: boolean           // For damage notes
+    amount_due: number | null  // For financial notes
+    is_paid: boolean           // For financial notes
+    currency?: Currency        // Currency for financial amounts (TRY/USD/EUR/GBP)
     created_at: Date
     created_by: string | 'anonymous'
     created_by_name: string

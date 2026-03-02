@@ -12,12 +12,12 @@ import {
     Timestamp
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { ShiftNote, NoteCategory, NoteStatus } from '@/types'
+import type { ShiftNote, NoteCategory, NoteStatus, NotePriority } from '@/types'
 import { syncNoteToCalendar, removeNoteFromCalendar } from '@/lib/calendar-sync'
 import { useAuthStore } from './authStore'
 import { useActivityStore } from './activityStore'
 
-export type { NoteCategory, NoteStatus }
+export type { NoteCategory, NoteStatus, NotePriority }
 
 interface NotesState {
     notes: ShiftNote[]
@@ -106,6 +106,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
                     return {
                         id: doc.id,
                         category: data.category as NoteCategory,
+                        priority: data.priority || 'low',
                         content: data.content,
                         room_number: data.room_number || null,
                         is_relevant: data.is_relevant ?? true,
@@ -119,7 +120,8 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         resolved_at: data.resolved_at ? convertTimestamp(data.resolved_at) : null,
                         resolved_by: data.resolved_by || null,
                         is_anonymous: data.is_anonymous || false,
-                        updated_at: data.updated_at ? convertTimestamp(data.updated_at) : undefined
+                        updated_at: data.updated_at ? convertTimestamp(data.updated_at) : undefined,
+                        currency: data.currency || undefined
                     }
                 })
 
@@ -328,11 +330,24 @@ export const categoryInfo: Record<NoteCategory, { label: string; color: string; 
     handover: { label: 'Handover', color: 'bg-indigo-500', icon: '📋' },
     damage: { label: 'Damage', color: 'bg-rose-500', icon: '⚠️' },
     upgrade: { label: 'Upgrade', color: 'bg-emerald-600', icon: '⬆️' },
-    upsell: { label: 'Upsell', color: 'bg-green-500', icon: '💰' },
+    payment_needed: { label: 'Payment Needed', color: 'bg-green-500', icon: '💳' },
     restaurant: { label: 'Restaurant', color: 'bg-orange-500', icon: '🍽️' },
     minibar: { label: 'Minibar', color: 'bg-zinc-700', icon: '🥤' },
     early_checkout: { label: 'Early Checkout', color: 'bg-amber-500', icon: '🚪' },
     guest_info: { label: 'Guest Info', color: 'bg-cyan-500', icon: '👤' },
     feedback: { label: 'Feedback', color: 'bg-purple-500', icon: '💬' },
     other: { label: 'Other', color: 'bg-zinc-500', icon: '📝' },
+}
+
+// Priority display info — visual intensity scales with level
+export const priorityInfo: Record<NotePriority, {
+    symbol: string
+    color: string
+    textClass: string
+    glowClass: string
+}> = {
+    low: { symbol: '!', color: 'text-zinc-400', textClass: 'font-normal text-sm', glowClass: '' },
+    medium: { symbol: '!!', color: 'text-amber-400', textClass: 'font-semibold text-sm', glowClass: '' },
+    high: { symbol: '!!!', color: 'text-orange-500', textClass: 'font-bold text-base', glowClass: '' },
+    critical: { symbol: '!!!!', color: 'text-rose-500', textClass: 'font-bold text-lg', glowClass: 'drop-shadow-[0_0_6px_rgba(244,63,94,0.6)]' },
 }
