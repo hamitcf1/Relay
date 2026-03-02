@@ -211,5 +211,3 @@ export function CurrencyWidget() {
     )
 }
 
-// Re-export for clarity
-export default CurrencyWidget

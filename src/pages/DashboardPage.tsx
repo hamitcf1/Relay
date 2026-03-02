@@ -48,10 +48,12 @@ import { ChevronLeft } from 'lucide-react'
 
 export function DashboardPage() {
     const location = useLocation()
-    const { user, initialize: initAuth } = useAuthStore()
-    const { hotel, subscribeToHotel } = useHotelStore()
-    const { subscribeToCurrentShift } = useShiftStore()
-    const { subscribeToNotes } = useNotesStore()
+    const user = useAuthStore((state) => state.user)
+    const initAuth = useAuthStore((state) => state.initialize)
+    const hotel = useHotelStore((state) => state.hotel)
+    const subscribeToHotel = useHotelStore((state) => state.subscribeToHotel)
+    const subscribeToCurrentShift = useShiftStore((state) => state.subscribeToCurrentShift)
+    const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
     const { t } = useLanguageStore()

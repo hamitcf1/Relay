@@ -14,7 +14,7 @@ import {
     serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { Shift, ShiftType, ShiftCompliance } from '@/types'
+import type { Shift, ShiftType } from '@/types'
 import { useAuthStore } from './authStore'
 import { useActivityStore } from './activityStore'
 
@@ -234,10 +234,3 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
     },
 }))
 
-// Helper to calculate compliance percentage
-export const calculateCompliancePercentage = (compliance: ShiftCompliance): number => {
-    let percentage = 0
-    if (compliance.kbs_checked) percentage += 50
-    if (compliance.agency_msg_checked_count > 0) percentage += 50
-    return percentage
-}

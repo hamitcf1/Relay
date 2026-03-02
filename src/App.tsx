@@ -26,12 +26,10 @@ import { CustomCursor } from '@/components/ui/CustomCursor'
 
 import { useThemeStore } from '@/stores/themeStore'
 import { useEffect } from 'react'
-import { useMobileCapabilities } from '@/hooks/useMobileCapabilities'
 import { ActivityTracker } from '@/components/tracking/ActivityTracker'
 import { AIChatBot } from '@/components/ai/AIChatBot'
 
 function App() {
-    useMobileCapabilities()
     const applyTheme = useThemeStore(state => state.applyTheme)
 
     useEffect(() => {
