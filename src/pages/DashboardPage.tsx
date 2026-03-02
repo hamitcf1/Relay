@@ -264,7 +264,7 @@ export function DashboardPage() {
                                 isMobile ? "p-4 pb-32" : ""
                             )}>
                                 {/* -- LEFT COLUMN: Shift Notes + Roster -- */}
-                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin",
+                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative pr-2 scrollbar-thin",
                                     isMobile && overviewTab !== 'notes' && overviewTab !== 'roster' && "hidden"
                                 )}>
                                     <div id="tour-logs" className={cn(isMobile && overviewTab !== 'notes' && "hidden")}>
@@ -285,7 +285,7 @@ export function DashboardPage() {
                                 </div>
 
                                 {/* -- RIGHT COLUMN: Hotel Info, Exchange Rates, Menu, Calendar -- */}
-                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto pr-2 scrollbar-thin pb-20 lg:pb-0",
+                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative pr-2 scrollbar-thin pb-20 lg:pb-0",
                                     isMobile && !['hotel-info', 'menu', 'currency', 'calendar'].includes(overviewTab) && "hidden lg:flex"
                                 )}>
                                     {/* Hotel Info */}
@@ -417,26 +417,26 @@ export function DashboardPage() {
                                         </TabsContent>
 
                                         {/* Scrollable Containers for other tabs */}
-                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
+                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <FeedbackSection />
                                         </TabsContent>
-                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
+                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <OffDayScheduler />
                                         </TabsContent>
-                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
+                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <TourCatalogue />
                                         </TabsContent>
-                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
+                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <RoomManagementPanel />
                                         </TabsContent>
-                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
+                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <PricingPanel />
                                         </TabsContent>
-                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
+                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <LeaderboardPanel />
                                         </TabsContent>
                                         {user?.role === 'gm' && (
-                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto custom-scrollbar pb-32">
+                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                                 <ActivityLogPanel />
                                             </TabsContent>
                                         )}

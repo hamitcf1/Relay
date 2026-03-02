@@ -221,7 +221,7 @@ function ChatSidebar() {
             </div>
 
             {/* Thread List */}
-            <div className="flex-1 overflow-y-auto px-2 space-y-0.5 scrollbar-thin">
+            <div className="flex-1 overflow-y-auto px-2 space-y-0.5 scrollbar-thin relative">
                 {threads.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-32 text-center px-4">
                         <MessageCircle className="w-6 h-6 text-muted-foreground/30 mb-2" />
@@ -285,7 +285,7 @@ function ModelSelector() {
                         exit={{ opacity: 0, y: 5 }}
                         className="absolute top-full left-0 mt-1 w-56 bg-popover border border-border rounded-xl shadow-2xl z-50 overflow-hidden"
                     >
-                        <div className="max-h-52 overflow-y-auto p-1.5 space-y-0.5 scrollbar-thin">
+                        <div className="max-h-52 overflow-y-auto p-1.5 space-y-0.5 scrollbar-thin relative">
                             {MODELS.map(m => (
                                 <button
                                     key={m.id}

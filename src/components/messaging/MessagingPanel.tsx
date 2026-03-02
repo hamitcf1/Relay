@@ -188,7 +188,7 @@ export function MessagingPanel() {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1 relative">
                     {/* General Channel */}
                     <button
                         onClick={() => setActiveConversation('all')}
@@ -311,7 +311,7 @@ export function MessagingPanel() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6" ref={scrollRef}>
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 relative" ref={scrollRef}>
                     {groupedMessages.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
                             <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
