@@ -4,15 +4,13 @@ import { Button } from '@/components/ui/button'
 import { Star, Globe, Shield, Smartphone, Zap, Lock, BarChart3, Clock, Users, MessageSquare, Download, Apple, Play } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function LandingPage() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
     const { t, language } = useLanguageStore()
-    const targetRef = useRef<HTMLDivElement>(null)
     const { scrollYProgress } = useScroll({
-        target: targetRef,
         offset: ["start start", "end start"]
     })
 
@@ -71,13 +69,13 @@ export function LandingPage() {
     }
 
     return (
-        <main className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 flex flex-col">
+        <main className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 flex flex-col relative">
             <script type="application/ld+json">
                 {JSON.stringify(structuredData)}
             </script>
 
             {/* Hero Section */}
-            <section ref={targetRef} className="h-screen relative flex items-center justify-center overflow-hidden shrink-0">
+            <section className="h-screen relative flex items-center justify-center overflow-hidden shrink-0">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
                     <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
@@ -91,12 +89,13 @@ export function LandingPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
+                        className="relative"
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm font-medium mb-8 backdrop-blur-sm shadow-xl">
                             <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" aria-hidden="true" />
                             <span>{t('landing.hero.trusted')}</span>
                         </div>
-                        <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 flex flex-col items-center justify-center gap-2">
+                        <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 flex flex-col items-center justify-center gap-2 relative">
                             <span>{t('landing.hero.title.prefix')}</span>
                             {/* Fixed width container to prevent cutout/jump */}
                             <div className="h-[1.2em] relative overflow-hidden flex justify-center w-full min-w-[300px]">
@@ -168,8 +167,8 @@ export function LandingPage() {
 
             {/* Features Section */}
             <section id="features" className="py-32 bg-zinc-950 relative z-20 shrink-0">
-                <div className="container mx-auto px-6">
-                    <header className="text-center mb-20">
+                <div className="container mx-auto px-6 relative">
+                    <header className="text-center mb-20 relative">
                         <h2 className="text-4xl font-bold text-white mb-4">{t('landing.features.title')}</h2>
                         <p className="text-zinc-400">{t('landing.features.subtitle')}</p>
                     </header>
@@ -179,7 +178,7 @@ export function LandingPage() {
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={staggerContainer}
-                        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                        className="grid grid-cols-1 md:grid-cols-3 gap-6 relative"
                     >
                         <FeatureCard
                             icon={<Smartphone className="w-6 h-6 text-blue-400" aria-hidden="true" />}

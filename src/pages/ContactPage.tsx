@@ -9,7 +9,7 @@ export function ContactPage() {
     const { t } = useLanguageStore()
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 relative">
             {/* Navigation */}
             <div className="container mx-auto px-6 pt-32">
                 <Button

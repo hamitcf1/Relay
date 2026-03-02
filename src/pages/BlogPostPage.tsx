@@ -43,7 +43,7 @@ export function BlogPostPage() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 pb-32">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 pb-32 relative">
             {/* Navigation */}
             <div className="container mx-auto px-6 pt-32">
                 <Button

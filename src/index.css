@@ -106,8 +106,14 @@
     /* Disable tap highlight on mobile */
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
+    position: relative;
+  }
 
-    /* Hide default cursor only when custom cursor is active */
+  html,
+  body,
+  #root,
+  #ai-chatbot-root {
+    position: relative !important;
   }
 
   body.custom-cursor-active {

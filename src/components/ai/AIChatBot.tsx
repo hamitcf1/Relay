@@ -78,7 +78,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.2 }}
             className={cn(
-                "flex gap-2 max-w-[90%] group", // Added group for hover effects
+                "flex gap-2 max-w-[90%] group relative", // Added group for hover effects
                 isUser ? "ml-auto flex-row-reverse" : "mr-auto"
             )}
         >
@@ -153,7 +153,7 @@ function TypingIndicator() {
         <motion.div
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 mr-auto"
+            className="flex items-center gap-2 mr-auto relative"
         >
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/20">
                 <Bot className="w-4 h-4 text-white" />
@@ -630,7 +630,7 @@ export function AIChatBot() {
                             </AnimatePresence>
 
                             {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin">
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin relative">
                                 {messages.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-center px-6">
                                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-600/20 flex items-center justify-center mb-4 border border-violet-500/20">

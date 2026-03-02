@@ -45,61 +45,63 @@ function App() {
     }, [applyTheme])
 
     return (
-        <BrowserRouter>
-            <UpdateNotifier />
-            <TabNotifications />
-            <CustomCursor />
-            <ActivityTracker />
-            <Routes>
+        <div className="relative">
+            <BrowserRouter>
+                <UpdateNotifier />
+                <TabNotifications />
+                <CustomCursor />
+                <ActivityTracker />
+                <Routes>
 
-                {/* Public Routes with Layout */}
-                <Route element={<PublicLayout />}>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/legal/privacy" element={<PrivacyPage />} />
-                    <Route path="/legal/terms" element={<TermsPage />} />
-                    <Route path="/legal/status" element={<StatusPage />} />
-                    <Route path="/pricing" element={<PricingPage />} />
-                    <Route path="/how-it-works" element={<HowItWorksPage />} />
-                    <Route path="/blog" element={<BlogPage />} />
-                    <Route path="/blog/:id" element={<BlogPostPage />} />
-                    <Route path="/updates" element={<UpdatesPage />} />
-                    <Route path="/features" element={<FeaturesPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                </Route>
+                    {/* Public Routes with Layout */}
+                    <Route element={<PublicLayout />}>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/legal/privacy" element={<PrivacyPage />} />
+                        <Route path="/legal/terms" element={<TermsPage />} />
+                        <Route path="/legal/status" element={<StatusPage />} />
+                        <Route path="/pricing" element={<PricingPage />} />
+                        <Route path="/how-it-works" element={<HowItWorksPage />} />
+                        <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/blog/:id" element={<BlogPostPage />} />
+                        <Route path="/updates" element={<UpdatesPage />} />
+                        <Route path="/features" element={<FeaturesPage />} />
+                        <Route path="/contact" element={<ContactPage />} />
+                    </Route>
 
-                {/* Auth & Demo Pages (No Layout for now, or maybe wrap if desired, keeping separate for unique design) */}
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/live-demo" element={<LiveDemoPage />} />
+                    {/* Auth & Demo Pages (No Layout for now, or maybe wrap if desired, keeping separate for unique design) */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/live-demo" element={<LiveDemoPage />} />
 
-                {/* Protected Routes */}
-                <Route
-                    path="/setup-hotel"
-                    element={
-                        <ProtectedRoute>
-                            <SetupHotelPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <DashboardPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/operations"
-                    element={
-                        <ProtectedRoute>
-                            <DashboardPage />
-                        </ProtectedRoute>
-                    }
-                />
-            </Routes>
-            <AIChatBot />
-        </BrowserRouter >
+                    {/* Protected Routes */}
+                    <Route
+                        path="/setup-hotel"
+                        element={
+                            <ProtectedRoute>
+                                <SetupHotelPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/dashboard"
+                        element={
+                            <ProtectedRoute>
+                                <DashboardPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/operations"
+                        element={
+                            <ProtectedRoute>
+                                <DashboardPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                </Routes>
+                <AIChatBot />
+            </BrowserRouter>
+        </div>
     )
 }
 

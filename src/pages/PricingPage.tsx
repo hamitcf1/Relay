@@ -65,9 +65,9 @@ export function PricingPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 relative">
             {/* Navigation Backlink */}
-            <div className="container mx-auto px-6 pt-32">
+            <div className="container mx-auto px-6 pt-32 relative">
                 <Button
                     variant="ghost"
                     className="text-zinc-400 hover:text-white group transition-colors"
@@ -78,8 +78,8 @@ export function PricingPage() {
                 </Button>
             </div>
 
-            <div className="container mx-auto px-6 py-20">
-                <div className="text-center mb-16">
+            <div className="container mx-auto px-6 py-20 relative">
+                <div className="text-center mb-16 relative">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -92,7 +92,7 @@ export function PricingPage() {
                     </p>
 
                     {/* Billing Toggle */}
-                    <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center justify-center gap-4 relative">
                         <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-white' : 'text-zinc-500'}`}>
                             {t('pricing.monthly')}
                         </span>
@@ -116,7 +116,7 @@ export function PricingPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 relative">
                     {plans.map((plan, i) => (
                         <motion.div
                             key={plan.id}
