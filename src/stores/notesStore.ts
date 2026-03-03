@@ -121,7 +121,11 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         resolved_by: data.resolved_by || null,
                         is_anonymous: data.is_anonymous || false,
                         updated_at: data.updated_at ? convertTimestamp(data.updated_at) : undefined,
-                        currency: data.currency || undefined
+                        currency: data.currency || undefined,
+                        time: data.time || null,
+                        guest_name: data.guest_name || null,
+                        assigned_staff_uid: data.assigned_staff_uid || null,
+                        assigned_staff_name: data.assigned_staff_name || null
                     }
                 })
 
