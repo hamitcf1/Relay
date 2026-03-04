@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from 'lucide-react'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 interface CollapsibleCardProps {
     id: string
@@ -143,8 +144,9 @@ export function CollapsibleCard({
                                 transition={{ duration: 0.2, ease: "easeInOut" }}
                                 className={cn(isFocused && "flex-1 overflow-y-auto custom-scrollbar")}
                             >
-                                <CardContent className="pt-0 h-full">
+                                <CardContent className="pt-0 h-full relative">
                                     {children}
+                                    {isFocused && <ScrollToTopButton />}
                                 </CardContent>
                             </motion.div>
                         )}

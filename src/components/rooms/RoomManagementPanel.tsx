@@ -24,6 +24,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { cn } from '@/lib/utils'
 import type { Room, RoomStatus, RoomType, BedConfig } from '@/types'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 const statusColors: Record<RoomStatus, string> = {
     clean: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
@@ -180,7 +181,7 @@ export function RoomManagementPanel() {
 
             <div className="flex-1 min-h-0 bg-background rounded-xl border border-border overflow-hidden flex flex-col">
                 <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0">
-                    <TabsContent value="overview" className="flex-1 flex flex-col min-h-0 m-0 p-4 sm:p-6 space-y-6 overflow-y-auto">
+                    <TabsContent value="overview" className="flex-1 flex flex-col min-h-0 m-0 p-4 sm:p-6 space-y-6 overflow-y-auto relative custom-scrollbar">
                         {/* Filters */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <div className="relative w-full sm:w-64">
@@ -292,9 +293,10 @@ export function RoomManagementPanel() {
                                 No rooms found matching your filter.
                             </div>
                         )}
+                        <ScrollToTopButton />
                     </TabsContent>
 
-                    <TabsContent value="setup" className="flex-1 overflow-y-auto m-0 p-4 sm:p-6 space-y-6">
+                    <TabsContent value="setup" className="flex-1 overflow-y-auto m-0 p-4 sm:p-6 space-y-6 relative custom-scrollbar">
                         {!isGM ? (
                             <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
                                 <ShieldAlert className="w-12 h-12 mb-4 text-zinc-700" />
@@ -478,6 +480,7 @@ export function RoomManagementPanel() {
                                 </div>
                             </div>
                         )}
+                        <ScrollToTopButton />
                     </TabsContent>
                 </Tabs>
             </div>

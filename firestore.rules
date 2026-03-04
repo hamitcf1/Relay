@@ -190,6 +190,14 @@ service cloud.firestore {
         allow update, delete: if isGM();
       }
 
+      // BLACKLISTS
+      match /blacklists/{guestId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if isGM() || (isAuthenticated() && resource.data.created_by == request.auth.uid);
+      }
+
       // PRICING - Complex nested structure
       match /pricing/{configId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);

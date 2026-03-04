@@ -28,6 +28,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useSalesStore } from '@/stores/salesStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useStaffMealStore } from '@/stores/staffMealStore'
+import { useBlacklistStore } from '@/stores/blacklistStore'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessagingPanel } from '@/components/messaging/MessagingPanel'
@@ -38,6 +39,7 @@ import { SalesPanel } from '@/components/sales/SalesPanel'
 import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
+import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
 import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText, BedDouble, Users } from 'lucide-react'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { UserNav } from '@/components/layout/UserNav'
@@ -45,6 +47,7 @@ import { MobileNav } from '@/components/layout/MobileNav'
 import { OperationsGrid } from '@/components/dashboard/OperationsGrid'
 import { OverviewGrid } from '@/components/dashboard/OverviewGrid'
 import { ChevronLeft } from 'lucide-react'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 export function DashboardPage() {
     const location = useLocation()
@@ -131,6 +134,8 @@ export function DashboardPage() {
         const unsubNotes = subscribeToNotes(userHotelId)
         const unsubRoster = subscribeToRoster(userHotelId)
         const unsubMenu = subscribeToTodayMenu(userHotelId)
+        const subscribeToBlacklist = useBlacklistStore.getState().subscribeToBlacklist
+        const unsubBlacklist = subscribeToBlacklist(userHotelId)
 
         return () => {
             unsubHotel()
@@ -138,6 +143,7 @@ export function DashboardPage() {
             unsubNotes()
             unsubRoster()
             unsubMenu()
+            unsubBlacklist()
         }
     }, [userHotelId, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu])
 
@@ -282,6 +288,18 @@ export function DashboardPage() {
                                             <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                         </motion.div>
                                     )}
+
+                                    {/* Blacklisted Guests */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
+                                        transition={{ duration: 0.5, delay: 0.3 }}
+                                        className={cn(isMobile && overviewTab !== 'roster' && "hidden")}
+                                    >
+                                        <BlacklistModule hotelId={hotel?.id || ''} />
+                                    </motion.div>
+
+                                    <ScrollToTopButton />
                                 </div>
 
                                 {/* -- RIGHT COLUMN: Hotel Info, Exchange Rates, Menu, Calendar -- */}
@@ -327,6 +345,8 @@ export function DashboardPage() {
                                     >
                                         <CalendarWidget hotelId={hotel?.id || ''} />
                                     </motion.div>
+
+                                    <ScrollToTopButton />
                                 </div>
                             </div>
                         )}
@@ -419,25 +439,32 @@ export function DashboardPage() {
                                         {/* Scrollable Containers for other tabs */}
                                         <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <FeedbackSection />
+                                            <ScrollToTopButton />
                                         </TabsContent>
                                         <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <OffDayScheduler />
+                                            <ScrollToTopButton />
                                         </TabsContent>
                                         <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <TourCatalogue />
+                                            <ScrollToTopButton />
                                         </TabsContent>
                                         <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <RoomManagementPanel />
+                                            <ScrollToTopButton />
                                         </TabsContent>
                                         <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <PricingPanel />
+                                            <ScrollToTopButton />
                                         </TabsContent>
                                         <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                             <LeaderboardPanel />
+                                            <ScrollToTopButton />
                                         </TabsContent>
                                         {user?.role === 'gm' && (
                                             <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
                                                 <ActivityLogPanel />
+                                                <ScrollToTopButton />
                                             </TabsContent>
                                         )}
                                     </div>

@@ -7,6 +7,7 @@ import { Trophy, Medal, Clock, Crown, TrendingUp } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 export function LeaderboardPanel() {
     const { hotel } = useHotelStore()
@@ -154,6 +155,7 @@ export function LeaderboardPanel() {
                         </motion.div>
                     ))
                 )}
+                <ScrollToTopButton />
             </CardContent>
         </Card>
     )

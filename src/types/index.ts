@@ -218,6 +218,20 @@ export interface ShiftNote {
     updated_at?: Date
 }
 
+export interface BlacklistedGuest {
+    id: string
+    name: string
+    surname?: string
+    phone_numbers?: string[]
+    reason: string
+    room_numbers?: string[]
+    photo_url?: string
+    related_persons?: string // Optional family members or friends
+    created_at: Date
+    created_by: string
+    created_by_name: string
+}
+
 // Room Types
 export type RoomStatus = 'clean' | 'dirty' | 'inspect' | 'dnd'
 export type RoomOccupancy = 'vacant' | 'occupied'

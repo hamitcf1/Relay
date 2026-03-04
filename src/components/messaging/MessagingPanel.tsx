@@ -19,6 +19,7 @@ import { type PrivateMessage } from '@/types'
 import { useFormatting } from '@/hooks/useFormatting'
 import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
 import { TextFormatter } from '@/components/ui/TextFormatter'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
@@ -243,6 +244,7 @@ export function MessagingPanel() {
                             </button>
                         )
                     })}
+                    <ScrollToTopButton />
                 </div>
             </div>
 
@@ -384,6 +386,7 @@ export function MessagingPanel() {
                             </div>
                         ))
                     )}
+                    <ScrollToTopButton />
                 </div>
 
                 <div className="p-4 bg-muted/20 border-t border-border">

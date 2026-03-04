@@ -23,6 +23,7 @@ import { useFormatting } from '@/hooks/useFormatting'
 import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
 import { TextFormatter } from '@/components/ui/TextFormatter'
 import { useRef } from 'react'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -75,21 +76,28 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const { setOpen: setAIChatOpen, setTask: setAIChatTask } = useChatStore()
     const [statusFilter, setStatusFilter] = useState<NoteStatus | 'all'>('active')
     const [filter, setFilter] = useState<NoteCategory | 'all'>('all')
+    const [searchQuery, setSearchQuery] = useState('')
 
     // Filter notes
     const filteredNotes = useMemo(() => {
         return notes.filter((note) => {
             const matchesCategory = filter === 'all' || note.category === filter
             const matchesStatus = statusFilter === 'all' || note.status === statusFilter
-            return matchesCategory && matchesStatus
+            const searchLower = searchQuery.toLowerCase()
+            const matchesSearch = !searchQuery ||
+                note.content.toLowerCase().includes(searchLower) ||
+                (note.guest_name && note.guest_name.toLowerCase().includes(searchLower)) ||
+                (note.room_number && note.room_number.toLowerCase().includes(searchLower)) ||
+                (note.assigned_staff_name && note.assigned_staff_name.toLowerCase().includes(searchLower))
+
+            return matchesCategory && matchesStatus && matchesSearch
         })
-    }, [notes, filter, statusFilter])
+    }, [notes, filter, statusFilter, searchQuery])
 
     const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'payment_needed', 'restaurant', 'minibar'].includes(cat)
 
     const CURRENCY_SYMBOLS: Record<string, string> = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }
 
-    // Map category keys to translation keys
     const getCategoryLabel = (cat: string): string => {
         const keyMap: Record<string, string> = {
             guest_info: 'category.guestInfo',
@@ -355,35 +363,47 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                     ))}
                 </div>
 
-                {/* Category Tabs */}
-                <div className="flex flex-wrap gap-1.5">
-                    {[
-                        { key: 'all' as const, label: t('category.allIssues'), color: 'bg-indigo-500', icon: '📁' },
-                        { key: 'handover' as const, ...categoryInfo.handover, label: t('category.handover') },
-                        { key: 'feedback' as const, ...categoryInfo.feedback, label: t('category.feedback') },
-                        { key: 'damage' as const, ...categoryInfo.damage, label: t('category.damage') },
-                        { key: 'upgrade' as const, ...categoryInfo.upgrade, label: t('category.upgrade') },
-                        { key: 'payment_needed' as const, ...categoryInfo.payment_needed, label: t('category.paymentNeeded') },
-                        { key: 'restaurant' as const, ...categoryInfo.restaurant, label: t('category.restaurant') },
-                        { key: 'minibar' as const, ...categoryInfo.minibar, label: t('category.minibar') },
-                        { key: 'guest_info' as const, ...categoryInfo.guest_info, label: t('category.guestInfo') },
-                        { key: 'early_checkout' as const, ...categoryInfo.early_checkout, label: t('category.earlyCheckout') },
-                        { key: 'other' as const, ...categoryInfo.other, label: t('category.other') },
-                    ].map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setFilter(tab.key)}
-                            className={cn(
-                                'text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all',
-                                filter === tab.key
-                                    ? `${tab.color} text-white shadow-lg`
-                                    : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground'
-                            )}
-                        >
-                            <span>{tab.icon}</span>
-                            <span>{tab.label}</span>
-                        </button>
-                    ))}
+                {/* Category Tabs & Search Bar */}
+                <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
+                    <div className="flex flex-wrap gap-1.5 flex-1">
+                        {[
+                            { key: 'all' as const, label: t('category.allIssues'), color: 'bg-indigo-500', icon: '📁' },
+                            { key: 'handover' as const, ...categoryInfo.handover, label: t('category.handover') },
+                            { key: 'feedback' as const, ...categoryInfo.feedback, label: t('category.feedback') },
+                            { key: 'damage' as const, ...categoryInfo.damage, label: t('category.damage') },
+                            { key: 'upgrade' as const, ...categoryInfo.upgrade, label: t('category.upgrade') },
+                            { key: 'payment_needed' as const, ...categoryInfo.payment_needed, label: t('category.paymentNeeded') },
+                            { key: 'restaurant' as const, ...categoryInfo.restaurant, label: t('category.restaurant') },
+                            { key: 'minibar' as const, ...categoryInfo.minibar, label: t('category.minibar') },
+                            { key: 'guest_info' as const, ...categoryInfo.guest_info, label: t('category.guestInfo') },
+                            { key: 'early_checkout' as const, ...categoryInfo.early_checkout, label: t('category.earlyCheckout') },
+                            { key: 'other' as const, ...categoryInfo.other, label: t('category.other') },
+                        ].map((tab) => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setFilter(tab.key)}
+                                className={cn(
+                                    'text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all',
+                                    filter === tab.key
+                                        ? `${tab.color} text-white shadow-lg`
+                                        : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                )}
+                            >
+                                <span>{tab.icon}</span>
+                                <span>{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="w-full sm:w-auto relative">
+                        <Input
+                            type="text"
+                            placeholder={t('common.search' as any) || 'Search notes...'}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-muted/50 w-full sm:w-48 text-sm h-8 pl-8 pr-2"
+                        />
+                        <svg className="absolute left-2.5 top-2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
                 </div>
             </div>
 
@@ -751,12 +771,18 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                             })()}
 
                                             {note.room_number && (
-                                                <Badge variant="outline" className="text-xs h-5 bg-muted text-muted-foreground border-border">#{note.room_number}</Badge>
+                                                <Badge variant="outline" className="text-[10px] h-5 py-0 px-2 bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 font-medium">#{note.room_number}</Badge>
                                             )}
                                             {note.guest_name && (
-                                                <Badge variant="outline" className="text-xs h-5 bg-muted text-muted-foreground border-border flex items-center gap-1">
+                                                <Badge variant="outline" className="text-[10px] h-5 py-0 px-2 bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 flex items-center gap-1 font-medium">
                                                     <User className="w-3 h-3" />
                                                     {note.guest_name}
+                                                </Badge>
+                                            )}
+                                            {note.assigned_staff_name && (
+                                                <Badge variant="outline" className="text-[10px] h-5 py-0 px-2 bg-primary/10 text-primary border-primary/20 flex items-center gap-1 font-medium">
+                                                    <User className="w-3 h-3" />
+                                                    {note.assigned_staff_name}
                                                 </Badge>
                                             )}
 
@@ -1093,6 +1119,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                 </div>
                             </motion.div>
                         ))}
+                        <ScrollToTopButton />
                     </div>
                 )}
             </div>

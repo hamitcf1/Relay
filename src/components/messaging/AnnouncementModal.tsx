@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Megaphone, X, Bell } from 'lucide-react'
 import { useNotificationStore } from '@/stores/notificationStore'
-import { useHotelStore } from '@/stores/hotelStore'
+import { useAuthStore } from '@/stores/authStore'
 import { Button } from '@/components/ui/button'
 
 export function AnnouncementModal() {
-    const { hotel } = useHotelStore()
-    const { notifications, markAsRead } = useNotificationStore()
+    const { notifications } = useNotificationStore()
+    const { user, updateSettings } = useAuthStore()
 
-    // Find the latest unread announcement
+    const dismissed = user?.settings?.dismissed_announcements || []
+
+    // Find the latest unread announcement not dismissed by user
     const announcement = notifications
-        .filter(n => n.type === 'announcement' && !n.is_read)
+        .filter(n => n.type === 'announcement' && !n.is_read && !dismissed.includes(n.id))
         .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0]
 
     const [isVisible, setIsVisible] = useState(false)
@@ -25,8 +27,10 @@ export function AnnouncementModal() {
     }, [announcement])
 
     const handleDismiss = async () => {
-        if (hotel?.id && announcement) {
-            await markAsRead(hotel.id, announcement.id)
+        if (announcement && user) {
+            await updateSettings({
+                dismissed_announcements: [...dismissed, announcement.id]
+            })
             setIsVisible(false)
         }
     }

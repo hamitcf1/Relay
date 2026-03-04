@@ -9,6 +9,7 @@ import { cn, formatDisplayDate } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
 import { SalesDetailModal } from './SalesDetailModal'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import {
     Select,
     SelectContent,
@@ -643,6 +644,7 @@ export function SalesPanel() {
                         })}
                     </div>
                 )}
+                <ScrollToTopButton />
             </CardContent>
 
             <SalesDetailModal

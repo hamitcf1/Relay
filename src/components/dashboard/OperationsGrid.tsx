@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 interface OperationsGridProps {
     onSelect: (tabIs: string) => void
@@ -106,7 +107,7 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
     }
 
     return (
-        <div className="p-4 pb-32 overflow-y-auto h-full">
+        <div className="p-4 pb-32 overflow-y-auto h-full relative custom-scrollbar">
             <h2 className="text-2xl font-bold mb-6 px-1">{t('dashboard.operationsHub')}</h2>
 
             <motion.div
@@ -134,6 +135,7 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
                     </motion.button>
                 ))}
             </motion.div>
+            <ScrollToTopButton />
         </div>
     )
 }

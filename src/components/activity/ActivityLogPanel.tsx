@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import type { ActivityAction } from '@/types'
+import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 const ACTION_META: Record<ActivityAction, { icon: typeof LogIn; label: string; color: string }> = {
     login: { icon: LogIn, label: 'Giriş', color: 'text-emerald-400' },
@@ -177,6 +178,7 @@ export function ActivityLogPanel() {
                                     )
                                 })}
                             </AnimatePresence>
+                            <ScrollToTopButton />
                         </div>
                     )}
                 </CardContent>
