@@ -1,13 +1,23 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Moon, Palette, MousePointer2, Sparkles } from 'lucide-react'
+import { Sun, Moon, Palette, MousePointer2, Sparkles, Smile, User, Type } from 'lucide-react'
 import { useThemeStore, ACCENT_COLORS } from '@/stores/themeStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { getCursorEnabled, setCursorEnabled } from '@/components/ui/CustomCursor'
+import { UserAvatar } from '@/components/ui/UserAvatar'
+import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react'
 import { cn } from '@/lib/utils'
 
 export function AppearanceOptions() {
     const { theme, setTheme, accentColor, setAccentColor } = useThemeStore()
+    const { user, updateSettings } = useAuthStore()
+    const { t } = useLanguageStore()
     const [cursorEnabled, setCursorEnabledLocal] = useState(getCursorEnabled)
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+
+    const avatar_style = user?.settings?.avatar_style || 'initials'
+    const avatar_emoji = user?.settings?.avatar_emoji || '😊'
 
     const toggleCursor = () => {
         const newVal = !cursorEnabled
@@ -135,6 +145,78 @@ export function AppearanceOptions() {
                         />
                     </div>
                 </button>
+            </div>
+
+            {/* Avatar Style Section */}
+            <div className="space-y-4 border-t border-border/50 pt-6">
+                <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-primary" />
+                        <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                            {t('appearance.avatar_style')}
+                        </label>
+                    </div>
+                    <UserAvatar user={user} size="sm" />
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                    {[
+                        { id: 'initials', icon: Type, label: t('appearance.avatar.initials') },
+                        { id: 'name', icon: User, label: t('appearance.avatar.name') },
+                        { id: 'emoji', icon: Smile, label: t('appearance.avatar.emoji') }
+                    ].map((style) => (
+                        <button
+                            key={style.id}
+                            onClick={() => updateSettings({ avatar_style: style.id as any })}
+                            className={cn(
+                                "flex flex-col items-center gap-2 py-3 px-2 rounded-xl border transition-all duration-200",
+                                avatar_style === style.id
+                                    ? "bg-primary/10 border-primary text-primary shadow-sm"
+                                    : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            )}
+                        >
+                            <style.icon className="w-4 h-4" />
+                            <span className="text-[10px] font-bold uppercase">{style.label}</span>
+                        </button>
+                    ))}
+                </div>
+
+                {avatar_style === 'emoji' && (
+                    <div className="space-y-3 px-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <button
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            className="w-full flex items-center justify-between p-3 rounded-xl border border-dashed border-primary/30 hover:bg-primary/5 transition-colors group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl leading-none">{avatar_emoji}</span>
+                                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                                    {t('appearance.avatar.choose_emoji')}
+                                </span>
+                            </div>
+                            <Smile className="w-4 h-4 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                        </button>
+
+                        {showEmojiPicker && (
+                            <div className="relative z-50 mt-2">
+                                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-2xl -m-2 z-[-1]" onClick={() => setShowEmojiPicker(false)} />
+                                <div className="bg-card border border-border rounded-xl p-1 shadow-2xl overflow-hidden">
+                                    <EmojiPicker
+                                        theme={theme === 'dark' ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                                        onEmojiClick={(emojiData) => {
+                                            updateSettings({ avatar_emoji: emojiData.emoji })
+                                            setShowEmojiPicker(false)
+                                        }}
+                                        width="100%"
+                                        height={350}
+                                        lazyLoadEmojis={true}
+                                        skinTonesDisabled={true}
+                                        searchPlaceholder="Search emoji..."
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     )

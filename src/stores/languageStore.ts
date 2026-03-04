@@ -371,6 +371,11 @@ type Translations = {
     'common.confirm': string
     'common.language': string
     'common.appearance': string
+    'appearance.avatar_style': string
+    'appearance.avatar.initials': string
+    'appearance.avatar.name': string
+    'appearance.avatar.emoji': string
+    'appearance.avatar.choose_emoji': string
     'common.formatting.bulletList': string
     'common.updateAvailable': string
     'common.updateDescription': string
@@ -1673,6 +1678,11 @@ const translations: Record<Language, Translations> = {
         'common.confirm': 'Confirm',
         'common.language': 'Language',
         'common.appearance': 'Appearance',
+        'appearance.avatar_style': 'Avatar Style',
+        'appearance.avatar.initials': 'Initials',
+        'appearance.avatar.name': 'Full Name',
+        'appearance.avatar.emoji': 'Emoji',
+        'appearance.avatar.choose_emoji': 'Choose Emoji',
         'common.formatting.bulletList': 'Bullet List',
         'common.updateAvailable': 'New version available',
         'common.updateDescription': 'Please refresh the page to use the latest features.',
@@ -2138,6 +2148,11 @@ const translations: Record<Language, Translations> = {
         'common.confirm': 'Onayla',
         'common.language': 'Dil Seçimi',
         'common.appearance': 'Görünüm Ayarları',
+        'appearance.avatar_style': 'Profil Resmi Stili',
+        'appearance.avatar.initials': 'Baş Harfler',
+        'appearance.avatar.name': 'Tam İsim',
+        'appearance.avatar.emoji': 'Emoji',
+        'appearance.avatar.choose_emoji': 'Emoji Seç',
         'common.formatting.bulletList': 'Madde İşareti',
         'common.updateAvailable': 'Yeni sürüm mevcut',
         'common.updateDescription': 'En son özellikleri kullanmak için lütfen sayfayı yenileyin.',

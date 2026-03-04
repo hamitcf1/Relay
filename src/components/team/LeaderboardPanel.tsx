@@ -4,7 +4,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Trophy, Medal, Clock, Crown, TrendingUp } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { UserAvatar } from '@/components/ui/UserAvatar'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
@@ -110,11 +110,11 @@ export function LeaderboardPanel() {
                                 </div>
 
                                 <div className="flex items-center gap-4">
-                                    <Avatar className="h-12 w-12 border-2 border-foreground/5 ring-2 ring-transparent group-hover:ring-indigo-500/30 transition-all">
-                                        <AvatarFallback className="bg-muted text-muted-foreground font-bold">
-                                            {entry.userName.substring(0, 2).toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
+                                    <UserAvatar
+                                        user={{ id: entry.userId, name: entry.userName, settings: entry.settings } as any}
+                                        size="lg"
+                                        className="h-12 w-12 border-2 border-foreground/5 ring-2 ring-transparent group-hover:ring-indigo-500/30 transition-all shadow-none"
+                                    />
 
                                     <div>
                                         <p className="font-bold text-foreground text-lg group-hover:text-indigo-400 transition-colors">

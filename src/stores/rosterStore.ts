@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { collection, getDocs, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore'
+import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { format, addDays, parseISO } from 'date-fns'
 
@@ -10,6 +10,10 @@ interface StaffMember {
     name: string
     role?: string
     is_hidden_in_roster?: boolean
+    settings?: {
+        avatar_style?: 'initials' | 'name' | 'emoji'
+        avatar_emoji?: string
+    }
 }
 
 interface RosterState {
@@ -71,9 +75,32 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             return () => { }
         }
 
-        const unsubscribe = onSnapshot(rosterRef, async (snapshot) => {
+        // 1. Reactive Staff Subscription (ensures avatar emoji updates are instant for everyone)
+        const usersRef = collection(db, 'users')
+        const usersQuery = query(usersRef, where('hotel_id', '==', hotelId))
+
+        const unsubscribeStaff = onSnapshot(usersQuery, (userSnap) => {
+            const staffList: StaffMember[] = []
+            userSnap.forEach(uDoc => {
+                const uData = uDoc.data()
+                if (uData.name && uData.name !== 'Unknown') {
+                    staffList.push({
+                        uid: uDoc.id,
+                        name: uData.name,
+                        role: uData.role,
+                        is_hidden_in_roster: uData.is_hidden_in_roster,
+                        settings: uData.settings
+                    })
+                }
+            })
+            set({ staff: staffList })
+        }, (err) => {
+            console.error("Staff subscription error", err)
+        })
+
+        // 2. Roster Schedule Subscription
+        const unsubscribeRoster = onSnapshot(rosterRef, (snapshot) => {
             const newSchedule: Record<string, Record<string, ShiftType>> = {}
-            const userIds = new Set<string>()
 
             snapshot.docs.forEach(doc => {
                 const weekStartStr = doc.id // "2026-02-02"
@@ -81,12 +108,9 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
                 if (!data.schedule) return
 
-                // Iterate users in this week's schedule
                 Object.entries(data.schedule).forEach(([uid, userWeek]) => {
-                    userIds.add(uid)
                     if (!newSchedule[uid]) newSchedule[uid] = {}
 
-                    // Iterate days (Mon, Tue...) and map to actual dates
                     DAYS.forEach((day, index) => {
                         const shift = userWeek[day]
                         if (shift) {
@@ -103,38 +127,16 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
                 })
             })
 
-            // Fetch staff details if missing OR if we want to ensure we have latest hidden status
-            // For simplicity, we re-fetch staff list to catch 'is_hidden_in_roster' updates
-            // (In a minimal read optimized app, we'd only do this on change, but this is fine for now)
-            try {
-                const usersRef = collection(db, 'users')
-                const q = query(usersRef, where('hotel_id', '==', hotelId))
-                const userSnap = await getDocs(q)
-                const staffList: StaffMember[] = []
-
-                userSnap.forEach(uDoc => {
-                    const uData = uDoc.data()
-                    if (uData.name && uData.name !== 'Unknown') {
-                        staffList.push({
-                            uid: uDoc.id,
-                            name: uData.name,
-                            role: uData.role,
-                            is_hidden_in_roster: uData.is_hidden_in_roster
-                        })
-                    }
-                })
-                set({ staff: staffList })
-            } catch (e) {
-                console.error("Failed to fetch staff details", e)
-            }
-
             set({ schedule: newSchedule, loading: false })
         }, (err) => {
             console.error("Roster subscription error", err)
             set({ error: err.message })
         })
 
-        return unsubscribe
+        return () => {
+            unsubscribeStaff()
+            unsubscribeRoster()
+        }
     },
 
     getShiftsForDate: (date: Date) => {
@@ -143,12 +145,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         const result: Array<{ name: string; shift: ShiftType; uid: string }> = []
 
         staff.forEach(member => {
-            // NOTE: We do NOT filter hidden staff here because this input is used by components
-            // that might need to show them (like GM view). Filtering should happen at UI level
-            // OR we add a parameter to this function. For now, we return all. 
-            // Actually, for "Current Shift" display, we probably should filter hidden ones if not GM?
-            // Let's stick to returning all and letting UI decide.
-
             const userShifts = schedule[member.uid]
             if (userShifts && userShifts[dateKey]) {
                 const shift = userShifts[dateKey]
@@ -162,7 +158,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             }
         })
 
-        // Sort by shift priority A -> E -> B -> C
         return result.sort((a, b) => {
             const priorityA = SHIFT_PRIORITY[a.shift] || 99
             const priorityB = SHIFT_PRIORITY[b.shift] || 99
@@ -176,7 +171,6 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             await updateDoc(userRef, {
                 is_hidden_in_roster: isHidden
             })
-            // Refetch staff to update UI immediately
             const { staff } = get()
             const updatedStaff = staff.map(s => s.uid === userId ? { ...s, is_hidden_in_roster: isHidden } : s)
             set({ staff: updatedStaff })

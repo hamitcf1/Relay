@@ -13,9 +13,7 @@ export function UpdateNotifier() {
     const [updateAvailable, setUpdateAvailable] = useState(false)
 
     useEffect(() => {
-        // Only run check in production-like builds where version.json exists
-        if (import.meta.env.DEV) return
-
+        // Run check to see if version.json exists
         const checkVersion = async () => {
             try {
                 // Fetch version.json from root with a cache buster

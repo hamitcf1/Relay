@@ -22,6 +22,7 @@ import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
 import { useFormatting } from '@/hooks/useFormatting'
 import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
 import { TextFormatter } from '@/components/ui/TextFormatter'
+import { UserAvatar } from '@/components/ui/UserAvatar'
 import { useRef } from 'react'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
@@ -780,8 +781,16 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                                 </Badge>
                                             )}
                                             {note.assigned_staff_name && (
-                                                <Badge variant="outline" className="text-[10px] h-5 py-0 px-2 bg-primary/10 text-primary border-primary/20 flex items-center gap-1 font-medium">
-                                                    <User className="w-3 h-3" />
+                                                <Badge variant="outline" className="text-[10px] h-5 py-0 px-1.5 bg-primary/10 text-primary border-primary/20 flex items-center gap-1.5 font-medium">
+                                                    <UserAvatar
+                                                        user={{
+                                                            id: note.assigned_staff_uid || '',
+                                                            name: note.assigned_staff_name,
+                                                            settings: staff.find(s => s.uid === note.assigned_staff_uid)?.settings
+                                                        } as any}
+                                                        size="xs"
+                                                        className="w-3.5 h-3.5 border-none bg-transparent shadow-none"
+                                                    />
                                                     {note.assigned_staff_name}
                                                 </Badge>
                                             )}
@@ -1036,9 +1045,24 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                                         <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                             {/* Author - Hide for non-GMs if feedback */}
                                             {(user?.role === 'gm' || note.category !== 'feedback') && (
-                                                <span className="flex items-center gap-1">
-                                                    <User className="w-3.5 h-3.5" />
-                                                    {note.is_anonymous ? t('notes.anonymous') : note.created_by_name}
+                                                <span className="flex items-center gap-1.5">
+                                                    {!note.is_anonymous && (
+                                                        <UserAvatar
+                                                            user={{
+                                                                id: note.created_by,
+                                                                name: note.created_by_name,
+                                                                settings: staff.find(s => s.uid === note.created_by)?.settings
+                                                            } as any}
+                                                            size="xs"
+                                                            className="w-4 h-4 border-none bg-transparent shadow-none"
+                                                        />
+                                                    )}
+                                                    {note.is_anonymous ? (
+                                                        <>
+                                                            <User className="w-3.5 h-3.5" />
+                                                            {t('notes.anonymous')}
+                                                        </>
+                                                    ) : note.created_by_name}
                                                 </span>
                                             )}
 

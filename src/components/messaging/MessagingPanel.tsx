@@ -11,7 +11,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { UserAvatar } from '@/components/ui/UserAvatar'
 import { Badge } from '@/components/ui/badge'
 import { isSameDay, format } from 'date-fns'
 import { cn, formatDisplayDate } from '@/lib/utils'
@@ -225,11 +225,11 @@ export function MessagingPanel() {
                                         : "hover:bg-muted/50 border border-transparent"
                                 )}
                             >
-                                <Avatar className="w-8 h-8 border border-border">
-                                    <AvatarFallback className="bg-muted text-xs text-muted-foreground font-bold">
-                                        {s.name.substring(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <UserAvatar
+                                    user={{ id: s.uid, name: s.name, settings: s.settings } as any}
+                                    size="sm"
+                                    className="w-8 h-8 border border-border bg-muted shadow-none"
+                                />
                                 <div className="flex-1 text-left min-w-0">
                                     <div className="flex justify-between items-center">
                                         <p className={cn("text-sm font-medium truncate", activeConversation === s.uid ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")}>
@@ -276,11 +276,15 @@ export function MessagingPanel() {
                             </>
                         ) : (
                             <>
-                                <Avatar className="w-8 h-8 border border-border">
-                                    <AvatarFallback className="bg-muted text-muted-foreground text-xs font-bold">
-                                        {staff.find(s => s.uid === activeConversation)?.name.substring(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <UserAvatar
+                                    user={{
+                                        id: activeConversation,
+                                        name: staff.find(s => s.uid === activeConversation)?.name || '',
+                                        settings: staff.find(s => s.uid === activeConversation)?.settings
+                                    } as any}
+                                    size="sm"
+                                    className="w-8 h-8 border border-border bg-muted shadow-none"
+                                />
                                 <div>
                                     <h2 className="font-bold text-foreground">
                                         {staff.find(s => s.uid === activeConversation)?.name || t('roster.unknown')}
@@ -339,11 +343,15 @@ export function MessagingPanel() {
                                             className={cn("flex gap-3 max-w-[75%]", isMe ? "ml-auto flex-row-reverse" : "")}
                                         >
                                             {!isMe && (
-                                                <Avatar className="w-8 h-8 border border-border shrink-0">
-                                                    <AvatarFallback className="bg-muted text-[9px] text-muted-foreground">
-                                                        {msg.sender_name.substring(0, 2).toUpperCase()}
-                                                    </AvatarFallback>
-                                                </Avatar>
+                                                <UserAvatar
+                                                    user={{
+                                                        id: msg.sender_id,
+                                                        name: msg.sender_name,
+                                                        settings: staff.find(s => s.uid === msg.sender_id)?.settings
+                                                    } as any}
+                                                    size="sm"
+                                                    className="w-8 h-8 border border-border shrink-0 bg-muted shadow-none"
+                                                />
                                             )}
 
                                             <div className={cn(

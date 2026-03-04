@@ -1,7 +1,7 @@
 import { create } from 'zustand'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { ActivityLog } from '@/types'
+import type { ActivityLog, User } from '@/types'
 import { format, startOfWeek, endOfWeek } from 'date-fns'
 
 interface LeaderboardEntry {
@@ -9,6 +9,7 @@ interface LeaderboardEntry {
     userName: string
     totalMinutes: number
     rank: number
+    settings?: User['settings']
 }
 
 interface LeaderboardState {
@@ -76,17 +77,35 @@ export const useLeaderboardStore = create<LeaderboardStore>((set, get) => ({
             })
 
             // Convert to array and sort
-            const sortedEntries = Object.entries(userTotals)
-                .map(([userId, data]) => ({
-                    userId,
-                    userName: data.name,
-                    totalMinutes: Math.round(data.minutes),
-                    rank: 0
-                }))
-                .sort((a, b) => b.totalMinutes - a.totalMinutes)
-                .map((entry, index) => ({ ...entry, rank: index + 1 }))
+            const sortedEntries = await Promise.all(
+                Object.entries(userTotals)
+                    .map(async ([userId, data]) => {
+                        // Fetch user settings for each user in the leaderboard
+                        // In a real app with many users, you might want to cache this or batch fetch
+                        let settings = undefined
+                        try {
+                            const userDoc = await getDoc(doc(db, 'users', userId))
+                            if (userDoc.exists()) {
+                                settings = (userDoc.data() as User).settings
+                            }
+                        } catch (e) {
+                            console.warn(`Failed to fetch settings for user ${userId}`, e)
+                        }
 
-            set({ entries: sortedEntries, loading: false })
+                        return {
+                            userId,
+                            userName: data.name,
+                            totalMinutes: Math.round(data.minutes),
+                            rank: 0,
+                            settings
+                        }
+                    })
+            )
+
+            sortedEntries.sort((a, b) => b.totalMinutes - a.totalMinutes)
+            const finalEntries = sortedEntries.map((entry, index) => ({ ...entry, rank: index + 1 }))
+
+            set({ entries: finalEntries, loading: false })
 
         } catch (error) {
             console.error("Error loading leaderboard:", error)

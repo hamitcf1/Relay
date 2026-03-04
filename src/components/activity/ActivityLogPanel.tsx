@@ -20,11 +20,13 @@ import {
 } from 'lucide-react'
 import { useActivityStore } from '@/stores/activityStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useRosterStore } from '@/stores/rosterStore'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import type { ActivityAction } from '@/types'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { UserAvatar } from '@/components/ui/UserAvatar'
 
 const ACTION_META: Record<ActivityAction, { icon: typeof LogIn; label: string; color: string }> = {
     login: { icon: LogIn, label: 'Giriş', color: 'text-emerald-400' },
@@ -52,6 +54,7 @@ function formatTimestamp(ts: any): string {
 export function ActivityLogPanel() {
     const { hotel } = useHotelStore()
     const { logs, loading, subscribeToActivityLogs } = useActivityStore()
+    const staff = useRosterStore(state => state.staff)
     const [filterUser, setFilterUser] = useState('')
     const [filterAction, setFilterAction] = useState<string>('all')
 
@@ -153,6 +156,15 @@ export function ActivityLogPanel() {
                                             {/* Content */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
+                                                    <UserAvatar
+                                                        user={{
+                                                            id: log.user_id,
+                                                            name: log.user_name,
+                                                            settings: staff.find(s => s.uid === log.user_id)?.settings
+                                                        } as any}
+                                                        size="xs"
+                                                        className="w-5 h-5 border-none bg-transparent shadow-none"
+                                                    />
                                                     <span className="text-sm font-semibold text-foreground truncate">
                                                         {log.user_name}
                                                     </span>
