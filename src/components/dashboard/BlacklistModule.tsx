@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useBlacklistStore } from '@/stores/blacklistStore'
+import { useLanguageStore } from '@/stores/languageStore'
 
 interface BlacklistModuleProps {
     hotelId: string
@@ -17,6 +18,7 @@ interface BlacklistModuleProps {
 export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
     const { user } = useAuthStore()
     const { blacklistedGuests, loading, addBlacklistedGuest, removeBlacklistedGuest } = useBlacklistStore()
+    const { t } = useLanguageStore()
 
     const [isAdding, setIsAdding] = useState(false)
     const [submitting, setSubmitting] = useState(false)
@@ -65,7 +67,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
 
     const handleDelete = async (guestId: string) => {
         if (!hotelId || !user) return
-        if (confirm('Are you sure you want to remove this guest from the blacklist?')) {
+        if (confirm(t('blacklist.deleteConfirm'))) {
             try {
                 await removeBlacklistedGuest(hotelId, guestId)
             } catch (error) {
@@ -80,7 +82,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
             title={
                 <div className="flex items-center gap-2">
                     <Ban className="w-5 h-5 text-red-500" />
-                    <span className="font-semibold text-lg text-red-500">Blacklisted Guests</span>
+                    <span className="font-semibold text-lg text-red-500">{t('blacklist.title')}</span>
                 </div>
             }
             defaultCollapsed={false}
@@ -95,7 +97,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
                     }}
                 >
                     <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Add Guest</span>
+                    <span className="hidden sm:inline">{t('blacklist.addGuest')}</span>
                 </Button>
             }
         >
@@ -112,7 +114,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
                                 <div className="flex items-center justify-between mb-2">
                                     <h4 className="font-semibold text-red-500 flex items-center gap-2">
                                         <Ban className="w-4 h-4" />
-                                        Add to Blacklist
+                                        {t('blacklist.addTitle')}
                                     </h4>
                                     <Button
                                         type="button"
@@ -127,32 +129,32 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-muted-foreground">First Name *</label>
+                                        <label className="text-xs font-medium text-muted-foreground">{t('blacklist.firstName')}</label>
                                         <Input
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            placeholder="John"
+                                            placeholder={t('blacklist.firstNamePlaceholder')}
                                             className="bg-background/50 border-red-500/20 focus-visible:ring-red-500/50"
                                             required
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-muted-foreground">Last Name</label>
+                                        <label className="text-xs font-medium text-muted-foreground">{t('blacklist.lastName')}</label>
                                         <Input
                                             value={formData.surname}
                                             onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
-                                            placeholder="Doe"
+                                            placeholder={t('blacklist.lastNamePlaceholder')}
                                             className="bg-background/50 border-red-500/20 focus-visible:ring-red-500/50"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground">Reason *</label>
+                                    <label className="text-xs font-medium text-muted-foreground">{t('blacklist.reason')}</label>
                                     <Textarea
                                         value={formData.reason}
                                         onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                                        placeholder="Detailed reason for blacklisting..."
+                                        placeholder={t('blacklist.reasonPlaceholder')}
                                         className="bg-background/50 border-red-500/20 focus-visible:ring-red-500/50 min-h-[80px]"
                                         required
                                     />
@@ -160,31 +162,31 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-muted-foreground">Phone Number(s)</label>
+                                        <label className="text-xs font-medium text-muted-foreground">{t('blacklist.phone')}</label>
                                         <Input
                                             value={formData.phone_numbers}
                                             onChange={(e) => setFormData({ ...formData, phone_numbers: e.target.value })}
-                                            placeholder="+123..., +456..."
+                                            placeholder={t('blacklist.phonePlaceholder')}
                                             className="bg-background/50 border-red-500/20 focus-visible:ring-red-500/50"
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs font-medium text-muted-foreground">Room Number(s)</label>
+                                        <label className="text-xs font-medium text-muted-foreground">{t('blacklist.room')}</label>
                                         <Input
                                             value={formData.room_numbers}
                                             onChange={(e) => setFormData({ ...formData, room_numbers: e.target.value })}
-                                            placeholder="101, 102..."
+                                            placeholder={t('blacklist.roomPlaceholder')}
                                             className="bg-background/50 border-red-500/20 focus-visible:ring-red-500/50"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground">Related Persons</label>
+                                    <label className="text-xs font-medium text-muted-foreground">{t('blacklist.relatedPersons')}</label>
                                     <Input
                                         value={formData.related_persons}
                                         onChange={(e) => setFormData({ ...formData, related_persons: e.target.value })}
-                                        placeholder="Family members or friends..."
+                                        placeholder={t('blacklist.relatedPlaceholder')}
                                         className="bg-background/50 border-red-500/20 focus-visible:ring-red-500/50"
                                     />
                                 </div>
@@ -195,7 +197,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
                                         disabled={submitting || !formData.name || !formData.reason}
                                         className="bg-red-500 hover:bg-red-600 text-white"
                                     >
-                                        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add to Blacklist'}
+                                        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : t('blacklist.submit')}
                                     </Button>
                                 </div>
                             </form>
@@ -210,7 +212,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
                 ) : blacklistedGuests.length === 0 ? (
                     <div className="py-8 text-center text-muted-foreground border border-dashed border-border rounded-xl">
                         <Ban className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                        <p className="text-sm">No blacklisted guests.</p>
+                        <p className="text-sm">{t('blacklist.empty')}</p>
                     </div>
                 ) : (
                     <div className="grid gap-3">
@@ -226,7 +228,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
                                                 {guest.name} {guest.surname}
                                             </h4>
                                             <div className="text-[10px] text-muted-foreground">
-                                                Added by {guest.created_by_name} • {guest.created_at.toLocaleDateString()}
+                                                {t('blacklist.addedBy', { name: guest.created_by_name || '', date: guest.created_at.toLocaleDateString() })}
                                             </div>
                                         </div>
                                     </div>
@@ -244,7 +246,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
                                 </div>
 
                                 <div className="bg-red-500/5 text-red-400/90 p-2 rounded-lg text-xs leading-relaxed border border-red-500/10 mb-3">
-                                    <span className="font-medium text-red-500">Reason:</span> {guest.reason}
+                                    <span className="font-medium text-red-500">{t('blacklist.reasonLabel')}</span> {guest.reason}
                                 </div>
 
                                 <div className="flex flex-wrap gap-2">

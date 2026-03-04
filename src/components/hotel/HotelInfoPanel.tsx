@@ -537,13 +537,34 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
                         {info.iban && (
                             <div className="p-3 bg-muted/50 rounded-lg">
-                                <div className="flex items-center gap-2 mb-1">
+                                <div className="flex items-center gap-2 mb-2">
                                     <CreditCard className="w-4 h-4 text-primary" />
                                     <span className="text-xs text-muted-foreground">{t('hotel.bankAccount')}</span>
                                 </div>
-                                <p className="font-mono text-sm text-foreground">{info.iban}</p>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="bg-background/50 px-3 py-1.5 rounded border border-border flex items-center">
+                                        <span className="font-mono text-sm font-bold text-foreground tracking-widest">{info.iban}</span>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground shrink-0"
+                                        onClick={(e) => {
+                                            navigator.clipboard.writeText(info.iban || '')
+                                            const btn = e.currentTarget
+                                            const originalHTML = btn.innerHTML
+                                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 text-emerald-500"><path d="M20 6 9 17l-5-5"/></svg>'
+                                            setTimeout(() => { btn.innerHTML = originalHTML }, 2000)
+                                        }}
+                                        title="Copy IBAN"
+                                    >
+                                        <div className="relative">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                                        </div>
+                                    </Button>
+                                </div>
                                 {info.bank_name && (
-                                    <p className="text-xs text-muted-foreground mt-1">{info.bank_name}</p>
+                                    <p className="text-xs text-muted-foreground px-1">{info.bank_name}</p>
                                 )}
                             </div>
                         )}

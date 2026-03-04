@@ -864,6 +864,28 @@ type Translations = {
     'demo.enter.gm': string
     'demo.enter.staff': string
     'demo.back': string
+
+    // Blacklist
+    'blacklist.title': string
+    'blacklist.addGuest': string
+    'blacklist.addTitle': string
+    'blacklist.firstName': string
+    'blacklist.firstNamePlaceholder': string
+    'blacklist.lastName': string
+    'blacklist.lastNamePlaceholder': string
+    'blacklist.reason': string
+    'blacklist.reasonPlaceholder': string
+    'blacklist.phone': string
+    'blacklist.phonePlaceholder': string
+    'blacklist.room': string
+    'blacklist.roomPlaceholder': string
+    'blacklist.relatedPersons': string
+    'blacklist.relatedPlaceholder': string
+    'blacklist.submit': string
+    'blacklist.deleteConfirm': string
+    'blacklist.empty': string
+    'blacklist.addedBy': string
+    'blacklist.reasonLabel': string
 }
 
 const translations: Record<Language, Translations> = {
@@ -1717,6 +1739,27 @@ const translations: Record<Language, Translations> = {
         'landing.feature.analytics.desc': 'Visual insights into hotel performance and efficiency.',
         'landing.feature.vault.title': 'Secret Vault',
 
+        // Blacklist
+        'blacklist.title': 'Blacklisted Guests',
+        'blacklist.addGuest': 'Add Guest',
+        'blacklist.addTitle': 'Add to Blacklist',
+        'blacklist.firstName': 'First Name *',
+        'blacklist.firstNamePlaceholder': 'John',
+        'blacklist.lastName': 'Last Name',
+        'blacklist.lastNamePlaceholder': 'Doe',
+        'blacklist.reason': 'Reason *',
+        'blacklist.reasonPlaceholder': 'Detailed reason for blacklisting...',
+        'blacklist.phone': 'Phone Number(s)',
+        'blacklist.phonePlaceholder': '+123..., +456...',
+        'blacklist.room': 'Room Number(s)',
+        'blacklist.roomPlaceholder': '101, 102...',
+        'blacklist.relatedPersons': 'Related Persons',
+        'blacklist.relatedPlaceholder': 'Family members or friends...',
+        'blacklist.submit': 'Add to Blacklist',
+        'blacklist.deleteConfirm': 'Are you sure you want to remove this guest from the blacklist?',
+        'blacklist.empty': 'No blacklisted guests.',
+        'blacklist.addedBy': 'Added by {name} • {date}',
+        'blacklist.reasonLabel': 'Reason:',
     },
     tr: {
         // Auth & Setup
@@ -2566,6 +2609,28 @@ const translations: Record<Language, Translations> = {
         'demo.enter.gm': 'Yönetici Olarak Gir',
         'demo.enter.staff': 'Resepsiyonist Olarak Gir',
         'demo.back': 'Ana Sayfaya Dön',
+
+        // Blacklist
+        'blacklist.title': 'Yasaklı Misafirler (Kara Liste)',
+        'blacklist.addGuest': 'Misafir Ekle',
+        'blacklist.addTitle': 'Kara Listeye Ekle',
+        'blacklist.firstName': 'Ad *',
+        'blacklist.firstNamePlaceholder': 'Ahmet',
+        'blacklist.lastName': 'Soyad',
+        'blacklist.lastNamePlaceholder': 'Yılmaz',
+        'blacklist.reason': 'Sebep *',
+        'blacklist.reasonPlaceholder': 'Kara listeye alınma sebebi...',
+        'blacklist.phone': 'Telefon Numarası/Numaraları',
+        'blacklist.phonePlaceholder': '+90 532...',
+        'blacklist.room': 'Oda Numarası/Numaraları',
+        'blacklist.roomPlaceholder': '101, 102...',
+        'blacklist.relatedPersons': 'İlgili Kişiler',
+        'blacklist.relatedPlaceholder': 'Aile üyeleri veya arkadaşları...',
+        'blacklist.submit': 'Kara Listeye Ekle',
+        'blacklist.deleteConfirm': 'Bu misafiri kara listeden çıkarmak istediğinize emin misiniz?',
+        'blacklist.empty': 'Kara listede misafir bulunmuyor.',
+        'blacklist.addedBy': 'Ekleyen: {name} • {date}',
+        'blacklist.reasonLabel': 'Sebep:',
     },
 }
 
