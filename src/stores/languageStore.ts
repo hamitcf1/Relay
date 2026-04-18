@@ -679,6 +679,14 @@ type Translations = {
     'landing.feature.tasks.title': string
     'landing.feature.tasks.desc': string
 
+    'landing.footer.community': string
+    'landing.footer.download': string
+
+    'download.title': string
+    'download.subtitle': string
+    'community.title': string
+    'community.subtitle': string
+
     // Landing Page Navbar
     'landing.nav.features': string
     'landing.nav.pricing': string
@@ -1770,6 +1778,14 @@ const translations: Record<Language, Translations> = {
         'blacklist.empty': 'No blacklisted guests.',
         'blacklist.addedBy': 'Added by {name} • {date}',
         'blacklist.reasonLabel': 'Reason:',
+
+        'landing.footer.community': 'Community',
+        'landing.footer.download': 'Download App',
+
+        'download.title': 'Download Aetherius Relay',
+        'download.subtitle': 'Get the power of Relay on all your devices.',
+        'community.title': 'Relay Community',
+        'community.subtitle': 'Connect with other hospitality professionals.',
     },
     tr: {
         // Auth & Setup
@@ -2576,6 +2592,14 @@ const translations: Record<Language, Translations> = {
         'landing.feature.vault.desc': 'Acente girişleri ve KBS için şifre korumalı depolama.',
         'landing.feature.tasks.title': 'Otomatik Görevler',
         'landing.feature.tasks.desc': 'Tekrarlayan kontrol listeleri her gün uyumluluğu sağlar.',
+
+        'landing.footer.community': 'Topluluk',
+        'landing.footer.download': 'Uygulamayı İndir',
+
+        'download.title': "Aetherius Relay'i İndirin",
+        'download.subtitle': 'Relay gücünü tüm cihazlarınıza taşıyın.',
+        'community.title': 'Relay Topluluğu',
+        'community.subtitle': 'Diğer konaklama profesyonelleriyle bağlantı kurun.',
 
         // Pricing Page
         'pricing.title': 'Planlar ve Fiyatlandırma',

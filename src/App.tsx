@@ -12,7 +12,9 @@ import {
     UpdatesPage,
     FeaturesPage,
     BlogPostPage,
-    ContactPage
+    ContactPage,
+    DownloadPage,
+    CommunityPage
 } from '@/pages'
 import { PrivacyPage } from '@/pages/legal/PrivacyPage'
 import { TermsPage } from '@/pages/legal/TermsPage'
@@ -59,6 +61,8 @@ function App() {
                         <Route path="/legal/privacy" element={<PrivacyPage />} />
                         <Route path="/legal/terms" element={<TermsPage />} />
                         <Route path="/legal/status" element={<StatusPage />} />
+                        <Route path="/download" element={<DownloadPage onBack={() => window.history.back()} />} />
+                        <Route path="/community" element={<CommunityPage onBack={() => window.history.back()} />} />
                         <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/how-it-works" element={<HowItWorksPage />} />
                         <Route path="/blog" element={<BlogPage />} />
