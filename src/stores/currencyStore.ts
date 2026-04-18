@@ -33,9 +33,9 @@ export const useCurrencyStore = create<CurrencyState>((set) => ({
 
             // Parallel fetch
             const [usdRes, eurRes, gbpRes] = await Promise.all([
-                fetch('https://api.frankfurter.app/latest?from=USD&to=TRY'),
-                fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY'),
-                fetch('https://api.frankfurter.app/latest?from=GBP&to=TRY')
+                fetch('https://open.er-api.com/v6/latest/USD'),
+                fetch('https://open.er-api.com/v6/latest/EUR'),
+                fetch('https://open.er-api.com/v6/latest/GBP')
             ]);
 
             if (!usdRes.ok || !eurRes.ok || !gbpRes.ok) throw new Error("Failed to fetch rates");
