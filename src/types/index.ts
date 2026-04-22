@@ -65,6 +65,14 @@ export interface UserSettings {
     avatar_emoji?: string
 }
 
+export interface StaffMember {
+    uid: string
+    name: string
+    role?: string
+    is_hidden_in_roster?: boolean
+    settings?: UserSettings
+}
+
 export interface HotelInfo {
     name: string
     address: string

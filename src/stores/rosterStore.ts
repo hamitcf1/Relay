@@ -3,18 +3,9 @@ import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/f
 import { db } from '@/lib/firebase'
 import { format, addDays, parseISO } from 'date-fns'
 
-export type ShiftType = 'A' | 'B' | 'C' | 'E' | 'OFF'
+import { type StaffMember } from '@/types'
 
-interface StaffMember {
-    uid: string
-    name: string
-    role?: string
-    is_hidden_in_roster?: boolean
-    settings?: {
-        avatar_style?: 'initials' | 'name' | 'emoji'
-        avatar_emoji?: string
-    }
-}
+export type ShiftType = 'A' | 'B' | 'C' | 'E' | 'OFF'
 
 interface RosterState {
     staff: StaffMember[]

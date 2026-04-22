@@ -1,7 +1,8 @@
-import { LayoutDashboard, Activity, User } from 'lucide-react'
+import { LayoutDashboard, Activity, User, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useChatStore } from '@/stores/chatStore'
 
 interface MobileNavProps {
     activeTab: string
@@ -11,19 +12,25 @@ interface MobileNavProps {
 
 export function MobileNav({ activeTab, setActiveTab, onOpenProfile }: MobileNavProps) {
     const { t } = useLanguageStore()
+    const toggleChat = useChatStore(state => state.toggleOpen)
 
     const tabs = [
         {
             id: 'overview',
             label: t('module.overview') || 'Overview',
-            icon: LayoutDashboard // Or Home
+            icon: LayoutDashboard
         },
         {
             id: 'operations',
             label: t('module.operations') || 'Operations',
-            icon: Activity // Or Grid
+            icon: Activity 
         },
-        // We can add more if needed, e.g. "Notifications" or "Search"
+        {
+            id: 'ai',
+            label: 'AI Chat',
+            icon: Sparkles,
+            action: toggleChat
+        }
     ]
 
     return (
@@ -38,12 +45,12 @@ export function MobileNav({ activeTab, setActiveTab, onOpenProfile }: MobileNavP
                     {/* Active Tab Indicator (Optional animated background) */}
                     {/* Simplified implementation for now: plain buttons */}
 
-                    {tabs.map((tab) => {
+                    {tabs.map((tab: any) => {
                         const isActive = activeTab === tab.id
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => tab.action ? tab.action() : setActiveTab(tab.id)}
                                 className={cn(
                                     "relative flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all duration-300",
                                     isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"

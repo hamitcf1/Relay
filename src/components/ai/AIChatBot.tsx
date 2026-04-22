@@ -463,33 +463,7 @@ export function AIChatBot() {
 
     return createPortal(
         <div className="fixed inset-0 z-[99999] pointer-events-none font-sans" style={{ direction: 'ltr' }}>
-            {/* FAB Button */}
-            <AnimatePresence>
-                {!isOpen && (
-                    <motion.button
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={toggleOpen}
-                        id="ai-toggle-btn"
-                        className={cn(
-                            "fixed bottom-24 right-4 md:bottom-6 md:right-6",
-                            "w-14 h-14 rounded-2xl",
-                            "bg-gradient-to-br from-violet-500 to-indigo-600",
-                            "text-white shadow-2xl shadow-violet-500/30",
-                            "flex items-center justify-center",
-                            "hover:shadow-violet-500/50 transition-shadow",
-                            "cursor-pointer border-0 overflow-hidden isolate pointer-events-auto"
-                        )}
-                    >
-                        <Sparkles className="w-6 h-6 relative z-10" />
-                    </motion.button>
-                )}
-            </AnimatePresence>
-
-            {/* Chat Panel */}
+            {/* Panel */}
             <AnimatePresence>
                 {isOpen && (
                     <>

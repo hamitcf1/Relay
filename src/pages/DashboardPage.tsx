@@ -31,7 +31,7 @@ import { useRosterStore } from '@/stores/rosterStore'
 import { useStaffMealStore } from '@/stores/staffMealStore'
 import { useBlacklistStore } from '@/stores/blacklistStore'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { MessagingPanel } from '@/components/messaging/MessagingPanel'
 import { FeedbackSection } from '@/components/feedback/FeedbackSection'
 import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
@@ -41,14 +41,14 @@ import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
-import { MessageCircle, ShieldAlert, CalendarDays, Map, CreditCard, Clock as ClockIcon, EyeOff, DollarSign, ScrollText, BedDouble, Users } from 'lucide-react'
+import { Clock as ClockIcon, EyeOff } from 'lucide-react'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
-import { UserNav } from '@/components/layout/UserNav'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { OperationsGrid } from '@/components/dashboard/OperationsGrid'
 import { OverviewGrid } from '@/components/dashboard/OverviewGrid'
 import { ChevronLeft } from 'lucide-react'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { AppSidebar } from '@/components/layout/AppSidebar'
 
 export function DashboardPage() {
     const location = useLocation()
@@ -152,7 +152,7 @@ export function DashboardPage() {
     const [showTutorial, setShowTutorial] = useState(false)
 
     return (
-        <div className="h-[100dvh] overflow-hidden bg-background text-foreground flex flex-col font-sans selection:bg-primary/30 relative">
+        <div className="h-[100dvh] overflow-hidden bg-background text-foreground flex font-sans selection:bg-primary/30 relative">
             {/* Background Gradients (Cyber Theme) */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px]" />
@@ -162,302 +162,181 @@ export function DashboardPage() {
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
 
-            {/* Header */}
-            <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 z-50 transition-all duration-300 relative">
-                <div className="flex items-center gap-8">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                            <span className="font-bold text-primary-foreground">R</span>
-                        </div>
-                        <div className="hidden sm:block">
-                            <h1 className="font-semibold text-lg tracking-tight">Relay</h1>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium max-w-[150px] truncate">{hotel?.info.name}</p>
-                        </div>
-                    </div>
-
-                    {/* Dashboard Tabs List */}
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="hidden md:block">
-                        <TabsList className="bg-muted/50 border border-border h-9">
-                            <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
-                                {t('module.overview') || 'Genel Bakış'}
-                            </TabsTrigger>
-                            <TabsTrigger value="operations" className="text-xs data-[state=active]:bg-card data-[state=active]:text-foreground">
-                                {t('module.operations') || 'Operasyon Merkezi'}
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-
-                    <div className="hidden lg:flex items-center gap-2">
-                        <AnimatePresence>
-                            {showDateTime && (
-                                <DateTimeWidget />
-                            )}
-                        </AnimatePresence>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            onClick={() => setShowDateTime(!showDateTime)}
-                            title={showDateTime ? "Hide Time" : "Show Time"}
-                        >
-                            {showDateTime ? <EyeOff className="w-3.5 h-3.5" /> : <ClockIcon className="w-3.5 h-3.5" />}
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <div id="tour-notifications">
-                        <NotificationDropdown />
-                    </div>
-
-                    {/* User Profile */}
-                    <div id="tour-profile">
-                        <UserNav />
-                    </div>
-                </div>
-
-            </header >
-
-            {/* Mobile Bottom Navigation (Fixed) */}
-            <MobileNav
+            {/* Application Sidebar (Desktop only) */}
+            <AppSidebar
                 activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                onOpenProfile={() => {
-                    // Trigger UserNav dropdown - for now we might need a better mobile profile solution
-                    // This is a temporary placeholder or we can route to settings
-                    // navigate('/settings') 
-                    // Or simple toggle:
-                    const trigger = document.querySelector('[data-radix-collection-item]') as HTMLElement;
-                    if (trigger) trigger.click();
+                operationTab={operationTab}
+                userRole={user?.role}
+                onNavigate={(tab, subTab) => {
+                    setActiveTab(tab)
+                    if (tab === 'operations' && subTab) {
+                        setOperationTab(subTab)
+                    } else if (tab === 'overview') {
+                        setOverviewTab('grid')
+                    }
                 }}
             />
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col transition-all duration-300">
-                <AnnouncementBanner />
-                <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
-                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
-
-                        {/* Mobile Header for Overview Sub-pages */}
-                        {isMobile && overviewTab !== 'grid' && (
-                            <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20">
-                                <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
-                                    <ChevronLeft className="w-5 h-5" />
-                                </Button>
-                                <span className="font-semibold text-lg capitalize">
-                                    {overviewTab === 'notes' ? t('module.shiftNotes') :
-                                        overviewTab === 'hotel-info' ? t('module.hotelInfo') :
-                                            overviewTab === 'calendar' ? t('module.calendar') :
-                                                overviewTab === 'menu' ? 'Daily Menu' :
-                                                    overviewTab === 'currency' ? t('currency.title') :
-                                                        overviewTab === 'roster' ? t('module.roster') : 'Overview'}
-                                </span>
+            {/* Main Content Pane */}
+            <div className="flex flex-col flex-1 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-0 relative min-w-0 overflow-hidden">
+                {/* Header Navbar (Visible mostly for Mobile layout and utility items) */}
+                <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 z-40 transition-all duration-300 relative h-16">
+                    <div className="flex items-center gap-8 md:hidden">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                                <span className="font-bold text-primary-foreground">R</span>
                             </div>
-                        )}
+                            <div>
+                                <h1 className="font-semibold text-lg tracking-tight leading-none text-foreground">Relay</h1>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium max-w-[150px] truncate">{hotel?.info.name}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                        {/* Mobile Grid View */}
-                        {isMobile && overviewTab === 'grid' ? (
-                            <OverviewGrid onSelect={(id) => setOverviewTab(id)} userRole={user?.role} />
-                        ) : (
-                            /* Desktop Grid OR Mobile Sub-view (when overviewTab != grid) */
-                            /* We use the same grid structure but conditionally hide columns/items based on overviewTab on mobile */
-                            <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0 h-auto lg:h-full",
-                                isMobile ? "p-4 pb-32" : ""
-                            )}>
-                                {/* -- LEFT COLUMN: Shift Notes + Roster -- */}
-                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative pr-2 scrollbar-thin",
-                                    isMobile && overviewTab !== 'notes' && overviewTab !== 'roster' && "hidden"
-                                )}>
-                                    <div id="tour-logs" className={cn(isMobile && overviewTab !== 'notes' && "hidden")}>
-                                        <ShiftNotes hotelId={hotel?.id || ''} />
+                    <div className="flex-1" />
+
+                    <div className="flex items-center gap-3">
+                        <div className="hidden lg:flex items-center gap-2 mr-2">
+                            <AnimatePresence>
+                                {showDateTime && (
+                                    <DateTimeWidget />
+                                )}
+                            </AnimatePresence>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                onClick={() => setShowDateTime(!showDateTime)}
+                                title={showDateTime ? "Hide Time" : "Show Time"}
+                            >
+                                {showDateTime ? <EyeOff className="w-3.5 h-3.5" /> : <ClockIcon className="w-3.5 h-3.5" />}
+                            </Button>
+                        </div>
+                        <div id="tour-notifications" className="mr-2">
+                            <NotificationDropdown />
+                        </div>
+                    </div>
+                </header>
+
+                <main className="flex-1 overflow-hidden p-4 lg:p-6 flex flex-col transition-all duration-300 relative min-h-0 bg-background/30">
+                    <AnnouncementBanner />
+                    
+                    <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
+                        
+                        {/* OVERVIEW VIEW */}
+                        <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                            {isMobile && overviewTab !== 'grid' && (
+                                <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20 mb-4 rounded-xl">
+                                    <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
+                                        <ChevronLeft className="w-5 h-5" />
+                                    </Button>
+                                    <span className="font-semibold text-lg capitalize">
+                                        {overviewTab === 'notes' ? t('module.shiftNotes') :
+                                            overviewTab === 'hotel-info' ? t('module.hotelInfo') :
+                                                overviewTab === 'calendar' ? t('module.calendar') :
+                                                    overviewTab === 'menu' ? 'Daily Menu' :
+                                                        overviewTab === 'currency' ? t('currency.title') :
+                                                            overviewTab === 'roster' ? t('module.roster') : 'Overview'}
+                                    </span>
+                                </div>
+                            )}
+
+                            {isMobile && overviewTab === 'grid' ? (
+                                <OverviewGrid onSelect={(id) => setOverviewTab(id)} userRole={user?.role} />
+                            ) : (
+                                <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0 h-auto lg:h-full", isMobile ? "p-0 pb-32" : "")}>
+                                    {/* Left Column */}
+                                    <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative lg:pr-2 custom-scrollbar",
+                                        isMobile && overviewTab !== 'notes' && overviewTab !== 'roster' && "hidden"
+                                    )}>
+                                        <div id="tour-logs" className={cn(isMobile && overviewTab !== 'notes' && "hidden")}>
+                                            <ShiftNotes hotelId={hotel?.id || ''} />
+                                        </div>
+                                        {(user?.role === 'gm' || user?.role === 'receptionist') && (
+                                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className={cn(isMobile && overviewTab !== 'roster' && "hidden")}>
+                                                <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                            </motion.div>
+                                        )}
+                                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className={cn(isMobile && overviewTab !== 'roster' && "hidden")}>
+                                            <BlacklistModule hotelId={hotel?.id || ''} />
+                                        </motion.div>
+                                        <ScrollToTopButton />
                                     </div>
 
-                                    {/* Weekly Roster */}
-                                    {(user?.role === 'gm' || user?.role === 'receptionist') && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                            transition={{ duration: 0.5, delay: 0.2 }}
-                                            className={cn(isMobile && overviewTab !== 'roster' && "hidden")}
-                                        >
-                                            <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                    {/* Right Column */}
+                                    <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative lg:pr-2 custom-scrollbar pb-20 lg:pb-0",
+                                        isMobile && !['hotel-info', 'menu', 'currency', 'calendar'].includes(overviewTab) && "hidden lg:flex"
+                                    )}>
+                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cn(isMobile && overviewTab !== 'hotel-info' && "hidden")}>
+                                            <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                         </motion.div>
-                                    )}
-
-                                    {/* Blacklisted Guests */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ duration: 0.5, delay: 0.3 }}
-                                        className={cn(isMobile && overviewTab !== 'roster' && "hidden")}
-                                    >
-                                        <BlacklistModule hotelId={hotel?.id || ''} />
-                                    </motion.div>
-
-                                    <ScrollToTopButton />
+                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className={cn(isMobile && overviewTab !== 'currency' && "hidden")}>
+                                            <CurrencyWidget />
+                                        </motion.div>
+                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className={cn(isMobile && overviewTab !== 'menu' && "hidden")}>
+                                            <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                        </motion.div>
+                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className={cn(isMobile && overviewTab !== 'calendar' && "hidden")}>
+                                            <CalendarWidget hotelId={hotel?.id || ''} />
+                                        </motion.div>
+                                        <ScrollToTopButton />
+                                    </div>
                                 </div>
+                            )}
+                        </TabsContent>
 
-                                {/* -- RIGHT COLUMN: Hotel Info, Exchange Rates, Menu, Calendar -- */}
-                                <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative pr-2 scrollbar-thin pb-20 lg:pb-0",
-                                    isMobile && !['hotel-info', 'menu', 'currency', 'calendar'].includes(overviewTab) && "hidden lg:flex"
-                                )}>
-                                    {/* Hotel Info */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.1 }}
-                                        className={cn(isMobile && overviewTab !== 'hotel-info' && "hidden")}
-                                    >
-                                        <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                    </motion.div>
-
-                                    {/* Exchange Rates */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.15 }}
-                                        className={cn(isMobile && overviewTab !== 'currency' && "hidden")}
-                                    >
-                                        <CurrencyWidget />
-                                    </motion.div>
-
-                                    {/* Staff Daily Menu */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.2 }}
-                                        className={cn(isMobile && overviewTab !== 'menu' && "hidden")}
-                                    >
-                                        <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                    </motion.div>
-
-                                    {/* Calendar */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0, transitionEnd: { transform: "none" } }}
-                                        transition={{ delay: 0.25 }}
-                                        className={cn(isMobile && overviewTab !== 'calendar' && "hidden")}
-                                    >
-                                        <CalendarWidget hotelId={hotel?.id || ''} />
-                                    </motion.div>
-
-                                    <ScrollToTopButton />
-                                </div>
-                            </div>
-                        )}
-                    </TabsContent>
-
-                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
-                        <div className="flex flex-col h-full">
-                            <div className="flex-none px-4 pt-4 lg:px-6 lg:pt-6">
-                                <div className="flex flex-col gap-2 mb-6">
-                                    <h2 className="text-3xl font-bold text-foreground tracking-tight">{t('dashboard.operationsHub')}</h2>
-                                    <p className="text-muted-foreground text-lg font-sans">{t('dashboard.operationsDesc')}</p>
-                                </div>
-                            </div>
-
-                            <Tabs
-                                value={operationTab}
-                                onValueChange={setOperationTab}
-                                className="flex-1 flex flex-col min-h-0"
-                            >
+                        {/* OPERATIONS VIEW */}
+                        <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                            <Tabs value={operationTab} onValueChange={setOperationTab} className="flex-1 flex flex-col min-h-0">
                                 {/* Mobile Header for Sub-pages */}
-                                {isMobile && activeTab === 'operations' && operationTab !== 'grid' && (
-                                    <div className="flex items-center gap-2 px-4 py-2 border-b border-border/50">
+                                {isMobile && operationTab !== 'grid' && (
+                                    <div className="flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20 mb-4 rounded-xl">
                                         <Button variant="ghost" size="icon" onClick={() => setOperationTab('grid')} className="-ml-2">
                                             <ChevronLeft className="w-5 h-5" />
                                         </Button>
-                                        <span className="font-semibold text-lg capitalize">{t(`module.${operationTab}` as any) || operationTab}</span>
+                                        <span className="font-semibold text-lg capitalize">{(t(`module.${operationTab}` as any) as string) || operationTab}</span>
                                     </div>
                                 )}
 
-                                {/* Desktop Tabs List - Hide on mobile if we are in 'grid' view (which is default for operations root) */}
-                                <div className={cn("flex-none px-4 lg:px-6 mb-4", isMobile ? "hidden" : "block")}>
-                                    <TabsList className="bg-muted/50 p-1 rounded-xl border border-border h-12 w-full justify-start overflow-x-auto whitespace-nowrap no-scrollbar">
-                                        <TabsTrigger value="messaging" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <MessageCircle className="w-4 h-4" />
-                                            <span className="hidden sm:inline">{t('module.messaging')}</span>
-                                        </TabsTrigger>
-                                        <TabsTrigger value="feedback" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <ShieldAlert className="w-4 h-4" />
-                                            <span className="hidden sm:inline">{t('module.complaints')}</span>
-                                        </TabsTrigger>
-                                        <TabsTrigger value="off-days" id="tour-offdays" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <CalendarDays className="w-4 h-4" />
-                                            <span className="hidden sm:inline">{t('module.offDays')}</span>
-                                        </TabsTrigger>
-                                        <TabsTrigger value="tours" id="tour-tours" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <Map className="w-4 h-4" />
-                                            <span className="hidden sm:inline">{t('module.tours')}</span>
-                                        </TabsTrigger>
-                                        <TabsTrigger value="rooms" id="tour-rooms" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <BedDouble className="w-4 h-4" />
-                                            <span className="hidden sm:inline">{t('dashboard.rooms')}</span>
-                                        </TabsTrigger>
-                                        <TabsTrigger value="sales" id="tour-sales" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <CreditCard className="w-4 h-4" />
-                                            <span className="hidden sm:inline">{t('module.sales')}</span>
-                                        </TabsTrigger>
-                                        <TabsTrigger value="pricing" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <DollarSign className="w-4 h-4" />
-                                            <span className="inline">{t('module.pricing_label')}</span>
-                                        </TabsTrigger>
-                                        <TabsTrigger value="team" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 shrink-0">
-                                            <Users className="w-4 h-4" />
-                                            <span className="inline">{t('module.team_label')}</span>
-                                        </TabsTrigger>
-                                        {user?.role === 'gm' && (
-                                            <TabsTrigger value="activity" className="rounded-lg gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white px-4 shrink-0">
-                                                <ScrollText className="w-4 h-4" />
-                                                <span className="inline">{t('module.activity')}</span>
-                                            </TabsTrigger>
-                                        )}
-
-                                    </TabsList>
-                                </div>
-
-                                <div className="flex-1 min-h-0 bg-background/50 border-t border-border/50">
-                                    {/* Mobile Grid View */}
+                                <div className="flex-1 min-h-0">
                                     {isMobile && operationTab === 'grid' && (
                                         <OperationsGrid onSelect={(id) => setOperationTab(id)} userRole={user?.role} />
                                     )}
 
-                                    {/* Standard Tab Contents - hidden if mobile grid is active */}
                                     <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
-                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        <TabsContent value="messaging" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <MessagingPanel />
                                         </TabsContent>
-                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        <TabsContent value="sales" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <SalesPanel />
                                         </TabsContent>
-
-                                        {/* Scrollable Containers for other tabs */}
-                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        
+                                        <TabsContent value="feedback" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <FeedbackSection />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        <TabsContent value="off-days" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <OffDayScheduler />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        <TabsContent value="tours" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <TourCatalogue />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        <TabsContent value="rooms" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <RoomManagementPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        <TabsContent value="pricing" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <PricingPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                        <TabsContent value="team" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <LeaderboardPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
                                         {user?.role === 'gm' && (
-                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                                            <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                                 <ActivityLogPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
@@ -465,12 +344,21 @@ export function DashboardPage() {
                                     </div>
                                 </div>
                             </Tabs>
-                        </div>
-                    </TabsContent>
-                </Tabs>
-            </main >
+                        </TabsContent>
+                    </Tabs>
+                </main>
+            </div>
 
+            {/* Mobile Bottom Navigation Layout stays consistent */}
+            <MobileNav
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onOpenProfile={() => {
+                    const trigger = document.querySelector('[data-radix-collection-item]') as HTMLElement;
+                    if (trigger) trigger.click();
+                }}
+            />
             <AnnouncementModal />
-        </div >
+        </div>
     )
 }
