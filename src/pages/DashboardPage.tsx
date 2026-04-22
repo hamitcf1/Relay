@@ -236,7 +236,7 @@ export function DashboardPage() {
             <main className="flex-1 overflow-hidden p-4 lg:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col transition-all duration-300">
                 <AnnouncementBanner />
                 <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
-                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden">
+                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
 
                         {/* Mobile Header for Overview Sub-pages */}
                         {isMobile && overviewTab !== 'grid' && (
@@ -347,7 +347,7 @@ export function DashboardPage() {
                         )}
                     </TabsContent>
 
-                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden">
+                    <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                         <div className="flex flex-col h-full">
                             <div className="flex-none px-4 pt-4 lg:px-6 lg:pt-6">
                                 <div className="flex flex-col gap-2 mb-6">
@@ -424,40 +424,40 @@ export function DashboardPage() {
 
                                     {/* Standard Tab Contents - hidden if mobile grid is active */}
                                     <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
-                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 page-enter">
+                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <MessagingPanel />
                                         </TabsContent>
-                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 page-enter">
+                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <SalesPanel />
                                         </TabsContent>
 
                                         {/* Scrollable Containers for other tabs */}
-                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
+                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <FeedbackSection />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
+                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <OffDayScheduler />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
+                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <TourCatalogue />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
+                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <RoomManagementPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
+                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <PricingPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
+                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                             <LeaderboardPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
                                         {user?.role === 'gm' && (
-                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
+                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                                                 <ActivityLogPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
