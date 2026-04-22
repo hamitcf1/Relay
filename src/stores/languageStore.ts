@@ -2127,9 +2127,9 @@ const translations: Record<Language, Translations> = {
 
         // Shifts & Roster
         'shift.morning': 'Sabah',
-        'shift.afternoon': 'Öğle',
+        'shift.afternoon': 'Akşam',
         'shift.night': 'Gece',
-        'shift.extra': 'Ekstra',
+        'shift.extra': 'Ara Shift',
         'shift.off': 'İzinli',
         'shift.none': 'Yok',
         'shift.welcome': 'Hoşgeldiniz! Lütfen vardiya verilerinizi başlatın.',
