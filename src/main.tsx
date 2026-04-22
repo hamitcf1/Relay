@@ -3,6 +3,11 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
+// Fix for Vite chunk load errors after deployment
+window.addEventListener('vite:preloadError', () => {
+    window.location.reload();
+});
+
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <App />

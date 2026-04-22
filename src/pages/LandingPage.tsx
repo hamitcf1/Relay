@@ -78,7 +78,7 @@ export function LandingPage() {
             <section className="h-screen relative flex items-center justify-center overflow-hidden shrink-0">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-                    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+                    <div className="absolute top-0 left-0 w-full h-full bg-black/5 opacity-5" />
                 </div>
 
                 <motion.div
