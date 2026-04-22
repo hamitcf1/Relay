@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import {
     collection,
     doc,
@@ -133,6 +134,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         // 2. Add Sale First to get ID
         const docRef = await addDoc(salesRef, saleDocData)
         const saleId = docRef.id
+        toast.success(`Sale added: ${saleData.name}`)
 
         // 3. If Tour/Transfer, create Calendar Event automatically
         if (saleData.type === 'tour' || saleData.type === 'transfer') {
@@ -196,6 +198,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 
         updateData.updated_at = serverTimestamp()
         await updateDoc(saleRef, updateData)
+        toast.success('Sale updated')
 
         // Sync to calendar if critical fields changed
         const currentSale = get().sales.find(s => s.id === saleId)
@@ -232,6 +235,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         const sale = get().sales.find(s => s.id === saleId)
         const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
         await deleteDoc(saleRef)
+        toast.success('Sale deleted')
 
         // Also delete calendar event if exists
         if (sale?.calendar_event_id) {
@@ -289,6 +293,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             payment_status: paymentStatus,
             payments: sanitizedPayments
         })
+        toast.success(paymentStatus === 'paid' ? 'Fully paid! ✓' : `Payment collected: ${amount} ${paymentCurrency}`)
 
         // Sync to calendar
         if (sale.calendar_event_id) {

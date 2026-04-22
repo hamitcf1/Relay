@@ -20,6 +20,7 @@ import { useFormatting } from '@/hooks/useFormatting'
 import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
 import { TextFormatter } from '@/components/ui/TextFormatter'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
@@ -28,6 +29,7 @@ export function MessagingPanel() {
     const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat, deleteMessage } = useMessageStore()
     const { staff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
+    const confirm = useConfirm()
     const [searchParams] = useSearchParams()
 
     const [activeConversation, setActiveConversation] = useState<string>('all') // 'all' or user uid
@@ -304,10 +306,14 @@ export function MessagingPanel() {
                             className="h-8 w-8 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 ml-2"
                             title={t('messaging.clearTooltip')}
                             onClick={async () => {
-                                if (window.confirm(t('messaging.clearChatConfirm'))) {
-                                    if (hotel?.id && user?.uid) {
-                                        await clearChat(hotel.id, user.uid, activeConversation)
-                                    }
+                                const confirmed = await confirm({
+                                    title: t('messaging.clearChatConfirm'),
+                                    description: t('messaging.clearTooltip'),
+                                    variant: 'destructive',
+                                    confirmLabel: t('common.delete'),
+                                })
+                                if (confirmed && hotel?.id && user?.uid) {
+                                    await clearChat(hotel.id, user.uid, activeConversation)
                                 }
                             }}
                         >
@@ -372,10 +378,15 @@ export function MessagingPanel() {
                                                 {/* Delete Message Button */}
                                                 {(isMe || user?.role === 'gm') && (
                                                     <button
-                                                        onClick={(e) => {
+                                                        onClick={async (e) => {
                                                             e.stopPropagation()
-                                                            if (confirm(t('messaging.deleteMessageConfirm'))) {
-                                                                if (hotel?.id) deleteMessage(hotel.id, msg.id)
+                                                            const confirmed = await confirm({
+                                                                title: t('messaging.deleteMessageConfirm'),
+                                                                variant: 'destructive',
+                                                                confirmLabel: t('common.delete'),
+                                                            })
+                                                            if (confirmed && hotel?.id) {
+                                                                deleteMessage(hotel.id, msg.id)
                                                             }
                                                         }}
                                                         className={cn(

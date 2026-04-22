@@ -27,6 +27,8 @@ import { Badge } from '@/components/ui/badge'
 import { useLanguageStore } from '@/stores/languageStore'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
+import { useConfirm } from '@/components/ui/confirm-dialog'
+import { toast } from 'sonner'
 
 interface HotelInfoData {
     iban: string
@@ -67,6 +69,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
 
     const { user } = useAuthStore()
     const { hotel, updateHotelSettings } = useHotelStore()
+    const confirm = useConfirm()
     const isGM = user?.role === 'gm'
 
     // Fetch hotel info
@@ -152,7 +155,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
             setIsVaultUnlocked(true)
             setPasswordInput('')
         } else {
-            alert('Yanlış şifre!')
+            toast.error('Yanlış şifre!')
         }
     }
 
@@ -452,8 +455,13 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                 variant="ghost"
                                                 size="sm"
                                                 className="h-6 text-[10px] text-muted-foreground hover:text-destructive"
-                                                onClick={() => {
-                                                    if (confirm('Şifreyi sıfırlamak istiyor musunuz?')) {
+                                                onClick={async () => {
+                                                    const confirmed = await confirm({
+                                                        title: 'Şifreyi sıfırlamak istiyor musunuz?',
+                                                        variant: 'destructive',
+                                                        confirmLabel: 'Sıfırla',
+                                                    })
+                                                    if (confirmed) {
                                                         updateHotelSettings(hotel.id, { safe_password: '' })
                                                         setIsVaultUnlocked(false)
                                                     }
@@ -518,7 +526,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                         await updateDoc(doc(db, 'hotels', hotel.id), { code: result })
                                                     } catch (e) {
                                                         console.error("Code generation failed:", e)
-                                                        alert("Failed to generate code. Please try again.")
+                                                        toast.error('Failed to generate code. Please try again.')
                                                     } finally {
                                                         setSaving(false)
                                                     }

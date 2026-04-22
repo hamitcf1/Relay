@@ -34,6 +34,8 @@ import {
     SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { useConfirm } from '@/components/ui/confirm-dialog'
+import { toast } from 'sonner'
 import type { RoomType, PricingCurrency, RoomPriceEntry, Agency, AgencyOverride, BaseOverride } from '@/types'
 
 const ROOM_TYPES: RoomType[] = ['standard', 'corner', 'corner_jacuzzi', 'triple', 'teras_suite']
@@ -41,6 +43,7 @@ const ROOM_TYPES: RoomType[] = ['standard', 'corner', 'corner_jacuzzi', 'triple'
 export function PricingPanel() {
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
+    const confirm = useConfirm()
     const isGM = user?.role === 'gm'
     const hotelId = user?.hotel_id
 
@@ -243,9 +246,14 @@ export function PricingPanel() {
                                                                         variant="ghost"
                                                                         size="icon"
                                                                         className="h-8 w-8 text-destructive opacity-0 group-hover/agency:opacity-100 transition-opacity hover:bg-destructive/10"
-                                                                        onClick={(e) => {
+                                                                        onClick={async (e) => {
                                                                             e.stopPropagation()
-                                                                            if (confirm(`Delete ${agency.name}?`)) {
+                                                                            const confirmed = await confirm({
+                                                                                title: `Delete ${agency.name}?`,
+                                                                                variant: 'destructive',
+                                                                                confirmLabel: t('common.delete'),
+                                                                            })
+                                                                            if (confirmed) {
                                                                                 removeAgency(hotelId, agency.id)
                                                                             }
                                                                         }}
@@ -467,9 +475,9 @@ function BulkRateEditor({ hotelId }: { hotelId: string }) {
             } else {
                 await setAgencyOverride(hotelId, target, overrideData)
             }
-            alert(t('pricing.save.success'))
+            toast.success(t('pricing.save.success'))
         } catch (error) {
-            alert(t('pricing.save.error'))
+            toast.error(t('pricing.save.error'))
         } finally {
             setIsSaving(false)
         }
@@ -563,6 +571,7 @@ function BulkRateEditor({ hotelId }: { hotelId: string }) {
 function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides: BaseOverride[], isGM: boolean, hotelId: string }) {
     const { t } = useLanguageStore()
     const { removeBaseOverride } = usePricingStore()
+    const confirm = useConfirm()
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
 
@@ -664,8 +673,13 @@ function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides
                                             variant="ghost"
                                             size="icon"
                                             className="opacity-0 group-hover/item:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 h-8 w-8 ml-4 shrink-0"
-                                            onClick={() => {
-                                                if (confirm('Delete this global override?')) {
+                                            onClick={async () => {
+                                                const confirmed = await confirm({
+                                                    title: t('common.deleteConfirm'),
+                                                    variant: 'destructive',
+                                                    confirmLabel: t('common.delete'),
+                                                })
+                                                if (confirmed) {
                                                     removeBaseOverride(hotelId, override.id)
                                                 }
                                             }}
@@ -722,8 +736,13 @@ function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-7 w-7 text-destructive hover:bg-destructive/10 opacity-0 group-row:hover:opacity-100 transition-opacity"
-                                                            onClick={() => {
-                                                                if (confirm('Delete this global override?')) {
+                                                            onClick={async () => {
+                                                                const confirmed = await confirm({
+                                                                    title: t('common.deleteConfirm'),
+                                                                    variant: 'destructive',
+                                                                    confirmLabel: t('common.delete'),
+                                                                })
+                                                                if (confirmed) {
                                                                     removeBaseOverride(hotelId, override.id)
                                                                 }
                                                             }}
@@ -843,6 +862,7 @@ function PriceLookup() {
 function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM: boolean, hotelId: string }) {
     const { t } = useLanguageStore()
     const { setAgencyOverride, removeAgencyOverride } = usePricingStore()
+    const confirm = useConfirm()
     const [isAdding, setIsAdding] = useState(false)
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
@@ -956,8 +976,13 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8 text-destructive opacity-0 group-hover/card:opacity-100 transition-all hover:bg-destructive/10 hover:scale-110"
-                                                onClick={() => {
-                                                    if (confirm('Delete this range?')) {
+                                                onClick={async () => {
+                                                    const confirmed = await confirm({
+                                                        title: t('common.deleteConfirm'),
+                                                        variant: 'destructive',
+                                                        confirmLabel: t('common.delete'),
+                                                    })
+                                                    if (confirmed) {
                                                         removeAgencyOverride(hotelId, agency.id, override.id)
                                                     }
                                                 }}
@@ -1033,8 +1058,13 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 text-destructive hover:bg-destructive/10 opacity-0 group-hover/row:opacity-100 transition-all hover:scale-110"
-                                                            onClick={() => {
-                                                                if (confirm('Delete this range?')) {
+                                                            onClick={async () => {
+                                                                const confirmed = await confirm({
+                                                                    title: t('common.deleteConfirm'),
+                                                                    variant: 'destructive',
+                                                                    confirmLabel: t('common.delete'),
+                                                                })
+                                                                if (confirmed) {
                                                                     removeAgencyOverride(hotelId, agency.id, override.id)
                                                                 }
                                                             }}
@@ -1064,6 +1094,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
     const { t } = useLanguageStore()
     const { basePrices, setBasePrices, updateAgencyBasePrices } = usePricingStore()
     const { user } = useAuthStore()
+    const confirm = useConfirm()
     const [editingId, setEditingId] = useState<string | null>(null) // 'global' or agency id
     const [editPrices, setEditPrices] = useState<Record<string, RoomPriceEntry>>({})
     const [isSaving, setIsSaving] = useState(false)
@@ -1276,8 +1307,13 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                                                     <Button
                                                         variant="ghost" size="icon"
                                                         className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                                                        onClick={() => {
-                                                            if (confirm(`${agency.name} silinsin mi?`)) {
+                                                        onClick={async () => {
+                                                            const confirmed = await confirm({
+                                                                title: `${agency.name} silinsin mi?`,
+                                                                variant: 'destructive',
+                                                                confirmLabel: t('common.delete'),
+                                                            })
+                                                            if (confirmed) {
                                                                 onRemoveAgency(agency.id)
                                                             }
                                                         }}

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/stores/authStore'
 import { useBlacklistStore } from '@/stores/blacklistStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 interface BlacklistModuleProps {
     hotelId: string
@@ -19,6 +20,7 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
     const { user } = useAuthStore()
     const { blacklistedGuests, loading, addBlacklistedGuest, removeBlacklistedGuest } = useBlacklistStore()
     const { t } = useLanguageStore()
+    const confirm = useConfirm()
 
     const [isAdding, setIsAdding] = useState(false)
     const [submitting, setSubmitting] = useState(false)
@@ -67,7 +69,12 @@ export function BlacklistModule({ hotelId }: BlacklistModuleProps) {
 
     const handleDelete = async (guestId: string) => {
         if (!hotelId || !user) return
-        if (confirm(t('blacklist.deleteConfirm'))) {
+        const confirmed = await confirm({
+            title: t('blacklist.deleteConfirm'),
+            variant: 'destructive',
+            confirmLabel: t('common.delete'),
+        })
+        if (confirmed) {
             try {
                 await removeBlacklistedGuest(hotelId, guestId)
             } catch (error) {

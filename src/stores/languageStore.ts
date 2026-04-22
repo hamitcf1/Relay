@@ -791,6 +791,15 @@ type Translations = {
     'offday.pending': string
     'offday.history': string
     'offday.petitions': string
+    'offday.deleteConfirm': string
+    'offday.deleteDesc': string
+    'offday.cancelConfirm': string
+    'offday.cancelBtn': string
+    'offday.deleted': string
+    'offday.cancelled': string
+    'offday.submitted': string
+    'offday.updated': string
+    'offday.error': string
 
     // Messages & Feedback
     'messages.title': string
@@ -1638,6 +1647,15 @@ const translations: Record<Language, Translations> = {
         'offday.pending': 'Pending Requests',
         'offday.history': 'Request History',
         'offday.petitions': 'Complaints & Petitions',
+        'offday.deleteConfirm': 'Delete this request permanently?',
+        'offday.deleteDesc': 'This action cannot be undone.',
+        'offday.cancelConfirm': 'Cancel this request?',
+        'offday.cancelBtn': 'Cancel Request',
+        'offday.deleted': 'Request deleted',
+        'offday.cancelled': 'Request cancelled',
+        'offday.submitted': 'Request submitted',
+        'offday.updated': 'Request updated',
+        'offday.error': 'Something went wrong',
 
         // AI Modal
         'ai.title': 'Aetherius Relay AI Assistant',
@@ -2441,6 +2459,15 @@ const translations: Record<Language, Translations> = {
         'offday.pending': 'Bekleyen Talepler',
         'offday.history': 'Talep Geçmişi',
         'offday.petitions': 'Şikayet ve Dilekçeler',
+        'offday.deleteConfirm': 'Bu talep kalıcı olarak silinsin mi?',
+        'offday.deleteDesc': 'Bu işlem geri alınamaz.',
+        'offday.cancelConfirm': 'Bu talep iptal edilsin mi?',
+        'offday.cancelBtn': 'Talebi İptal Et',
+        'offday.deleted': 'Talep silindi',
+        'offday.cancelled': 'Talep iptal edildi',
+        'offday.submitted': 'Talep gönderildi',
+        'offday.updated': 'Talep güncellendi',
+        'offday.error': 'Bir sorun oluştu',
 
         // AI Modal
         'ai.title': 'Aetherius Relay AI Asistanı',

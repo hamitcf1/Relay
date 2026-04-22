@@ -25,6 +25,7 @@ import { useCalendarStore, eventTypeInfo, type CalendarEventType } from '@/store
 import { useAuthStore } from '@/stores/authStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 interface CalendarWidgetProps {
     hotelId: string
@@ -35,6 +36,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
     const { subscribeToRoster, getShiftsForDate } = useRosterStore()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
+    const confirm = useConfirm()
 
     const [currentMonth, setCurrentMonth] = useState(new Date())
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -130,7 +132,12 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
     }
 
     const handleDeleteEvent = async (eventId: string) => {
-        if (confirm(t('common.deleteConfirm'))) {
+        const confirmed = await confirm({
+            title: t('common.deleteConfirm'),
+            variant: 'destructive',
+            confirmLabel: t('common.delete'),
+        })
+        if (confirmed) {
             await deleteEvent(hotelId, eventId)
         }
     }

@@ -6,6 +6,7 @@ import { Plus, Check, DollarSign, Clock, User, Trash2, Wand2, Pencil, AlertTrian
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { Badge } from '@/components/ui/badge'
 import { CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -37,6 +38,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const { t } = useLanguageStore()
     const { staff, subscribeToRoster } = useRosterStore()
     const { hotel } = useHotelStore()
+    const confirm = useConfirm()
 
     // Ensure we have staff list
     useEffect(() => {
@@ -214,13 +216,22 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     }
 
     const handleDelete = async (noteId: string) => {
-        if (confirm(t('common.deleteConfirm'))) {
+        const confirmed = await confirm({
+            title: t('common.deleteConfirm'),
+            variant: 'destructive',
+            confirmLabel: t('common.delete'),
+        })
+        if (confirmed) {
             await deleteNote(hotelId, noteId)
         }
     }
 
     const handleConvertToLog = async (noteId: string) => {
-        if (confirm('Convert this note to a system log?')) {
+        const confirmed = await confirm({
+            title: 'Convert this note to a system log?',
+            confirmLabel: 'Convert',
+        })
+        if (confirmed) {
             await convertToLog(hotelId, noteId)
         }
     }

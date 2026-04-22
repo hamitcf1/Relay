@@ -7,6 +7,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { formatDistanceToNow } from 'date-fns'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 /**
  * AnnouncementBanner displays important GM announcements at the top of the dashboard.
@@ -17,6 +18,7 @@ export function AnnouncementBanner() {
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
     const { messages, subscribeToMessages, deleteMessage } = useMessageStore()
+    const confirm = useConfirm()
 
     // Filter for important announcements (receiver_id === 'all' and recent)
     const now = new Date()
@@ -38,7 +40,12 @@ export function AnnouncementBanner() {
 
     const handleDelete = async (id: string) => {
         if (!hotel?.id) return
-        if (window.confirm(t('announcement.deleteConfirm'))) {
+        const confirmed = await confirm({
+            title: t('announcement.deleteConfirm'),
+            variant: 'destructive',
+            confirmLabel: t('common.delete'),
+        })
+        if (confirmed) {
             await deleteMessage(hotel.id, id)
         }
     }

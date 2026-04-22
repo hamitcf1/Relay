@@ -13,6 +13,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import type { Sale, Currency, SaleStatus } from '@/types'
 import { cn, formatDisplayDate, getDateLocale } from '@/lib/utils'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import {
     Select,
     SelectContent,
@@ -41,6 +42,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
     const { sales, updateSale, deleteSale, collectPayment } = useSalesStore()
+    const confirm = useConfirm()
 
     const [isEditing, setIsEditing] = useState(false)
     const [editForm, setEditForm] = useState<Partial<Sale>>({})
@@ -118,7 +120,13 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
     const handleDelete = async () => {
         if (!hotel?.id || !saleId) return
-        if (confirm(t('sales.details.deleteConfirm'))) {
+        const confirmed = await confirm({
+            title: t('sales.details.deleteConfirm'),
+            description: sale.name,
+            variant: 'destructive',
+            confirmLabel: t('common.delete'),
+        })
+        if (confirmed) {
             await deleteSale(hotel.id, saleId)
             onClose()
         }

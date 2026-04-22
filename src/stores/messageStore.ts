@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import {
     collection,
     query,
@@ -109,8 +110,10 @@ export const useMessageStore = create<MessageStore>((set) => ({
         try {
             const docRef = doc(db, 'hotels', hotelId, 'messages', messageId)
             await deleteDoc(docRef)
+            toast.success('Message deleted')
         } catch (error: any) {
             console.error("Error deleting message:", error)
+            toast.error('Failed to delete message')
         }
     },
 
@@ -140,6 +143,7 @@ export const useMessageStore = create<MessageStore>((set) => ({
 
             if (count > 0) {
                 await resolvedBatch.commit()
+                toast.success(`Chat cleared (${count} messages)`)
             }
         } catch (error) {
             console.error("Error clearing chat:", error)

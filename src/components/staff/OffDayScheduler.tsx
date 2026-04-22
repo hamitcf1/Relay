@@ -15,12 +15,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { parseISO } from 'date-fns'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { useConfirm } from '@/components/ui/confirm-dialog'
+import { toast } from 'sonner'
 
 export function OffDayScheduler() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
     const { requests, subscribeToRequests, submitRequest, updateRequest, updateRequestStatus, deleteRequest, cancelRequest, loading } = useOffDayStore()
+    const confirm = useConfirm()
 
     const [dates, setDates] = useState<string[]>([''])
     const [reason, setReason] = useState('')
@@ -79,8 +82,11 @@ export function OffDayScheduler() {
             setReason('')
             setRequestType('off_day')
             setShiftName('morning')
+            toast.success(editingId ? t('offday.updated') : t('offday.submitted'))
+            if (editingId) setEditingId(null)
         } catch (error) {
             console.error("Submission error:", error)
+            toast.error(t('offday.error'))
         } finally {
             setSubmitting(false)
         }
@@ -113,13 +119,30 @@ export function OffDayScheduler() {
     }
 
     const handleDelete = async (requestId: string) => {
-        if (!hotel?.id || !confirm('Bu talebi kalıcı olarak silmek istediğinizden emin misiniz?')) return
-        await deleteRequest(hotel.id, requestId)
+        if (!hotel?.id) return
+        const confirmed = await confirm({
+            title: t('offday.deleteConfirm'),
+            description: t('offday.deleteDesc'),
+            variant: 'destructive',
+            confirmLabel: t('common.delete'),
+        })
+        if (confirmed) {
+            await deleteRequest(hotel.id, requestId)
+            toast.success(t('offday.deleted'))
+        }
     }
 
     const handleCancel = async (requestId: string) => {
-        if (!hotel?.id || !confirm('Bu talebi iptal etmek istediğinizden emin misiniz?')) return
-        await cancelRequest(hotel.id, requestId)
+        if (!hotel?.id) return
+        const confirmed = await confirm({
+            title: t('offday.cancelConfirm'),
+            variant: 'destructive',
+            confirmLabel: t('offday.cancelBtn'),
+        })
+        if (confirmed) {
+            await cancelRequest(hotel.id, requestId)
+            toast.success(t('offday.cancelled'))
+        }
     }
 
     return (
