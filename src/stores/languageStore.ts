@@ -2264,7 +2264,7 @@ const translations: Record<Language, Translations> = {
         'messaging.deleteTooltip': 'Mesajı Sil',
 
         // Currency
-        'currency.title': 'Döviz Kurları (TCMB)',
+        'currency.title': 'Döviz Kurları (TCMB) HER ZAMAN GÜNCEL OLMAYABİLİR!',
         'currency.buying': 'Döviz Alış (Bozma)',
         'currency.selling': 'Döviz Satış (Satış)',
         'currency.lastUpdated': 'Güncellendi',
