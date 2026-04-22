@@ -1342,9 +1342,9 @@ const translations: Record<Language, Translations> = {
 
         // Shifts & Roster
         'shift.morning': 'Morning',
-        'shift.afternoon': 'Afternoon',
+        'shift.afternoon': 'Evening',
         'shift.night': 'Night',
-        'shift.extra': 'Extra',
+        'shift.extra': 'Middle Shift',
         'shift.off': 'Off',
         'shift.none': 'None',
         'shift.welcome': 'Welcome! Please initialize your shift data.',
