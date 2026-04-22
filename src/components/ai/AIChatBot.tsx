@@ -396,13 +396,14 @@ function KBEditor() {
 export function AIChatBot() {
     const {
         threads, activeThreadId, isOpen, showSidebar, loading, isPublic,
-        toggleOpen, sendMessage, createThread, toggleSidebar, setIsPublic
+        toggleOpen, setOpen, sendMessage, createThread, toggleSidebar, setIsPublic
     } = useChatStore()
     const { user } = useAuthStore()
     const location = useLocation()
     const [input, setInput] = useState('')
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
+    const panelRef = useRef<HTMLDivElement>(null)
     const [showKB, setShowKB] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
 
@@ -421,19 +422,35 @@ export function AIChatBot() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages, loading])
 
-    // Focus input when opened, but be polite (don't steal focus if user is typing elsewhere)
+    // Click outside listener
+    useEffect(() => {
+        if (!isOpen) return
+
+        const handleClickOutside = (e: MouseEvent) => {
+            if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+                // Using setOpen(false) is safer than toggleOpen()
+                setOpen(false)
+            }
+        }
+
+        // Delay attaching the listener to avoid capturing the same click that opened it
+        const timer = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside)
+        }, 100)
+
+        return () => {
+            clearTimeout(timer)
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [isOpen, setOpen])
+
+    // Focus input when opened
     useEffect(() => {
         if (isOpen) {
-            // Small delay to allow animation and React state updates
             setTimeout(() => {
                 const active = document.activeElement
                 const isInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement
-
-                // If user is already in a text input, don't steal focus
-                // UNLESS the active element is the toggle button (meaning they just clicked it) or body
-                const isToggleBtn = active?.id === 'ai-toggle-btn'
-
-                if (!isInput || isToggleBtn) {
+                if (!isInput) {
                     inputRef.current?.focus()
                 }
             }, 300)
@@ -472,12 +489,13 @@ export function AIChatBot() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={toggleOpen}
+                            onClick={() => setOpen(false)}
                             className="fixed inset-0 bg-black/40 backdrop-blur-sm lg:hidden pointer-events-auto"
                         />
 
                         {/* Panel */}
                         <motion.div
+                            ref={panelRef}
                             initial={{ opacity: 0, y: 20, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -489,21 +507,6 @@ export function AIChatBot() {
                                 // Desktop: Floating Window
                                 "md:w-[450px] md:h-[650px] md:rounded-2xl md:border md:border-border/50 md:bottom-6 md:right-6 md:left-auto"
                             )}
-                            ref={(node) => {
-                                if (node) {
-                                    // Click outside listener
-                                    const handleClickOutside = (e: MouseEvent) => {
-                                        if (node && !node.contains(e.target as Node)) {
-                                            // Check if click was on the toggle button (to prevent immediate reopen)
-                                            const toggleBtn = document.getElementById('ai-toggle-btn')
-                                            if (toggleBtn && toggleBtn.contains(e.target as Node)) return
-                                            toggleOpen()
-                                        }
-                                    }
-                                    document.addEventListener('mousedown', handleClickOutside)
-                                    return () => document.removeEventListener('mousedown', handleClickOutside)
-                                }
-                            }}
                         >
                             {/* Sidebar Overlay */}
                             <AnimatePresence>
