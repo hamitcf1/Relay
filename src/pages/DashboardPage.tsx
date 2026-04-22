@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useIsMobile } from '@/hooks/useMediaQuery'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -67,13 +68,7 @@ export function DashboardPage() {
     const [overviewTab, setOverviewTab] = useState('grid')
 
     // Mobile Detection
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768)
-        window.addEventListener('resize', checkMobile)
-        return () => window.removeEventListener('resize', checkMobile)
-    }, [])
+    const isMobile = useIsMobile()
 
     const [showDateTime, setShowDateTime] = useState(() => {
         const saved = localStorage.getItem('relay_show_datetime')
@@ -429,40 +424,40 @@ export function DashboardPage() {
 
                                     {/* Standard Tab Contents - hidden if mobile grid is active */}
                                     <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
-                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6">
+                                        <TabsContent value="messaging" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 page-enter">
                                             <MessagingPanel />
                                         </TabsContent>
-                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6">
+                                        <TabsContent value="sales" className="h-full m-0 p-4 lg:p-6 outline-none pb-32 lg:pb-6 page-enter">
                                             <SalesPanel />
                                         </TabsContent>
 
                                         {/* Scrollable Containers for other tabs */}
-                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
+                                        <TabsContent value="feedback" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
                                             <FeedbackSection />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
+                                        <TabsContent value="off-days" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
                                             <OffDayScheduler />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
+                                        <TabsContent value="tours" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
                                             <TourCatalogue />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
+                                        <TabsContent value="rooms" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
                                             <RoomManagementPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
+                                        <TabsContent value="pricing" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
                                             <PricingPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
+                                        <TabsContent value="team" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
                                             <LeaderboardPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
                                         {user?.role === 'gm' && (
-                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32">
+                                            <TabsContent value="activity" className="h-full m-0 p-4 lg:p-6 outline-none overflow-y-auto relative custom-scrollbar pb-32 page-enter">
                                                 <ActivityLogPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>

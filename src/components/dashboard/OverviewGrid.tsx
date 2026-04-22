@@ -98,16 +98,17 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
                         variants={itemAnim}
                         onClick={() => onSelect(item.id)}
                         whileTap={{ scale: 0.95 }}
-                        className="group relative flex flex-col items-start p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-left overflow-hidden"
+                        whileHover={{ scale: 1.02 }}
+                        className="group relative flex flex-col items-start p-5 rounded-2xl card-modern text-left overflow-hidden"
                     >
-                        <div className={cn("p-3 rounded-xl mb-3 transition-colors group-hover:bg-white/10", item.color)}>
+                        <div className={cn("p-3 rounded-xl mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", item.color)}>
                             <item.icon className="w-6 h-6" />
                         </div>
                         <span className="font-bold text-base tracking-tight mb-1">{item.label}</span>
-                        <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider leading-snug">{item.desc}</span>
+                        <span className="text-xs text-muted-foreground font-medium leading-snug">{item.desc}</span>
 
-                        {/* Glow Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                        {/* Gradient Glow Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl" />
                     </motion.button>
                 ))}
             </motion.div>

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import {
     signInWithEmailAndPassword,
     signOut as firebaseSignOut,
@@ -92,10 +93,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Login failed'
+            const cleanMessage = errorMessage.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim()
             set({
-                error: errorMessage.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim(),
+                error: cleanMessage,
                 loading: false
             })
+            toast.error(cleanMessage || 'Login failed')
         }
     },
 
@@ -179,6 +182,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
             localStorage.clear()
 
             set({ user: null, firebaseUser: null, loading: false })
+            toast.success('Logged out')
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Logout failed'
             set({ error: errorMessage, loading: false })

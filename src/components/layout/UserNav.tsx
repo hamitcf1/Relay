@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useIsMobile } from '@/hooks/useMediaQuery'
 import {
     LogOut,
     Globe,
@@ -36,16 +37,9 @@ export function UserNav() {
     const { t, language, setLanguage } = useLanguageStore()
 
     // Mobile Detection
-    const [isMobile, setIsMobile] = useState(false)
+    const isMobile = useIsMobile()
     const [showAppearanceDialog, setShowAppearanceDialog] = useState(false)
     const [showLanguageDialog, setShowLanguageDialog] = useState(false)
-
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768)
-        checkMobile()
-        window.addEventListener('resize', checkMobile)
-        return () => window.removeEventListener('resize', checkMobile)
-    }, [])
 
     return (
         <>

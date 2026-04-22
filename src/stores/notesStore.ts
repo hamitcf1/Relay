@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import {
     collection,
     doc,
@@ -179,8 +180,11 @@ export const useNotesStore = create<NotesStore>((set) => ({
                     'note_create', noteData.content?.substring(0, 60) || 'New note'
                 )
             }
+
+            toast.success('Note added')
         } catch (error) {
             console.error('Error adding note:', error)
+            toast.error('Failed to add note')
             throw error
         }
     },
@@ -271,8 +275,10 @@ export const useNotesStore = create<NotesStore>((set) => ({
                 resolved_at: serverTimestamp(),
             })
             await removeNoteFromCalendar(hotelId, noteId)
+            toast.success('Marked as paid ✓')
         } catch (error) {
             console.error('Error marking paid:', error)
+            toast.error('Failed to mark as paid')
             throw error
         }
     },
@@ -291,8 +297,10 @@ export const useNotesStore = create<NotesStore>((set) => ({
                     'note_delete'
                 )
             }
+            toast.success('Note deleted')
         } catch (error) {
             console.error('Error deleting note:', error)
+            toast.error('Failed to delete note')
             throw error
         }
     },
