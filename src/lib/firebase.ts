@@ -21,8 +21,8 @@ export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 
-// Connect to Local Emulators if running on localhost
-if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+// Connect to Local Emulators if running on localhost or 127.0.0.1
+if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
     connectFirestoreEmulator(db, '127.0.0.1', 8080)
     console.log('🔥 Connected to Firebase Emulators')

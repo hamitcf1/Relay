@@ -9,7 +9,10 @@
         "lint": "eslint .",
         "preview": "vite preview",
         "test:stress:env": "PATH=\"/opt/homebrew/opt/openjdk/bin:$PATH\" npx firebase emulators:start --project relay-e61b4",
-        "test:stress:run": "k6 run tests/stress/firestore-load.js"
+        "test:stress:init": "node tests/stress/init-emulator.js",
+        "test:stress:chaos": "k6 run tests/stress/firestore-load.js",
+        "test:stress:security": "k6 run tests/stress/security-audit.js",
+        "test:stress:race": "k6 run tests/stress/race-check.js"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
@@ -31,6 +34,7 @@
         "date-fns": "^4.1.0",
         "emoji-picker-react": "^4.18.0",
         "firebase": "^11.10.0",
+        "firebase-admin": "^13.8.0",
         "framer-motion": "^11.15.0",
         "lucide-react": "^0.469.0",
         "react": "^19.0.0",
