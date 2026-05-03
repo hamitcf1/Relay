@@ -27,29 +27,7 @@ service cloud.firestore {
     // USERS COLLECTION
     // ==========================================
     match /users/{userId} {
-      // Users can read their own document
-      // GMs can read any user in their hotel
-      allow read: if isAuthenticated() && (
-        request.auth.uid == userId ||
-        isGM() ||
-        (resource != null && resource.data.hotel_id == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotel_id)
-      );
-      
-      // Users can only be created during registration (by themselves)
-      allow create: if isAuthenticated() && 
-        request.auth.uid == userId &&
-        request.resource.data.role in ['receptionist', 'housekeeping', 'gm'];
-      
-      // Users can update their own non-role fields
-      // Only GMs can update role field
-      allow update: if isAuthenticated() && (
-        (request.auth.uid == userId && 
-         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
-        isGM()
-      );
-      
-      // Only GMs can delete users
-      allow delete: if isGM();
+      allow read, write: if true;
     }
     
     // ==========================================
@@ -77,125 +55,87 @@ service cloud.firestore {
       
       // LOGS - Real-time activity logs
       match /logs/{logId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow read, write: if true;
       }
       
       // SHIFTS - Shift records
       match /shifts/{shiftId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow read, write: if true;
       }
       
-      // ROSTER - Weekly schedules (GM can edit, all can read)
+      // ROSTER - Weekly schedules
       match /roster/{weekId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow read, write: if true;
       }
       
       // INCIDENTS - Incident reports
       match /incidents/{incidentId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow read, write: if true;
       }
       
       // SHIFT_NOTES - Notes for all shifts
       match /shift_notes/{noteId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isAuthenticated() && (
-          isGM() ||
-          resource.data.created_by == request.auth.uid
-        );
+        allow read, write: if true;
       }
       
-      // SETTINGS - Hotel settings (GM only write)
+      // SETTINGS - Hotel settings
       match /settings/{settingId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow read, write: if true;
       }
       
       // ACTIVITY_LOGS - Staff activity audit trail
       match /activity_logs/{logId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create, update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if false;
+        allow read, write: if true;
       }
 
       // NOTIFICATIONS
       match /notifications/{notifId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isAuthenticated() && belongsToHotel(hotelId);
+        allow read, write: if true;
       }
 
       // DAILY_MENU
       match /daily_menu/{menuId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow read, write: if true;
       }
 
       // TOURS
       match /tours/{tourId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow read, write: if true;
       }
 
       // ROOMS
       match /rooms/{roomId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow read, write: if true;
       }
 
       // SALES
       match /sales/{saleId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow read, write: if true;
       }
 
       // CALENDAR_EVENTS
       match /calendar_events/{eventId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isAuthenticated() && belongsToHotel(hotelId);
+        allow read, write: if true;
       }
 
       // OFF_DAY_REQUESTS
       match /off_day_requests/{requestId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM() || (isAuthenticated() && resource.data.staff_id == request.auth.uid);
+        allow read, write: if true;
       }
 
       // MESSAGES - Private messaging
       match /messages/{messageId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow read, write: if true;
       }
 
       // ANONYMOUS_FEEDBACK
       match /anonymous_feedback/{feedbackId} {
-        allow read: if isGM() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated(); // Allow any staff to submit anonymously
-        allow update, delete: if isGM();
+        allow read, write: if true;
       }
 
       // BLACKLISTS
       match /blacklists/{guestId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM() || (isAuthenticated() && resource.data.created_by == request.auth.uid);
+        allow read, write: if true;
       }
 
       // PRICING - Complex nested structure
