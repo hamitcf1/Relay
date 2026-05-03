@@ -14,7 +14,9 @@ import {
     LockOpen,
     ShieldCheck,
     KeyRound,
-    Pizza
+    Pizza,
+    Eye,
+    EyeOff
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -66,6 +68,8 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     const [editInfo, setEditInfo] = useState<HotelInfoData>(defaultInfo)
     const [isVaultUnlocked, setIsVaultUnlocked] = useState(false)
     const [passwordInput, setPasswordInput] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
+    const [showNewPassword, setShowNewPassword] = useState(false)
 
     const { user } = useAuthStore()
     const { hotel, updateHotelSettings } = useHotelStore()
@@ -310,14 +314,23 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                     <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
                                         <p className="text-xs text-muted-foreground">Henüz kasa şifresi belirlenmemiş. Gözetmen olarak şifre belirleyerek bu alanı kullanmaya başlayabilirsiniz.</p>
                                         <div className="flex gap-2">
-                                            <Input
-                                                type="password"
-                                                placeholder="Güvenli Kasa Şifresi"
-                                                autoComplete="new-password"
-                                                value={passwordInput}
-                                                onChange={e => setPasswordInput(e.target.value)}
-                                                className="h-8 bg-muted/30 border-input text-xs"
-                                            />
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    type={showNewPassword ? "text" : "password"}
+                                                    placeholder="Güvenli Kasa Şifresi"
+                                                    autoComplete="new-password"
+                                                    value={passwordInput}
+                                                    onChange={e => setPasswordInput(e.target.value)}
+                                                    className="h-8 bg-muted/30 border-input text-xs pr-8"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                                >
+                                                    {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                </button>
+                                            </div>
                                             <Button size="sm" onClick={handleSetSafePassword} disabled={saving}>
                                                 Belirle
                                             </Button>
@@ -328,15 +341,24 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 )
                             ) : !isVaultUnlocked ? (
                                 <div className="flex gap-2">
-                                    <Input
-                                        type="password"
-                                        placeholder={t('hotel.secure.safeCode')}
-                                        autoComplete="new-password"
-                                        value={passwordInput}
-                                        onChange={e => setPasswordInput(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && handleUnlock()}
-                                        className="h-9 bg-background border-border"
-                                    />
+                                    <div className="relative flex-1">
+                                        <Input
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder={t('hotel.secure.safeCode')}
+                                            autoComplete="new-password"
+                                            value={passwordInput}
+                                            onChange={e => setPasswordInput(e.target.value)}
+                                            onKeyDown={e => e.key === 'Enter' && handleUnlock()}
+                                            className="h-9 bg-background border-border pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                     <Button onClick={handleUnlock}>
                                         <LockOpen className="w-4 h-4" />
                                     </Button>
