@@ -40,7 +40,7 @@ import { MotionConfig, AnimatePresence } from 'framer-motion'
 
 function App() {
     const applyTheme = useThemeStore(state => state.applyTheme)
-    const { user, isBooted, setBooted, initialized } = useAuthStore()
+    const { user, isBooted, setBooted } = useAuthStore()
     const disableAnimations = user?.settings?.disable_animations
 
     useEffect(() => {

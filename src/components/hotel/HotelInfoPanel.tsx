@@ -16,8 +16,7 @@ import {
     KeyRound,
     Pizza,
     Eye,
-    EyeOff,
-    Terminal
+    EyeOff
 } from 'lucide-react'
 import { PasswordReveal } from '@/components/ui/PasswordReveal'
 import { cn } from '@/lib/utils'

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, MouseEvent } from 'react'
+import { useState, useEffect, MouseEvent } from 'react'
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion'
 import { Hotel, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'

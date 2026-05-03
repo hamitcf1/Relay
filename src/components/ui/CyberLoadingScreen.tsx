@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Loader2, Database, Lock, Cpu } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
