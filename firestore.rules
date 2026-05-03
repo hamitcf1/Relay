@@ -38,7 +38,7 @@ service cloud.firestore {
       // Users can only be created during registration (by themselves)
       allow create: if isAuthenticated() && 
         request.auth.uid == userId &&
-        request.resource.data.role in ['receptionist', 'housekeeping'];
+        request.resource.data.role in ['receptionist', 'housekeeping', 'gm'];
       
       // Users can update their own non-role fields
       // Only GMs can update role field

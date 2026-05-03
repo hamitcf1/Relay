@@ -2,8 +2,8 @@
 // Using environment variables for security
 
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { getAuth, connectAuthEmulator } from 'firebase/auth'
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -21,6 +21,9 @@ export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 
-// NOTE: Firebase Storage requires Blaze plan (paid)
-// For incident photos, we'll use base64 encoding in Firestore
-// or integrate a free image hosting API later
+// Connect to Local Emulators if running on localhost
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
+    connectFirestoreEmulator(db, '127.0.0.1', 8080)
+    console.log('🔥 Connected to Firebase Emulators')
+}
