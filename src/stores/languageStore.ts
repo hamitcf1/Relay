@@ -776,6 +776,11 @@ type Translations = {
     'hotel.secure.other': string
     'hotel.secure.kbs': string
     'hotel.secure.safeInfo': string
+    'hotel.secure.setupDesc': string
+    'hotel.secure.setupButton': string
+    'hotel.secure.notSetup': string
+    'hotel.secure.resetConfirmTitle': string
+    'hotel.secure.resetConfirmButton': string
     'hotel.settings.fixturePrices': string
     'fixture.hand_towel': string
     'fixture.bath_towel': string
@@ -833,6 +838,61 @@ type Translations = {
     'ai.context.save': string
     'ai.generate': string
     'ai.cancel': string
+
+    // AI Chatbot (New)
+    'ai.chat.publicTitle': string
+    'ai.chat.internalTitle': string
+    'ai.chat.publicWelcome': string
+    'ai.chat.internalWelcome': string
+    'ai.chat.placeholder': string
+    'ai.chat.quickTitle': string
+    'ai.chat.backToDashboard': string
+    'ai.chat.kbDesc': string
+    'ai.chat.expertiseTitle': string
+    'ai.chat.expertise.shift': string
+    'ai.chat.expertise.compliance': string
+    'ai.chat.expertise.report': string
+    'ai.chat.expertise.pricing': string
+    'ai.chat.expertise.rooms': string
+    'ai.chat.expertise.sales': string
+    'ai.chat.task.general': string
+    'ai.chat.task.email': string
+    'ai.chat.task.report': string
+    'ai.chat.task.review': string
+    // Quick Suggestions - Dashboard
+    'ai.suggest.activeNotes': string
+    'ai.suggest.activeNotes.text': string
+    'ai.suggest.todaySales': string
+    'ai.suggest.todaySales.text': string
+    'ai.suggest.roomPrices': string
+    'ai.suggest.roomPrices.text': string
+    'ai.suggest.shiftStatus': string
+    'ai.suggest.shiftStatus.text': string
+    'ai.suggest.roomStatus': string
+    'ai.suggest.roomStatus.text': string
+    'ai.suggest.exchangeRates': string
+    'ai.suggest.exchangeRates.text': string
+    'ai.suggest.draftReport': string
+    'ai.suggest.draftReport.text': string
+    'ai.suggest.writeEmail': string
+    'ai.suggest.writeEmail.text': string
+    // Quick Suggestions - Public
+    'ai.suggest.whatIsRelay': string
+    'ai.suggest.whatIsRelay.text': string
+    'ai.suggest.pricing': string
+    'ai.suggest.pricing.text': string
+    'ai.suggest.security': string
+    'ai.suggest.security.text': string
+    'ai.suggest.mobileApp': string
+    'ai.suggest.mobileApp.text': string
+    'ai.suggest.handover': string
+    'ai.suggest.handover.text': string
+    // AI Sidebar
+    'ai.sidebar.chats': string
+    'ai.sidebar.newChat': string
+    'ai.sidebar.noChats': string
+    'ai.sidebar.message': string
+    'ai.sidebar.messages': string
 
     // Shift Notes
     'notes.edited': string
@@ -1327,6 +1387,11 @@ const translations: Record<Language, Translations> = {
         'hotel.secure.other': 'Other Safe Info',
         'hotel.secure.kbs': 'KBS Login Info',
         'hotel.secure.safeInfo': 'Safe & Key Info',
+        'hotel.secure.setupDesc': 'Vault password is not set yet. As a GM, you can set a password to start using this area.',
+        'hotel.secure.setupButton': 'Set',
+        'hotel.secure.notSetup': 'The GM has not set a vault password yet.',
+        'hotel.secure.resetConfirmTitle': 'Do you want to reset the password?',
+        'hotel.secure.resetConfirmButton': 'Reset',
 
         // Log
         'log.new': 'New Log Entry',
@@ -1677,8 +1742,60 @@ const translations: Record<Language, Translations> = {
         'ai.generate': 'Generate',
         'ai.cancel': 'Cancel',
 
-
-
+        // AI Chatbot (New)
+        'ai.chat.publicTitle': 'Aetherius Relay Support',
+        'ai.chat.internalTitle': 'Aetherius Relay AI Assistant',
+        'ai.chat.publicWelcome': 'Welcome! Feel free to ask anything about Aetherius Relay. I can explain features, pricing, and the value it brings to your hotel.',
+        'ai.chat.internalWelcome': 'I have real-time access to all your hotel data (shifts, sales, notes, rooms, tours, exchange rates). I can prepare operational reports, shift summaries, or analyze guest requests.',
+        'ai.chat.placeholder': 'Ask something...',
+        'ai.chat.quickTitle': 'Quick suggestions',
+        'ai.chat.backToDashboard': 'Back to Dashboard',
+        'ai.chat.kbDesc': 'Fill this in so the AI knows your hotel-specific rules (breakfast times, check-out rules, pool hours, etc.). This information will be prioritized in the assistant\'s responses.',
+        'ai.chat.expertiseTitle': 'My Expertise',
+        'ai.chat.expertise.shift': 'Shifts',
+        'ai.chat.expertise.compliance': 'Compliance',
+        'ai.chat.expertise.report': 'Reports',
+        'ai.chat.expertise.pricing': 'Pricing',
+        'ai.chat.expertise.rooms': 'Rooms',
+        'ai.chat.expertise.sales': 'Sales',
+        'ai.chat.task.general': 'General',
+        'ai.chat.task.email': 'Email',
+        'ai.chat.task.report': 'Report',
+        'ai.chat.task.review': 'Reply',
+        // Quick Suggestions - Dashboard
+        'ai.suggest.activeNotes': '📋 Active notes',
+        'ai.suggest.activeNotes.text': 'Summarize active notes',
+        'ai.suggest.todaySales': '💰 Today\'s sales',
+        'ai.suggest.todaySales.text': 'List today\'s sales',
+        'ai.suggest.roomPrices': '🏷️ Room prices',
+        'ai.suggest.roomPrices.text': 'Show current room prices',
+        'ai.suggest.shiftStatus': '📊 Shift status',
+        'ai.suggest.shiftStatus.text': 'Summarize current shift status and report missing KBS/Agency checks',
+        'ai.suggest.roomStatus': '🏨 Room status',
+        'ai.suggest.roomStatus.text': 'Show all room statuses',
+        'ai.suggest.exchangeRates': '💱 Exchange rates',
+        'ai.suggest.exchangeRates.text': 'Show current exchange rates',
+        'ai.suggest.draftReport': '📝 Draft report',
+        'ai.suggest.draftReport.text': 'I want to create an incident report (tutanak) draft',
+        'ai.suggest.writeEmail': '✉️ Write email',
+        'ai.suggest.writeEmail.text': 'Create a reservation confirmation email draft for a guest',
+        // Quick Suggestions - Public
+        'ai.suggest.whatIsRelay': '🚀 What is Relay?',
+        'ai.suggest.whatIsRelay.text': 'Can you tell me about Aetherius Relay and its core modules (Handover Wizard, Compliance Pulse, etc.)?',
+        'ai.suggest.pricing': '💎 Pricing?',
+        'ai.suggest.pricing.text': 'What are your pricing plans?',
+        'ai.suggest.security': '🛡️ Security?',
+        'ai.suggest.security.text': 'How do you ensure data security and the Vault feature?',
+        'ai.suggest.mobileApp': '📱 Mobile app?',
+        'ai.suggest.mobileApp.text': 'Do you have a mobile app?',
+        'ai.suggest.handover': '🔄 Handover process?',
+        'ai.suggest.handover.text': 'How does the Handover Wizard module simplify shift transfers?',
+        // AI Sidebar
+        'ai.sidebar.chats': 'Chats',
+        'ai.sidebar.newChat': 'New Chat',
+        'ai.sidebar.noChats': 'No chats yet',
+        'ai.sidebar.message': 'message',
+        'ai.sidebar.messages': 'messages',
         'app.welcome': 'Welcome to Aetherius Relay',
         'app.description': 'Your digital handover system for seamless hotel operations.',
         'app.activeShift': 'Active Shift',
@@ -2120,6 +2237,11 @@ const translations: Record<Language, Translations> = {
         'hotel.secure.other': 'Diğer Kasa Bilgileri',
         'hotel.secure.kbs': 'KBS Giriş Bilgileri',
         'hotel.secure.safeInfo': 'Kasa ve Anahtar Bilgileri',
+        'hotel.secure.setupDesc': 'Henüz kasa şifresi belirlenmemiş. Gözetmen olarak şifre belirleyerek bu alanı kullanmaya başlayabilirsiniz.',
+        'hotel.secure.setupButton': 'Belirle',
+        'hotel.secure.notSetup': 'Gözetmen henüz kasa şifresi belirlememiş.',
+        'hotel.secure.resetConfirmTitle': 'Şifreyi sıfırlamak istiyor musunuz?',
+        'hotel.secure.resetConfirmButton': 'Sıfırla',
 
         // Log
         'log.new': 'Yeni Kayıt Girişi',
@@ -2489,7 +2611,60 @@ const translations: Record<Language, Translations> = {
         'ai.generate': 'Oluştur',
         'ai.cancel': 'İptal',
 
-        // Landing Page Navbar & Footer
+        // AI Chatbot (New)
+        'ai.chat.publicTitle': 'Aetherius Relay Müşteri Desteği',
+        'ai.chat.internalTitle': 'Aetherius Relay AI Asistanı',
+        'ai.chat.publicWelcome': 'Hoş geldiniz! Aetherius Relay hakkında merak ettiğiniz her şeyi sorabilirsiniz. Size platformun özelliklerini, fiyatlandırmasını ve otelinize katacağı değeri anlatabilirim.',
+        'ai.chat.internalWelcome': 'Otelinizin tüm verilerine (vardiyalar, satışlar, notlar, odalar, turlar, döviz kurları) gerçek zamanlı erişimim var. Operasyonel raporlar hazırlayabilir, vardiya özetleri çıkarabilir veya misafir taleplerini analiz edebilirim.',
+        'ai.chat.placeholder': 'Bir şey sorun...',
+        'ai.chat.quickTitle': 'Hızlı seçenekler',
+        'ai.chat.backToDashboard': 'Dashboard\'a dön',
+        'ai.chat.kbDesc': 'AI\'ın otelinize özel kuralları (kahvaltı saati, check-out kuralları, havuz saatleri vb.) bilmesi için burayı doldurun. Bu bilgiler asistanın yanıtlarında öncelikli olacaktır.',
+        'ai.chat.expertiseTitle': 'Uzmanlık Alanlarım',
+        'ai.chat.expertise.shift': 'Vardiya',
+        'ai.chat.expertise.compliance': 'Uyum',
+        'ai.chat.expertise.report': 'Rapor',
+        'ai.chat.expertise.pricing': 'Fiyat',
+        'ai.chat.expertise.rooms': 'Odalar',
+        'ai.chat.expertise.sales': 'Satış',
+        'ai.chat.task.general': 'Genel',
+        'ai.chat.task.email': 'Email',
+        'ai.chat.task.report': 'Rapor',
+        'ai.chat.task.review': 'Yanıt',
+        // Quick Suggestions - Dashboard
+        'ai.suggest.activeNotes': '📋 Aktif notlar',
+        'ai.suggest.activeNotes.text': 'Aktif notları özetle',
+        'ai.suggest.todaySales': '💰 Bugünkü satışlar',
+        'ai.suggest.todaySales.text': 'Bugünkü satışları listele',
+        'ai.suggest.roomPrices': '🏷️ Oda fiyatları',
+        'ai.suggest.roomPrices.text': 'Güncel oda fiyatlarını göster',
+        'ai.suggest.shiftStatus': '📊 Vardiya durumu',
+        'ai.suggest.shiftStatus.text': 'Mevcut vardiya durumunu özetle ve eksik KBS/Acente kontrollerini bildir',
+        'ai.suggest.roomStatus': '🏨 Oda durumu',
+        'ai.suggest.roomStatus.text': 'Tüm odaların durumunu göster',
+        'ai.suggest.exchangeRates': '💱 Döviz kurları',
+        'ai.suggest.exchangeRates.text': 'Güncel döviz kurlarını göster',
+        'ai.suggest.draftReport': '📝 Rapor taslağı',
+        'ai.suggest.draftReport.text': 'Bir olay raporu (tutanak) taslağı oluşturmak istiyorum',
+        'ai.suggest.writeEmail': '✉️ Email yaz',
+        'ai.suggest.writeEmail.text': 'Bir misafire rezervasyon onayı emaili taslağı oluştur',
+        // Quick Suggestions - Public
+        'ai.suggest.whatIsRelay': '🚀 Relay nedir?',
+        'ai.suggest.whatIsRelay.text': 'Aetherius Relay platformu ve temel modülleri (Handover Wizard, Compliance Pulse vb.) hakkında bilgi verir misin?',
+        'ai.suggest.pricing': '💎 Fiyatlandırma?',
+        'ai.suggest.pricing.text': 'Fiyatlandırma planlarınız nasıl?',
+        'ai.suggest.security': '🛡️ Güvenlik?',
+        'ai.suggest.security.text': 'Veri güvenliğini ve Gizli Kasa (Vault) özelliğini nasıl sağlıyorsunuz?',
+        'ai.suggest.mobileApp': '📱 Mobil uygulama?',
+        'ai.suggest.mobileApp.text': 'Mobil uygulamanız var mı?',
+        'ai.suggest.handover': '🔄 Devir süreci?',
+        'ai.suggest.handover.text': 'Handover Wizard modülü vardiya devrini nasıl kolaylaştırıyor?',
+        // AI Sidebar
+        'ai.sidebar.chats': 'Sohbetler',
+        'ai.sidebar.newChat': 'Yeni Sohbet',
+        'ai.sidebar.noChats': 'Henüz sohbet yok',
+        'ai.sidebar.message': 'mesaj',
+        'ai.sidebar.messages': 'mesaj',
         'landing.nav.features': 'Özellikler',
         'landing.nav.pricing': 'Fiyatlandırma',
         'landing.nav.status': 'Durum',

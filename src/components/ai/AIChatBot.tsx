@@ -28,30 +28,35 @@ import {
 import { useChatStore, type ChatMessage } from '@/stores/chatStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import type { AIModelType, AITaskType } from '@/stores/aiStore'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-const QUICK_SUGGESTIONS = [
-    { label: '📋 Aktif notlar', text: 'Aktif notları özetle' },
-    { label: '💰 Bugünkü satışlar', text: 'Bugünkü satışları listele' },
-    { label: '🏷️ Oda fiyatları', text: 'Güncel oda fiyatlarını göster' },
-    { label: '📊 Vardiya durumu', text: 'Mevcut vardiya durumunu özetle ve eksik KBS/Acente kontrollerini bildir' },
-    { label: '🏨 Oda durumu', text: 'Tüm odaların durumunu göster' },
-    { label: '💱 Döviz kurları', text: 'Güncel döviz kurlarını göster' },
-    { label: '📝 Rapor taslağı', text: 'Bir olay raporu (tutanak) taslağı oluşturmak istiyorum' },
-    { label: '✉️ Email yaz', text: 'Bir misafire rezervasyon onayı emaili taslağı oluştur' },
-]
+function getQuickSuggestions(t: (k: any) => string) {
+    return [
+        { label: t('ai.suggest.activeNotes'), text: t('ai.suggest.activeNotes.text') },
+        { label: t('ai.suggest.todaySales'), text: t('ai.suggest.todaySales.text') },
+        { label: t('ai.suggest.roomPrices'), text: t('ai.suggest.roomPrices.text') },
+        { label: t('ai.suggest.shiftStatus'), text: t('ai.suggest.shiftStatus.text') },
+        { label: t('ai.suggest.roomStatus'), text: t('ai.suggest.roomStatus.text') },
+        { label: t('ai.suggest.exchangeRates'), text: t('ai.suggest.exchangeRates.text') },
+        { label: t('ai.suggest.draftReport'), text: t('ai.suggest.draftReport.text') },
+        { label: t('ai.suggest.writeEmail'), text: t('ai.suggest.writeEmail.text') },
+    ]
+}
 
-const SUPPORT_SUGGESTIONS = [
-    { label: '🚀 Relay nedir?', text: 'Aetherius Relay platformu ve temel modülleri (Handover Wizard, Compliance Pulse vb.) hakkında bilgi verir misin?' },
-    { label: '💎 Fiyatlandırma?', text: 'Fiyatlandırma planlarınız nasıl?' },
-    { label: '🛡️ Güvenlik?', text: 'Veri güvenliğini ve Gizli Kasa (Vault) özelliğini nasıl sağlıyorsunuz?' },
-    { label: '📱 Mobil uygulama?', text: 'Mobil uygulamanız var mı?' },
-    { label: '🔄 Devir süreci?', text: 'Handover Wizard modülü vardiya devrini nasıl kolaylaştırıyor?' },
-]
+function getSupportSuggestions(t: (k: any) => string) {
+    return [
+        { label: t('ai.suggest.whatIsRelay'), text: t('ai.suggest.whatIsRelay.text') },
+        { label: t('ai.suggest.pricing'), text: t('ai.suggest.pricing.text') },
+        { label: t('ai.suggest.security'), text: t('ai.suggest.security.text') },
+        { label: t('ai.suggest.mobileApp'), text: t('ai.suggest.mobileApp.text') },
+        { label: t('ai.suggest.handover'), text: t('ai.suggest.handover.text') },
+    ]
+}
 
 const MODELS: { id: AIModelType; name: string; desc: string }[] = [
     { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: 'Balanced (Google)' },
@@ -65,12 +70,14 @@ const MODELS: { id: AIModelType; name: string; desc: string }[] = [
     { id: 'claude-4.5-haiku', name: 'Claude 4.5 Haiku', desc: 'Balanced (Anthropic)' },
 ]
 
-const TASK_MODES: { id: AITaskType; label: string; icon: typeof Sparkles }[] = [
-    { id: 'general', label: 'Genel', icon: Sparkles },
-    { id: 'email', label: 'Email', icon: Mail },
-    { id: 'report', label: 'Rapor', icon: FileText },
-    { id: 'review', label: 'Yanıt', icon: MessageCircle },
-]
+function getTaskModes(t: (k: any) => string): { id: AITaskType; label: string; icon: typeof Sparkles }[] {
+    return [
+        { id: 'general', label: t('ai.chat.task.general'), icon: Sparkles },
+        { id: 'email', label: t('ai.chat.task.email'), icon: Mail },
+        { id: 'report', label: t('ai.chat.task.report'), icon: FileText },
+        { id: 'review', label: t('ai.chat.task.review'), icon: MessageCircle },
+    ]
+}
 
 function MessageBubble({ message }: { message: ChatMessage }) {
     const isUser = message.role === 'user'
@@ -179,6 +186,7 @@ function TypingIndicator() {
 
 function ChatSidebar() {
     const { threads, activeThreadId, switchThread, deleteThread, createThread, toggleOpen, toggleSidebar } = useChatStore()
+    const { t } = useLanguageStore()
 
     return (
         <motion.div
@@ -190,14 +198,14 @@ function ChatSidebar() {
         >
             {/* Sidebar Header */}
             <div className="p-3 border-b border-border/30 flex items-center justify-between">
-                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Sohbetler</h4>
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('ai.sidebar.chats')}</h4>
                 <div className="flex items-center gap-1">
                     <Button
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground"
                         onClick={() => toggleOpen()}
-                        title="Dashboard'a dön"
+                        title={t('ai.chat.backToDashboard')}
                     >
                         <Home className="w-3.5 h-3.5" />
                     </Button>
@@ -219,7 +227,7 @@ function ChatSidebar() {
                     className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-violet-500/30 bg-violet-500/5 hover:bg-violet-500/10 hover:border-violet-500/50 transition-all text-xs text-violet-400 font-medium cursor-pointer"
                 >
                     <Plus className="w-3.5 h-3.5" />
-                    Yeni Sohbet
+                    {t('ai.sidebar.newChat')}
                 </button>
             </div>
 
@@ -228,7 +236,7 @@ function ChatSidebar() {
                 {threads.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-32 text-center px-4">
                         <MessageCircle className="w-6 h-6 text-muted-foreground/30 mb-2" />
-                        <p className="text-[11px] text-muted-foreground/50">Henüz sohbet yok</p>
+                        <p className="text-[11px] text-muted-foreground/50">{t('ai.sidebar.noChats')}</p>
                     </div>
                 ) : (
                     threads.map(thread => (
@@ -246,7 +254,7 @@ function ChatSidebar() {
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-medium truncate">{thread.title}</p>
                                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-                                    {thread.messages.length} mesaj · {format(thread.updatedAt, 'HH:mm')}
+                                    {thread.messages.length} {thread.messages.length === 1 ? t('ai.sidebar.message') : t('ai.sidebar.messages')} · {format(thread.updatedAt, 'HH:mm')}
                                 </p>
                             </div>
                             <button
@@ -319,24 +327,26 @@ function ModelSelector() {
 function TaskSelector() {
     const { selectedTask, setTask } = useChatStore()
 
+    const { t } = useLanguageStore()
+
     return (
         <div className="flex gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/20">
-            {TASK_MODES.map(t => {
-                const Icon = t.icon
+            {getTaskModes(t).map(tm => {
+                const Icon = tm.icon
                 return (
                     <button
-                        key={t.id}
-                        onClick={() => setTask(t.id)}
-                        title={t.label}
+                        key={tm.id}
+                        onClick={() => setTask(tm.id)}
+                        title={tm.label}
                         className={cn(
                             "px-2 py-1 rounded-md text-[10px] font-medium transition-all cursor-pointer flex items-center gap-1",
-                            selectedTask === t.id
+                            selectedTask === tm.id
                                 ? "bg-violet-500/15 text-violet-400 border border-violet-500/20"
                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent"
                         )}
                     >
                         <Icon className="w-3 h-3" />
-                        <span className="hidden sm:inline">{t.label}</span>
+                        <span className="hidden sm:inline">{tm.label}</span>
                     </button>
                 )
             })}
@@ -347,6 +357,7 @@ function TaskSelector() {
 // ── Knowledge Base Editor ────────────────────────
 function KBEditor() {
     const { hotel, updateHotelSettings } = useHotelStore()
+    const { t } = useLanguageStore()
     const [kbContent, setKbContent] = useState(hotel?.settings?.knowledge_base || '')
     const [saving, setSaving] = useState(false)
 
@@ -379,11 +390,11 @@ function KBEditor() {
                         onClick={handleSave}
                         disabled={saving}
                     >
-                        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Kaydet'}
+                        {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : t('ai.context.save')}
                     </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground mb-2">
-                    AI'ın otelinize özel kuralları (kahvaltı saati, check-out kuralları, havuz saatleri vb.) bilmesi için burayı doldurun. Bu bilgiler asistanın yanıtlarında öncelikli olacaktır.
+                    {t('ai.chat.kbDesc')}
                 </p>
                 <textarea
                     value={kbContent}
@@ -402,6 +413,7 @@ export function AIChatBot() {
         toggleOpen, setOpen, sendMessage, createThread, toggleSidebar, setIsPublic
     } = useChatStore()
     const { user } = useAuthStore()
+    const { t } = useLanguageStore()
     const location = useLocation()
     const [input, setInput] = useState('')
     const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -618,17 +630,17 @@ export function AIChatBot() {
                                             <MessageCircle className="w-8 h-8 text-violet-400" />
                                         </div>
                                         <h4 className="text-base font-bold text-foreground mb-1">
-                                            {isPublic ? 'Aetherius Relay Müşteri Desteği' : 'Aetherius Relay AI Asistanı'}
+                                            {isPublic ? t('ai.chat.publicTitle') : t('ai.chat.internalTitle')}
                                         </h4>
                                         <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
                                             {isPublic
-                                                ? 'Hoş geldiniz! Aetherius Relay hakkında merak ettiğiniz her şeyi sorabilirsiniz. Size platformun özelliklerini, fiyatlandırmasını ve otelinize katacağı değeri anlatabilirim.'
-                                                : 'Otelinizin tüm verilerine (vardiyalar, satışlar, notlar, odalar, turlar, döviz kurları) gerçek zamanlı erişimim var. Operasyonel raporlar hazırlayabilir, vardiya özetleri çıkarabilir veya misafir taleplerini analiz edebilirim.'
+                                                ? t('ai.chat.publicWelcome')
+                                                : t('ai.chat.internalWelcome')
                                             }
                                         </p>
 
                                         <div className="grid grid-cols-2 gap-2 w-full mb-6">
-                                            {(isPublic ? SUPPORT_SUGGESTIONS : QUICK_SUGGESTIONS).map((s, i) => (
+                                            {(isPublic ? getSupportSuggestions(t) : getQuickSuggestions(t)).map((s, i) => (
                                                 <motion.button
                                                     key={i}
                                                     initial={{ opacity: 0, y: 10 }}
@@ -644,15 +656,15 @@ export function AIChatBot() {
 
                                         {!isPublic && (
                                             <div className="w-full text-left space-y-2 pt-2 border-t border-border/10">
-                                                <p className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider mb-2">Uzmanlık Alanlarım</p>
+                                                <p className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider mb-2">{t('ai.chat.expertiseTitle')}</p>
                                                 <div className="grid grid-cols-3 gap-1.5">
                                                     {[
-                                                        { icon: BrainIcon, label: 'Vardiya' },
-                                                        { icon: Zap, label: 'Uyum' },
-                                                        { icon: FileText, label: 'Rapor' },
-                                                        { icon: Settings2, label: 'Fiyat' },
-                                                        { icon: Home, label: 'Odalar' },
-                                                        { icon: Sparkles, label: 'Satış' }
+                                                        { icon: BrainIcon, label: t('ai.chat.expertise.shift') },
+                                                        { icon: Zap, label: t('ai.chat.expertise.compliance') },
+                                                        { icon: FileText, label: t('ai.chat.expertise.report') },
+                                                        { icon: Settings2, label: t('ai.chat.expertise.pricing') },
+                                                        { icon: Home, label: t('ai.chat.expertise.rooms') },
+                                                        { icon: Sparkles, label: t('ai.chat.expertise.sales') }
                                                     ].map((cap, idx) => (
                                                         <div key={idx} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-background/40 border border-border/10">
                                                             <cap.icon className="w-3.5 h-3.5 text-muted-foreground/60" />
@@ -686,7 +698,7 @@ export function AIChatBot() {
                                             className="overflow-hidden mb-2"
                                         >
                                             <div className="grid grid-cols-2 gap-1.5 p-2 rounded-xl bg-muted/30 border border-border/20">
-                                                {(isPublic ? SUPPORT_SUGGESTIONS : QUICK_SUGGESTIONS).map((s, i) => (
+                                                {(isPublic ? getSupportSuggestions(t) : getQuickSuggestions(t)).map((s, i) => (
                                                     <motion.button
                                                         key={i}
                                                         initial={{ opacity: 0, scale: 0.95 }}
@@ -715,7 +727,7 @@ export function AIChatBot() {
                                                 ? "bg-violet-500/20 text-violet-400"
                                                 : "text-muted-foreground/40 hover:text-violet-400 hover:bg-violet-500/10"
                                         )}
-                                        title="Hızlı seçenekler"
+                                        title={t('ai.chat.quickTitle')}
                                     >
                                         <Zap className="w-4 h-4" />
                                     </button>
@@ -725,7 +737,7 @@ export function AIChatBot() {
                                         value={input}
                                         onChange={e => setInput(e.target.value)}
                                         onKeyDown={handleKeyDown}
-                                        placeholder="Bir şey sorun..."
+                                        placeholder={t('ai.chat.placeholder')}
                                         disabled={loading}
                                         className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none py-1.5 disabled:opacity-50"
                                     />

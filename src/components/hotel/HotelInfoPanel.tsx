@@ -312,12 +312,12 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             {!hotel?.settings?.safe_password ? (
                                 isGM ? (
                                     <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3">
-                                        <p className="text-xs text-muted-foreground">Henüz kasa şifresi belirlenmemiş. Gözetmen olarak şifre belirleyerek bu alanı kullanmaya başlayabilirsiniz.</p>
+                                        <p className="text-xs text-muted-foreground">{t('hotel.secure.setupDesc')}</p>
                                         <div className="flex gap-2">
                                             <div className="relative flex-1">
                                                 <Input
                                                     type={showNewPassword ? "text" : "password"}
-                                                    placeholder="Güvenli Kasa Şifresi"
+                                                    placeholder={t('hotel.secure.safeCode')}
                                                     autoComplete="new-password"
                                                     value={passwordInput}
                                                     onChange={e => setPasswordInput(e.target.value)}
@@ -332,12 +332,12 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                 </button>
                                             </div>
                                             <Button size="sm" onClick={handleSetSafePassword} disabled={saving}>
-                                                Belirle
+                                                {t('hotel.secure.setupButton')}
                                             </Button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="text-xs text-muted-foreground italic">Gözetmen henüz kasa şifresi belirlememiş.</p>
+                                    <p className="text-xs text-muted-foreground italic">{t('hotel.secure.notSetup')}</p>
                                 )
                             ) : !isVaultUnlocked ? (
                                 <div className="flex gap-2">
@@ -479,9 +479,9 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                 className="h-6 text-[10px] text-muted-foreground hover:text-destructive"
                                                 onClick={async () => {
                                                     const confirmed = await confirm({
-                                                        title: 'Şifreyi sıfırlamak istiyor musunuz?',
+                                                        title: t('hotel.secure.resetConfirmTitle'),
                                                         variant: 'destructive',
-                                                        confirmLabel: 'Sıfırla',
+                                                        confirmLabel: t('hotel.secure.resetConfirmButton'),
                                                     })
                                                     if (confirmed) {
                                                         updateHotelSettings(hotel.id, { safe_password: '' })
