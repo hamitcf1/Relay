@@ -28,7 +28,8 @@ export function AnnouncementBanner() {
         m.receiver_id === 'all' &&
         m.timestamp > oneDayAgo &&
         !(user?.settings?.dismissed_announcements || []).includes(m.id)
-    ).slice(0, 3) // Show max 3 banners
+    ).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 3)
+
 
     const handleDismiss = async (id: string) => {
         if (!user) return
