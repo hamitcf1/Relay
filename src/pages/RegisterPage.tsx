@@ -10,7 +10,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { PasswordReveal } from '@/components/ui/PasswordReveal'
-import { cn, cleanAuthError } from '@/lib/utils'
+import { cleanAuthError } from '@/lib/utils'
 import type { UserRole } from '@/types'
 
 export function RegisterPage() {
