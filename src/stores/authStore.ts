@@ -20,6 +20,7 @@ interface AuthState {
     loading: boolean
     error: string | null
     initialized: boolean
+    isBooted: boolean
 }
 
 interface AuthActions {
@@ -29,6 +30,7 @@ interface AuthActions {
     clearError: () => void
     initialize: () => () => void
     updateSettings: (settings: Partial<NonNullable<User['settings']>>) => Promise<void>
+    setBooted: (val: boolean) => void
 }
 
 type AuthStore = AuthState & AuthActions
@@ -40,6 +42,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     loading: false,
     error: null,
     initialized: false,
+    isBooted: false,
 
     // Actions
     signIn: async (email: string, password: string) => {
@@ -181,7 +184,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
             // Clear localStorage to prevent stale data on next login
             localStorage.clear()
 
-            set({ user: null, firebaseUser: null, loading: false })
+            set({ user: null, firebaseUser: null, loading: false, isBooted: false })
             toast.success('Logged out')
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Logout failed'
@@ -277,5 +280,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
         } catch (error) {
             console.error("Error updating user settings:", error)
         }
-    }
+    },
+    setBooted: (val) => set({ isBooted: val })
 }))

@@ -361,5 +361,5 @@ export const priorityInfo: Record<NotePriority, {
     low: { symbol: '!', color: 'text-zinc-400', textClass: 'font-normal text-sm', glowClass: '' },
     medium: { symbol: '!!', color: 'text-amber-400', textClass: 'font-semibold text-sm', glowClass: '' },
     high: { symbol: '!!!', color: 'text-orange-500', textClass: 'font-bold text-base', glowClass: '' },
-    critical: { symbol: '!!!!', color: 'text-rose-500', textClass: 'font-bold text-lg', glowClass: 'drop-shadow-[0_0_6px_rgba(244,63,94,0.6)]' },
+    critical: { symbol: '!!!!', color: 'text-rose-500', textClass: 'font-bold text-lg', glowClass: 'drop-shadow-[0_0_6px_rgba(244,63,94,0.6)] animate-pulse-critical' },
 }

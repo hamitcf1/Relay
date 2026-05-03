@@ -63,6 +63,7 @@ export interface UserSettings {
     collapsed_cards?: Record<string, boolean>
     avatar_style?: 'initials' | 'name' | 'emoji'
     avatar_emoji?: string
+    disable_animations?: boolean
 }
 
 export interface StaffMember {

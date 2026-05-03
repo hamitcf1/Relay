@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, MouseEvent } from 'react'
+import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion'
 import { Hotel, Mail, Lock, Eye, EyeOff, Loader2, User, ArrowLeft } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
@@ -7,12 +7,17 @@ import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { PasswordReveal } from '@/components/ui/PasswordReveal'
+import { cn } from '@/lib/utils'
 import type { UserRole } from '@/types'
 
 export function RegisterPage() {
     const navigate = useNavigate()
     const { t } = useLanguageStore()
+    const { user } = useAuthStore()
+    const disableAnimations = user?.settings?.disable_animations
 
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -24,6 +29,36 @@ export function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // 3D Tilt Effect State
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+    const mouseXSpring = useSpring(x, { stiffness: 150, damping: 20 })
+    const mouseYSpring = useSpring(y, { stiffness: 150, damping: 20 })
+
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], disableAnimations ? ["0deg", "0deg"] : ["5deg", "-5deg"])
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], disableAnimations ? ["0deg", "0deg"] : ["-5deg", "5deg"])
+    const glowX = useTransform(mouseXSpring, [-0.5, 0.5], ["0%", "100%"])
+    const glowY = useTransform(mouseYSpring, [-0.5, 0.5], ["0%", "100%"])
+    
+    const backgroundGlow = useMotionTemplate`radial-gradient(circle at ${glowX} ${glowY}, ${disableAnimations ? 'transparent' : 'rgba(124, 58, 237, 0.2)'} 0%, transparent 60%)`
+
+    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const width = rect.width
+        const height = rect.height
+        const mouseX = e.clientX - rect.left
+        const mouseY = e.clientY - rect.top
+        const xPct = mouseX / width - 0.5
+        const yPct = mouseY / height - 0.5
+        x.set(xPct)
+        y.set(yPct)
+    }
+
+    const handleMouseLeave = () => {
+        x.set(0)
+        y.set(0)
+    }
 
     // Helper to validate code
     const { validateHotelCode } = useHotelStore()
@@ -152,36 +187,58 @@ export function RegisterPage() {
                 />
             </div>
 
-            {/* Register Card */}
+            {/* Register Card Wrapper */}
             <motion.div
-                className="relative z-10 w-full max-w-[480px] mx-4"
-                initial={{ opacity: 0, y: 30 }}
+                className="relative z-10 w-full max-w-[480px] mx-4 perspective-[1200px]"
+                initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
             >
                 {/* Glass Container */}
-                <div className="relative backdrop-blur-3xl bg-black/40 border border-white/10 rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_-10px_rgba(0,0,0,0.5)] overflow-hidden group">
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                <div className="relative backdrop-blur-3xl bg-black/40 border border-white/10 rounded-[32px] p-8 md:p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden group">
+                    {/* Interactive Hover Glow Effect */}
+                    <motion.div 
+                        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" 
+                        style={{ background: backgroundGlow }}
+                    />
 
                     {/* Back Link */}
                     <Link
                         to="/"
-                        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-8 group/back relative z-10"
+                        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-8 group/back relative z-10 transform-gpu translate-z-10"
                     >
                         <ArrowLeft className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" />
                         {t('auth.backToHome')}
                     </Link>
 
+                    {/* Logo Section */}
+                    <motion.div
+                        className="flex flex-col items-center mb-8 relative z-10"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                    >
+                        <div className="relative group/logo mb-4">
+                            <div className="absolute inset-0 bg-primary/40 blur-xl rounded-full opacity-50 group-hover/logo:opacity-100 transition-opacity duration-500" />
+                            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-zinc-900 to-black border border-white/10 flex items-center justify-center shadow-2xl">
+                                <Hotel className="w-7 h-7 text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
+                            </div>
+                        </div>
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight text-center">Aetherius Relay</h1>
+                    </motion.div>
+
                     {/* Header */}
                     <motion.div
-                        className="mb-8 relative z-10"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
+                        className="mb-8 relative z-10 text-center"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
                     >
-                        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">{t('auth.register')}</h1>
-                        <p className="text-zinc-400">{t('auth.registerSubtitle')}</p>
+                        <h2 className="text-2xl font-bold text-white tracking-tight mb-2">{t('auth.register')}</h2>
+                        <p className="text-zinc-500 text-sm leading-relaxed">{t('auth.registerSubtitle')}</p>
                     </motion.div>
 
                     {/* Form */}
@@ -194,7 +251,7 @@ export function RegisterPage() {
                                     type="button"
                                     onClick={() => setIsGM(false)}
                                     className={`p-4 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group/btn ${!isGM
-                                        ? 'bg-primary/20 border-primary/50 text-white shadow-[0_0_20px_-5px_rgba(var(--primary),0.3)]'
+                                        ? 'bg-primary/20 border-primary/50 text-white shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]'
                                         : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:border-white/20'
                                         }`}
                                 >
@@ -208,7 +265,7 @@ export function RegisterPage() {
                                     type="button"
                                     onClick={() => setIsGM(true)}
                                     className={`p-4 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group/btn ${isGM
-                                        ? 'bg-primary/20 border-primary/50 text-white shadow-[0_0_20px_-5px_rgba(var(--primary),0.3)]'
+                                        ? 'bg-primary/20 border-primary/50 text-white shadow-[0_0_20px_-5px_hsl(var(--primary)/0.3)]'
                                         : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10 hover:border-white/20'
                                         }`}
                                 >
@@ -270,14 +327,22 @@ export function RegisterPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="group/input relative">
+                             <div className="grid grid-cols-2 gap-4">
+                                 <div className="group/input relative">
                                     <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    {showPassword && (
+                                        <div className="absolute left-12 right-10 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
+                                            <PasswordReveal value={password} visible={true} />
+                                        </div>
+                                    )}
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-10 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
+                                        className={cn(
+                                            "w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-10 placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight",
+                                            showPassword ? "text-transparent caret-white" : "text-white"
+                                        )}
                                         placeholder={t('auth.password')}
                                         required
                                     />
@@ -290,13 +355,21 @@ export function RegisterPage() {
                                     </button>
                                 </div>
 
-                                <div className="group/input relative">
+                                 <div className="group/input relative">
                                     <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    {showPassword && (
+                                        <div className="absolute left-12 right-4 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
+                                            <PasswordReveal value={confirmPassword} visible={true} />
+                                        </div>
+                                    )}
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
+                                        className={cn(
+                                            "w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight",
+                                            showPassword ? "text-transparent caret-white" : "text-white"
+                                        )}
                                         placeholder={t('auth.confirmPassword')}
                                         required
                                     />
@@ -321,7 +394,7 @@ export function RegisterPage() {
                                                 {r.label}
                                             </span>
                                             {role === r.value && (
-                                                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary),0.8)]" />
+                                                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.8)]" />
                                             )}
                                         </div>
                                         <p className="text-[10px] text-zinc-500 leading-tight">

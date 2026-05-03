@@ -243,12 +243,12 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                         )}
 
                         <Badge variant="outline" className={cn(
-                            "text-xs h-5 px-1.5 border-none font-semibold",
-                            note.status === 'active' ? "text-emerald-500 bg-emerald-500/10" :
-                                note.status === 'resolved' ? "text-indigo-500 bg-indigo-500/10" :
-                                    "text-zinc-500 bg-zinc-500/10"
+                            "text-xs h-5 px-1.5 border-none font-semibold relative",
+                            note.status === 'active' ? "text-emerald-500 bg-emerald-500/10 snake-border-active" :
+                                note.status === 'resolved' ? "text-indigo-500 bg-indigo-500/10 snake-border-resolved" :
+                                    "text-zinc-500 bg-zinc-500/10 snake-border-archived"
                         )}>
-                            {(t(`status.${note.status}` as any) as string).toUpperCase()}
+                            <span>{(t(`status.${note.status}` as any) as string).toUpperCase()}</span>
                         </Badge>
                     </div>
 

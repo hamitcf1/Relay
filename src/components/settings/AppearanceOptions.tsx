@@ -147,6 +147,41 @@ export function AppearanceOptions() {
                 </button>
             </div>
 
+            {/* Disable Animations Toggle */}
+            <div className="space-y-3">
+                <div className="flex items-center gap-2 px-2">
+                    <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
+                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                        UI Animations
+                    </label>
+                </div>
+                <button
+                    onClick={() => updateSettings({ disable_animations: !user?.settings?.disable_animations })}
+                    className={cn(
+                        "w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-200",
+                        !user?.settings?.disable_animations
+                            ? "bg-primary/10 border-primary/30 text-foreground"
+                            : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    )}
+                >
+                    <span className="text-xs font-medium">
+                        {!user?.settings?.disable_animations ? 'Enabled' : 'Disabled'}
+                    </span>
+                    <div
+                        className={cn(
+                            "w-8 h-4 rounded-full relative transition-colors duration-200",
+                            !user?.settings?.disable_animations ? "bg-primary" : "bg-zinc-600"
+                        )}
+                    >
+                        <motion.div
+                            className="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm"
+                            animate={{ left: !user?.settings?.disable_animations ? 16 : 2 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                    </div>
+                </button>
+            </div>
+
             {/* Avatar Style Section */}
             <div className="space-y-4 border-t border-border/50 pt-6">
                 <div className="flex items-center justify-between px-2">

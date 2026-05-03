@@ -86,9 +86,11 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             const date = new Date(start)
             date.setDate(start.getDate() + i)
             const isToday = date.toDateString() === today.toDateString()
+            const dayStr = String(date.getDate()).padStart(2, '0')
+            const monthStr = String(date.getMonth() + 1).padStart(2, '0')
             return {
                 day: DAYS[i],
-                dateStr: formatDisplayDate(date),
+                dateStr: `${dayStr}/${monthStr}`,
                 isToday
             }
         })
@@ -317,27 +319,27 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                         {t('roster.noStaff')}
                     </p>
                 ) : (
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm table-fixed">
                         <thead>
                             <tr className="border-b border-border">
-                                {canEdit && <th className="w-8"></th>}
-                                <th className="text-left py-3 px-2 text-muted-foreground font-medium text-xs uppercase tracking-wider">{t('common.staff')}</th>
+                                {canEdit && <th className="w-5 sm:w-8"></th>}
+                                <th className="text-left py-2 px-1 sm:px-2 text-muted-foreground font-medium text-[10px] sm:text-xs uppercase tracking-wider w-[70px] sm:w-[120px]">{t('common.staff')}</th>
                                 {weekDates.map(({ day, dateStr, isToday }) => {
                                     const dayKey = `day.${day.toLowerCase()}` as any
                                     return (
                                         <th key={day} className={cn(
-                                            "text-center py-3 px-1 font-medium min-w-[64px]",
+                                            "text-center py-2 px-0.5 font-medium",
                                             isToday ? "text-primary" : "text-muted-foreground"
                                         )}>
                                             <div className={cn(
-                                                "text-xs mb-0.5 font-mono",
+                                                "text-[9px] sm:text-xs mb-0.5 font-mono",
                                                 isToday ? "opacity-100" : "opacity-50"
                                             )}>{dateStr}</div>
                                             <div className={cn(
-                                                "text-sm",
+                                                "text-[10px] sm:text-sm truncate",
                                                 isToday && "font-bold"
                                             )}>{t(dayKey)}</div>
-                                            {isToday && <div className="h-0.5 w-4 mx-auto mt-0.5 rounded-full bg-primary" />}
+                                            {isToday && <div className="h-0.5 w-3 sm:w-4 mx-auto mt-0.5 rounded-full bg-primary" />}
                                         </th>
                                     )
                                 })}
@@ -364,40 +366,42 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                         )}
                                     >
                                         {canEdit && (
-                                            <td className="py-2 px-1 text-muted-foreground cursor-grab active:cursor-grabbing">
-                                                <GripVertical className="w-4 h-4 opacity-50 hover:opacity-100 transition-opacity" />
+                                            <td className="py-1 sm:py-2 px-0.5 sm:px-1 text-muted-foreground cursor-grab active:cursor-grabbing">
+                                                <GripVertical className="w-3 h-3 sm:w-4 sm:h-4 opacity-50 hover:opacity-100 transition-opacity" />
                                             </td>
                                         )}
-                                        <td className="py-3 px-2 text-foreground whitespace-nowrap text-sm flex items-center gap-2">
-                                            <span className={cn(member.is_hidden_in_roster && "opacity-50 line-through decoration-muted-foreground")}>
-                                                {member.name}
-                                            </span>
-                                            {user?.role === 'gm' && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        if (hotelId) {
-                                                            toggleStaffVisibility(hotelId, member.uid, !member.is_hidden_in_roster)
-                                                                .then(() => {
-                                                                    // Update local state to reflect change immediately
-                                                                    setStaff(prev => prev.map(s => s.uid === member.uid ? { ...s, is_hidden_in_roster: !member.is_hidden_in_roster } : s))
-                                                                })
-                                                        }
-                                                    }}
-                                                    className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
-                                                    title={member.is_hidden_in_roster ? t('roster.show') : t('roster.hide')}
-                                                >
-                                                    {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                                                </button>
-                                            )}
+                                        <td className="py-2 px-1 sm:px-2 text-foreground text-xs sm:text-sm">
+                                            <div className="flex items-center gap-1 sm:gap-2">
+                                                <span className={cn("truncate min-w-0 flex-1", member.is_hidden_in_roster && "opacity-50 line-through decoration-muted-foreground")}>
+                                                    {member.name}
+                                                </span>
+                                                {user?.role === 'gm' && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            if (hotelId) {
+                                                                toggleStaffVisibility(hotelId, member.uid, !member.is_hidden_in_roster)
+                                                                    .then(() => {
+                                                                        // Update local state to reflect change immediately
+                                                                        setStaff(prev => prev.map(s => s.uid === member.uid ? { ...s, is_hidden_in_roster: !member.is_hidden_in_roster } : s))
+                                                                    })
+                                                            }
+                                                        }}
+                                                        className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
+                                                        title={member.is_hidden_in_roster ? t('roster.show') : t('roster.hide')}
+                                                    >
+                                                        {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                         {DAYS.map((day, dayIdx) => {
                                             const shift = schedule[member.uid]?.[day]
                                             const isToday = weekDates[dayIdx]?.isToday
                                             return (
                                                 <td key={day} className={cn(
-                                                    "py-3 px-1 text-center",
-                                                    isToday && "bg-primary/5"
+                                                    "py-1 sm:py-2 px-0.5 sm:px-1 text-center align-middle relative",
+                                                    isToday && "bg-primary/5 animate-highlight-pulse rounded-md"
                                                 )}>
                                                     <motion.button
                                                         onClick={() => cycleShift(member.uid, day, 'forward')}
@@ -407,7 +411,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                                         }}
                                                         disabled={!canEdit}
                                                         className={cn(
-                                                            'w-12 h-9 mx-auto rounded text-xs font-bold transition-all',
+                                                            'w-full max-w-[36px] sm:max-w-[48px] h-7 sm:h-9 mx-auto rounded text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center',
                                                             shift ? SHIFT_COLORS[shift] : 'bg-zinc-800/50 text-zinc-600',
                                                             canEdit && 'hover:opacity-80 cursor-pointer',
                                                             !canEdit && 'cursor-default'

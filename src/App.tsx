@@ -11,8 +11,10 @@ import { ConfirmProvider } from '@/components/ui/confirm-dialog'
 import { PageSkeleton } from '@/components/ui/skeleton'
 
 import { useThemeStore } from '@/stores/themeStore'
+import { useAuthStore } from '@/stores/authStore'
 import { ActivityTracker } from '@/components/tracking/ActivityTracker'
 import { AIChatBot } from '@/components/ai/AIChatBot'
+import { CyberLoadingScreen } from '@/components/ui/CyberLoadingScreen'
 
 // Lazy-loaded pages — each becomes a separate chunk
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })))
@@ -34,11 +36,21 @@ const PrivacyPage = lazy(() => import('@/pages/legal/PrivacyPage').then(m => ({ 
 const TermsPage = lazy(() => import('@/pages/legal/TermsPage').then(m => ({ default: m.TermsPage })))
 const StatusPage = lazy(() => import('@/pages/legal/StatusPage').then(m => ({ default: m.StatusPage })))
 
+import { MotionConfig, AnimatePresence } from 'framer-motion'
+
 function App() {
     const applyTheme = useThemeStore(state => state.applyTheme)
+    const { user, isBooted, setBooted, initialized } = useAuthStore()
+    const disableAnimations = user?.settings?.disable_animations
 
     useEffect(() => {
         applyTheme()
+
+        if (disableAnimations) {
+            document.body.classList.add('disable-animations')
+        } else {
+            document.body.classList.remove('disable-animations')
+        }
 
         // Global right-click prevention
         const handleContextMenu = (e: MouseEvent) => {
@@ -47,13 +59,14 @@ function App() {
 
         window.addEventListener('contextmenu', handleContextMenu)
         return () => window.removeEventListener('contextmenu', handleContextMenu)
-    }, [applyTheme])
+    }, [applyTheme, disableAnimations])
 
     return (
         <ConfirmProvider>
-            <div className="relative">
-                <BrowserRouter>
-                    <UpdateNotifier />
+            <MotionConfig reducedMotion={disableAnimations ? "always" : "user"}>
+                <div className="relative">
+                    <BrowserRouter>
+                        <UpdateNotifier />
                     <TabNotifications />
                     <CustomCursor />
                     <ActivityTracker />
@@ -69,7 +82,7 @@ function App() {
                         closeButton
                     />
 
-                    <Suspense fallback={<PageSkeleton />}>
+                     <Suspense fallback={<PageSkeleton />}>
                         <Routes>
                             {/* Public Routes with Layout */}
                             <Route element={<PublicLayout />}>
@@ -106,7 +119,14 @@ function App() {
                                 path="/dashboard"
                                 element={
                                     <ProtectedRoute>
-                                        <DashboardPage />
+                                        <div className="relative w-full h-full">
+                                            <DashboardPage />
+                                            <AnimatePresence>
+                                                {user && !isBooted && (
+                                                    <CyberLoadingScreen onComplete={() => setBooted(true)} />
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
                                     </ProtectedRoute>
                                 }
                             />
@@ -114,7 +134,14 @@ function App() {
                                 path="/operations"
                                 element={
                                     <ProtectedRoute>
-                                        <DashboardPage />
+                                        <div className="relative w-full h-full">
+                                            <DashboardPage />
+                                            <AnimatePresence>
+                                                {user && !isBooted && (
+                                                    <CyberLoadingScreen onComplete={() => setBooted(true)} />
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
                                     </ProtectedRoute>
                                 }
                             />
@@ -123,7 +150,8 @@ function App() {
                     <AIChatBot />
                 </BrowserRouter>
             </div>
-        </ConfirmProvider>
+        </MotionConfig>
+    </ConfirmProvider>
     )
 }
 

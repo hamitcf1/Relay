@@ -99,7 +99,7 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
                         onClick={() => onSelect(item.id)}
                         whileTap={{ scale: 0.95 }}
                         whileHover={{ scale: 1.02 }}
-                        className="group relative flex flex-col items-start p-5 rounded-2xl card-modern text-left overflow-hidden"
+                        className="group relative flex flex-col items-start p-5 rounded-2xl card-modern text-left snake-border-glow"
                     >
                         <div className={cn("p-3 rounded-xl mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", item.color)}>
                             <item.icon className="w-6 h-6" />

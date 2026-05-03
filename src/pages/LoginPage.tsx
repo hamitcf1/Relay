@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useEffect, MouseEvent } from 'react'
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion'
 import { Hotel, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { PasswordReveal } from '@/components/ui/PasswordReveal'
+import { cn } from '@/lib/utils'
 
 export function LoginPage() {
     const navigate = useNavigate()
@@ -16,6 +18,38 @@ export function LoginPage() {
     const [hotelCode, setHotelCode] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loginError, setLoginError] = useState<string | null>(null) // Local error state
+
+    const disableAnimations = useAuthStore(state => state.user?.settings?.disable_animations)
+
+    // 3D Tilt Effect State
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+    const mouseXSpring = useSpring(x, { stiffness: 150, damping: 20 })
+    const mouseYSpring = useSpring(y, { stiffness: 150, damping: 20 })
+
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], disableAnimations ? ["0deg", "0deg"] : ["7deg", "-7deg"])
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], disableAnimations ? ["0deg", "0deg"] : ["-7deg", "7deg"])
+    const glowX = useTransform(mouseXSpring, [-0.5, 0.5], ["0%", "100%"])
+    const glowY = useTransform(mouseYSpring, [-0.5, 0.5], ["0%", "100%"])
+    
+    const backgroundGlow = useMotionTemplate`radial-gradient(circle at ${glowX} ${glowY}, ${disableAnimations ? 'transparent' : 'rgba(124, 58, 237, 0.25)'} 0%, transparent 60%)`
+
+    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const width = rect.width
+        const height = rect.height
+        const mouseX = e.clientX - rect.left
+        const mouseY = e.clientY - rect.top
+        const xPct = mouseX / width - 0.5
+        const yPct = mouseY / height - 0.5
+        x.set(xPct)
+        y.set(yPct)
+    }
+
+    const handleMouseLeave = () => {
+        x.set(0)
+        y.set(0)
+    }
 
     // Cycling Text Logic
     const texts = [
@@ -31,14 +65,12 @@ export function LoginPage() {
             setTextIndex((prev) => (prev + 1) % texts.length)
         }, 3000)
         return () => clearInterval(interval)
-    }, [texts.length]) // slightly imperfect dependency but fine for now, or remove dependancy since t changes rarely in this view
+    }, [texts.length])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         clearError()
         setLoginError(null)
-
-        // removed pre-check for hotelCode to allow fetching hotel data first
 
         await signIn(email, password)
 
@@ -70,21 +102,11 @@ export function LoginPage() {
                                 return
                             }
                         }
-                        // CASE 2: Hotel has NO code (Legacy Support)
-                        // Allow login so GM can generate one.
-                        // Ideally, we restrict this to GM only, but for now allow all to avoid lockout.
                     } else {
-                        // Hotel doesn't exist?
                         setLoginError(t('auth.error.hotelNotFound'))
                         await useAuthStore.getState().signOut()
                         return
                     }
-                } else if (!user.hotel_id && location.pathname !== '/setup-hotel') {
-                    // Allow login if no hotel (will redirect to setup)
-                    // But wait, user said "requirement for logging into correct hotel"
-                    // If they have NO hotel, they probably are a new GM who signed up via some other way?
-                    // Or maybe a broken state.
-                    // Let's assume if NO hotel_id, we bypass code check (nothing to check against) and let ProtectedRoute handle redirect.
                 }
             } catch (err) {
                 console.error("Error verifying hotel code:", err)
@@ -143,22 +165,28 @@ export function LoginPage() {
                 />
             </div>
 
-            {/* Login Card */}
+            {/* Login Card Wrapper */}
             <motion.div
-                className="relative z-10 w-full max-w-[420px] mx-4"
-                initial={{ opacity: 0, y: 30 }}
+                className="relative z-10 w-full max-w-[420px] mx-4 perspective-[1200px]"
+                initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
             >
                 {/* Glass Container */}
-                <div className="relative backdrop-blur-3xl bg-black/40 border border-white/10 rounded-[32px] p-8 md:p-10 shadow-[0_0_50px_-10px_rgba(0,0,0,0.5)] overflow-hidden group">
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                <div className="relative backdrop-blur-3xl bg-black/40 border border-white/10 rounded-[32px] p-8 md:p-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden group">
+                    {/* Interactive Hover Glow Effect */}
+                    <motion.div 
+                        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" 
+                        style={{ background: backgroundGlow }}
+                    />
 
                     {/* Back Link */}
                     <Link
                         to="/"
-                        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-6 group/back relative z-10"
+                        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-6 group/back relative z-10 transform-gpu translate-z-10"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6" /></svg>
                         {t('auth.backToHome')}
@@ -174,7 +202,7 @@ export function LoginPage() {
                         <div className="relative group/logo mb-6">
                             <div className="absolute inset-0 bg-primary/40 blur-xl rounded-full opacity-50 group-hover/logo:opacity-100 transition-opacity duration-500" />
                             <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-900 to-black border border-white/10 flex items-center justify-center shadow-2xl">
-                                <Hotel className="w-8 h-8 text-primary drop-shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                                <Hotel className="w-8 h-8 text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.5)]" />
                             </div>
                         </div>
                         <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight text-center">Aetherius Relay</h1>
@@ -228,14 +256,22 @@ export function LoginPage() {
                                 />
                             </div>
 
-                            {/* Password */}
+                             {/* Password */}
                             <div className="group/input relative">
                                 <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                {showPassword && (
+                                    <div className="absolute left-12 right-12 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
+                                        <PasswordReveal value={password} visible={true} />
+                                    </div>
+                                )}
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-12 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
+                                    className={cn(
+                                        "w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-12 placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight",
+                                        showPassword ? "text-transparent caret-white" : "text-white"
+                                    )}
                                     placeholder={t('auth.password')}
                                 />
                                 <button

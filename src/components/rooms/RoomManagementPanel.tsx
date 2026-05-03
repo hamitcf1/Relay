@@ -184,14 +184,14 @@ export function RoomManagementPanel() {
                     <TabsContent value="overview" className="flex-1 flex flex-col min-h-0 m-0 p-4 sm:p-6 space-y-6 overflow-y-auto relative custom-scrollbar data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
                         {/* Filters */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-4 rounded-xl border border-border">
-                            <div className="relative w-full sm:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                            <div className="relative w-full sm:w-auto max-w-12 focus-within:max-w-full sm:focus-within:max-w-64 transition-[max-width] ease-in-out duration-300 group">
                                 <Input
                                     placeholder="Search room..."
-                                    className="pl-9 bg-background border-border focus:border-primary"
+                                    className="h-10 w-full rounded-full bg-background border-border text-sm pl-4 pr-10 placeholder:text-transparent focus:placeholder:text-muted-foreground transition-all focus:border-primary"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
+                                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none group-hover:animate-quacke" />
                             </div>
                             <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
                                 {(['all', 'clean', 'dirty', 'inspect', 'dnd'] as const).map((status) => (

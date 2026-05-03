@@ -122,7 +122,7 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
                         variants={itemAnim}
                         onClick={() => onSelect(item.id)}
                         whileTap={{ scale: 0.95 }}
-                        className="group relative flex flex-col items-start p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-left overflow-hidden"
+                        className="group relative flex flex-col items-start p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-left snake-border-glow"
                     >
                         <div className={cn("p-3 rounded-xl mb-3 transition-colors group-hover:bg-white/10", item.color)}>
                             <item.icon className="w-6 h-6" />

@@ -180,14 +180,14 @@ export function MessagingPanel() {
             )}>
                 <div className="p-4 border-b border-border">
                     <h3 className="font-bold text-foreground mb-4">{t('messages.title')}</h3>
-                    <div className="relative">
-                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-muted-foreground" />
+                    <div className="relative max-w-8 focus-within:max-w-full transition-[max-width] ease-in-out duration-300 ml-auto group">
                         <Input
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder={t('messages.search')}
-                            className="h-8 pl-8 bg-background border-border text-xs"
+                            placeholder={t('messages.search') as string}
+                            className="h-8 w-full rounded-full bg-background border-border text-xs pl-3 pr-7 placeholder:text-transparent focus:placeholder:text-muted-foreground transition-all focus:border-primary"
                         />
+                        <Search className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none group-hover:animate-quacke" />
                     </div>
                 </div>
 

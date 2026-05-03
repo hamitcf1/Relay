@@ -35,6 +35,10 @@ type Translations = {
     'auth.cycling.2': string
     'auth.cycling.3': string
     'auth.cycling.4': string
+    'auth.loading.decrypting': string
+    'auth.loading.syncing': string
+    'auth.loading.initializing': string
+    'auth.loading.finalizing': string
     'auth.error.hotelCodeRequired': string
     'auth.error.invalidHotelCode': string
     'auth.error.hotelNotFound': string
@@ -1193,6 +1197,10 @@ const translations: Record<Language, Translations> = {
         'auth.cycling.2': 'Forget About Notepads',
         'auth.cycling.3': 'AI Assisted Replies',
         'auth.cycling.4': 'Seamless Shifts',
+        'auth.loading.decrypting': 'Decrypting Secure Vault...',
+        'auth.loading.syncing': 'Syncing Hotel Core...',
+        'auth.loading.initializing': 'Initializing Interface...',
+        'auth.loading.finalizing': 'Welcome to the Future',
         'auth.error.hotelCodeRequired': 'Hotel Code is required for this hotel.',
         'auth.error.invalidHotelCode': 'Invalid Hotel Code.',
         'auth.error.hotelNotFound': 'Account configuration error: Hotel not found.',
@@ -1954,6 +1962,10 @@ const translations: Record<Language, Translations> = {
         'auth.cycling.2': 'Not Defterlerini Unutun',
         'auth.cycling.3': 'AI Destekli Yanıtlar',
         'auth.cycling.4': 'Sorunsuz Vardiyalar',
+        'auth.loading.decrypting': 'Güvenli Kasa Çözülüyor...',
+        'auth.loading.syncing': 'Otel Verileri Eşitleniyor...',
+        'auth.loading.initializing': 'Arayüz Hazırlanıyor...',
+        'auth.loading.finalizing': 'Geleceğe Hoş Geldiniz',
         'auth.error.hotelCodeRequired': 'Bu otel için Otel Kodu gereklidir.',
         'auth.error.invalidHotelCode': 'Geçersiz Otel Kodu.',
         'auth.error.hotelNotFound': 'Hesap yapılandırma hatası: Otel bulunamadı.',

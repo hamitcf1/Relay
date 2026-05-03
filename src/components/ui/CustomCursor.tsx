@@ -20,7 +20,10 @@ export function setCursorEnabled(enabled: boolean) {
     window.dispatchEvent(new Event('cursor-setting-changed'))
 }
 
+import { useAuthStore } from '@/stores/authStore'
+
 export function CustomCursor() {
+    const disableAnimations = useAuthStore(state => state.user?.settings?.disable_animations)
     const [cursorEnabled, setCursorEnabledState] = useState(getCursorEnabled)
 
     // Listen for toggle changes from AppearanceOptions
@@ -32,7 +35,7 @@ export function CustomCursor() {
 
     // Toggle cursor visibility via class + inline style for reliability
     useEffect(() => {
-        if (cursorEnabled) {
+        if (cursorEnabled && !disableAnimations) {
             document.body.classList.add('custom-cursor-active')
             // Clear any lingering inline cursor styles
             document.documentElement.style.cursor = ''
@@ -45,7 +48,7 @@ export function CustomCursor() {
         }
     }, [cursorEnabled])
 
-    if (!cursorEnabled) return null
+    if (!cursorEnabled || disableAnimations) return null
 
     return <CursorRenderer />
 }
