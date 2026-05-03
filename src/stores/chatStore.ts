@@ -230,6 +230,23 @@ function buildContext(): string {
         if (rateParts.length > 0) parts.push(`[EXCHANGE RATES TRY] ${rateParts.join(' | ')}`)
     }
 
+    // ── STAFF MEAL / DAILY MENU ───────────────
+    const todayMenu = useStaffMealStore.getState().todayMenu
+    if (todayMenu) {
+        parts.push(`[TODAY'S STAFF MENU] ${todayMenu.menu || 'Not set'}`)
+    }
+
+    // ── OFF-DAY REQUESTS ──────────────────────
+    const offDayRequests = useOffDayStore.getState().requests
+    if (offDayRequests.length > 0) {
+        const pending = offDayRequests.filter(r => r.status === 'pending')
+        const approved = offDayRequests.filter(r => r.status === 'approved')
+        parts.push(`[OFF-DAY REQUESTS] Total: ${offDayRequests.length}, Pending: ${pending.length}, Approved: ${approved.length}`)
+        pending.slice(0, 5).forEach(r => {
+            parts.push(`  - ${r.staff_name}: ${r.date} (${r.reason || 'No reason'})`)
+        })
+    }
+
     return parts.join('\n')
 }
 
