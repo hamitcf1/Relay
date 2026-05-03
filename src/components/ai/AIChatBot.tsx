@@ -38,16 +38,19 @@ const QUICK_SUGGESTIONS = [
     { label: '📋 Aktif notlar', text: 'Aktif notları özetle' },
     { label: '💰 Bugünkü satışlar', text: 'Bugünkü satışları listele' },
     { label: '🏷️ Oda fiyatları', text: 'Güncel oda fiyatlarını göster' },
-    { label: '📊 Vardiya durumu', text: 'Mevcut vardiya durumunu özetle' },
+    { label: '📊 Vardiya durumu', text: 'Mevcut vardiya durumunu özetle ve eksik KBS/Acente kontrollerini bildir' },
     { label: '🏨 Oda durumu', text: 'Tüm odaların durumunu göster' },
     { label: '💱 Döviz kurları', text: 'Güncel döviz kurlarını göster' },
+    { label: '📝 Rapor taslağı', text: 'Bir olay raporu (tutanak) taslağı oluşturmak istiyorum' },
+    { label: '✉️ Email yaz', text: 'Bir misafire rezervasyon onayı emaili taslağı oluştur' },
 ]
 
 const SUPPORT_SUGGESTIONS = [
-    { label: '🚀 Relay nedir?', text: 'Aetherius Relay platformu hakkında bilgi verir misin?' },
+    { label: '🚀 Relay nedir?', text: 'Aetherius Relay platformu ve temel modülleri (Handover Wizard, Compliance Pulse vb.) hakkında bilgi verir misin?' },
     { label: '💎 Fiyatlandırma?', text: 'Fiyatlandırma planlarınız nasıl?' },
-    { label: '🛡️ Güvenlik?', text: 'Veri güvenliğini nasıl sağlıyorsunuz?' },
+    { label: '🛡️ Güvenlik?', text: 'Veri güvenliğini ve Gizli Kasa (Vault) özelliğini nasıl sağlıyorsunuz?' },
     { label: '📱 Mobil uygulama?', text: 'Mobil uygulamanız var mı?' },
+    { label: '🔄 Devir süreci?', text: 'Handover Wizard modülü vardiya devrini nasıl kolaylaştırıyor?' },
 ]
 
 const MODELS: { id: AIModelType; name: string; desc: string }[] = [
@@ -380,7 +383,7 @@ function KBEditor() {
                     </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground mb-2">
-                    AI'ın kullanacağı otel bilgilerini buraya girin (kahvaltı saatleri, checkout, havuz, vb.)
+                    AI'ın otelinize özel kuralları (kahvaltı saati, check-out kuralları, havuz saatleri vb.) bilmesi için burayı doldurun. Bu bilgiler asistanın yanıtlarında öncelikli olacaktır.
                 </p>
                 <textarea
                     value={kbContent}
@@ -618,12 +621,12 @@ export function AIChatBot() {
                                         </h4>
                                         <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
                                             {isPublic
-                                                ? 'Hoş geldiniz! Aetherius Relay hakkında merak ettiğiniz her şeyi sorabilirsiniz. Size nasıl yardımcı olabilirim?'
-                                                : 'Otel verilerinize tam erişimim var. Vardiya, fiyat, satış, notlar, odalar, turlar, döviz kurları hakkında her şeyi sorabilirsiniz.'
+                                                ? 'Hoş geldiniz! Aetherius Relay hakkında merak ettiğiniz her şeyi sorabilirsiniz. Size platformun özelliklerini, fiyatlandırmasını ve otelinize katacağı değeri anlatabilirim.'
+                                                : 'Otelinizin tüm verilerine (vardiyalar, satışlar, notlar, odalar, turlar, döviz kurları) gerçek zamanlı erişimim var. Operasyonel raporlar hazırlayabilir, vardiya özetleri çıkarabilir veya misafir taleplerini analiz edebilirim.'
                                             }
                                         </p>
 
-                                        <div className="grid grid-cols-2 gap-2 w-full">
+                                        <div className="grid grid-cols-2 gap-2 w-full mb-6">
                                             {(isPublic ? SUPPORT_SUGGESTIONS : QUICK_SUGGESTIONS).map((s, i) => (
                                                 <motion.button
                                                     key={i}
@@ -637,6 +640,27 @@ export function AIChatBot() {
                                                 </motion.button>
                                             ))}
                                         </div>
+
+                                        {!isPublic && (
+                                            <div className="w-full text-left space-y-2 pt-2 border-t border-border/10">
+                                                <p className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider mb-2">Uzmanlık Alanlarım</p>
+                                                <div className="grid grid-cols-3 gap-1.5">
+                                                    {[
+                                                        { icon: BrainIcon, label: 'Vardiya' },
+                                                        { icon: Zap, label: 'Uyum' },
+                                                        { icon: FileText, label: 'Rapor' },
+                                                        { icon: Settings2, label: 'Fiyat' },
+                                                        { icon: Home, label: 'Odalar' },
+                                                        { icon: Sparkles, label: 'Satış' }
+                                                    ].map((cap, idx) => (
+                                                        <div key={idx} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-background/40 border border-border/10">
+                                                            <cap.icon className="w-3.5 h-3.5 text-muted-foreground/60" />
+                                                            <span className="text-[9px] text-muted-foreground">{cap.label}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <>

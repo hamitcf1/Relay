@@ -59,6 +59,23 @@ type ChatStore = ChatState & ChatActions
 
 const ROOM_TYPES: RoomType[] = ['standard', 'corner', 'corner_jacuzzi', 'triple', 'teras_suite']
 
+const RELAY_APP_INFO = `
+Relay (Aetherius Relay), modern oteller için tasarlanmış kapsamlı bir "Dijital Devir" ve operasyon yönetim platformudur.
+Temel Özellikler ve Modüller:
+1. Vardiya Devri (Shift Handover): Kağıt logbook'ların yerini alan modül. Kasa sayımı, personel takibi ve AI destekli devir notları içerir.
+2. Aktif Log (Active Log): Arıza, misafir isteği ve şikayetlerin gerçek zamanlı takibi. #OdaNo (örn: #204) yazılarak odalara hızlı erişim sağlar.
+3. Sabit Pano (Sticky Board): Önemli ve acil notların en üstte "glass" bir container içinde sabitlenmesi.
+4. Uyum Nabzı (Compliance Pulse): KBS bildirimi ve Acente mesaj kontrolü gibi yasal zorunlulukların takibi. %100 uyum hedeflenir.
+5. Handover Wizard: Vardiya sonu işlemlerini (para sayımı, açık işlerin devri, final notu) yönetir.
+6. Roster (Nöbet Çizelgesi): Personel çalışma saatlerinin ve izinlerinin yönetimi. Sadece GM (Genel Müdür) erişebilir.
+7. Olay Raporlama (Incident Reporting): Hasar veya hırsızlık durumlarında fotoğraf yüklemeli resmi rapor oluşturma.
+8. Gizli Kasa (Vault): Hassas bilgilerin (şifreler, IBAN, fiyat listeleri) şifreli olarak saklanması.
+9. Geri Bildirim (Feedback): Misafirlerin oda içindeki QR kodlar üzerinden ilettiği anonim görüşler.
+10. Personel Yemeği: Günlük yemek menüsü takibi.
+11. Döviz Kurları: Merkez Bankası bazlı anlık kur takibi ve otomatik TL çevirileri.
+12. Satış Takibi: Tur, transfer ve çamaşırhane satışlarının oda numarası bazlı takibi ve ödeme durumu.
+`;
+
 function buildContext(): string {
     const parts: string[] = []
 
@@ -71,16 +88,17 @@ function buildContext(): string {
     // ── HOTEL ─────────────────────────────────
     const hotel = useHotelStore.getState().hotel
     if (hotel) {
-        parts.push(`[HOTEL] Name: ${hotel.info?.name || 'N/A'}`)
+        parts.push(`[HOTEL] Name: ${hotel.info?.name || 'N/A'}, Code: ${hotel.code || 'N/A'}`)
         if (hotel.settings?.knowledge_base) {
-            parts.push(`[HOTEL KNOWLEDGE BASE] ${hotel.settings.knowledge_base}`)
+            parts.push(`[HOTEL MANUAL KNOWLEDGE BASE] This is specific information provided by the hotel manager: ${hotel.settings.knowledge_base}`)
         }
     }
 
     // ── SHIFT ─────────────────────────────────
     const shift = useShiftStore.getState().currentShift
     if (shift) {
-        parts.push(`[CURRENT SHIFT] Type: ${shift.type}, Status: ${shift.status}, Date: ${shift.date}, Staff: ${shift.staff_ids.length} people, Cash Start: ${shift.cash_start}`)
+        parts.push(`[CURRENT SHIFT] Type: ${shift.type}, Status: ${shift.status}, Date: ${shift.date}, Staff: ${shift.staff_ids.length} people, Cash Start: ${shift.cash_start} TRY`)
+        parts.push(`[COMPLIANCE PULSE] KBS Checked: ${shift.compliance.kbs_checked ? 'YES' : 'NO'}, Agency Messages: ${shift.compliance.agency_msg_checked_count} checks performed.`)
         if (shift.handover_note) parts.push(`Handover Note: ${shift.handover_note}`)
     } else {
         parts.push('[CURRENT SHIFT] No active shift')
@@ -91,20 +109,24 @@ function buildContext(): string {
     const activeNotes = notes.filter(n => n.status === 'active')
     if (activeNotes.length > 0) {
         parts.push(`[ACTIVE NOTES] ${activeNotes.length} active notes:`)
-        activeNotes.slice(0, 10).forEach(n => {
-            parts.push(`  - [${n.category}] ${n.content?.substring(0, 80) || ''} ${n.room_number ? `(Room ${n.room_number})` : ''} ${n.amount_due ? `Amount: ${n.amount_due} TRY` : ''}`)
+        activeNotes.slice(0, 15).forEach(n => {
+            parts.push(`  - [${n.category}/${n.priority || 'low'}] ${n.content} ${n.room_number ? `(Room ${n.room_number})` : ''} ${n.amount_due ? `Amount: ${n.amount_due} ${n.currency || 'TRY'}` : ''}`)
         })
     }
 
     // ── SALES ─────────────────────────────────
     const sales = useSalesStore.getState().sales
     const today = new Date().toISOString().split('T')[0]
-    const todaySales = sales.filter(s => s.date.toISOString().split('T')[0] === today)
+    const todaySales = sales.filter(s => {
+        try {
+            return s.date.toISOString().split('T')[0] === today
+        } catch { return false }
+    })
     const pendingSales = sales.filter(s => s.payment_status !== 'paid')
-    parts.push(`[SALES] Total: ${sales.length}, Today: ${todaySales.length}, Pending Payment: ${pendingSales.length}`)
+    parts.push(`[SALES] Total Record: ${sales.length}, Today's Sales: ${todaySales.length}, Pending Payment: ${pendingSales.length}`)
     if (todaySales.length > 0) {
-        todaySales.slice(0, 5).forEach(s => {
-            parts.push(`  - ${s.type}: ${s.name} - ${s.customer_name} (Room ${s.room_number}) ${s.total_price} ${s.currency}, Status: ${s.payment_status}`)
+        todaySales.forEach(s => {
+            parts.push(`  - ${s.type}: ${s.name} - ${s.customer_name} (Room ${s.room_number}) ${s.total_price} ${s.currency}, Status: ${s.payment_status}/${s.status || 'waiting'}`)
         })
     }
 
@@ -115,12 +137,12 @@ function buildContext(): string {
             .filter(r => basePrices.prices[r])
             .map(r => `${r}: ${basePrices.prices[r]!.amount} ${basePrices.prices[r]!.currency}`)
         if (priceLines.length > 0) {
-            parts.push(`[BASE PRICES] ${priceLines.join(', ')}`)
+            parts.push(`[BASE ROOM PRICES] ${priceLines.join(', ')}`)
         }
     }
     if (baseOverrides.length > 0) {
         parts.push(`[PRICE OVERRIDES] ${baseOverrides.length} active period overrides`)
-        baseOverrides.slice(0, 3).forEach(o => {
+        baseOverrides.slice(0, 5).forEach(o => {
             const rooms = Object.entries(o.prices).map(([r, p]) => `${r}: ${p.amount} ${p.currency}`).join(', ')
             parts.push(`  - ${o.start_date} to ${o.end_date}: ${rooms}`)
         })
@@ -132,12 +154,10 @@ function buildContext(): string {
                 const now = new Date().toISOString().split('T')[0]
                 return now >= o.start_date && now <= o.end_date
             })
-
             const prices = activeOverride?.prices || a.base_prices || {}
             const priceList = Object.entries(prices)
                 .map(([room, price]) => `${room}: ${price.amount} ${price.currency}`)
                 .join(', ')
-
             parts.push(`  - ${a.name}: ${priceList || 'No prices set'} ${activeOverride ? '(Active Override)' : ''}`)
         })
     }
@@ -145,11 +165,11 @@ function buildContext(): string {
     // ── ROSTER ────────────────────────────────
     const roster = useRosterStore.getState()
     if (roster.staff.length > 0) {
-        parts.push(`[ROSTER] ${roster.staff.length} staff members`)
+        parts.push(`[ROSTER] ${roster.staff.length} staff members tracked.`)
         const todayDate = new Date()
         const todayShifts = roster.getShiftsForDate(todayDate)
         if (todayShifts.length > 0) {
-            parts.push(`Today's shifts: ${todayShifts.map(s => `${s.name} (${s.shift})`).join(', ')}`)
+            parts.push(`Today's Staff on Duty: ${todayShifts.map(s => `${s.name} (${s.shift})`).join(', ')}`)
         }
     }
 
@@ -157,105 +177,95 @@ function buildContext(): string {
     const logs = useLogsStore.getState().logs
     if (logs.length > 0) {
         const openLogs = logs.filter(l => l.status === 'open')
-        const resolvedLogs = logs.filter(l => l.status === 'resolved')
-        parts.push(`[LOGS/TICKETS] Total: ${logs.length}, Open: ${openLogs.length}, Resolved: ${resolvedLogs.length}`)
-        openLogs.slice(0, 8).forEach(l => {
-            parts.push(`  - [${l.type}/${l.urgency}] ${l.content?.substring(0, 80) || ''} ${l.room_number ? `(Room ${l.room_number})` : ''} by ${l.created_by_name}`)
+        parts.push(`[LOGS/TICKETS] Total: ${logs.length}, Open: ${openLogs.length}`)
+        openLogs.slice(0, 15).forEach(l => {
+            parts.push(`  - [${l.type}/${l.urgency}] ${l.content} ${l.room_number ? `(Room ${l.room_number})` : ''} by ${l.created_by_name}`)
         })
     }
 
     // ── ROOMS ─────────────────────────────────
     const rooms = useRoomStore.getState().rooms
     if (rooms.length > 0) {
-        const occupied = rooms.filter(r => r.occupancy === 'occupied').length
-        const vacant = rooms.filter(r => r.occupancy === 'vacant').length
+        const occupied = rooms.filter(r => r.occupancy === 'occupied')
+        const vacant = rooms.filter(r => r.occupancy === 'vacant')
         const dirty = rooms.filter(r => r.status === 'dirty').length
         const clean = rooms.filter(r => r.status === 'clean').length
-        const inspect = rooms.filter(r => r.status === 'inspect').length
-        parts.push(`[ROOMS] Total: ${rooms.length}, Occupied: ${occupied}, Vacant: ${vacant}, Clean: ${clean}, Dirty: ${dirty}, Inspect: ${inspect}`)
-        rooms.forEach(r => {
-            parts.push(`  - Room ${r.number}: type=${r.type}, status=${r.status}, occupancy=${r.occupancy}, floor=${r.floor || 'N/A'}`)
-        })
+        parts.push(`[ROOM STATUS SUMMARY] Total: ${rooms.length}, Occupied: ${occupied.length}, Vacant: ${vacant.length}, Clean: ${clean}, Dirty: ${dirty}`)
+        if (occupied.length > 0) {
+            parts.push(`[OCCUPIED ROOMS DETAILS]`)
+            occupied.forEach(r => {
+                parts.push(`  - Room ${r.number}: ${r.type}, status=${r.status}, floor=${r.floor}`)
+            })
+        }
     }
 
     // ── TOURS ─────────────────────────────────
     const tours = useTourStore.getState().tours
     if (tours.length > 0) {
-        parts.push(`[TOURS] ${tours.length} tours:`)
-        tours.forEach(t => {
+        parts.push(`[TOURS CATALOGUE]`)
+        tours.filter(t => t.is_active).forEach(t => {
             const days = t.operating_days?.join(', ') || 'N/A'
-            parts.push(`  - ${t.name}: Adult €${t.adult_price}, Child(3-7) €${t.child_3_7_price}, Child(0-3) €${t.child_0_3_price}, Base €${t.base_price_eur}, Days: ${days}, Active: ${t.is_active}`)
+            parts.push(`  - ${t.name}: Adult €${t.adult_price}, Child €${t.child_3_7_price}, Days: ${days}`)
         })
     }
 
-    // ── FEEDBACK / COMPLAINTS ─────────────────
+    // ── FEEDBACK ──────────────────────────────
     const complaints = useFeedbackStore.getState().complaints
     if (complaints.length > 0) {
         const newComplaints = complaints.filter(c => c.status === 'new')
-        parts.push(`[ANONYMOUS FEEDBACK] Total: ${complaints.length}, New/Unread: ${newComplaints.length}`)
+        parts.push(`[GUEST FEEDBACK] Total: ${complaints.length}, Unread: ${newComplaints.length}`)
         newComplaints.slice(0, 5).forEach(c => {
-            parts.push(`  - ${c.content?.substring(0, 100) || ''}`)
+            parts.push(`  - ${c.content}`)
         })
     }
 
-    // ── STAFF MEAL / DAILY MENU ───────────────
-    const todayMenu = useStaffMealStore.getState().todayMenu
-    if (todayMenu) {
-        parts.push(`[TODAY'S STAFF MENU] ${todayMenu.menu || 'Not set'}`)
-    }
-
-    // ── CURRENCY / EXCHANGE RATES ─────────────
+    // ── CURRENCY ──────────────────────────────
     const currency = useCurrencyStore.getState()
     if (currency.rates) {
         const { USD, EUR, GBP } = currency.rates
         const rateParts: string[] = []
-        if (USD) rateParts.push(`USD: Buy ${USD.buying.toFixed(2)}, Sell ${USD.selling.toFixed(2)}`)
-        if (EUR) rateParts.push(`EUR: Buy ${EUR.buying.toFixed(2)}, Sell ${EUR.selling.toFixed(2)}`)
-        if (GBP) rateParts.push(`GBP: Buy ${GBP.buying.toFixed(2)}, Sell ${GBP.selling.toFixed(2)}`)
+        if (USD) rateParts.push(`USD: ${USD.buying.toFixed(2)}`)
+        if (EUR) rateParts.push(`EUR: ${EUR.buying.toFixed(2)}`)
+        if (GBP) rateParts.push(`GBP: ${GBP.buying.toFixed(2)}`)
         if (rateParts.length > 0) parts.push(`[EXCHANGE RATES TRY] ${rateParts.join(' | ')}`)
-    }
-
-    // ── OFF-DAY REQUESTS ──────────────────────
-    const offDayRequests = useOffDayStore.getState().requests
-    if (offDayRequests.length > 0) {
-        const pending = offDayRequests.filter(r => r.status === 'pending')
-        const approved = offDayRequests.filter(r => r.status === 'approved')
-        parts.push(`[OFF-DAY REQUESTS] Total: ${offDayRequests.length}, Pending: ${pending.length}, Approved: ${approved.length}`)
-        pending.slice(0, 5).forEach(r => {
-            parts.push(`  - ${r.staff_name}: ${r.date} (${r.reason || 'No reason'})`)
-        })
     }
 
     return parts.join('\n')
 }
 
-const PUBLIC_SYSTEM_PROMPT = `You are Relay Customer Support AI. You are a helpful assistant for the "Relay" hotel management platform.
-Your goal is to help potential clients, travelers, or curious users understand what Relay is and how it can help their business.
+const PUBLIC_SYSTEM_PROMPT = `You are Relay Customer Support AI. You represent "Relay", the high-end hotel operations platform.
+Your mission is to inform potential clients about Relay's capabilities and help them understand its value.
 
-Scope:
-- Explain Relay's features (Shift transfers, operational logs, maintenance tickets, compliance checks, staff rosters).
-- Discuss pricing plans and general benefits.
-- Help with onboarding related questions or demo requests.
-- Provide general hospitality best practices.
+Relay Overview:
+${RELAY_APP_INFO}
 
-Rules:
-- You DO NOT have access to any specific hotel's private data right now.
-- DO NOT share room numbers, guest names, sales data, or internal notes.
-- If asked about specific hotel operations, explain that you are the general support bot and they should log in to see their hotel's data.
-- Be extremely professional, welcoming, and sales-oriented.`
+Guidelines:
+- Explain features like Shift Handover, Compliance Pulse, and Handover Wizard clearly.
+- Mention that Relay replaces paper logbooks and messaging apps with a centralized, professional system.
+- Professional, sales-oriented, and welcoming tone.
+- DO NOT share any internal hotel data (you don't have access to it in this mode).
+- If asked about a specific hotel's data, politely explain that you are the general support bot and they must log in to their dashboard.
+- Always offer to help with demo requests or general platform questions.`
 
-const INTERNAL_SYSTEM_PROMPT = `You are Relay AI, the intelligent assistant for the hotel management platform "Relay".
-You have real-time access to the hotel's operational data.
+const INTERNAL_SYSTEM_PROMPT = `You are Relay AI, the ultimate intelligent operational partner for the hotel.
+You have real-time access to every heartbeat of the hotel's operations.
 
-Your responsibilities:
-- Answer questions about the hotel's current state (shifts, notes, sales, pricing, roster, rooms, tours, logs).
-- Help draft operational content (emails, reports, review responses).
-- Reference specific data from the context when relevant.
+Application Architecture & Features:
+${RELAY_APP_INFO}
 
-Rules:
-- Be concise and professional.
-- When providing prices, always include the currency.
-- Respond in the same language the user writes in.`
+Your Capabilities:
+- Summarize shifts and identify missing compliance checks (KBS/Agency).
+- Analyze sales performance and pending payments.
+- Help with guest requests and maintenance tickets.
+- Draft professional emails, reports (tutanak), and review responses based on actual data.
+- Provide room status, tour prices, and currency calculations instantly.
+
+Operational Rules:
+- Be precise. Use room numbers and names from the context.
+- Always include currency (TRY, EUR, USD, GBP) when discussing money.
+- Prioritize information from the [HOTEL MANUAL KNOWLEDGE BASE] for hotel-specific rules (breakfast times, pool rules, etc.).
+- Maintain a proactive, professional, and efficient tone.
+- Respond in the same language the user uses.`
 
 function generateTitle(firstMessage: string): string {
     const text = firstMessage.trim()

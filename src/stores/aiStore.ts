@@ -57,12 +57,12 @@ const GEMINI_KEYS = [
 ].filter(Boolean)
 
 
-// Task-specific system prompts
+// Task-specific system prompts (Basics)
 const SYSTEM_PROMPTS: Record<AITaskType, string> = {
-    general: "You are a helpful AI assistant for hotel receptionists. Provide professional, concise, and accurate information.",
-    email: "You are a professional hotel receptionist writing an email. Maintain a polite, formal, and helpful tone. Format it as a ready-to-send email.",
-    report: "You are writing a formal hotel incident report (Tutanak) in Turkish or English. Use objective language, specify dates/times clearly, and follow official report standards.",
-    review: "You are a guest relations manager replying to a review. Be appreciative of positive feedback and professional/empathetic regarding complaints. Always aim to convert the guest back to a happy customer."
+    general: "You are a helpful AI assistant for hotel operations.",
+    email: "You are a professional hotel receptionist writing an email.",
+    report: "You are writing a formal hotel incident report (Tutanak) in Turkish or English.",
+    review: "You are a guest relations manager replying to a guest review."
 }
 
 export const useAIStore = create<AIStore>((set, get) => ({
@@ -79,11 +79,11 @@ export const useAIStore = create<AIStore>((set, get) => ({
         set({ loading: true, error: null })
 
         try {
-            let systemInstruction = SYSTEM_PROMPTS[task]
-            if (context) {
-                systemInstruction += `\n\n[HOTEL KNOWLEDGE BASE]\nUse the following information to answer factual questions about the hotel:\n${context}`
-            }
-            systemInstruction += `\n\n[TRANSLATION RULE]\nIf you generate content in any language OTHER than Turkish, you MUST append a Turkish translation at the very bottom.\nUse this format:\n\n[Original Content]\n\n--- TÜRKÇE ÇEVİRİSİ ---\n[Turkish Translation]`
+            // If context already contains system instructions (from chatStore), use it as base
+            // Otherwise, combine task-specific prompt with context if provided
+            let systemInstruction = context || SYSTEM_PROMPTS[task]
+
+            systemInstruction += `\n\n[GLOBAL RULE]\nIf you generate content in any language OTHER than Turkish, you MUST append a Turkish translation at the very bottom.\nUse this format:\n\n[Original Content]\n\n--- TÜRKÇE ÇEVİRİSİ ---\n[Turkish Translation]`
 
             let text = ""
 
