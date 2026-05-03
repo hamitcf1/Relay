@@ -383,7 +383,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
     left: -1px;
     width: 20px;
     height: 1.5px;
-    background: linear-gradient(90deg, var(--snake-color, #10b981), transparent);
+    background: linear-gradient(90deg, transparent, var(--snake-color, #10b981));
     box-shadow: 0 0 6px var(--snake-color, #10b981);
     offset-path: border-box;
     offset-rotate: auto;
@@ -399,7 +399,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
     opacity: 0;
     transition: opacity 0.3s ease;
     animation-duration: 6s;
-    background: linear-gradient(90deg, var(--snake-color), transparent);
+    background: linear-gradient(90deg, transparent, var(--snake-color));
     box-shadow: 0 0 10px var(--snake-color);
   }
 

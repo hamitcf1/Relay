@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { useAuthStore } from './authStore'
+
 
 type Language = 'en' | 'tr'
 
@@ -20,6 +20,12 @@ type Translations = {
     'auth.error.passwordLength': string
     'auth.error.passwordMismatch': string
     'auth.error.regFailed': string
+    'auth.error.invalidCredentials': string
+    'auth.error.userNotFound': string
+    'auth.error.wrongPassword': string
+    'auth.error.tooManyRequests': string
+    'auth.error.generic': string
+    'auth.error.emailInUse': string
     'auth.role.receptionist': string
     'auth.role.receptionistDesc': string
     'auth.role.housekeeping': string
@@ -1181,6 +1187,12 @@ const translations: Record<Language, Translations> = {
         'auth.error.passwordLength': 'Password must be at least 6 characters',
         'auth.error.passwordMismatch': 'Passwords do not match',
         'auth.error.regFailed': 'Registration failed. Please try again.',
+        'auth.error.invalidCredentials': 'Invalid email or password.',
+        'auth.error.userNotFound': 'User not found.',
+        'auth.error.wrongPassword': 'Incorrect password.',
+        'auth.error.tooManyRequests': 'Too many failed attempts. Account temporarily locked.',
+        'auth.error.generic': 'An unexpected error occurred.',
+        'auth.error.emailInUse': 'This email is already in use.',
         'auth.role.receptionist': 'Receptionist',
         'auth.role.receptionistDesc': 'Front desk operations, check-ins, and guest relations.',
         'auth.role.housekeeping': 'Housekeeping',
@@ -1946,6 +1958,12 @@ const translations: Record<Language, Translations> = {
         'auth.error.passwordLength': 'Şifre en az 6 karakter olmalıdır',
         'auth.error.passwordMismatch': 'Şifreler eşleşmiyor',
         'auth.error.regFailed': 'Kayıt başarısız. Lütfen tekrar deneyin.',
+        'auth.error.invalidCredentials': 'Geçersiz e-posta veya şifre.',
+        'auth.error.userNotFound': 'Kullanıcı bulunamadı.',
+        'auth.error.wrongPassword': 'Hatalı şifre.',
+        'auth.error.tooManyRequests': 'Çok fazla hatalı deneme. Hesap geçici olarak kilitlendi.',
+        'auth.error.generic': 'Beklenmedik bir hata oluştu.',
+        'auth.error.emailInUse': 'Bu e-posta adresi zaten kullanımda.',
         'auth.role.receptionist': 'Resepsiyonist',
         'auth.role.receptionistDesc': 'Ön büro işlemleri, girişler ve misafir ilişkileri.',
         'auth.role.housekeeping': 'Kat Hizmetleri',
@@ -2900,9 +2918,12 @@ export const useLanguageStore = create<LanguageState>()(
             setLanguage: (lang) => {
                 set({ language: lang })
                 // Also update Firestore if logged in
-                const { user, updateSettings } = useAuthStore.getState()
-                if (user) {
-                    updateSettings({ language: lang })
+                const authStore = (window as any).useAuthStore
+                if (authStore) {
+                    const { user, updateSettings } = authStore.getState()
+                    if (user) {
+                        updateSettings({ language: lang })
+                    }
                 }
             },
             t: (key, params) => {
@@ -2926,11 +2947,4 @@ export const useLanguageStore = create<LanguageState>()(
     )
 )
 
-// Sync language with Firestore if logged in
-useAuthStore.subscribe((state) => {
-    const firestoreLang = state.user?.settings?.language
-    if (firestoreLang && firestoreLang !== useLanguageStore.getState().language) {
-        // Use a flag or check to avoid infinite loop since setLanguage updates Firestore
-        useLanguageStore.setState({ language: firestoreLang })
-    }
-})
+

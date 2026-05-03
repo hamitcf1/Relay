@@ -259,19 +259,14 @@ export function LoginPage() {
                              {/* Password */}
                             <div className="group/input relative">
                                 <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
-                                {showPassword && (
-                                    <div className="absolute left-12 right-12 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
-                                        <PasswordReveal value={password} visible={true} />
-                                    </div>
-                                )}
+                                <div className="absolute left-12 right-12 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
+                                    <PasswordReveal value={password} visible={showPassword} />
+                                </div>
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className={cn(
-                                        "w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-12 placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight",
-                                        showPassword ? "text-transparent caret-white" : "text-white"
-                                    )}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-12 text-transparent caret-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
                                     placeholder={t('auth.password')}
                                 />
                                 <button

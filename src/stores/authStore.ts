@@ -13,6 +13,8 @@ import { useHotelStore } from './hotelStore'
 import { useNotificationStore } from './notificationStore'
 import { useShiftStore } from './shiftStore'
 import { useActivityStore } from './activityStore'
+import { cleanAuthError } from '@/lib/utils'
+import { useLanguageStore } from './languageStore'
 
 interface AuthState {
     user: User | null
@@ -94,14 +96,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
                     loading: false,
                 })
             }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Login failed'
-            const cleanMessage = errorMessage.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim()
+        } catch (error: any) {
+            const { t } = useLanguageStore.getState()
+            const cleanMessage = cleanAuthError(error, t)
+
             set({
                 error: cleanMessage,
                 loading: false
             })
-            toast.error(cleanMessage || 'Login failed')
+            toast.error(cleanMessage)
         }
     },
 
@@ -259,7 +262,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
             }
         })
 
-        return unsubscribe
+        // Sync language from Firestore to languageStore
+        const sub = useAuthStore.subscribe((state) => {
+            const firestoreLang = state.user?.settings?.language
+            if (firestoreLang && firestoreLang !== useLanguageStore.getState().language) {
+                useLanguageStore.setState({ language: firestoreLang as any })
+            }
+        })
+
+        return () => {
+            unsubscribe()
+            sub()
+        }
     },
 
     updateSettings: async (settings) => {
@@ -283,3 +297,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     },
     setBooted: (val) => set({ isBooted: val })
 }))
+
+if (typeof window !== 'undefined') {
+    (window as any).useAuthStore = useAuthStore
+}

@@ -1,31 +1,55 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
 
 interface PasswordRevealProps {
     value: string
     visible: boolean
 }
 
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+'
+
+function ScrambledChar({ char, visible, index }: { char: string; visible: boolean; index: number }) {
+    const [displayChar, setDisplayChar] = useState(visible ? (char === ' ' ? '\u00A0' : char) : '•')
+
+    useEffect(() => {
+        if (!visible) {
+            setDisplayChar('•')
+            return
+        }
+
+        let iterations = 0
+        const maxIterations = 5 + Math.floor(Math.random() * 5)
+        const interval = setInterval(() => {
+            if (iterations >= maxIterations) {
+                setDisplayChar(char === ' ' ? '\u00A0' : char)
+                clearInterval(interval)
+                return
+            }
+
+            setDisplayChar(CHARS[Math.floor(Math.random() * CHARS.length)])
+            iterations++
+        }, 30 + index * 5)
+
+        return () => clearInterval(interval)
+    }, [char, visible, index])
+
+    return (
+        <span className="inline-block min-w-[0.6em] text-center font-mono">
+            {displayChar}
+        </span>
+    )
+}
+
 export function PasswordReveal({ value, visible }: PasswordRevealProps) {
     return (
-        <div className="h-full flex items-center whitespace-nowrap overflow-hidden">
-            <AnimatePresence mode="popLayout" initial={false}>
-                {value.split('').map((char, i) => (
-                    <motion.span
-                        key={`${i}-${char}-${visible}`}
-                        initial={{ y: 15, opacity: 0, filter: 'blur(4px)' }}
-                        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-                        exit={{ y: -15, opacity: 0, filter: 'blur(4px)' }}
-                        transition={{
-                            delay: i * 0.02,
-                            duration: 0.15,
-                            ease: [0.16, 1, 0.3, 1]
-                        }}
-                        className="inline-block"
-                    >
-                        {visible ? (char === ' ' ? '\u00A0' : char) : '•'}
-                    </motion.span>
-                ))}
-            </AnimatePresence>
+        <div className="h-full flex items-center whitespace-nowrap overflow-hidden pointer-events-none">
+            {value.split('').map((char, i) => (
+                <ScrambledChar 
+                    key={i} 
+                    char={char} 
+                    visible={visible} 
+                    index={i} 
+                />
+            ))}
         </div>
     )
 }

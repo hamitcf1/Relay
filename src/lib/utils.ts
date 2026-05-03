@@ -28,3 +28,22 @@ export function formatDisplayDateTime(date: Date | string | number) {
     if (isNaN(d.getTime())) return String(date)
     return format(d, 'dd-MM-yyyy HH:mm')
 }
+export function cleanAuthError(error: any, t: (key: any) => string) {
+    const errorCode = error?.code || 'unknown'
+    
+    switch(errorCode) {
+        case 'auth/invalid-email':
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+            return t('auth.error.invalidCredentials')
+        case 'auth/too-many-requests':
+            return t('auth.error.tooManyRequests')
+        case 'auth/email-already-in-use':
+            return t('auth.error.emailInUse')
+        case 'auth/weak-password':
+            return t('auth.error.passwordLength')
+        default:
+            return error.message?.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim() || t('auth.error.generic')
+    }
+}
