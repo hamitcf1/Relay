@@ -2,9 +2,15 @@ import { useEffect, useState, useRef } from 'react'
 import { motion, useMotionValue, useSpring, useAnimation } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
+// --- CODE-LEVEL TOGGLE ---
+const GLOBAL_ENABLE_CUSTOM_CURSOR = false // Set to true to enable the feature, false to hard-disable
+// --------------------------
+
 const CURSOR_STORAGE_KEY = 'relay_custom_cursor_enabled'
 
 export function getCursorEnabled(): boolean {
+    if (!GLOBAL_ENABLE_CUSTOM_CURSOR) return false
+    
     const saved = localStorage.getItem(CURSOR_STORAGE_KEY)
     return saved !== 'false' // default: enabled
 }

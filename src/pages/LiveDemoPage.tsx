@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { CustomCursor } from '@/components/ui/CustomCursor'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, User, Hotel } from 'lucide-react'
