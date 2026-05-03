@@ -409,6 +409,7 @@ export function AIChatBot() {
     const panelRef = useRef<HTMLDivElement>(null)
     const [showKB, setShowKB] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
+    const [showQuickSuggestions, setShowQuickSuggestions] = useState(false)
 
     // Location detection
     useEffect(() => {
@@ -675,8 +676,49 @@ export function AIChatBot() {
 
                             {/* Input */}
                             <div className="shrink-0 p-3 border-t border-border/30 bg-muted/10">
+                                {/* Quick Suggestions Popup */}
+                                <AnimatePresence>
+                                    {showQuickSuggestions && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 8, height: 0 }}
+                                            animate={{ opacity: 1, y: 0, height: 'auto' }}
+                                            exit={{ opacity: 0, y: 8, height: 0 }}
+                                            className="overflow-hidden mb-2"
+                                        >
+                                            <div className="grid grid-cols-2 gap-1.5 p-2 rounded-xl bg-muted/30 border border-border/20">
+                                                {(isPublic ? SUPPORT_SUGGESTIONS : QUICK_SUGGESTIONS).map((s, i) => (
+                                                    <motion.button
+                                                        key={i}
+                                                        initial={{ opacity: 0, scale: 0.95 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        transition={{ delay: i * 0.03 }}
+                                                        onClick={() => {
+                                                            handleSuggestion(s.text)
+                                                            setShowQuickSuggestions(false)
+                                                        }}
+                                                        className="text-left px-2.5 py-2 rounded-lg bg-background/60 border border-border/20 hover:bg-violet-500/10 hover:border-violet-500/30 transition-all text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                                                    >
+                                                        {s.label}
+                                                    </motion.button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
                                 <div className="flex items-center gap-2 bg-background/80 border border-border/50 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-violet-500/30 focus-within:border-violet-500/50 transition-all">
-                                    <Zap className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                                    <button
+                                        onClick={() => setShowQuickSuggestions(prev => !prev)}
+                                        className={cn(
+                                            "shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all cursor-pointer",
+                                            showQuickSuggestions
+                                                ? "bg-violet-500/20 text-violet-400"
+                                                : "text-muted-foreground/40 hover:text-violet-400 hover:bg-violet-500/10"
+                                        )}
+                                        title="Hızlı seçenekler"
+                                    >
+                                        <Zap className="w-4 h-4" />
+                                    </button>
                                     <input
                                         ref={inputRef}
                                         type="text"
