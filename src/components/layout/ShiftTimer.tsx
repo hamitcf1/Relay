@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Clock, Hourglass, LogOut } from 'lucide-react'
 import { format, addDays } from 'date-fns'
+import { useShiftStore } from '@/stores/shiftStore'
 import { useRosterStore, type ShiftType } from '@/stores/rosterStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -10,6 +11,7 @@ import { useSecurityStore } from '@/stores/securityStore'
 import { cn } from '@/lib/utils'
 
 export function ShiftTimer() {
+    const { currentShift } = useShiftStore()
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
     const { startCountdown } = useSecurityStore()
@@ -24,11 +26,22 @@ export function ShiftTimer() {
             const now = new Date()
             const dateKey = format(now, 'yyyy-MM-dd')
             
-            // Fallback to Weekly Roster for the current user
-            let shiftType: ShiftType | null = null
+            // 1. Try current active shift (automated)
+            // 2. Try roster for current user
+            // 3. If GM, try to find any rostered shift active now
+            let shiftType: ShiftType | null = currentShift?.type as ShiftType || null
             
-            if (user && schedule[user.uid]) {
+            if (!shiftType && user && schedule[user.uid]) {
                 shiftType = schedule[user.uid][dateKey]
+            }
+
+            // Fallback for GMs: find any active shift in the roster
+            if (!shiftType && user?.role === 'gm') {
+                const hour = now.getHours()
+                // Simple heuristic for global shift if not on roster
+                if (hour >= 8 && hour < 16) shiftType = 'A'
+                else if (hour >= 16 || hour < 0) shiftType = 'B'
+                else if (hour >= 0 && hour < 8) shiftType = 'C'
             }
 
             if (!shiftType || shiftType === 'OFF') {
@@ -74,7 +87,7 @@ export function ShiftTimer() {
         calculateTimeLeft()
         const interval = setInterval(calculateTimeLeft, 1000)
         return () => clearInterval(interval)
-    }, [hotel, user, schedule, startCountdown, isLoggingOut])
+    }, [currentShift, hotel, user, schedule, startCountdown, isLoggingOut])
 
     if (timeLeft === null) {
         return null
