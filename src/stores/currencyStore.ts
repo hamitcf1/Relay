@@ -11,6 +11,7 @@ interface CurrencyState {
     lastUpdated: Date | null;
     loading: boolean;
     error: string | null;
+    connectionSuccessful: boolean | null;
     fetchRates: () => Promise<void>;
 }
 
@@ -19,18 +20,10 @@ export const useCurrencyStore = create<CurrencyState>((set) => ({
     lastUpdated: null,
     loading: false,
     error: null,
+    connectionSuccessful: null,
     fetchRates: async () => {
         set({ loading: true, error: null });
         try {
-            // Fetch rates against TRY
-            // free API: https://api.frankfurter.app/latest?from=TRY&to=USD,EUR,GBP
-            // OR fetch from USD, EUR, GBP to TRY.
-            // Let's fetch base EUR to get all cross rates if needed, or simpler:
-            // Fetch individually to be precise? No, let's fetch base TRY and inverted, or base EUR.
-            // Actually, Frankfurter supports 'from'. Let's fetch base 'USD' to get USD->TRY? No, we need multiple bases.
-            // Better: Fetch 'from=TRY' and invert values? Or just make 3 requests?
-            // 3 requests is safer for accuracy on direct pairs.
-
             // Parallel fetch
             const [usdRes, eurRes, gbpRes] = await Promise.all([
                 fetch('https://open.er-api.com/v6/latest/USD'),
@@ -44,24 +37,17 @@ export const useCurrencyStore = create<CurrencyState>((set) => ({
             const eurData = await eurRes.json();
             const gbpData = await gbpRes.json();
 
-            // Raw mid-market rates
             const usdRate = usdData.rates.TRY;
             const eurRate = eurData.rates.TRY;
             const gbpRate = gbpData.rates.TRY;
-
-            // Apply spread (Bank usually buys lower, sells higher)
-            // Buying = We (User) buy from Bank = Bank Sells = higher
-            // Selling = We (User) sell to Bank = Bank Buys = lower
-            // WAIT - In Turkey "Dolar Alış" means Bank Buying (lower), "Dolar Satış" means Bank Selling (higher).
-            // Usually spread is around 1-2% or fixed amount. Let's use 0.5% for "Digital" rates.
 
             const SPREAD = 0.005; // 0.5%
 
             set({
                 rates: {
                     USD: {
-                        buying: usdRate * (1 - SPREAD), // Bank buys low
-                        selling: usdRate * (1 + SPREAD) // Bank sells high
+                        buying: usdRate * (1 - SPREAD),
+                        selling: usdRate * (1 + SPREAD)
                     },
                     EUR: {
                         buying: eurRate * (1 - SPREAD),
@@ -73,7 +59,8 @@ export const useCurrencyStore = create<CurrencyState>((set) => ({
                     }
                 },
                 lastUpdated: new Date(),
-                loading: false
+                loading: false,
+                connectionSuccessful: true
             });
 
         } catch (error) {
@@ -87,7 +74,8 @@ export const useCurrencyStore = create<CurrencyState>((set) => ({
                 },
                 lastUpdated: new Date(),
                 loading: false,
-                error: "Using offline rates"
+                error: "Using offline rates",
+                connectionSuccessful: false
             });
         }
     }

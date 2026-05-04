@@ -291,10 +291,12 @@ export const useNotesStore = create<NotesStore>((set) => ({
 
             // Log activity
             const user = useAuthStore.getState().user
+            const note = useNotesStore.getState().notes.find(n => n.id === noteId)
             if (user) {
                 useActivityStore.getState().logActivity(
                     hotelId, user.uid, user.name, user.role,
-                    'note_delete'
+                    'note_delete', 
+                    note ? `Deleted: "${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}" (Room ${note.room_number || 'N/A'})` : `Note ID: ${noteId}`
                 )
             }
             toast.success('Note deleted')
@@ -358,8 +360,8 @@ export const priorityInfo: Record<NotePriority, {
     textClass: string
     glowClass: string
 }> = {
-    low: { symbol: '!', color: 'text-zinc-400', textClass: 'font-normal text-sm', glowClass: '' },
-    medium: { symbol: '!!', color: 'text-amber-400', textClass: 'font-semibold text-sm', glowClass: '' },
-    high: { symbol: '!!!', color: 'text-orange-500', textClass: 'font-bold text-base', glowClass: '' },
-    critical: { symbol: '!!!!', color: 'text-rose-500', textClass: 'font-bold text-lg', glowClass: 'drop-shadow-[0_0_6px_rgba(244,63,94,0.6)] animate-pulse-critical' },
+    low: { symbol: '!', color: 'text-zinc-400', textClass: 'font-normal text-xs', glowClass: '' },
+    medium: { symbol: '!!', color: 'text-amber-400', textClass: 'font-semibold text-xs', glowClass: '' },
+    high: { symbol: '!!!', color: 'text-orange-500', textClass: 'font-bold text-sm', glowClass: 'animate-pulse' },
+    critical: { symbol: '!!!!', color: 'text-rose-500', textClass: 'font-black text-base', glowClass: 'animate-pulse-critical shadow-[0_0_15px_rgba(244,63,94,0.4)] rounded-full px-1' },
 }

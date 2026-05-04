@@ -8,7 +8,7 @@ import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { useLanguageStore } from '@/stores/languageStore'
 
 export function CurrencyWidget() {
-    const { rates, loading, error, fetchRates, lastUpdated } = useCurrencyStore()
+    const { rates, loading, error, fetchRates, lastUpdated, connectionSuccessful } = useCurrencyStore()
     const { t } = useLanguageStore()
 
     useEffect(() => {
@@ -59,6 +59,19 @@ export function CurrencyWidget() {
                 <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
                     {t('currency.title')}
+                    {connectionSuccessful !== null && (
+                        <div 
+                            className={cn(
+                                "w-2 h-2 rounded-full ml-1 cursor-help transition-all duration-300",
+                                connectionSuccessful 
+                                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" 
+                                    : "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                            )}
+                            title={connectionSuccessful 
+                                ? "Exchange API connection successful. Live rates active." 
+                                : "API Connection failed. Using last known/fallback rates."}
+                        />
+                    )}
                 </CardTitle>
             }
             headerActions={

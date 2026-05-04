@@ -53,7 +53,8 @@ export function useDuePaymentNotifier() {
                 content: t('notifications.duePayments.content', {
                     count: dueSales.length.toString(),
                     amount: totalDue.toString()
-                })
+                }),
+                link: '/operations?tab=sales'
             })
         }
 

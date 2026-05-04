@@ -28,6 +28,7 @@ interface NotificationActions {
     addNotification: (hotelId: string, notification: Omit<Notification, 'id' | 'timestamp' | 'is_read'>) => Promise<void>
     markAsRead: (hotelId: string, notificationId: string) => Promise<void>
     markAllAsRead: (hotelId: string) => Promise<void>
+    clearAllNotifications: (hotelId: string) => Promise<void>
     removeNotification: (hotelId: string, notificationId: string) => Promise<void>
 }
 
@@ -93,7 +94,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
             return () => { }
         }
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
             const allNotifications: Notification[] = snapshot.docs.map(doc => {
                 const data = doc.data()
                 return {
@@ -108,6 +109,23 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
                     link: data.link
                 }
             })
+
+            // 15-day Auto Cleanup
+            const fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
+            const oldNotifications = allNotifications.filter(n => n.timestamp < fifteenDaysAgo)
+            
+            if (oldNotifications.length > 0) {
+                try {
+                    const batch = writeBatch(db)
+                    oldNotifications.forEach(n => {
+                        const docRef = doc(db, 'hotels', hotelId, 'notifications', n.id)
+                        batch.delete(docRef)
+                    })
+                    await batch.commit()
+                } catch (e) {
+                    console.error("Auto-cleanup error:", e)
+                }
+            }
 
             // Filter for the current user
             const filtered = allNotifications.filter(n => {
@@ -180,6 +198,22 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
             await deleteDoc(docRef)
         } catch (error) {
             console.error("Error removing notification:", error)
+        }
+    },
+
+    clearAllNotifications: async (hotelId) => {
+        const { notifications } = get()
+        if (notifications.length === 0) return
+
+        try {
+            const batch = writeBatch(db)
+            notifications.forEach(n => {
+                const docRef = doc(db, 'hotels', hotelId, 'notifications', n.id)
+                batch.delete(docRef)
+            })
+            await batch.commit()
+        } catch (error: any) {
+            console.error("Error clearing notifications:", error)
         }
     }
 }))

@@ -18,7 +18,8 @@ import {
     Sparkles,
     Palette,
     Globe,
-    Check
+    Check,
+    Settings
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useLayoutStore } from '@/stores/layoutStore'
@@ -76,6 +77,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
 
     if (userRole === 'gm') {
         opsNavItems.push({ id: 'activity', icon: Activity, label: t('module.activity') || 'Activity Log', subTab: 'activity' })
+        opsNavItems.push({ id: 'settings', icon: Settings, label: t('module.setting') || 'Hotel Settings', subTab: 'settings' })
     }
 
     const isActive = (tab: string, subTab?: string) => {

@@ -40,6 +40,7 @@ import { SalesPanel } from '@/components/sales/SalesPanel'
 import { PricingPanel } from '@/components/pricing/PricingPanel'
 import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
+import { HotelSettings } from '@/components/settings/HotelSettings'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
 import { Clock as ClockIcon, EyeOff } from 'lucide-react'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
@@ -49,6 +50,10 @@ import { OverviewGrid } from '@/components/dashboard/OverviewGrid'
 import { ChevronLeft } from 'lucide-react'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { AppSidebar } from '@/components/layout/AppSidebar'
+import { ShiftTimer } from '@/components/layout/ShiftTimer'
+import { SecurityTimer } from '@/components/layout/SecurityTimer'
+import { SecurityModal } from '@/components/layout/SecurityModal'
+import { ShiftGuard } from '@/components/layout/ShiftGuard'
 
 export function DashboardPage() {
     const location = useLocation()
@@ -82,13 +87,26 @@ export function DashboardPage() {
 
     // Update activeTab when location changes (e.g. via navigate('/operations'))
     useEffect(() => {
+        const searchParams = new URLSearchParams(location.search)
+        const tabParam = searchParams.get('tab')
+        const chatParam = searchParams.get('chat')
+
         if (location.pathname === '/operations') {
             setActiveTab('operations')
+            if (tabParam) {
+                setOperationTab(tabParam)
+            } else if (chatParam) {
+                setOperationTab('messaging')
+            }
         } else if (location.pathname === '/dashboard' || location.pathname === '/') {
             setActiveTab('overview')
-            setOverviewTab('grid') // Reset to grid when navigating back to root
+            if (tabParam) {
+                setOverviewTab(tabParam)
+            } else {
+                setOverviewTab('grid')
+            }
         }
-    }, [location.pathname])
+    }, [location.pathname, location.search])
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
@@ -195,56 +213,60 @@ export function DashboardPage() {
 
                     <div className="flex-1" />
 
-                    <div className="flex items-center gap-3">
-                        <div className="hidden lg:flex items-center gap-2 mr-2">
-                            <AnimatePresence>
-                                {showDateTime && (
-                                    <DateTimeWidget />
-                                )}
-                            </AnimatePresence>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                onClick={() => setShowDateTime(!showDateTime)}
-                                title={showDateTime ? "Hide Time" : "Show Time"}
-                            >
-                                {showDateTime ? <EyeOff className="w-3.5 h-3.5" /> : <ClockIcon className="w-3.5 h-3.5" />}
-                            </Button>
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mr-1 sm:mr-2 scale-90 sm:scale-100 origin-right">
+                            <ShiftTimer />
+                            <SecurityTimer />
                         </div>
+                        <AnimatePresence>
+                            {showDateTime && (
+                                <div className="hidden lg:block">
+                                    <DateTimeWidget />
+                                </div>
+                            )}
+                        </AnimatePresence>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground hidden lg:flex"
+                            onClick={() => setShowDateTime(!showDateTime)}
+                            title={showDateTime ? "Hide Time" : "Show Time"}
+                        >
+                            {showDateTime ? <EyeOff className="w-3.5 h-3.5" /> : <ClockIcon className="w-3.5 h-3.5" />}
+                        </Button>
                         <div id="tour-notifications" className="mr-2">
                             <NotificationDropdown />
                         </div>
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-hidden p-4 lg:p-6 flex flex-col transition-all duration-300 relative min-h-0 bg-background/30">
-                    <AnnouncementBanner />
+            <main className="flex-1 overflow-hidden p-4 lg:p-6 flex flex-col transition-all duration-300 relative min-h-0 bg-background/30">
+                <AnnouncementBanner />
+                
+                <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
                     
-                    <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
-                        
-                        {/* OVERVIEW VIEW */}
-                        <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                            {isMobile && overviewTab !== 'grid' && (
-                                <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20 mb-4 rounded-xl">
-                                    <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
-                                        <ChevronLeft className="w-5 h-5" />
-                                    </Button>
-                                    <span className="font-semibold text-lg capitalize">
-                                        {overviewTab === 'notes' ? t('module.shiftNotes') :
-                                            overviewTab === 'hotel-info' ? t('module.hotelInfo') :
-                                                overviewTab === 'calendar' ? t('module.calendar') :
-                                                    overviewTab === 'menu' ? 'Daily Menu' :
-                                                        overviewTab === 'currency' ? t('currency.title') :
-                                                            overviewTab === 'roster' ? t('module.roster') : 'Overview'}
-                                    </span>
-                                </div>
-                            )}
+                    {/* OVERVIEW VIEW */}
+                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                        {isMobile && overviewTab !== 'grid' && (
+                            <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20 mb-4 rounded-xl">
+                                <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
+                                    <ChevronLeft className="w-5 h-5" />
+                                </Button>
+                                <span className="font-semibold text-lg capitalize">
+                                    {overviewTab === 'notes' ? t('module.shiftNotes') :
+                                        overviewTab === 'hotel-info' ? t('module.hotelInfo') :
+                                            overviewTab === 'calendar' ? t('module.calendar') :
+                                                overviewTab === 'menu' ? 'Daily Menu' :
+                                                    overviewTab === 'currency' ? t('currency.title') :
+                                                        overviewTab === 'roster' ? t('module.roster') : 'Overview'}
+                                </span>
+                            </div>
+                        )}
 
-                            {isMobile && overviewTab === 'grid' ? (
-                                <OverviewGrid onSelect={(id) => setOverviewTab(id)} userRole={user?.role} />
-                            ) : (
-                                <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0 h-auto lg:h-full", isMobile ? "p-0 pb-32" : "")}>
+                        {isMobile && overviewTab === 'grid' ? (
+                            <OverviewGrid onSelect={(id) => setOverviewTab(id)} userRole={user?.role} />
+                        ) : (
+                            <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 flex-1 min-h-0 h-auto md:h-full max-w-[1600px] mx-auto w-full", isMobile ? "p-0 pb-32" : "")}>
                                     {/* Left Column */}
                                     <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative lg:pr-2 custom-scrollbar",
                                         isMobile && overviewTab !== 'notes' && overviewTab !== 'roster' && "hidden"
@@ -307,6 +329,9 @@ export function DashboardPage() {
                                         <TabsContent value="messaging" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <MessagingPanel />
                                         </TabsContent>
+                                        <TabsContent value="settings" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                                            <HotelSettings />
+                                        </TabsContent>
                                         <TabsContent value="sales" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <SalesPanel />
                                         </TabsContent>
@@ -335,12 +360,10 @@ export function DashboardPage() {
                                             <LeaderboardPanel />
                                             <ScrollToTopButton />
                                         </TabsContent>
-                                        {user?.role === 'gm' && (
-                                            <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                                <ActivityLogPanel />
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                        )}
+                                        <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                                            <ActivityLogPanel />
+                                            <ScrollToTopButton />
+                                        </TabsContent>
                                     </div>
                                 </div>
                             </Tabs>
@@ -359,6 +382,8 @@ export function DashboardPage() {
                 }}
             />
             <AnnouncementModal />
+            <SecurityModal />
+            <ShiftGuard />
         </div>
     )
 }

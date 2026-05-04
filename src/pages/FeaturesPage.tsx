@@ -66,7 +66,7 @@ export function FeaturesPage() {
             <div className="container mx-auto px-6 pt-32 mb-12 relative z-20">
                 <Button
                     variant="ghost"
-                    className="text-zinc-500 hover:text-white group transition-colors px-0 hover:bg-transparent"
+                    className="text-zinc-300 hover:text-white group transition-colors px-0 hover:bg-transparent"
                     onClick={() => navigate('/')}
                 >
                     <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -89,7 +89,7 @@ export function FeaturesPage() {
                             Full Spectrum <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-400 to-rose-400">Hotel Logistics</span>.
                         </h1>
-                        <p className="text-2xl text-zinc-400 leading-relaxed max-w-2xl font-medium">
+                        <p className="text-2xl text-zinc-200 leading-relaxed max-w-2xl font-medium">
                             {t('features.subtitle')}
                         </p>
                     </motion.div>
@@ -110,10 +110,10 @@ export function FeaturesPage() {
                                 <f.icon className={`w-8 h-8 ${f.color}`} />
                             </div>
                             <h3 className="text-3xl font-black text-white mb-6 tracking-tight leading-tight">{f.title}</h3>
-                            <p className="text-zinc-400 text-lg leading-relaxed font-medium">{f.desc}</p>
+                            <p className="text-zinc-200 text-lg leading-relaxed font-medium">{f.desc}</p>
 
                             {/* Decorative ID */}
-                            <div className="absolute top-8 right-12 text-zinc-800 font-black text-4xl select-none group-hover:text-indigo-500/10 transition-colors">
+                            <div className="absolute top-8 right-12 text-zinc-700 font-black text-4xl select-none group-hover:text-indigo-500/10 transition-colors">
                                 0{i + 1}
                             </div>
                         </motion.div>
@@ -128,7 +128,7 @@ export function FeaturesPage() {
                             whileInView={{ opacity: 1, x: 0 }}
                         >
                             <h2 className="text-4xl font-black text-white mb-8 tracking-tighter">Enterprise Infrastructure</h2>
-                            <p className="text-zinc-400 text-xl leading-relaxed mb-12">
+                            <p className="text-zinc-200 text-xl leading-relaxed mb-12">
                                 Relay is built on a distributed cloud architecture with zero single points of failure. Your hotel operations stay online even during global outages.
                             </p>
                             <div className="space-y-6">
@@ -143,7 +143,7 @@ export function FeaturesPage() {
                                         </div>
                                         <div>
                                             <h4 className="text-lg font-bold text-white mb-1">{item.title}</h4>
-                                            <p className="text-zinc-500">{item.desc}</p>
+                                            <p className="text-zinc-300">{item.desc}</p>
                                         </div>
                                     </div>
                                 ))}

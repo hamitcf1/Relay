@@ -79,9 +79,9 @@ export const useAIStore = create<AIStore>((set, get) => ({
         set({ loading: true, error: null })
 
         try {
-            // If context already contains system instructions (from chatStore), use it as base
-            // Otherwise, combine task-specific prompt with context if provided
-            let systemInstruction = context || SYSTEM_PROMPTS[task]
+            // Combine task-specific prompt with context if provided
+            let systemInstruction = SYSTEM_PROMPTS[task]
+            if (context) systemInstruction += `\n\nContext Data:\n${context}`
 
             systemInstruction += `\n\n[GLOBAL RULE]\nIf you generate content in any language OTHER than Turkish, you MUST append a Turkish translation at the very bottom.\nUse this format:\n\n[Original Content]\n\n--- TÜRKÇE ÇEVİRİSİ ---\n[Turkish Translation]`
 

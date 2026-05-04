@@ -12,6 +12,7 @@ type Translations = {
     'auth.password': string
     'auth.name': string
     'auth.confirmPassword': string
+    'common.date': string
     'auth.noAccount': string
     'auth.haveAccount': string
     'auth.contactGM': string
@@ -149,6 +150,37 @@ type Translations = {
     'urgency.medium': string
     'urgency.high': string
     'urgency.critical': string
+    'security.manualCheck': string
+    'shift.timeLeft': string
+    'common.lock': string
+    'common.copy': string
+    'common.dismiss': string
+    'hotel.hotelCode': string
+    'hotel.generateCode': string
+    'hotel.error.generateCode': string
+    'report.aiAnalyzing': string
+    'report.clickToStart': string
+    'report.newSales': string
+    'report.newNotes': string
+    'report.totalNotes': string
+    'report.pendingTasks': string
+    'report.successAI': string
+    'report.errorAI': string
+    'common.accessDenied': string
+    'common.gmOnly': string
+    'common.addNew': string
+    'common.updateInfo': string
+    'hotel.settings.title': string
+    'hotel.settings.desc': string
+    'hotel.settings.criticalNotifications': string
+    'hotel.settings.criticalNotificationsDesc': string
+    'hotel.settings.autoReports': string
+    'hotel.settings.autoReportsDesc': string
+    'hotel.settings.shiftPlanning': string
+    'hotel.settings.shiftPlanningDesc': string
+    'hotel.settings.saveShifts': string
+    'hotel.shifts.success': string
+    'hotel.shifts.error': string
 
     // Modules
     'module.activityFeed': string
@@ -172,6 +204,8 @@ type Translations = {
     'module.pricing_label': string
     'module.team_label': string
     'module.activity': string
+    'module.setting': string
+    'module.reports': string
 
     // Pricing Module (v2)
     'pricing.base.title': string
@@ -446,7 +480,30 @@ type Translations = {
     'notifications.viewAll': string
     'notifications.duePayments.title': string
     'notifications.duePayments.content': string
-    'notifications.compliance.pending': string
+    'notifications.clearAll': string
+    'notifications.clearAllConfirm': string
+    'notifications.clearAllDescription': string
+    'security.sessionEnding': string
+    'security.shiftEndedDesc': string
+    'security.extendSession': string
+    'security.sessionCountdown': string
+    'security.manualTrigger': string
+
+    // Activity Log Action Labels
+    'activity.action.login': string
+    'activity.action.logout': string
+    'activity.action.shift_start': string
+    'activity.action.shift_end': string
+    'activity.action.note_create': string
+    'activity.action.note_edit': string
+    'activity.action.note_delete': string
+    'activity.action.message_send': string
+    'activity.action.pricing_update': string
+    'activity.action.roster_update': string
+    'activity.action.compliance_check': string
+    'activity.action.sale_create': string
+    'activity.action.sale_update': string
+    'activity.action.feedback_create': string
 
     // Feedback - Expanded
     'feedback.placeholder': string
@@ -478,6 +535,30 @@ type Translations = {
 
     // Status/Filter
     'status.all': string
+    
+    // Reports
+    'report.generate': string
+    'report.generateAI': string
+    'report.generateManual': string
+    'report.period': string
+    'report.today': string
+    'report.yesterday': string
+    'report.thisWeek': string
+    'report.lastWeek': string
+    'report.thisMonth': string
+    'report.lastMonth': string
+    'report.type': string
+    'report.ai': string
+    'report.manual': string
+    'report.noData': string
+    'report.preparing': string
+    'report.success': string
+    'report.template.header': string
+    'report.template.sales': string
+    'report.template.activity': string
+    'report.template.issues': string
+    'report.template.maintenance': string
+    'report.template.footer': string
 
 
     // Roster
@@ -1179,6 +1260,7 @@ const translations: Record<Language, Translations> = {
         'auth.password': 'Password',
         'auth.name': 'Full Name',
         'auth.confirmPassword': 'Confirm Password',
+        'common.date': 'Date',
         'auth.noAccount': "Don't have an account? Contact GM",
         'auth.haveAccount': 'Already have an account?',
         'auth.contactGM': 'Please contact your General Manager (GM) to be registered for your hotel.',
@@ -1400,6 +1482,8 @@ const translations: Record<Language, Translations> = {
         'hotel.settings.fixturePrices': 'Fixture Damage Prices',
         'hotel.noInfo': 'No hotel information set',
         'hotel.clickEdit': 'Click edit to add',
+        'module.setting': 'Settings',
+        'module.reports': 'Management Reports',
         'hotel.secure.title': 'Secure Information (KBS / Agency)',
         'hotel.secure.encrypted': 'Encrypted Section',
         'hotel.secure.safeCode': 'Safe Code',
@@ -1549,6 +1633,32 @@ const translations: Record<Language, Translations> = {
         'notifications.duePayments.title': 'Pending Payments',
         'notifications.duePayments.content': '{count} sales have a total of {amount}€ uncollected.',
         'notifications.compliance.pending': 'Shift {shift} compliance tasks (KBS/Agency) are still pending. Please complete them.',
+        'notifications.clearAll': 'Clear All',
+        'notifications.clearAllConfirm': 'Clear all notifications?',
+        'notifications.clearAllDescription': 'This action will remove all notifications from your list. This cannot be undone.',
+        'security.sessionEnding': 'Session Ending',
+        'security.shiftEndedDesc': 'Your shift has ended or you are not on the current roster. For security, you will be logged out automatically.',
+        'security.extendSession': 'Stay Logged In',
+        'security.sessionCountdown': 'Logout Countdown',
+        'security.manualTrigger': 'Lock Dashboard Session',
+        'security.manualCheck': 'Quick Lock',
+        'shift.timeLeft': 'Shift Remaining',
+
+        // Activity Log Action Labels
+        'activity.action.login': 'Login',
+        'activity.action.logout': 'Logout',
+        'activity.action.shift_start': 'Shift Start',
+        'activity.action.shift_end': 'Shift End',
+        'activity.action.note_create': 'Note Created',
+        'activity.action.note_edit': 'Note Edited',
+        'activity.action.note_delete': 'Note Deleted',
+        'activity.action.message_send': 'Message Sent',
+        'activity.action.pricing_update': 'Pricing Updated',
+        'activity.action.roster_update': 'Roster Updated',
+        'activity.action.compliance_check': 'Compliance Check',
+        'activity.action.sale_create': 'Sale Created',
+        'activity.action.sale_update': 'Sale Updated',
+        'activity.action.feedback_create': 'Feedback Submitted',
 
         // Feedback
         'feedback.placeholder': 'Describe your concern or feedback here...',
@@ -1674,6 +1784,60 @@ const translations: Record<Language, Translations> = {
         'sales.transfer.flight': 'Flight Number',
         'sales.transfer.rest': 'Rest (Vehicle)',
         'sales.addToNotes': 'Add to Shift Notes',
+        
+        // Reports
+        'report.period': 'Reporting Period',
+        'report.generate': 'Generate Report',
+        'report.generateAI': 'AI Analysis',
+        'report.generateManual': 'Standard Report',
+        'report.period': 'Select Period',
+        'report.today': 'Today',
+        'report.yesterday': 'Yesterday',
+        'report.thisWeek': 'This Week',
+        'report.lastWeek': 'Last Week',
+        'report.thisMonth': 'This Month',
+        'report.lastMonth': 'Last Month',
+        'report.type': 'Report Type',
+        'report.ai': 'AI Insights',
+        'report.manual': 'Standard Template',
+        'report.noData': 'No data found for this period.',
+        'report.preparing': 'Preparing your report...',
+        'report.success': 'Report generated successfully.',
+        'report.template.header': 'Relay Operational Report',
+        'report.template.sales': 'Financial Performance',
+        'report.template.activity': 'Staff Activity',
+        'report.template.issues': 'Critical Issues & Feedback',
+        'report.template.maintenance': 'Maintenance Status',
+        'report.template.footer': 'Generated by Aetherius Relay',
+        'report.aiAnalyzing': 'AI is analyzing operational trends...',
+        'report.clickToStart': 'Click "Generate" to start analysis.',
+        'report.newSales': 'New Sales',
+        'report.newNotes': 'New Notes',
+        'report.totalNotes': 'Total Notes',
+        'report.pendingTasks': 'Pending Tasks',
+        'report.successAI': 'AI report generated successfully.',
+        'report.errorAI': 'AI generation failed. Please try again.',
+        'common.lock': 'Lock',
+        'common.copy': 'Copy',
+        'common.dismiss': 'Dismiss',
+        'hotel.hotelCode': 'Hotel Code',
+        'hotel.generateCode': 'Generate Hotel Code',
+        'hotel.error.generateCode': 'Failed to generate code.',
+        'common.accessDenied': 'Access Denied',
+        'common.gmOnly': 'This page is only accessible by General Managers (GM).',
+        'common.addNew': 'Add New',
+        'common.updateInfo': 'Update Information',
+        'hotel.settings.title': 'Hotel Configuration',
+        'hotel.settings.desc': 'Manage system operational principles and hotel details.',
+        'hotel.settings.criticalNotifications': 'Critical Notifications',
+        'hotel.settings.criticalNotificationsDesc': 'Instant forwarding of complaints and malfunctions to GM is active.',
+        'hotel.settings.autoReports': 'Auto Reports',
+        'hotel.settings.autoReportsDesc': 'Weekly AI summary reports are generated every Monday at 09:00.',
+        'hotel.settings.shiftPlanning': 'Shift Planning',
+        'hotel.settings.shiftPlanningDesc': 'Define shift codes and names to be used on the roster.',
+        'hotel.settings.saveShifts': 'Save Shift Settings',
+        'hotel.shifts.success': 'Shift settings updated successfully.',
+        'hotel.shifts.error': 'Failed to save shift settings.',
 
         // Compliance
         'compliance.kbs.required': 'KBS Check Required!',
@@ -1950,6 +2114,7 @@ const translations: Record<Language, Translations> = {
         'auth.password': 'Şifre',
         'auth.name': 'Tam Ad',
         'auth.confirmPassword': 'Şifreyi Onayla',
+        'common.date': 'Tarih',
         'auth.noAccount': 'Hesabınız yok mu? GM ile görüşün',
         'auth.haveAccount': 'Zaten hesabınız var mı?',
         'auth.contactGM': 'Otelinize kayıt olmak için lütfen Genel Müdürünüze (GM) danışın.',
@@ -2403,6 +2568,32 @@ const translations: Record<Language, Translations> = {
         'notifications.duePayments.title': 'Bekleyen Ödemeler',
         'notifications.duePayments.content': '{count} satışta toplam {amount}€ tahsil edilmedi.',
         'notifications.compliance.pending': 'Vardiya {shift} uyum görevleri (KBS/Acente) hâlâ bekliyor. Lütfen tamamlayın.',
+        'notifications.clearAll': 'Tümünü Temizle',
+        'notifications.clearAllConfirm': 'Tüm bildirimler silinsin mi?',
+        'notifications.clearAllDescription': 'Bu işlem tüm bildirimlerinizi kalıcı olarak silecektir. Geri alınamaz.',
+        'security.sessionEnding': 'Oturum Kapatılıyor',
+        'security.shiftEndedDesc': 'Vardiyanız sona erdi veya mevcut kadroda görünmüyorsunuz. Güvenliğiniz için oturumunuz otomatik olarak kapatılacaktır.',
+        'security.extendSession': 'Oturumu Uzat',
+        'security.sessionCountdown': 'Çıkış Geri Sayımı',
+        'security.manualTrigger': 'Panel Oturumunu Kilitle',
+        'security.manualCheck': 'Hızlı Kilitle',
+        'shift.timeLeft': 'Vardiya Bitişine',
+
+        // Activity Log Action Labels
+        'activity.action.login': 'Giriş',
+        'activity.action.logout': 'Çıkış',
+        'activity.action.shift_start': 'Vardiya Başlangıcı',
+        'activity.action.shift_end': 'Vardiya Bitişi',
+        'activity.action.note_create': 'Not Oluşturuldu',
+        'activity.action.note_edit': 'Not Düzenlendi',
+        'activity.action.note_delete': 'Not Silindi',
+        'activity.action.message_send': 'Mesaj Gönderildi',
+        'activity.action.pricing_update': 'Fiyat Güncellendi',
+        'activity.action.roster_update': 'Kadro Güncellendi',
+        'activity.action.compliance_check': 'Uyumluluk Kontrolü',
+        'activity.action.sale_create': 'Satış Oluşturuldu',
+        'activity.action.sale_update': 'Satış Güncellendi',
+        'activity.action.feedback_create': 'Geri Bildirim Gönderildi',
 
         // Feedback
         'feedback.placeholder': 'Şikayet veya geri bildiriminizi buraya yazın...',
@@ -2546,6 +2737,62 @@ const translations: Record<Language, Translations> = {
         'sales.transfer.flight': 'Uçuş Numarası',
         'sales.transfer.rest': 'Rest (Araçta)',
         'sales.addToNotes': 'Nöbet Notlarına Ekle',
+        'module.setting': 'Ayarlar',
+        'module.reports': 'Yönetim Raporları',
+
+        // Reports
+        'report.period': 'Raporlama Dönemi',
+        'report.generate': 'Rapor Oluştur',
+        'report.generateAI': 'AI Analizi',
+        'report.generateManual': 'Standart Rapor',
+        'report.period': 'Periyot Seçin',
+        'report.today': 'Bugün',
+        'report.yesterday': 'Dün',
+        'report.thisWeek': 'Bu Hafta',
+        'report.lastWeek': 'Geçen Hafta',
+        'report.thisMonth': 'Bu Ay',
+        'report.lastMonth': 'Geçen Ay',
+        'report.type': 'Rapor Türü',
+        'report.ai': 'AI Analizi',
+        'report.manual': 'Standart Şablon',
+        'report.noData': 'Bu periyot için veri bulunamadı.',
+        'report.preparing': 'Rapor hazırlanıyor...',
+        'report.success': 'Rapor başarıyla oluşturuldu.',
+        'report.template.header': 'Relay Operasyonel Rapor',
+        'report.template.sales': 'Finansal Performans',
+        'report.template.activity': 'Personel Aktivitesi',
+        'report.template.issues': 'Kritik Sorunlar ve Geri Bildirim',
+        'report.template.maintenance': 'Bakım Durumu',
+        'report.template.footer': 'Aetherius Relay tarafından oluşturulmuştur',
+        'report.aiAnalyzing': 'AI operasyonel trendleri analiz ediyor...',
+        'report.clickToStart': 'Analizi başlatmak için "Oluştur"a tıklayın.',
+        'report.newSales': 'Yeni Satış',
+        'report.newNotes': 'Yeni Not',
+        'report.totalNotes': 'Toplam Not',
+        'report.pendingTasks': 'Bekleyen İşler',
+        'report.successAI': 'AI raporu başarıyla oluşturuldu.',
+        'report.errorAI': 'AI oluşturma hatası. Lütfen tekrar deneyin.',
+        'common.lock': 'Kilitle',
+        'common.copy': 'Kopyala',
+        'common.dismiss': 'Kapat',
+        'hotel.hotelCode': 'Otel Kodu',
+        'hotel.generateCode': 'Otel Kodu Oluştur',
+        'hotel.error.generateCode': 'Kod oluşturma hatası.',
+        'common.accessDenied': 'Erişim Reddedildi',
+        'common.gmOnly': 'Bu sayfayı yalnızca Genel Müdürler (GM) görüntüleyebilir.',
+        'common.addNew': 'Yeni Ekle',
+        'common.updateInfo': 'Bilgileri Güncelle',
+        'hotel.settings.title': 'Otel Yapılandırması',
+        'hotel.settings.desc': 'Sistem çalışma prensiplerini ve otel bilgilerini buradan yönetin.',
+        'hotel.settings.criticalNotifications': 'Kritik Bildirimler',
+        'hotel.settings.criticalNotificationsDesc': 'Şikayet ve arıza bildirimlerinin GM\'e anlık olarak iletilmesi aktif.',
+        'hotel.settings.autoReports': 'Otomatik Raporlar',
+        'hotel.settings.autoReportsDesc': 'Haftalık AI özet raporları her Pazartesi saat 09:00\'da oluşturulur.',
+        'hotel.settings.shiftPlanning': 'Vardiya Planlaması',
+        'hotel.settings.shiftPlanningDesc': 'Roster üzerinde kullanılacak vardiya kodlarını ve isimlerini belirleyin.',
+        'hotel.settings.saveShifts': 'Vardiya Ayarlarını Kaydet',
+        'hotel.shifts.success': 'Vardiya ayarları güncellendi.',
+        'hotel.shifts.error': 'Vardiya ayarları kaydedilemedi.',
 
         // Compliance
         'compliance.kbs.required': 'KBS Kontrolü Gerekli!',

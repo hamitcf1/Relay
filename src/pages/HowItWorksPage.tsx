@@ -52,7 +52,7 @@ export function HowItWorksPage() {
             <div className="container mx-auto px-6 pt-32 mb-12 relative z-20">
                 <Button
                     variant="ghost"
-                    className="text-zinc-500 hover:text-white group transition-colors px-0 hover:bg-transparent"
+                    className="text-zinc-300 hover:text-white group transition-colors px-0 hover:bg-transparent"
                     onClick={() => navigate('/')}
                 >
                     <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -75,7 +75,7 @@ export function HowItWorksPage() {
                             Seamless <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-400 to-purple-400">Implementation</span>.
                         </h1>
-                        <p className="text-2xl text-zinc-400 leading-relaxed max-w-2xl font-medium">
+                        <p className="text-2xl text-zinc-200 leading-relaxed max-w-2xl font-medium">
                             {t('howItWorks.subtitle')}
                         </p>
                     </motion.div>
@@ -106,11 +106,11 @@ export function HowItWorksPage() {
                                     {/* Content */}
                                     <div className="pt-2">
                                         <div className="flex items-center gap-4 mb-4">
-                                             <span className="text-xs font-black text-zinc-600 uppercase tracking-[0.3em]">Step 0{i+1}</span>
+                                             <span className="text-xs font-black text-zinc-400 uppercase tracking-[0.3em]">Step 0{i+1}</span>
                                              <div className="h-px w-12 bg-zinc-800" />
                                         </div>
                                         <h3 className="text-4xl font-black text-white mb-6 tracking-tight group-hover:text-blue-400 transition-colors">{step.title}</h3>
-                                        <p className="text-xl text-zinc-500 leading-relaxed max-w-2xl font-medium">
+                                        <p className="text-xl text-zinc-300 leading-relaxed max-w-2xl font-medium">
                                             {step.desc}
                                         </p>
                                     </div>
@@ -127,7 +127,7 @@ export function HowItWorksPage() {
                              <Layers className="w-7 h-7 text-indigo-400" />
                         </div>
                         <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tighter italic">Automation by design.</h2>
-                        <p className="text-zinc-500 text-lg leading-relaxed mb-10">
+                        <p className="text-zinc-300 text-lg leading-relaxed mb-10">
                             Relay doesn't just store data; it processes it. Every log entry is cross-referenced with your staff roster and guest history to provide context before you even ask.
                         </p>
                         <div className="flex items-center gap-4 text-xs font-bold text-indigo-400 uppercase tracking-widest">

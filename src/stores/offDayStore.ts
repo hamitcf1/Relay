@@ -14,6 +14,7 @@ import {
     limit
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { useNotificationStore } from './notificationStore'
 import type { OffDayRequest, OffDayStatus } from '@/types'
 
 const cleanObject = (obj: any) => {
@@ -100,6 +101,16 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
                 status: 'pending',
                 created_at: serverTimestamp()
             }))
+
+            // Notify GMs
+            const { addNotification } = useNotificationStore.getState()
+            await addNotification(hotelId, {
+                type: 'off_day',
+                title: 'Yeni İzin/Vardiya Talebi',
+                content: `${requestData.staff_name} yeni bir talep oluşturdu: ${requestData.reason}`,
+                target_role: 'gm',
+                link: '/operations?tab=roster'
+            })
         } catch (error: any) {
             console.error("Error submitting off-day request:", error)
             throw error
@@ -127,6 +138,20 @@ export const useOffDayStore = create<OffDayStore>((set) => ({
                 processed_at: serverTimestamp(),
                 processed_by: gmUid
             })
+
+            // Notify User
+            const { requests } = get()
+            const request = requests.find(r => r.id === requestId)
+            if (request) {
+                const { addNotification } = useNotificationStore.getState()
+                await addNotification(hotelId, {
+                    type: 'off_day',
+                    title: status === 'approved' ? 'Talep Onaylandı' : 'Talep Reddedildi',
+                    content: `${request.date} tarihli talebiniz ${status === 'approved' ? 'onaylandı' : 'reddedildi'}.`,
+                    target_uid: request.staff_id,
+                    link: '/operations?tab=roster'
+                })
+            }
         } catch (error: any) {
             console.error("Error updating off-day status:", error)
             throw error

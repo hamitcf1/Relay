@@ -80,7 +80,7 @@ export function PricingPage() {
             <div className="container mx-auto px-6 pt-32 mb-12 relative z-20">
                 <Button
                     variant="ghost"
-                    className="text-zinc-500 hover:text-white group transition-colors px-0 hover:bg-transparent"
+                    className="text-zinc-300 hover:text-white group transition-colors px-0 hover:bg-transparent"
                     onClick={() => navigate('/')}
                 >
                     <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -99,7 +99,7 @@ export function PricingPage() {
                             Fair pricing for <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-400 to-rose-400">modern hotels</span>.
                         </h1>
-                        <p className="text-2xl text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-16 font-medium">
+                        <p className="text-2xl text-zinc-200 leading-relaxed max-w-2xl mx-auto mb-16 font-medium">
                             {t('pricing.subtitle')}
                         </p>
 
@@ -107,13 +107,13 @@ export function PricingPage() {
                         <div className="flex items-center justify-center gap-6 p-2 rounded-2xl bg-white/5 border border-white/10 w-fit mx-auto backdrop-blur-xl">
                             <button
                                 onClick={() => setBillingCycle('monthly')}
-                                className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${billingCycle === 'monthly' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
+                                className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${billingCycle === 'monthly' ? 'bg-white text-black shadow-lg' : 'text-zinc-300 hover:text-white'}`}
                             >
                                 {t('pricing.monthly')}
                             </button>
                             <button
                                 onClick={() => setBillingCycle('annual')}
-                                className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${billingCycle === 'annual' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
+                                className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${billingCycle === 'annual' ? 'bg-white text-black shadow-lg' : 'text-zinc-300 hover:text-white'}`}
                             >
                                 {t('pricing.annual')}
                                 <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-white text-[10px] uppercase tracking-tighter shadow-sm shadow-emerald-500/50">
@@ -149,7 +149,7 @@ export function PricingPage() {
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-black text-white">{plan.name}</h3>
-                                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Entry Level</p>
+                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Entry Level</p>
                                 </div>
                             </div>
 
@@ -157,10 +157,10 @@ export function PricingPage() {
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-6xl font-black tracking-tighter text-white">{plan.price}</span>
                                     {plan.price !== 'Custom' && plan.price !== 'Kişiye Özel' && (
-                                        <span className="text-zinc-500 text-lg font-bold">/{t('common.month')}</span>
+                                        <span className="text-zinc-300 text-lg font-bold">/{t('common.month')}</span>
                                     )}
                                 </div>
-                                <p className="text-zinc-400 text-lg mt-4 leading-relaxed font-normal italic opacity-80">
+                                <p className="text-zinc-200 text-lg mt-4 leading-relaxed font-normal italic opacity-80">
                                     "{plan.desc}"
                                 </p>
                             </div>
@@ -197,7 +197,7 @@ export function PricingPage() {
                 <div className="max-w-4xl mx-auto pt-40 border-t border-white/5">
                     <div className="flex items-center gap-4 mb-16 justify-center">
                         <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
-                            <HelpCircle className="w-6 h-6 text-zinc-500" />
+                            <HelpCircle className="w-6 h-6 text-zinc-300" />
                         </div>
                         <h2 className="text-5xl font-black text-white tracking-tighter">{t('pricing.faq.title')}</h2>
                     </div>
@@ -211,14 +211,14 @@ export function PricingPage() {
                                 className="p-10 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all group"
                             >
                                 <h4 className="text-xl font-black text-white mb-4 group-hover:text-indigo-400 transition-colors">{faq.q}</h4>
-                                <p className="text-zinc-500 text-lg leading-relaxed">{faq.a}</p>
+                                <p className="text-zinc-300 text-lg leading-relaxed">{faq.a}</p>
                             </motion.div>
                         ))}
                     </div>
 
                     <div className="mt-24 p-12 rounded-[3rem] bg-indigo-600/10 border border-indigo-500/20 text-center">
                          <h4 className="text-2xl font-black text-white mb-4 italic">Still have questions?</h4>
-                         <p className="text-zinc-400 mb-8 max-w-lg mx-auto leading-relaxed">
+                         <p className="text-zinc-200 mb-8 max-w-lg mx-auto leading-relaxed">
                              Our operations team is available 24/7 to discuss custom integrations and enterprise deployments.
                          </p>
                          <Button variant="link" className="text-indigo-400 font-black text-lg hover:text-white transition-colors" onClick={() => navigate('/contact')}>

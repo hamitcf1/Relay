@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck, X } from 'lucide-react'
+import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck, X, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -16,8 +16,8 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { formatDistanceToNow } from 'date-fns'
-import { getDateLocale } from '@/lib/utils'
-import { cn } from '@/lib/utils'
+import { cn, getDateLocale } from '@/lib/utils'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import type { NotificationType } from '@/types'
 
 const notificationIcons: Record<NotificationType, any> = {
@@ -46,9 +46,11 @@ export function NotificationDropdown() {
         subscribeToNotifications,
         markAsRead,
         markAllAsRead,
+        clearAllNotifications,
         removeNotification
     } = useNotificationStore()
     const { t } = useLanguageStore()
+    const confirm = useConfirm()
 
     useEffect(() => {
         if (user && hotel?.id) {
@@ -66,6 +68,19 @@ export function NotificationDropdown() {
         markAsRead(hotel.id, n.id)
         if (n.link) {
             navigate(n.link)
+        }
+    }
+
+    const handleClearAll = async () => {
+        if (!hotel?.id) return
+        const confirmed = await confirm({
+            title: t('notifications.clearAllConfirm') as string || 'Clear all notifications?',
+            description: t('notifications.clearAllDescription') as string || 'This action cannot be undone.',
+            variant: 'destructive',
+            confirmLabel: t('common.clear') as string || 'Clear All'
+        })
+        if (confirmed) {
+            await clearAllNotifications(hotel.id)
         }
     }
 
@@ -91,17 +106,30 @@ export function NotificationDropdown() {
             <DropdownMenuContent align="end" className="w-80 bg-popover/95 backdrop-blur-md border-border p-0 shadow-2xl">
                 <div className="p-4 flex items-center justify-between border-b border-border">
                     <DropdownMenuLabel className="p-0 font-bold text-base text-foreground font-sans">{t('notifications.title')}</DropdownMenuLabel>
-                    {unreadCount > 0 && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleMarkAllRead}
-                            className="h-8 text-[11px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1.5"
-                        >
-                            <CheckCheck className="w-3.5 h-3.5" />
-                            {t('notifications.markAllRead')}
-                        </Button>
-                    )}
+                    <div className="flex items-center gap-1">
+                        {notifications.length > 0 && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleClearAll}
+                                className="h-8 w-8 p-0 text-rose-500 hover:text-rose-400 hover:bg-rose-500/10"
+                                title={t('notifications.clearAll') as string || 'Clear All'}
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                        )}
+                        {unreadCount > 0 && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleMarkAllRead}
+                                className="h-8 text-[11px] text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 gap-1.5"
+                            >
+                                <CheckCheck className="w-3.5 h-3.5" />
+                                {t('notifications.markAllRead')}
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
@@ -117,7 +145,10 @@ export function NotificationDropdown() {
                                 return (
                                     <DropdownMenuItem
                                         key={n.id}
-                                        onSelect={() => handleNotificationClick(n)}
+                                        onSelect={(e) => {
+                                            e.preventDefault()
+                                            handleNotificationClick(n)
+                                        }}
                                         className={cn(
                                             "flex gap-3 p-4 transition-all cursor-pointer focus:bg-muted/50 relative group outline-none hover:bg-muted/30",
                                             !n.is_read && "bg-primary/5"
@@ -165,7 +196,7 @@ export function NotificationDropdown() {
 
                 <DropdownMenuSeparator className="bg-border m-0" />
                 <DropdownMenuItem
-                    onSelect={() => navigate('/operations')}
+                    onSelect={() => navigate('/operations?tab=activity')}
                     className="w-full rounded-none h-11 text-xs text-muted-foreground hover:text-foreground focus:text-foreground transition-colors flex items-center justify-center cursor-pointer focus:bg-muted"
                 >
                     {t('notifications.viewAll')}

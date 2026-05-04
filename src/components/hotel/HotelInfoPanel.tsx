@@ -160,7 +160,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
             setIsVaultUnlocked(true)
             setPasswordInput('')
         } else {
-            toast.error('Yanlış şifre!')
+            toast.error(t('auth.error.wrongPassword'))
         }
     }
 
@@ -301,7 +301,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 </div>
                                 {isVaultUnlocked ? (
                                     <Button size="sm" variant="ghost" onClick={() => setIsVaultUnlocked(false)}>
-                                        <Lock className="w-3 h-3 mr-1" /> Kilitle
+                                        <Lock className="w-3 h-3 mr-1" /> {t('common.lock')}
                                     </Button>
                                 ) : (
                                     <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[10px]">
@@ -485,6 +485,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                 size="sm"
                                                 className="h-6 text-[10px] text-muted-foreground hover:text-destructive"
                                                 onClick={async () => {
+                                                    if (!hotel?.id) return
                                                     const confirmed = await confirm({
                                                         title: t('hotel.secure.resetConfirmTitle'),
                                                         variant: 'destructive',
@@ -496,7 +497,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                     }
                                                 }}
                                             >
-                                                Şifreyi Sıfırla
+                                                {t('hotel.secure.resetPassword')}
                                             </Button>
                                         </div>
                                     )}
@@ -509,7 +510,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             <div className="p-3 bg-muted/50 rounded-lg flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <KeyRound className="w-4 h-4 text-primary" />
-                                    <span className="text-xs text-muted-foreground">Hotel Code:</span>
+                                    <span className="text-xs text-muted-foreground">{t('hotel.hotelCode')}:</span>
                                     <div className="flex items-center gap-2">
                                         {hotel?.code ? (
                                             <div className="flex items-center gap-2">
@@ -529,7 +530,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                             setTimeout(() => { btn.innerHTML = originalHTML }, 2000)
                                                         }
                                                     }}
-                                                    title="Copy Code"
+                                                    title={t('common.copy')}
                                                 >
                                                     <div className="relative">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
@@ -555,7 +556,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                         await updateDoc(doc(db, 'hotels', hotel.id), { code: result })
                                                     } catch (e) {
                                                         console.error("Code generation failed:", e)
-                                                        toast.error('Failed to generate code. Please try again.')
+                                                        toast.error(t('hotel.error.generateCode'))
                                                     } finally {
                                                         setSaving(false)
                                                     }
@@ -564,7 +565,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                 disabled={saving}
                                             >
                                                 {saving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <KeyRound className="w-3 h-3 mr-1" />}
-                                                Generate Hotel Code
+                                                {t('hotel.generateCode')}
                                             </Button>
                                         )}
                                     </div>
@@ -593,7 +594,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4 text-emerald-500"><path d="M20 6 9 17l-5-5"/></svg>'
                                             setTimeout(() => { btn.innerHTML = originalHTML }, 2000)
                                         }}
-                                        title="Copy IBAN"
+                                        title={t('common.copy')}
                                     >
                                         <div className="relative">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>

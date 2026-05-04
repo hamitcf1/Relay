@@ -37,7 +37,8 @@ type ShiftValue = ShiftType | 'OFF' | null
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-const SHIFT_COLORS: Record<ShiftValue & string, string> = {
+// Default shifts if none configured in hotel settings
+const DEFAULT_SHIFT_COLORS: Record<string, string> = {
     'A': 'bg-indigo-500/80 text-white',
     'B': 'bg-purple-500/80 text-white',
     'C': 'bg-rose-500/80 text-white',
@@ -45,28 +46,58 @@ const SHIFT_COLORS: Record<ShiftValue & string, string> = {
     'OFF': 'bg-muted text-muted-foreground border border-border/50',
 }
 
-const SHIFT_CYCLE: (ShiftType | 'OFF')[] = ['A', 'B', 'C', 'E', 'OFF']
+const DEFAULT_SHIFT_CYCLE: (ShiftType | 'OFF')[] = ['A', 'B', 'C', 'E', 'OFF']
 
 export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const { t } = useLanguageStore()
     const { hotel, updateHotelSettings } = useHotelStore()
     const { user } = useAuthStore()
     const { toggleStaffVisibility } = useRosterStore()
+    const { staff: storeStaff } = useRosterStore()
     const [staff, setStaff] = useState<StaffMember[]>([])
     const [schedule, setSchedule] = useState<Record<string, Record<string, ShiftValue>>>({})
     const [weekOffset, setWeekOffset] = useState(0)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
 
+    // Sync store staff to local staff for reordering
+    useEffect(() => {
+        if (storeStaff.length > 0) {
+            setStaff(storeStaff)
+        }
+    }, [storeStaff])
+
+    // Dynamic shifts from hotel settings
+    const shifts = useMemo(() => {
+        if (hotel?.settings?.shifts && hotel.settings.shifts.length > 0) {
+            const dynamic = hotel.settings.shifts.map((s: any) => s.code as ShiftType | 'OFF')
+            if (!dynamic.includes('OFF')) dynamic.push('OFF')
+            return dynamic
+        }
+        return DEFAULT_SHIFT_CYCLE
+    }, [hotel?.settings?.shifts])
+
+    const shiftColors = useMemo(() => {
+        if (hotel?.settings?.shifts && hotel.settings.shifts.length > 0) {
+            const colors: Record<string, string> = { ...DEFAULT_SHIFT_COLORS }
+            hotel.settings.shifts.forEach((s: any) => {
+                if (s.code) colors[s.code] = `${s.color || 'bg-primary'} text-white`
+            })
+            return colors
+        }
+        return DEFAULT_SHIFT_COLORS
+    }, [hotel?.settings?.shifts])
+
     // Get week start date (Monday)
     const getWeekStart = (offset: number = 0): string => {
         const now = new Date()
         const dayOfWeek = now.getDay() // 0 (Sun) - 6 (Sat)
         // Calculate difference to get to Monday (1)
-        // If Sunday (0), we need to subtract 6 days. If Monday (1), subtract 0. If Tuesday (2), subtract 1.
         const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) + (offset * 7)
 
-        const monday = new Date(now.setDate(diff))
+        const monday = new Date(now) // Clone to avoid mutation
+        monday.setDate(diff)
+        monday.setHours(0, 0, 0, 0)
 
         // Return YYYY-MM-DD in local time
         const year = monday.getFullYear()
@@ -98,23 +129,17 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
     // Sorted staff based on hotel settings AND visibility
     const sortedStaff = useMemo(() => {
-        let currentStaff = staff
+        let currentStaff = [...staff]
 
-        // Hide hidden staff for non-GMs
-        if (canEdit === false) { // Assuming canEdit is true ONLY for GM/Manager
-            // Ideally we should check user role directly, but canEdit is a good proxy for now provided it's only true for GM
-            // Actually, verify where canEdit comes from. It's passed as prop. 
-            // Let's use useAuthStore from import to be safe? 
-            // Wait, I can't easily add import here without another step. 
-            // Let's assume canEdit is sufficient or I'll add user store.
+        // Filter out hidden staff for non-GMs
+        if (user?.role !== 'gm') {
+            currentStaff = currentStaff.filter(s => !s.is_hidden_in_roster)
         }
-
-        // BETTER: Let's use the hook for auth store at top level
 
         if (!hotel?.settings?.staff_order || currentStaff.length === 0) return currentStaff;
 
         const order = hotel.settings.staff_order;
-        const sorted = currentStaff.sort((a, b) => {
+        return currentStaff.sort((a, b) => {
             const indexA = order.indexOf(a.uid);
             const indexB = order.indexOf(b.uid);
 
@@ -124,8 +149,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
             return indexA - indexB;
         });
-
-        return sorted;
     }, [staff, hotel?.settings?.staff_order, user?.role]);
 
     const handleReorder = async (newOrder: StaffMember[]) => {
@@ -139,7 +162,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         }
     };
 
-    // Fetch staff and schedule
+    // Fetch schedule (staff is now handled by store)
     useEffect(() => {
         if (!hotelId) return
 
@@ -147,24 +170,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             setLoading(true)
 
             try {
-                // Fetch staff members for this hotel
-                const usersSnap = await getDocs(
-                    query(collection(db, 'users'), where('hotel_id', '==', hotelId))
-                )
-
-                const staffList: StaffMember[] = []
-                usersSnap.forEach((doc) => {
-                    const data = doc.data()
-                    if (data.name && data.name !== 'Unknown') {
-                        staffList.push({
-                            uid: doc.id,
-                            name: data.name,
-                            is_hidden_in_roster: data.is_hidden_in_roster
-                        })
-                    }
-                })
-                setStaff(staffList)
-
                 // Fetch roster for this week
                 const rosterRef = doc(db, 'hotels', hotelId, 'roster', weekStart)
                 const rosterSnap = await getDoc(rosterRef)
@@ -174,7 +179,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                 } else {
                     // Initialize empty schedule
                     const emptySchedule: Record<string, Record<string, ShiftValue>> = {}
-                    staffList.forEach((s) => {
+                    staff.forEach((s) => {
                         emptySchedule[s.uid] = {}
                         DAYS.forEach((day) => {
                             emptySchedule[s.uid][day] = null
@@ -190,23 +195,23 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         }
 
         fetchData()
-    }, [hotelId, weekStart])
+    }, [hotelId, weekStart, staff.length === 0]) // Re-run if staff list was initially empty
 
     // Cycle shift value
     const cycleShift = async (userId: string, day: string, direction: 'forward' | 'backward' = 'forward') => {
         if (!canEdit) return
 
         const currentValue = schedule[userId]?.[day] || null
-        const currentIndex = currentValue ? SHIFT_CYCLE.indexOf(currentValue as ShiftType | 'OFF') : -1
+        const currentIndex = currentValue ? shifts.indexOf(currentValue as ShiftType | 'OFF') : -1
 
         let nextIndex: number
         if (direction === 'forward') {
-            nextIndex = (currentIndex + 1) % SHIFT_CYCLE.length
+            nextIndex = (currentIndex + 1) % shifts.length
         } else {
-            nextIndex = (currentIndex - 1 + SHIFT_CYCLE.length) % SHIFT_CYCLE.length
+            nextIndex = (currentIndex - 1 + shifts.length) % shifts.length
         }
 
-        const nextValue = SHIFT_CYCLE[nextIndex]
+        const nextValue = shifts[nextIndex]
 
         // Update local state
         setSchedule((prev) => ({
@@ -336,8 +341,8 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                                 isToday ? "opacity-100" : "opacity-50"
                                             )}>{dateStr}</div>
                                             <div className={cn(
-                                                "text-[10px] sm:text-sm truncate",
-                                                isToday && "font-bold"
+                                                "text-[7px] sm:text-[8px] md:text-[9px] truncate leading-tight uppercase",
+                                                isToday && "font-black"
                                             )}>{t(dayKey)}</div>
                                             {isToday && <div className="h-0.5 w-3 sm:w-4 mx-auto mt-0.5 rounded-full bg-primary" />}
                                         </th>
@@ -412,7 +417,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                                         disabled={!canEdit}
                                                         className={cn(
                                                             'w-full max-w-[36px] sm:max-w-[48px] h-7 sm:h-9 mx-auto rounded text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center',
-                                                            shift ? SHIFT_COLORS[shift] : 'bg-zinc-800/50 text-zinc-600',
+                                                            shift ? shiftColors[shift] : 'bg-zinc-800/50 text-zinc-600',
                                                             canEdit && 'hover:opacity-80 cursor-pointer',
                                                             !canEdit && 'cursor-default'
                                                         )}
@@ -432,20 +437,27 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
                 {/* Legend */}
                 <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-zinc-800">
-                    {SHIFT_CYCLE.map((shift) => (
-                        <div key={shift} className="flex items-center gap-1.5">
-                            <div className={cn('w-4 h-4 rounded text-[10px] flex items-center justify-center font-bold', SHIFT_COLORS[shift])}>
-                                {shift}
+                    {shifts.map((shift) => {
+                        const shiftInfo = hotel?.settings?.shifts?.find((s: any) => s.code === shift)
+                        return (
+                            <div key={shift} className="flex items-center gap-1.5">
+                                <div className={cn('w-4 h-4 rounded text-[10px] flex items-center justify-center font-bold', shiftColors[shift])}>
+                                    {shift}
+                                </div>
+                                <span className="text-xs text-zinc-500">
+                                    {shiftInfo ? shiftInfo.name : (
+                                        <>
+                                            {shift === 'A' && t('shift.morning')}
+                                            {shift === 'B' && t('shift.afternoon')}
+                                            {shift === 'C' && t('shift.night')}
+                                            {shift === 'E' && t('shift.extra')}
+                                            {shift === 'OFF' && t('shift.off')}
+                                        </>
+                                    )}
+                                </span>
                             </div>
-                            <span className="text-xs text-zinc-500">
-                                {shift === 'A' && t('shift.morning')}
-                                {shift === 'B' && t('shift.afternoon')}
-                                {shift === 'C' && t('shift.night')}
-                                {shift === 'E' && t('shift.extra')}
-                                {shift === 'OFF' && t('shift.off')}
-                            </span>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             </div>
         </CollapsibleCard>

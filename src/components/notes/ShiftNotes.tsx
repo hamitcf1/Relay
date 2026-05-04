@@ -72,7 +72,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
                     📋 {t('module.shiftNotes') as string}
                     {counts.active > 0 && (
-                        <Badge variant="success" className="text-[10px] h-5 py-0 px-2 bg-emerald-500/10 text-emerald-600 border-transparent snake-border-active relative overflow-visible">
+                        <Badge variant="success" className="text-[10px] h-5 py-0 px-2 bg-emerald-500/10 text-emerald-400 border-transparent snake-border-active relative overflow-visible font-bold">
                             <span>{counts.active} {t('status.active') as string}</span>
                         </Badge>
                     )}

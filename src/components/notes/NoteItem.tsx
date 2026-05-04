@@ -196,10 +196,11 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                             return (
                                 <span
                                     className={cn(
+                                        'inline-flex items-center justify-center min-w-[1.5rem] h-5',
                                         pInfo.color,
                                         pInfo.textClass,
                                         pInfo.glowClass,
-                                        'leading-none select-none'
+                                        'leading-none select-none transition-all'
                                     )}
                                     title={t(`priority.${p}` as any) as string}
                                 >
@@ -243,12 +244,12 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                         )}
 
                         <Badge variant="outline" className={cn(
-                            "text-xs h-5 px-1.5 border-none font-semibold relative",
-                            note.status === 'active' ? "text-emerald-500 bg-emerald-500/10 snake-border-active" :
-                                note.status === 'resolved' ? "text-indigo-500 bg-indigo-500/10 snake-border-resolved" :
-                                    "text-zinc-500 bg-zinc-500/10 snake-border-archived"
+                            "text-[10px] h-5 px-2 border-none font-black tracking-widest relative overflow-visible shadow-sm uppercase",
+                            note.status === 'active' ? "text-emerald-400 bg-emerald-500/20 snake-border-active" :
+                                note.status === 'resolved' ? "text-violet-300 bg-violet-600/30 snake-border-resolved shadow-lg shadow-violet-500/20" :
+                                    "text-zinc-400 bg-zinc-500/10 snake-border-archived"
                         )}>
-                            <span>{(t(`status.${note.status}` as any) as string).toUpperCase()}</span>
+                            <span>{t(`status.${note.status}` as any) as string}</span>
                         </Badge>
                     </div>
 
@@ -477,18 +478,18 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                     )}
 
                     {/* Footer */}
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-foreground mt-2 pt-2 border-t border-border/20">
                         {(user?.role === 'gm' || note.category !== 'feedback') && (
-                            <span className="flex items-center gap-1.5">
+                            <span className="flex items-center gap-1.5 font-medium text-foreground">
                                 {!note.is_anonymous && (
-                                    <UserAvatar
+                                        <UserAvatar
                                         user={{
                                             id: note.created_by,
                                             name: note.created_by_name,
                                             settings: staff.find(s => s.uid === note.created_by)?.settings
                                         } as any}
-                                        size="xs"
-                                        className="w-4 h-4 border-none bg-transparent shadow-none"
+                                        size="sm"
+                                        className="w-5 h-5 border-none bg-transparent shadow-none"
                                     />
                                 )}
                                 {note.is_anonymous ? (
@@ -501,13 +502,13 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                         )}
 
                         {(user?.role === 'gm' || note.category !== 'feedback') && (
-                            <span className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
-                                {formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}
-                                <span className="opacity-50 ml-1">({formatDisplayDateTime(note.created_at)})</span>
+                            <span className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-full border border-border/30 shadow-inner">
+                                <Clock className="w-3.5 h-3.5 text-primary" />
+                                <span className="opacity-100 text-foreground font-semibold">{formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}</span>
+                                <span className="opacity-100 ml-0.5 font-mono text-[10px] text-foreground/80">({formatDisplayDateTime(note.created_at)})</span>
                                 {note.updated_at && note.updated_at.getTime() !== note.created_at.getTime() && (
-                                    <span className="text-muted-foreground ml-1" title={formatDisplayDateTime(note.updated_at)}>
-                                        ({(t('common.edited') as string) || 'edited'})
+                                    <span className="text-amber-400 ml-1 text-[10px] font-black uppercase tracking-tight" title={formatDisplayDateTime(note.updated_at)}>
+                                        • {(t('common.edited') as string) || 'edited'}
                                     </span>
                                 )}
                             </span>

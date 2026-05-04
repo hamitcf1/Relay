@@ -27,13 +27,14 @@ import { cn } from '@/lib/utils'
 import type { ActivityAction } from '@/types'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { useLanguageStore } from '@/stores/languageStore'
 
 const ACTION_META: Record<ActivityAction, { icon: typeof LogIn; label: string; color: string }> = {
     login: { icon: LogIn, label: 'Giriş', color: 'text-emerald-400' },
     logout: { icon: LogOut, label: 'Çıkış', color: 'text-rose-400' },
     shift_start: { icon: Play, label: 'Vardiya Başlangıç', color: 'text-blue-400' },
     shift_end: { icon: Square, label: 'Vardiya Bitiş', color: 'text-amber-400' },
-    note_create: { icon: StickyNote, label: 'Not Oluşturma', color: 'text-violet-400' },
+    note_create: { icon: StickyNote, label: 'Not Oluşturma', color: 'text-fuchsia-400' },
     note_edit: { icon: StickyNote, label: 'Not Düzenleme', color: 'text-violet-300' },
     note_delete: { icon: Trash2, label: 'Not Silme', color: 'text-rose-300' },
     message_send: { icon: Send, label: 'Mesaj Gönderme', color: 'text-sky-400' },
@@ -54,9 +55,30 @@ function formatTimestamp(ts: any): string {
 export function ActivityLogPanel() {
     const { hotel } = useHotelStore()
     const { logs, loading, subscribeToActivityLogs } = useActivityStore()
+    const { t } = useLanguageStore()
     const staff = useRosterStore(state => state.staff)
     const [filterUser, setFilterUser] = useState('')
     const [filterAction, setFilterAction] = useState<string>('all')
+
+    const getActionLabel = (action: ActivityAction) => {
+        const keyMap: Record<ActivityAction, string> = {
+            login: 'activity.action.login',
+            logout: 'activity.action.logout',
+            shift_start: 'activity.action.shift_start',
+            shift_end: 'activity.action.shift_end',
+            note_create: 'activity.action.note_create',
+            note_edit: 'activity.action.note_edit',
+            note_delete: 'activity.action.note_delete',
+            message_send: 'activity.action.message_send',
+            pricing_update: 'activity.action.pricing_update',
+            roster_update: 'activity.action.roster_update',
+            compliance_check: 'activity.action.compliance_check',
+            sale_create: 'activity.action.sale_create',
+            sale_update: 'activity.action.sale_update',
+            feedback_create: 'activity.action.feedback_create'
+        }
+        return (t(keyMap[action] as any) || ACTION_META[action].label) as string
+    }
 
     useEffect(() => {
         if (!hotel?.id) return
@@ -65,7 +87,7 @@ export function ActivityLogPanel() {
     }, [hotel?.id, subscribeToActivityLogs])
 
     // Extract unique users from logs
-    const uniqueUsers = Array.from(new Set(logs.map(l => l.user_name))).sort()
+    const uniqueUsers = Array.from(new Set(logs.map(l => l.user_name).filter(Boolean))).sort()
 
     // Filtered logs
     const filtered = logs.filter(log => {
@@ -83,17 +105,17 @@ export function ActivityLogPanel() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <ScrollText className="w-5 h-5 text-orange-400" />
-                            Personel Aktivite Kayıtları
+                            {t('module.activity')}
                         </CardTitle>
                         <div className="flex items-center gap-2 flex-wrap">
                             {/* User filter */}
                             <Select value={filterUser || '__all__'} onValueChange={(v) => setFilterUser(v === '__all__' ? '' : v)}>
                                 <SelectTrigger className="w-40 h-9 bg-background/80 border-border/50 text-xs">
                                     <UserIcon className="w-3 h-3 mr-1 text-muted-foreground" />
-                                    <SelectValue placeholder="Tüm Kullanıcılar" />
+                                    <SelectValue placeholder={t('common.staff')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="__all__">Tüm Kullanıcılar</SelectItem>
+                                    <SelectItem value="__all__">{t('common.staff')}</SelectItem>
                                     {uniqueUsers.map(u => (
                                         <SelectItem key={u} value={u}>{u}</SelectItem>
                                     ))}
@@ -104,13 +126,13 @@ export function ActivityLogPanel() {
                             <Select value={filterAction} onValueChange={setFilterAction}>
                                 <SelectTrigger className="w-44 h-9 bg-background/80 border-border/50 text-xs">
                                     <Filter className="w-3 h-3 mr-1 text-muted-foreground" />
-                                    <SelectValue placeholder="Tüm Aksiyonlar" />
+                                    <SelectValue placeholder={t('module.activity')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Tüm Aksiyonlar</SelectItem>
+                                    <SelectItem value="all">{t('status.all')}</SelectItem>
                                     {Object.entries(ACTION_META).map(([key, meta]) => (
                                         <SelectItem key={key} value={key}>
-                                            {meta.label}
+                                            {getActionLabel(key as ActivityAction)}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -127,7 +149,7 @@ export function ActivityLogPanel() {
                     ) : filtered.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                             <ScrollText className="w-10 h-10 mb-3 opacity-30" />
-                            <p className="text-sm">Henüz aktivite kaydı yok</p>
+                            <p className="text-sm">{t('report.noData')}</p>
                         </div>
                     ) : (
                         <div className="divide-y divide-border/20 max-h-[calc(100vh-20rem)] overflow-y-auto scrollbar-thin">
@@ -169,7 +191,7 @@ export function ActivityLogPanel() {
                                                         {log.user_name}
                                                     </span>
                                                     <span className={cn("text-xs font-medium px-1.5 py-0.5 rounded", meta.color, "bg-current/10")}>
-                                                        {meta.label}
+                                                        {getActionLabel(log.action)}
                                                     </span>
                                                     <span className="text-[10px] text-muted-foreground uppercase px-1.5 py-0.5 rounded bg-muted/50">
                                                         {log.user_role}

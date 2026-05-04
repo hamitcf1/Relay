@@ -207,7 +207,7 @@ export function RegisterPage() {
                     {/* Back Link */}
                     <Link
                         to="/"
-                        className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors mb-8 group/back relative z-10 transform-gpu translate-z-10"
+                        className="inline-flex items-center gap-2 text-sm text-zinc-300 hover:text-white transition-colors mb-8 group/back relative z-10 transform-gpu translate-z-10"
                     >
                         <ArrowLeft className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" />
                         {t('auth.backToHome')}
@@ -237,14 +237,14 @@ export function RegisterPage() {
                         transition={{ delay: 0.3 }}
                     >
                         <h2 className="text-2xl font-bold text-white tracking-tight mb-2">{t('auth.register')}</h2>
-                        <p className="text-zinc-500 text-sm leading-relaxed">{t('auth.registerSubtitle')}</p>
+                        <p className="text-zinc-300 text-sm leading-relaxed">{t('auth.registerSubtitle')}</p>
                     </motion.div>
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                         {/* Role Selection & GM Toggle */}
                         <div className="space-y-3">
-                            <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider pl-1">{t('auth.role.selection')}</p>
+                            <p className="text-xs text-zinc-300 font-bold uppercase tracking-wider pl-1">{t('auth.role.selection')}</p>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
@@ -285,17 +285,17 @@ export function RegisterPage() {
                                 className="space-y-2"
                             >
                                 <div className="group/input relative">
-                                    <Hotel className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    <Hotel className="absolute left-4 top-3.5 w-5 h-5 text-zinc-300 group-focus-within/input:text-primary transition-colors duration-300" />
                                     <input
                                         value={hotelCode}
                                         onChange={(e) => setHotelCode(e.target.value.toUpperCase())}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 font-mono tracking-wider uppercase text-sm"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 font-mono tracking-wider uppercase text-sm"
                                         placeholder={t('auth.placeholder.hotelCode')}
                                         maxLength={10}
                                         required
                                     />
                                 </div>
-                                <p className="text-[11px] text-zinc-500 pl-1">
+                                <p className="text-[11px] text-zinc-300 pl-1">
                                     {t('auth.helper.askManager')}
                                 </p>
                             </motion.div>
@@ -304,23 +304,23 @@ export function RegisterPage() {
                         {/* Standard Fields */}
                         <div className="space-y-4">
                             <div className="group/input relative">
-                                <User className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                <User className="absolute left-4 top-3.5 w-5 h-5 text-zinc-300 group-focus-within/input:text-primary transition-colors duration-300" />
                                 <input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
                                     placeholder={t('auth.name')}
                                     required
                                 />
                             </div>
 
                             <div className="group/input relative">
-                                <Mail className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                <Mail className="absolute left-4 top-3.5 w-5 h-5 text-zinc-300 group-focus-within/input:text-primary transition-colors duration-300" />
                                 <input
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm"
                                     placeholder={t('auth.email')}
                                     required
                                 />
@@ -328,7 +328,7 @@ export function RegisterPage() {
 
                              <div className="grid grid-cols-2 gap-4">
                                  <div className="group/input relative">
-                                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-300 group-focus-within/input:text-primary transition-colors duration-300" />
                                     <div className="absolute left-12 right-10 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
                                         <PasswordReveal value={password} visible={showPassword} />
                                     </div>
@@ -336,21 +336,21 @@ export function RegisterPage() {
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-10 text-transparent caret-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-10 text-transparent caret-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
                                         placeholder={t('auth.password')}
                                         required
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-3.5 text-zinc-500 hover:text-white transition-colors"
+                                        className="absolute right-3 top-3.5 text-zinc-300 hover:text-white transition-colors"
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
                                 </div>
 
                                  <div className="group/input relative">
-                                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500 group-focus-within/input:text-primary transition-colors duration-300" />
+                                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-300 group-focus-within/input:text-primary transition-colors duration-300" />
                                     <div className="absolute left-12 right-4 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
                                         <PasswordReveal value={confirmPassword} visible={showPassword} />
                                     </div>
@@ -358,7 +358,7 @@ export function RegisterPage() {
                                         type={showPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-transparent caret-white placeholder:text-zinc-600 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-transparent caret-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
                                         placeholder={t('auth.confirmPassword')}
                                         required
                                     />
@@ -386,7 +386,7 @@ export function RegisterPage() {
                                                 <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.8)]" />
                                             )}
                                         </div>
-                                        <p className="text-[10px] text-zinc-500 leading-tight">
+                                        <p className="text-[10px] text-zinc-300 leading-tight">
                                             {r.desc}
                                         </p>
                                     </div>
@@ -428,7 +428,7 @@ export function RegisterPage() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.6 }}
                     >
-                        <p className="text-zinc-500 text-sm">
+                        <p className="text-zinc-300 text-sm">
                             {t('auth.haveAccount')}{' '}
                             <Link to="/login" className="text-white hover:text-primary transition-colors font-semibold hover:underline decoration-primary underline-offset-4">
                                 {t('auth.login')}

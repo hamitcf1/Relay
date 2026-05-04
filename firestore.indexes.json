@@ -1,4 +1,13 @@
 {
-    "indexes": [],
-    "fieldOverrides": []
+  "indexes": [
+    {
+      "collectionGroup": "shifts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "ended_at", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
 }

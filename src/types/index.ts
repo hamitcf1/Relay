@@ -85,6 +85,19 @@ export interface HotelSettings {
     staff_order?: string[]
     safe_password?: string
     knowledge_base?: string // AI Knowledge Base context
+    shifts?: Array<{
+        id: string
+        name: string
+        code: string
+        startTime: string
+        endTime: string
+        color?: string
+    }>
+    meal_times?: {
+        breakfast?: string // "07:00 - 10:00"
+        lunch?: string
+        dinner?: string
+    }
     secret_info?: {
         agency_logins?: string
         kbs_logins?: string
@@ -94,7 +107,6 @@ export interface HotelSettings {
     }
     fixture_prices?: Record<string, number>
     minibar_prices?: Record<string, number>
-
 }
 
 export interface Hotel {
