@@ -29,7 +29,7 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 export function HotelSettings() {
-    const { hotel, updateHotelSettings } = useHotelStore()
+    const { hotel, updateHotelSettings, updateHotelInfo } = useHotelStore()
     const { t } = useLanguageStore()
     const { user } = useAuthStore()
     const staff = useRosterStore(state => state.staff)
@@ -72,7 +72,7 @@ export function HotelSettings() {
         if (!hotel?.id) return
         setSaving(true)
         try {
-            await updateHotelSettings(hotel.id, { info: { ...hotel.info, name } })
+            await updateHotelInfo(hotel.id, { name })
             toast.success('Changes saved')
         } catch (err) {
             toast.error('Error saving changes')

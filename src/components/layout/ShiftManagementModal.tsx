@@ -13,7 +13,6 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { Clock, DollarSign, MessageSquare, LogOut, AlertCircle } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface ShiftManagementModalProps {
     isOpen: boolean

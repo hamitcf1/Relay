@@ -2,6 +2,13 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { NoteCategory, NoteStatus, categoryInfo } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface NoteFiltersProps {
     statusFilter: NoteStatus | 'all'
@@ -27,29 +34,42 @@ export function NoteFilters({
     return (
         <div className="pt-2">
             {/* Status Tabs */}
-            <div className="flex gap-1 mb-4 p-1 bg-muted/50 rounded-lg border border-border/50">
-                {[
-                    { key: 'active' as const, label: t('status.active') || 'Active', color: 'bg-emerald-500' },
-                    { key: 'resolved' as const, label: t('status.resolved') || 'Resolved', color: 'bg-indigo-500' },
-                    { key: 'archived' as const, label: t('status.archived') || 'Archived', color: 'bg-zinc-600' },
-                    { key: 'all' as const, label: t('status.all') || 'All', color: 'bg-zinc-400' }
-                ].map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => setStatusFilter(tab.key)}
-                        className={cn(
-                            'flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded transition-all',
-                            statusFilter === tab.key
-                                ? 'bg-card text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground'
-                        )}
-                    >
-                        {tab.label}
-                        {counts[tab.key] > 0 && (
-                            <span className="ml-1 opacity-60">({counts[tab.key]})</span>
-                        )}
-                    </button>
-                ))}
+            <div className="flex items-center justify-between gap-4 mb-4">
+                <div className="flex-1">
+                    <Select value={statusFilter} onValueChange={(val: any) => setStatusFilter(val)}>
+                        <SelectTrigger className="w-[180px] bg-muted/50 border-border/50 h-9 rounded-xl font-bold uppercase text-[10px] tracking-wider">
+                            <div className="flex items-center gap-2">
+                                <div className={cn(
+                                    "w-2 h-2 rounded-full",
+                                    statusFilter === 'active' ? 'bg-emerald-500' :
+                                    statusFilter === 'resolved' ? 'bg-indigo-500' :
+                                    statusFilter === 'archived' ? 'bg-zinc-600' : 'bg-zinc-400'
+                                )} />
+                                <SelectValue placeholder="Status" />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border-border">
+                            {[
+                                { key: 'active' as const, label: t('status.active') || 'Active', color: 'bg-emerald-500' },
+                                { key: 'resolved' as const, label: t('status.resolved') || 'Resolved', color: 'bg-indigo-500' },
+                                { key: 'archived' as const, label: t('status.archived') || 'Archived', color: 'bg-zinc-600' },
+                                { key: 'all' as const, label: t('status.all') || 'All', color: 'bg-zinc-400' }
+                            ].map((tab) => (
+                                <SelectItem key={tab.key} value={tab.key} className="text-[10px] font-bold uppercase tracking-wider">
+                                    <div className="flex items-center gap-2">
+                                        <div className={cn("w-1.5 h-1.5 rounded-full", tab.color)} />
+                                        {tab.label}
+                                        {counts[tab.key] > 0 && <span className="ml-1 opacity-40">({counts[tab.key]})</span>}
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="hidden sm:flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">
+                    <div className="w-1 h-1 rounded-full bg-border" />
+                    {counts.all} Total Notes
+                </div>
             </div>
 
             {/* Category Tabs & Search Bar */}

@@ -14,6 +14,7 @@ interface HotelActions {
     subscribeToHotel: (hotelId: string) => () => void
     createHotelIfNotExists: (hotelId: string, info: HotelInfo) => Promise<void>
     updateHotelSettings: (hotelId: string, settings: Partial<HotelSettings>) => Promise<void>
+    updateHotelInfo: (hotelId: string, info: Partial<HotelInfo>) => Promise<void>
     joinHotelByCode: (code: string, user: any) => Promise<boolean>
     validateHotelCode: (code: string) => Promise<string | null>
     createNewHotel: (info: HotelInfo, user: any) => Promise<string | null>
@@ -193,6 +194,17 @@ export const useHotelStore = create<HotelStore>((set) => ({
         }
     },
 
+    updateHotelInfo: async (hotelId: string, info: Partial<HotelInfo>) => {
+        try {
+            const hotelRef = doc(db, 'hotels', hotelId)
+            await setDoc(hotelRef, {
+                info: info
+            }, { merge: true })
+        } catch (error) {
+            console.error('Error updating hotel info:', error)
+            throw error
+        }
+    },
     joinHotelByCode: async (code, user) => {
         try {
             const { collection, query, where, getDocs, updateDoc, arrayUnion, doc: firestoreDoc } = await import('firebase/firestore')

@@ -16,7 +16,9 @@ interface SecurityActions {
 
 type SecurityStore = SecurityState & SecurityActions
 
-export const useSecurityStore = create<SecurityStore>((set) => ({
+let countdownInterval: NodeJS.Timeout | null = null
+
+export const useSecurityStore = create<SecurityStore>((set, get) => ({
     countdown: null,
     showOverlay: false,
     lastTriggerReason: null,
@@ -25,16 +27,31 @@ export const useSecurityStore = create<SecurityStore>((set) => ({
     setShowOverlay: (val) => set({ showOverlay: val }),
     
     startCountdown: (seconds, reason) => {
+        if (countdownInterval) clearInterval(countdownInterval)
+        
         set({ countdown: seconds, lastTriggerReason: reason })
-        // If manual, show overlay immediately
-        if (reason === 'manual') {
+        if (reason === 'manual' || reason === 'shift_end') {
             set({ showOverlay: true })
         }
+
+        countdownInterval = setInterval(() => {
+            const { countdown } = get()
+            if (countdown !== null && countdown > 0) {
+                set({ countdown: countdown - 1 })
+            } else if (countdown === 0) {
+                if (countdownInterval) clearInterval(countdownInterval)
+                // Trigger auto logout via window event or direct auth call if possible
+                // For now, we'll let components listen to countdown === 0
+            }
+        }, 1000)
     },
 
-    stopCountdown: () => set({ countdown: null, showOverlay: false, lastTriggerReason: null }),
+    stopCountdown: () => {
+        if (countdownInterval) clearInterval(countdownInterval)
+        set({ countdown: null, showOverlay: false, lastTriggerReason: null })
+    },
 
     triggerManualCheck: () => {
-        set({ countdown: 60, showOverlay: true, lastTriggerReason: 'manual' })
+        get().startCountdown(60, 'manual')
     }
 }))

@@ -103,7 +103,7 @@ export function CompliancePanel({ hotelId, className }: CompliancePanelProps) {
                             <p className="text-sm font-bold">{t('compliance.agency') || 'Agency Messages'}</p>
                             <p className="text-[10px] text-muted-foreground">
                                 {agencyChecked 
-                                    ? (t('compliance.agencyDone', { count: currentShift.compliance.agency_msg_checked_count }) || `${currentShift.compliance.agency_msg_checked_count} messages checked`) 
+                                    ? (t('compliance.agencyDone', { count: String(currentShift.compliance.agency_msg_checked_count) }) || `${currentShift.compliance.agency_msg_checked_count} messages checked`) 
                                     : (t('compliance.agencyPending') || 'Check for new messages')}
                             </p>
                         </div>

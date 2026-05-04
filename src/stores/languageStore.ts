@@ -151,7 +151,6 @@ type Translations = {
     'urgency.high': string
     'urgency.critical': string
     'security.manualCheck': string
-    'shift.timeLeft': string
     'common.lock': string
     'common.copy': string
     'common.dismiss': string
@@ -1681,7 +1680,6 @@ const translations: Record<Language, Translations> = {
         'security.sessionCountdown': 'Logout Countdown',
         'security.manualTrigger': 'Lock Dashboard Session',
         'security.manualCheck': 'Quick Lock',
-        'shift.timeLeft': 'Shift Remaining',
 
         // Activity Log Action Labels
         'activity.action.login': 'Login',
@@ -2631,7 +2629,6 @@ const translations: Record<Language, Translations> = {
         'security.sessionCountdown': 'Çıkış Geri Sayımı',
         'security.manualTrigger': 'Panel Oturumunu Kilitle',
         'security.manualCheck': 'Hızlı Kilitle',
-        'shift.timeLeft': 'Vardiya Bitişine',
 
         // Activity Log Action Labels
         'activity.action.login': 'Giriş',
@@ -2827,7 +2824,6 @@ const translations: Record<Language, Translations> = {
         'report.errorAI': 'AI oluşturma hatası. Lütfen tekrar deneyin.',
         'common.lock': 'Kilitle',
         'common.copy': 'Kopyala',
-        'common.dismiss': 'Kapat',
         'hotel.hotelCode': 'Otel Kodu',
         'hotel.generateCode': 'Otel Kodu Oluştur',
         'hotel.error.generateCode': 'Kod oluşturma hatası.',
@@ -2846,7 +2842,6 @@ const translations: Record<Language, Translations> = {
         'hotel.settings.saveShifts': 'Vardiya Ayarlarını Kaydet',
         'hotel.shifts.success': 'Vardiya ayarları güncellendi.',
         'hotel.shifts.error': 'Vardiya ayarları kaydedilemedi.',
-        'shift.management': 'Vardiya Yönetimi',
         'shift.type': 'Vardiya Tipi',
         'shift.cashCount': 'Kasa Sayımı',
         'shift.enterCash': 'Kapanış Kasasını Girin',

@@ -1,15 +1,13 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, Check, X, Camera, DollarSign, Package } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { AlertTriangle, X, Camera, DollarSign, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useIncidentStore } from '@/stores/incidentStore'
-import { useHotelStore } from '@/stores/hotelStore'
-import { useLanguageStore } from '@/stores/languageStore'
 import { useNotesStore } from '@/stores/notesStore'
 import { cn } from '@/lib/utils'
-import type { IncidentType, IncidentSeverity, IncidentStatus } from '@/types'
+import type { IncidentType, IncidentStatus } from '@/types'
 
 interface IncidentReportModalProps {
     isOpen: boolean
@@ -21,8 +19,6 @@ interface IncidentReportModalProps {
 export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: IncidentReportModalProps) {
     const { addIncident } = useIncidentStore()
     const { addNote } = useNotesStore()
-    const { hotel } = useHotelStore()
-    const { t } = useLanguageStore()
 
     const [type, setType] = useState<IncidentType>('damage')
     const [item, setItem] = useState('')

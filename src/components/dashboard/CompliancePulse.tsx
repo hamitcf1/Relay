@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { Check, ShieldCheck, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useLanguageStore } from '@/stores/languageStore'
 import {
     Tooltip,
     TooltipContent,
@@ -16,7 +15,6 @@ interface CompliancePulseProps {
 }
 
 export function CompliancePulse({ agencyChecked, kbsChecked, className }: CompliancePulseProps) {
-    const { t } = useLanguageStore()
     
     const total = 2
     const checked = (agencyChecked ? 1 : 0) + (kbsChecked ? 1 : 0)

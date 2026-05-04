@@ -7,11 +7,10 @@ import {
     deleteDoc, 
     query, 
     onSnapshot, 
-    serverTimestamp,
-    where
+    serverTimestamp
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { Incident, IncidentStatus, IncidentType } from '@/types'
+import type { Incident, IncidentStatus } from '@/types'
 import { toast } from 'sonner'
 import { useAuthStore } from './authStore'
 import { useActivityStore } from './activityStore'
@@ -63,7 +62,7 @@ export const useIncidentStore = create<IncidentStore>((set) => ({
     addIncident: async (hotelId, data) => {
         try {
             const incidentsRef = collection(db, 'hotels', hotelId, 'incidents')
-            const docRef = await addDoc(incidentsRef, {
+            await addDoc(incidentsRef, {
                 ...data,
                 created_at: serverTimestamp()
             })

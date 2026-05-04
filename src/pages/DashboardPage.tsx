@@ -54,7 +54,6 @@ import { AppSidebar } from '@/components/layout/AppSidebar'
 import { ShiftTimer } from '@/components/layout/ShiftTimer'
 import { SecurityTimer } from '@/components/layout/SecurityTimer'
 import { SecurityModal } from '@/components/layout/SecurityModal'
-import { ShiftGuard } from '@/components/layout/ShiftGuard'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { useSecurityStore } from '@/stores/securityStore'
@@ -143,6 +142,21 @@ export function DashboardPage() {
         const interval = setInterval(checkSecurityTime, 60000) // Check every minute
         return () => clearInterval(interval)
     }, [startCountdown])
+
+    // Auto-logout when countdown hits 0
+    const { countdown, stopCountdown } = useSecurityStore()
+    const signOut = useAuthStore(state => state.signOut)
+
+    useEffect(() => {
+        if (countdown === 0) {
+            const performLogout = async () => {
+                stopCountdown()
+                await signOut()
+                window.location.href = '/login'
+            }
+            performLogout()
+        }
+    }, [countdown, signOut, stopCountdown])
 
     // Subscribe to sales for dashboard visibility
     const { subscribeToSales } = useSalesStore()
@@ -429,7 +443,6 @@ export function DashboardPage() {
             />
             <AnnouncementModal />
             <SecurityModal />
-            <ShiftGuard />
         </div>
     )
 }

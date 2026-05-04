@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useAuthStore } from '@/stores/authStore'
 import type { Sale, Currency, SaleStatus } from '@/types'
 import { cn, formatDisplayDate, getDateLocale } from '@/lib/utils'
 import { useConfirm } from '@/components/ui/confirm-dialog'
