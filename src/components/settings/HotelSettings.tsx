@@ -18,6 +18,7 @@ import { ManagementReportPanel } from '@/components/admin/ManagementReportPanel'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useRosterStore } from '@/stores/rosterStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -31,10 +32,19 @@ export function HotelSettings() {
     const { hotel, updateHotelSettings } = useHotelStore()
     const { t } = useLanguageStore()
     const { user } = useAuthStore()
+    const staff = useRosterStore(state => state.staff)
+    const subscribeToRoster = useRosterStore(state => state.subscribeToRoster)
     
     const [name, setName] = useState('')
     const [saving, setSaving] = useState(false)
     const [shifts, setShifts] = useState<{ id: string, name: string, code: string, startTime: string, endTime: string, color?: string }[]>([])
+
+    useEffect(() => {
+        if (hotel?.id) {
+            const unsub = subscribeToRoster(hotel.id)
+            return () => unsub()
+        }
+    }, [hotel?.id, subscribeToRoster])
 
     useEffect(() => {
         if (hotel) {
@@ -266,11 +276,16 @@ export function HotelSettings() {
 
                 <TabsContent value="roles" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[
-                            { role: 'GM', count: 1, icon: ShieldCheck, color: 'text-rose-400' },
-                            { role: 'Reception', count: 4, icon: Briefcase, color: 'text-blue-400' },
-                            { role: 'Staff', count: 8, icon: Users, color: 'text-zinc-400' }
-                        ].map((item, i) => (
+                        {(() => {
+                            const gmCount = staff.filter(s => s.role === 'gm').length
+                            const receptionCount = staff.filter(s => s.role === 'receptionist').length
+                            const otherCount = staff.filter(s => s.role !== 'gm' && s.role !== 'receptionist').length
+
+                            return [
+                                { role: 'GM', count: gmCount, icon: ShieldCheck, color: 'text-rose-400' },
+                                { role: 'Reception', count: receptionCount, icon: Briefcase, color: 'text-blue-400' },
+                                { role: 'Staff', count: otherCount, icon: Users, color: 'text-zinc-400' }
+                            ].map((item, i) => (
                             <Card key={i} className="glass">
                                 <CardContent className="pt-6">
                                     <div className="flex items-center justify-between mb-2">
@@ -281,7 +296,7 @@ export function HotelSettings() {
                                     <p className="text-xs text-muted-foreground mt-1">Erişim yetkileri ve görev tanımları yapılandırılmış.</p>
                                 </CardContent>
                             </Card>
-                        ))}
+                        ))})()}
                     </div>
                 </TabsContent>
 
