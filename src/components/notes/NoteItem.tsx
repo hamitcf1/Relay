@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale, formatDisplayDateTime, cn } from '@/lib/utils'
-import { User, Trash2, Wand2, Pencil, DollarSign, Clock } from 'lucide-react'
+import { User, Trash2, Wand2, Pencil, DollarSign, Clock, Pin, PinOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -30,7 +30,7 @@ interface NoteItemProps {
 }
 
 export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
-    const { updateNote, updateNoteStatus, markPaid, deleteNote, convertToLog } = useNotesStore()
+    const { updateNote, updateNoteStatus, markPaid, deleteNote, convertToLog, togglePin } = useNotesStore()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
     const confirm = useConfirm()
@@ -158,18 +158,29 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
         }
     }
 
+    const handleTogglePin = async () => {
+        await togglePin(hotelId, note.id, !note.is_pinned)
+    }
+
     return (
         <motion.div
             layout
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className={cn(
-                'p-3 rounded-lg border transition-all group',
+                'p-3 rounded-lg border transition-all group relative',
                 note.status === 'active'
                     ? 'border-border bg-muted/30'
-                    : 'border-border/30 bg-muted/10 opacity-60'
+                    : 'border-border/30 bg-muted/10 opacity-60',
+                note.is_pinned && 'border-primary/40 bg-primary/[0.03]'
             )}
         >
+            {note.is_pinned && (
+                <div className="absolute -left-1 -top-1 bg-primary text-primary-foreground rounded-full p-1 shadow-lg shadow-primary/20">
+                    <Pin className="w-2.5 h-2.5 fill-current" />
+                </div>
+            )}
+            
             <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                     {/* Header */}
@@ -243,14 +254,30 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                             </span>
                         )}
 
-                        <Badge variant="outline" className={cn(
-                            "text-[10px] h-5 px-2 border-none font-black tracking-widest relative overflow-visible shadow-sm uppercase",
-                            note.status === 'active' ? "text-emerald-400 bg-emerald-500/20 snake-border-active" :
-                                note.status === 'resolved' ? "text-violet-300 bg-violet-600/30 snake-border-resolved shadow-lg shadow-violet-500/20" :
-                                    "text-zinc-400 bg-zinc-500/10 snake-border-archived"
-                        )}>
-                            <span>{t(`status.${note.status}` as any) as string}</span>
-                        </Badge>
+                        <Select
+                            value={note.status}
+                            onValueChange={(v) => handleStatusChange(v as NoteStatus)}
+                        >
+                            <SelectTrigger className={cn(
+                                "h-5 px-2 border-none font-black tracking-widest relative overflow-visible shadow-sm uppercase text-[10px] w-fit min-w-[70px] bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0 transition-all [&>svg]:w-3 [&>svg]:h-3 [&>svg]:opacity-70 [&>svg]:ml-1",
+                                note.status === 'active' ? "text-emerald-400 bg-emerald-500/20 snake-border-active" :
+                                    note.status === 'resolved' ? "text-violet-300 bg-violet-600/30 snake-border-resolved shadow-lg shadow-violet-500/20" :
+                                        "text-zinc-400 bg-zinc-500/10 snake-border-archived"
+                            )}>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-card border-border shadow-2xl min-w-[120px]">
+                                <SelectItem value="active" className="text-[10px] font-bold uppercase tracking-wider focus:bg-emerald-500/10 focus:text-emerald-400">
+                                    {t('status.active') as string}
+                                </SelectItem>
+                                <SelectItem value="resolved" className="text-[10px] font-bold uppercase tracking-wider focus:bg-violet-500/10 focus:text-violet-300">
+                                    {t('status.resolved') as string}
+                                </SelectItem>
+                                <SelectItem value="archived" className="text-[10px] font-bold uppercase tracking-wider focus:bg-zinc-500/10 focus:text-zinc-400">
+                                    {t('status.archived') as string}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Content */}
@@ -518,6 +545,18 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
 
                 {/* Actions */}
                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleTogglePin}
+                        className={cn(
+                            "h-8 w-8 transition-colors",
+                            note.is_pinned ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-primary/5"
+                        )}
+                        title={note.is_pinned ? 'Unpin from Sticky Board' : 'Pin to Sticky Board'}
+                    >
+                        {note.is_pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
+                    </Button>
                     {isFinancialCategory(note.category) && !note.is_paid && note.amount_due && (
                         <Button
                             size="icon"
@@ -529,19 +568,6 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                         </Button>
                     )}
 
-                    <Select
-                        value={note.status}
-                        onValueChange={(v) => handleStatusChange(v as NoteStatus)}
-                    >
-                        <SelectTrigger className="h-8 w-28 bg-background border-border text-xs px-2">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="active" className="text-xs">{t('status.active') as string}</SelectItem>
-                            <SelectItem value="resolved" className="text-xs">{t('status.resolved') as string}</SelectItem>
-                            <SelectItem value="archived" className="text-xs">{t('status.archived') as string}</SelectItem>
-                        </SelectContent>
-                    </Select>
 
                     {user?.role === 'gm' && (
                         <>

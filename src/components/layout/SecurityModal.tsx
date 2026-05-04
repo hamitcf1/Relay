@@ -10,7 +10,8 @@ export function SecurityModal() {
     const { t } = useLanguageStore()
     const { user, signOut: logout } = useAuthStore()
 
-    if (countdown === null || countdown > 10) return null
+    if (countdown === null) return null
+    if (lastTriggerReason === 'idle' && countdown > 60) return null
     if (user?.role === 'gm' && lastTriggerReason === 'shift_end') return null
 
     return (

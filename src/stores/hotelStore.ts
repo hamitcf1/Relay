@@ -25,6 +25,11 @@ type HotelStore = HotelState & HotelActions
 const defaultSettings: HotelSettings = {
     kbs_time: '23:00',
     check_agency_intervals: [9, 12, 15, 18, 21],
+    shifts: [
+        { id: '1', name: 'Morning', code: 'A', startTime: '08:00', endTime: '16:00', color: 'blue' },
+        { id: '2', name: 'Evening', code: 'B', startTime: '16:00', endTime: '00:00', color: 'indigo' },
+        { id: '3', name: 'Night', code: 'C', startTime: '00:00', endTime: '08:00', color: 'violet' },
+    ]
 }
 
 export const useHotelStore = create<HotelStore>((set) => ({

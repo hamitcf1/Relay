@@ -186,12 +186,6 @@ export interface Roster {
 // UI State Types
 // ============================================
 
-export interface CompliancePulse {
-    agencyChecked: boolean
-    kbsChecked: boolean
-    percentage: number
-}
-
 export interface AuthState {
     user: User | null
     loading: boolean
@@ -239,6 +233,7 @@ export interface ShiftNote {
     assigned_staff_uid?: string | null
     assigned_staff_name?: string | null
     updated_at?: Date
+    is_pinned?: boolean
 }
 
 export interface BlacklistedGuest {
@@ -456,5 +451,4 @@ export type SaleStatus = 'waiting' | 'confirmed' | 'cancelled' | 'pickup_pending
 export interface AppState {
     currentHotelId: string | null
     currentShift: Shift | null
-    compliancePulse: CompliancePulse
 }

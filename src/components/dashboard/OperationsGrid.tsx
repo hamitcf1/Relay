@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import {
     MessageCircle,
     ShieldAlert,
+    ShieldCheck,
     CalendarDays,
     Map,
     CreditCard,
@@ -29,6 +30,13 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             icon: MessageCircle,
             color: 'bg-blue-500/10 text-blue-500',
             desc: t('operations.messaging.desc')
+        },
+        {
+            id: 'compliance',
+            label: t('module.compliance') || 'Compliance',
+            icon: ShieldCheck,
+            color: 'bg-emerald-500/10 text-emerald-500',
+            desc: t('operations.compliance.desc') || 'KBS & Agency check-ins'
         },
         {
             id: 'feedback',

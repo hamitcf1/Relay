@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Lock, Timer, ShieldAlert } from 'lucide-react'
 import { useSecurityStore } from '@/stores/securityStore'
 import { useLanguageStore } from '@/stores/languageStore'

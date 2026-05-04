@@ -497,7 +497,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                                     }
                                                 }}
                                             >
-                                                {t('hotel.secure.resetPassword')}
+                                                Reset Password
                                             </Button>
                                         </div>
                                     )}

@@ -149,9 +149,11 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                     <Button size="icon" variant="ghost" className="hover:bg-white/10" onClick={() => setIsEditing(true)}>
                                         <Edit3 className="w-4 h-4" />
                                     </Button>
-                                    <Button size="icon" variant="ghost" className="text-rose-400 hover:bg-rose-500/10 hover:text-rose-300" onClick={handleDelete}>
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    {useAuthStore.getState().user?.role === 'gm' && (
+                                        <Button size="icon" variant="ghost" className="text-rose-400 hover:bg-rose-500/10 hover:text-rose-300" onClick={handleDelete}>
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    )}
                                 </>
                             ) : (
                                 <>

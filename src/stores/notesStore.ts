@@ -35,6 +35,7 @@ interface NotesActions {
     markPaid: (hotelId: string, noteId: string) => Promise<void>
     deleteNote: (hotelId: string, noteId: string) => Promise<void>
     convertToLog: (hotelId: string, noteId: string) => Promise<void>
+    togglePin: (hotelId: string, noteId: string, isPinned: boolean) => Promise<void>
 }
 
 type NotesStore = NotesState & NotesActions
@@ -126,7 +127,8 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         time: data.time || null,
                         guest_name: data.guest_name || null,
                         assigned_staff_uid: data.assigned_staff_uid || null,
-                        assigned_staff_name: data.assigned_staff_name || null
+                        assigned_staff_name: data.assigned_staff_name || null,
+                        is_pinned: data.is_pinned || false
                     }
                 })
 
@@ -335,6 +337,20 @@ export const useNotesStore = create<NotesStore>((set) => ({
         } catch (error) {
             console.error('Error converting note to log:', error)
             throw error
+        }
+    },
+
+    togglePin: async (hotelId, noteId, isPinned) => {
+        try {
+            const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
+            await updateDoc(noteRef, {
+                is_pinned: isPinned,
+                updated_at: serverTimestamp()
+            })
+            toast.success(isPinned ? 'Note pinned to Sticky Board' : 'Note unpinned')
+        } catch (error) {
+            console.error('Error toggling pin:', error)
+            toast.error('Failed to update pin status')
         }
     }
 }))

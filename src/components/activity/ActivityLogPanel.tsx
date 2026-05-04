@@ -130,7 +130,7 @@ export function ActivityLogPanel() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">{t('status.all')}</SelectItem>
-                                    {Object.entries(ACTION_META).map(([key, meta]) => (
+                                    {Object.entries(ACTION_META).map(([key]) => (
                                         <SelectItem key={key} value={key}>
                                             {getActionLabel(key as ActivityAction)}
                                         </SelectItem>

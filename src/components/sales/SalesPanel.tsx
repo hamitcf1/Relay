@@ -46,7 +46,8 @@ export function SalesPanel() {
         pickup_time: '',
         total_price: '',
         currency: 'EUR' as Currency,
-        notes: ''
+        notes: '',
+        status: 'waiting' as SaleStatus
     })
 
     const [laundryData, setLaundryData] = useState({
@@ -112,7 +113,8 @@ export function SalesPanel() {
             pickup_time: '',
             total_price: '',
             currency: 'EUR',
-            notes: ''
+            notes: '',
+            status: 'waiting'
         })
         setLaundryData({
             whites: 0,
@@ -169,7 +171,8 @@ export function SalesPanel() {
             currency: isLaundry ? 'TRY' : formData.currency,
             notes: finalNotes,
             created_by: user.uid,
-            created_by_name: user.name || 'Unknown'
+            created_by_name: user.name || 'Unknown',
+            status: formData.status
         })
 
         // Also add to Shift Notes if enabled
@@ -508,25 +511,52 @@ export function SalesPanel() {
                                     </div>
                                 </div>
 
-                                <div className="col-span-2 flex items-center gap-2 py-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShouldAddToNotes(!shouldAddToNotes)}
-                                        className={cn(
-                                            "flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all border",
-                                            shouldAddToNotes
-                                                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
-                                                : "bg-muted text-muted-foreground border-border"
-                                        )}
-                                    >
-                                        <div className={cn(
-                                            "w-3 h-3 rounded-sm border flex items-center justify-center transition-all",
-                                            shouldAddToNotes ? "bg-emerald-500 border-emerald-500" : "bg-background border-border"
-                                        )}>
-                                            {shouldAddToNotes && <Check className="w-2.5 h-2.5 text-white" />}
-                                        </div>
-                                        {t('sales.addToNotes')}
-                                    </button>
+                                <div className="col-span-2 grid grid-cols-2 gap-2 py-1">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('status.label' as any)}</label>
+                                        <Select
+                                            value={formData.status}
+                                            onValueChange={(val: any) => setFormData(p => ({ ...p, status: val }))}
+                                        >
+                                            <SelectTrigger className={cn(
+                                                "h-8 text-xs bg-background border-border",
+                                                saleStatusInfo[formData.status]?.color
+                                            )}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-popover border-border">
+                                                {(Object.keys(saleStatusInfo) as SaleStatus[]).map((status) => (
+                                                    <SelectItem key={status} value={status} className="text-xs">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={cn("w-2 h-2 rounded-full", saleStatusInfo[status].color.split(' ')[0].replace('/20', ''))} />
+                                                            {t(saleStatusInfo[status].label as any)}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="flex items-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShouldAddToNotes(!shouldAddToNotes)}
+                                            className={cn(
+                                                "flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all border w-full h-8",
+                                                shouldAddToNotes
+                                                    ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+                                                    : "bg-muted text-muted-foreground border-border"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "w-3 h-3 rounded-sm border flex items-center justify-center transition-all",
+                                                shouldAddToNotes ? "bg-emerald-500 border-emerald-500" : "bg-background border-border"
+                                            )}>
+                                                {shouldAddToNotes && <Check className="w-2.5 h-2.5 text-white" />}
+                                            </div>
+                                            {t('sales.addToNotes')}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="flex gap-2 pt-2 col-span-2">
                                     <Button

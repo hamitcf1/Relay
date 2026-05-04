@@ -39,8 +39,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const [searchQuery, setSearchQuery] = useState('')
 
     // Filter notes
-    const filteredNotes = useMemo(() => {
-        return notes.filter((note) => {
+    const { filteredNotes, pinnedNotes } = useMemo(() => {
+        const matches = notes.filter((note) => {
             const matchesCategory = filter === 'all' || note.category === filter
             const matchesStatus = statusFilter === 'all' || note.status === statusFilter
             const searchLower = searchQuery.toLowerCase()
@@ -51,7 +51,12 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 (note.assigned_staff_name && note.assigned_staff_name.toLowerCase().includes(searchLower))
 
             return matchesCategory && matchesStatus && matchesSearch
-        }).sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+        })
+
+        return {
+            pinnedNotes: matches.filter(n => n.is_pinned).sort((a, b) => b.created_at.getTime() - a.created_at.getTime()),
+            filteredNotes: matches.filter(n => !n.is_pinned).sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+        }
     }, [notes, filter, statusFilter, searchQuery])
 
     // Calculate unread counts per category and status
@@ -116,6 +121,22 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         />
                     )}
                 </AnimatePresence>
+
+                {/* Sticky Board (Pinned Notes) */}
+                {pinnedNotes.length > 0 && (
+                    <div className="space-y-2 pb-4 border-b border-border/40">
+                        <div className="flex items-center gap-2 px-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Sticky Board</span>
+                        </div>
+                        <NoteList
+                            notes={pinnedNotes}
+                            hotelId={hotelId}
+                            hotel={hotel}
+                            staff={staff}
+                        />
+                    </div>
+                )}
 
                 <NoteList
                     notes={filteredNotes}

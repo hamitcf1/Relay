@@ -2,13 +2,9 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, Reorder } from 'framer-motion'
 import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical, Eye, EyeOff } from 'lucide-react'
 import {
-    collection,
     doc,
     getDoc,
-    setDoc,
-    query,
-    where,
-    getDocs
+    setDoc
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { syncRosterToCalendar } from '@/lib/calendar-sync'

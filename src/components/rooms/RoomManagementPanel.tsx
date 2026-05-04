@@ -11,7 +11,8 @@ import {
     Search,
     Layers,
     CheckSquare,
-    Square
+    Square,
+    AlertTriangle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,9 +23,11 @@ import { Badge } from '@/components/ui/badge'
 import { useRoomStore } from '@/stores/roomStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useIncidentStore } from '@/stores/incidentStore'
 import { cn } from '@/lib/utils'
 import type { Room, RoomStatus, RoomType, BedConfig } from '@/types'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { IncidentReportModal } from './IncidentReportModal'
 
 const statusColors: Record<RoomStatus, string> = {
     clean: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
@@ -62,6 +65,7 @@ export function RoomManagementPanel() {
         deleteRoom,
         updateMultipleRooms
     } = useRoomStore()
+    const { incidents, subscribeToIncidents } = useIncidentStore()
 
     const [activeTab, setActiveTab] = useState<'overview' | 'setup'>('overview')
     const [searchQuery, setSearchQuery] = useState('')
@@ -77,10 +81,17 @@ export function RoomManagementPanel() {
     const [selectedRoomIds, setSelectedRoomIds] = useState<Set<string>>(new Set())
     const [bulkBedConfig, setBulkBedConfig] = useState<BedConfig>('separated')
 
+    // Incident Modal State
+    const [reportingRoom, setReportingRoom] = useState<string | null>(null)
+
     useEffect(() => {
         if (hotelId) {
-            const unsub = subscribeToRooms(hotelId)
-            return () => unsub()
+            const unsubRooms = subscribeToRooms(hotelId)
+            const unsubIncidents = subscribeToIncidents(hotelId)
+            return () => {
+                unsubRooms()
+                unsubIncidents()
+            }
         }
     }, [hotelId])
 
@@ -214,79 +225,105 @@ export function RoomManagementPanel() {
                         {/* Matrix Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                             <AnimatePresence>
-                                {filteredRooms.map((room) => (
-                                    <motion.div
-                                        key={room.id}
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        className={cn(
-                                            "relative group p-4 rounded-xl border transition-all cursor-pointer hover:shadow-lg flex flex-col gap-3",
-                                            room.occupancy === 'occupied'
-                                                ? "bg-primary/5 border-primary/40 hover:border-primary"
-                                                : "bg-card border-border hover:border-primary/50"
-                                        )}
-                                    >
-                                        {/* Header */}
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex flex-col">
-                                                <span className="text-xl font-bold text-foreground tracking-tight">
-                                                    {room.number}
-                                                </span>
-                                                <span className="text-[10px] text-muted-foreground uppercase font-medium">{roomTypeLabels[room.type]}</span>
-                                            </div>
-                                            <div className="flex gap-1">
-                                                {room.type === 'standard' && (
+                                {filteredRooms.map((room) => {
+                                    const roomIncidents = incidents.filter(i => i.room === room.number && i.status === 'pending_payment')
+                                    const hasIncident = roomIncidents.length > 0
+
+                                    return (
+                                        <motion.div
+                                            key={room.id}
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            className={cn(
+                                                "relative group p-4 rounded-xl border transition-all cursor-pointer hover:shadow-lg flex flex-col gap-3",
+                                                room.occupancy === 'occupied'
+                                                    ? "bg-primary/5 border-primary/40 hover:border-primary"
+                                                    : "bg-card border-border hover:border-primary/50",
+                                                hasIncident && "border-rose-500/50"
+                                            )}
+                                        >
+                                            {/* Header */}
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-xl font-bold text-foreground tracking-tight">
+                                                            {room.number}
+                                                        </span>
+                                                        {hasIncident && (
+                                                            <div className="animate-pulse bg-rose-500 w-2 h-2 rounded-full" />
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[10px] text-muted-foreground uppercase font-medium">{roomTypeLabels[room.type]}</span>
+                                                </div>
+                                                <div className="flex gap-1">
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); toggleBedConfig(room); }}
+                                                        onClick={(e) => { e.stopPropagation(); setReportingRoom(room.number); }}
+                                                        className="p-1.5 rounded-full bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all opacity-0 group-hover:opacity-100"
+                                                        title="Report Incident"
+                                                    >
+                                                        <AlertTriangle className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    {room.type === 'standard' && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); toggleBedConfig(room); }}
+                                                            className={cn(
+                                                                "p-1.5 rounded-full transition-colors",
+                                                                room.bed_config === 'together'
+                                                                    ? "bg-amber-500/20 text-amber-500"
+                                                                    : "bg-zinc-800/10 text-zinc-500 hover:bg-zinc-700/10"
+                                                            )}
+                                                            title={room.bed_config === 'together' ? 'Birleşik Yatak' : 'Ayrık Yataklar'}
+                                                        >
+                                                            <BedDouble className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    )}
+                                                    <div
+                                                        onClick={(e) => { e.stopPropagation(); toggleOccupancy(room); }}
                                                         className={cn(
                                                             "p-1.5 rounded-full transition-colors",
-                                                            room.bed_config === 'together'
-                                                                ? "bg-amber-500/20 text-amber-500"
-                                                                : "bg-zinc-800/10 text-zinc-500 hover:bg-zinc-700/10"
+                                                            room.occupancy === 'occupied'
+                                                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                                                : "bg-muted text-muted-foreground group-hover:bg-muted/80"
                                                         )}
-                                                        title={room.bed_config === 'together' ? 'Birleşik Yatak' : 'Ayrık Yataklar'}
+                                                        title={room.occupancy}
                                                     >
-                                                        <BedDouble className="w-3.5 h-3.5" />
-                                                    </button>
-                                                )}
-                                                <div
-                                                    onClick={(e) => { e.stopPropagation(); toggleOccupancy(room); }}
-                                                    className={cn(
-                                                        "p-1.5 rounded-full transition-colors",
-                                                        room.occupancy === 'occupied'
-                                                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                                            : "bg-muted text-muted-foreground group-hover:bg-muted/80"
-                                                    )}
-                                                    title={room.occupancy}
-                                                >
-                                                    {room.occupancy === 'occupied' ? <User className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5 opacity-50" />}
+                                                        {room.occupancy === 'occupied' ? <User className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5 opacity-50" />}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Status Button */}
-                                        <Button
-                                            variant="ghost"
-                                            className={cn(
-                                                "w-full h-8 text-xs font-semibold capitalize justify-start px-2 mt-auto",
-                                                statusColors[room.status]
-                                            )}
-                                            onClick={() => cycleStatus(room)}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                {room.status === 'clean' && <Sparkles className="w-3.5 h-3.5" />}
-                                                {room.status === 'dirty' && <SprayCan className="w-3.5 h-3.5" />}
-                                                {room.status === 'inspect' && <Search className="w-3.5 h-3.5" />}
-                                                {room.status === 'dnd' && <ShieldAlert className="w-3.5 h-3.5" />}
-                                                {statusLabels[room.status]}
-                                            </div>
-                                        </Button>
-                                    </motion.div>
-                                ))}
+                                            {/* Status Button */}
+                                            <Button
+                                                variant="ghost"
+                                                className={cn(
+                                                    "w-full h-8 text-xs font-semibold capitalize justify-start px-2 mt-auto",
+                                                    statusColors[room.status]
+                                                )}
+                                                onClick={() => cycleStatus(room)}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    {room.status === 'clean' && <Sparkles className="w-3.5 h-3.5" />}
+                                                    {room.status === 'dirty' && <SprayCan className="w-3.5 h-3.5" />}
+                                                    {room.status === 'inspect' && <Search className="w-3.5 h-3.5" />}
+                                                    {room.status === 'dnd' && <ShieldAlert className="w-3.5 h-3.5" />}
+                                                    {statusLabels[room.status]}
+                                                </div>
+                                            </Button>
+                                        </motion.div>
+                                    )
+                                })}
                             </AnimatePresence>
                         </div>
+                        
+                        <IncidentReportModal 
+                            isOpen={!!reportingRoom}
+                            onClose={() => setReportingRoom(null)}
+                            roomNumber={reportingRoom || ''}
+                            hotelId={hotelId || ''}
+                        />
+
 
                         {filteredRooms.length === 0 && (
                             <div className="text-center py-12 text-muted-foreground">

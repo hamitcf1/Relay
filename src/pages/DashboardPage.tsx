@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
+import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -54,6 +55,9 @@ import { ShiftTimer } from '@/components/layout/ShiftTimer'
 import { SecurityTimer } from '@/components/layout/SecurityTimer'
 import { SecurityModal } from '@/components/layout/SecurityModal'
 import { ShiftGuard } from '@/components/layout/ShiftGuard'
+import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
+import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
+import { useSecurityStore } from '@/stores/securityStore'
 
 export function DashboardPage() {
     const location = useLocation()
@@ -61,9 +65,11 @@ export function DashboardPage() {
     const initAuth = useAuthStore((state) => state.initialize)
     const hotel = useHotelStore((state) => state.hotel)
     const subscribeToHotel = useHotelStore((state) => state.subscribeToHotel)
+    const currentShift = useShiftStore((state) => state.currentShift)
     const subscribeToCurrentShift = useShiftStore((state) => state.subscribeToCurrentShift)
-    const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
+    const schedule = useRosterStore((state) => state.schedule)
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
+    const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
     const { t } = useLanguageStore()
 
@@ -113,6 +119,30 @@ export function DashboardPage() {
 
     // Due payment notifications
     useDuePaymentNotifier()
+
+    // 23:00 Security Check Trigger
+    const { startCountdown } = useSecurityStore()
+    useEffect(() => {
+        const checkSecurityTime = () => {
+            const now = new Date()
+            const hours = now.getHours()
+            const minutes = now.getMinutes()
+            
+            // Trigger at 23:00 (11 PM)
+            if (hours === 23 && minutes === 0) {
+                const alreadyTriggered = localStorage.getItem('relay_security_triggered_today')
+                const today = now.toISOString().split('T')[0]
+                
+                if (alreadyTriggered !== today) {
+                    startCountdown(300, 'idle') // 5 min countdown for night check
+                    localStorage.setItem('relay_security_triggered_today', today)
+                }
+            }
+        }
+
+        const interval = setInterval(checkSecurityTime, 60000) // Check every minute
+        return () => clearInterval(interval)
+    }, [startCountdown])
 
     // Subscribe to sales for dashboard visibility
     const { subscribeToSales } = useSalesStore()
@@ -215,6 +245,13 @@ export function DashboardPage() {
 
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-2 mr-1 sm:mr-2 scale-90 sm:scale-100 origin-right">
+                            {(currentShift || (user && schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] && schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] !== 'OFF')) && (
+                                <CompliancePulse 
+                                    agencyChecked={currentShift?.compliance.agency_msg_checked_count ? currentShift.compliance.agency_msg_checked_count > 0 : false}
+                                    kbsChecked={currentShift?.compliance.kbs_checked || false}
+                                    className="mr-2"
+                                />
+                            )}
                             <ShiftTimer />
                             <SecurityTimer />
                         </div>
@@ -328,6 +365,15 @@ export function DashboardPage() {
                                     <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
                                         <TabsContent value="messaging" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <MessagingPanel />
+                                        </TabsContent>
+                                        <TabsContent value="compliance" className="h-full m-0 p-6 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500 overflow-y-auto">
+                                            <div className="max-w-2xl mx-auto space-y-6">
+                                                <div className="space-y-1">
+                                                    <h2 className="text-2xl font-bold tracking-tight">{t('module.compliance') || 'Compliance'}</h2>
+                                                    <p className="text-sm text-muted-foreground">{t('operations.compliance.desc') || 'Maintain operational standards for the current shift.'}</p>
+                                                </div>
+                                                <CompliancePanel hotelId={hotel?.id || ''} className="p-2" />
+                                            </div>
                                         </TabsContent>
                                         <TabsContent value="settings" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <HotelSettings />

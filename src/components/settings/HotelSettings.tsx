@@ -15,7 +15,6 @@ import {
     Loader2
 } from 'lucide-react'
 import { ManagementReportPanel } from '@/components/admin/ManagementReportPanel'
-import { motion } from 'framer-motion'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -29,17 +28,17 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 export function HotelSettings() {
-    const { hotel, updateHotelSettings, loading } = useHotelStore()
+    const { hotel, updateHotelSettings } = useHotelStore()
     const { t } = useLanguageStore()
     const { user } = useAuthStore()
     
     const [name, setName] = useState('')
     const [saving, setSaving] = useState(false)
-    const [shifts, setShifts] = useState<{ id: string, name: string, code: string, startTime?: string, endTime?: string, color?: string }[]>([])
+    const [shifts, setShifts] = useState<{ id: string, name: string, code: string, startTime: string, endTime: string, color?: string }[]>([])
 
     useEffect(() => {
         if (hotel) {
-            setName(hotel.name || '')
+            setName(hotel.info?.name || '')
             setShifts(hotel.settings?.shifts || [
                 { id: '1', name: 'Morning', code: 'A', startTime: '08:00', endTime: '16:00', color: 'bg-indigo-500' },
                 { id: '2', name: 'Evening', code: 'B', startTime: '16:00', endTime: '00:00', color: 'bg-purple-500' },
@@ -63,10 +62,10 @@ export function HotelSettings() {
         if (!hotel?.id) return
         setSaving(true)
         try {
-            await updateHotelSettings(hotel.id, { name })
-            toast.success(t('common.saved'))
+            await updateHotelSettings(hotel.id, { info: { ...hotel.info, name } })
+            toast.success('Changes saved')
         } catch (err) {
-            toast.error(t('auth.error.generic'))
+            toast.error('Error saving changes')
         } finally {
             setSaving(false)
         }
@@ -87,7 +86,7 @@ export function HotelSettings() {
 
     const addShift = () => {
         const id = Math.random().toString(36).substr(2, 9)
-        setShifts([...shifts, { id, name: t('common.addNew'), code: '?' }])
+        setShifts([...shifts, { id, name: t('common.addNew'), code: '?', startTime: '00:00', endTime: '23:59' }])
     }
 
     const removeShift = (id: string) => {
@@ -114,7 +113,7 @@ export function HotelSettings() {
                 <TabsList className="bg-muted/50 p-1 mb-8">
                     <TabsTrigger value="general" className="gap-2">
                         <Hotel className="w-4 h-4" />
-                        {t('hotel.details')}
+                        Hotel Details
                     </TabsTrigger>
                     <TabsTrigger value="shifts" className="gap-2">
                         <Clock className="w-4 h-4" />
@@ -133,17 +132,17 @@ export function HotelSettings() {
                 <TabsContent value="general" className="space-y-6">
                     <Card className="glass">
                         <CardHeader>
-                            <CardTitle>{t('hotel.details')}</CardTitle>
-                            <CardDescription>{t('hotel.clickEdit')}</CardDescription>
+                            <CardTitle>Hotel Details</CardTitle>
+                            <CardDescription>Update your hotel information</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="hotel-name">{t('hotel.name')}</Label>
+                                <Label htmlFor="hotel-name">Hotel Name</Label>
                                 <Input 
                                     id="hotel-name" 
                                     value={name} 
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder={t('setup.hotelNamePlaceholder')}
+                                    placeholder="Enter hotel name"
                                     className="bg-muted/30 border-border/50"
                                 />
                             </div>
@@ -153,7 +152,7 @@ export function HotelSettings() {
                                 className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                             >
                                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                {t('common.updateInfo')}
+                                Update
                             </Button>
                         </CardContent>
                     </Card>

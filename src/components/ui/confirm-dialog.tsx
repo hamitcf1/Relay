@@ -10,6 +10,7 @@ import {
     AlertDialogCancel,
 } from '@/components/ui/alert-dialog'
 import { AlertTriangle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ConfirmOptions {
     title: string
@@ -72,11 +73,9 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                             )}
                             <div>
                                 <AlertDialogTitle>{state.options.title}</AlertDialogTitle>
-                                {state.options.description && (
-                                    <AlertDialogDescription className="mt-1">
-                                        {state.options.description}
-                                    </AlertDialogDescription>
-                                )}
+                                <AlertDialogDescription className={cn("mt-1", !state.options.description && "sr-only")}>
+                                    {state.options.description || 'Please confirm your action.'}
+                                </AlertDialogDescription>
                             </div>
                         </div>
                     </AlertDialogHeader>

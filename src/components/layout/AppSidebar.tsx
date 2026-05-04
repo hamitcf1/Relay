@@ -66,6 +66,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
 
     const opsNavItems = [
         { id: 'messaging', icon: MessageCircle, label: t('module.messaging') || 'Messaging', subTab: 'messaging' },
+        { id: 'compliance', icon: Check, label: t('module.compliance') || 'Compliance', subTab: 'compliance' },
         { id: 'feedback', icon: ShieldAlert, label: t('module.complaints') || 'Complaints', subTab: 'feedback' },
         { id: 'off-days', icon: CalendarDays, label: t('module.offDays') || 'Off Days', subTab: 'off-days' },
         { id: 'tours', icon: MapIcon, label: t('module.tours') || 'Tours', subTab: 'tours' },

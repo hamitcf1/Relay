@@ -44,7 +44,7 @@ interface OffDayActions {
 
 type OffDayStore = OffDayState & OffDayActions
 
-export const useOffDayStore = create<OffDayStore>((set) => ({
+export const useOffDayStore = create<OffDayStore>((set, get) => ({
     requests: [],
     loading: true,
     error: null,

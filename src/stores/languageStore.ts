@@ -388,6 +388,7 @@ type Translations = {
     'shift.selectType': string
     'shift.startingCash': string
     'shift.proceed': string
+    'shift.timeLeft': string
     'shift.loggedAs': string
 
     // App & Common
@@ -434,9 +435,11 @@ type Translations = {
     'common.finish': string
     'common.reopen': string
     'common.resolve': string
-    'common.dismiss': string
     'common.backToHome': string
     'common.profile': string
+    'common.done': string
+    'common.processing': string
+    'common.close': string
 
     // Calendar
     'calendar.noShifts': string
@@ -483,6 +486,7 @@ type Translations = {
     'notifications.clearAll': string
     'notifications.clearAllConfirm': string
     'notifications.clearAllDescription': string
+    'notifications.compliance.pending': string
     'security.sessionEnding': string
     'security.shiftEndedDesc': string
     'security.extendSession': string
@@ -668,6 +672,14 @@ type Translations = {
     'sales.addToNotes': string
 
     // Compliance
+    'compliance.title': string
+    'compliance.kbs': string
+    'compliance.kbsDone': string
+    'compliance.kbsPending': string
+    'compliance.agency': string
+    'compliance.agencyDone': string
+    'compliance.agencyPending': string
+    'compliance.markDone': string
     'compliance.kbs.required': string
     'compliance.kbs.pastTime': string
     'compliance.kbs.desc': string
@@ -677,6 +689,21 @@ type Translations = {
     'compliance.agency.desc': string
     'compliance.kbs.label': string
     'compliance.kbs.checklistDesc': string
+
+    // Operations Hub Desc
+    'operations.compliance.desc': string
+
+    // Shift Management
+    'shift.management': string
+    'shift.type': string
+    'shift.cashCount': string
+    'shift.enterCash': string
+    'shift.startCash': string
+    'shift.handoverNote': string
+    'shift.notePlaceholder': string
+    'shift.endAction': string
+    'shift.endConfirmTitle': string
+    'shift.endConfirmDesc': string
 
     // Onboarding
     'onboarding.welcome.title': string
@@ -1399,6 +1426,7 @@ const translations: Record<Language, Translations> = {
         'urgency.medium': 'Medium',
         'urgency.high': 'High',
         'urgency.critical': 'Critical',
+        'operations.compliance.desc': 'KBS & Agency check-ins',
 
         // Modules
         'module.activityFeed': 'Live Activity Feed',
@@ -1529,7 +1557,18 @@ const translations: Record<Language, Translations> = {
         'shift.selectType': 'Select Shift Type',
         'shift.startingCash': 'Starting Cash',
         'shift.proceed': 'Proceed to Dashboard',
+        'shift.timeLeft': 'Shift Remaining',
         'shift.loggedAs': 'Logged in as',
+        'shift.management': 'Shift Management',
+        'shift.type': 'Shift Type',
+        'shift.cashCount': 'Cash Count',
+        'shift.enterCash': 'Enter End Cash',
+        'shift.startCash': 'Started with',
+        'shift.handoverNote': 'Handover Notes',
+        'shift.notePlaceholder': 'Important info for the next shift...',
+        'shift.endAction': 'End Shift',
+        'shift.endConfirmTitle': 'End Shift?',
+        'shift.endConfirmDesc': 'Ensure all cash and compliance checks are complete.',
         'roster.title': 'Weekly Roster',
         'roster.currentWeek': 'This Week',
         'roster.noStaff': 'No staff members found',
@@ -1786,7 +1825,6 @@ const translations: Record<Language, Translations> = {
         'sales.addToNotes': 'Add to Shift Notes',
         
         // Reports
-        'report.period': 'Reporting Period',
         'report.generate': 'Generate Report',
         'report.generateAI': 'AI Analysis',
         'report.generateManual': 'Standard Report',
@@ -1840,6 +1878,14 @@ const translations: Record<Language, Translations> = {
         'hotel.shifts.error': 'Failed to save shift settings.',
 
         // Compliance
+        'compliance.title': 'Compliance Checklist',
+        'compliance.kbs': 'KBS System Check',
+        'compliance.kbsDone': 'Guest data submitted to police.',
+        'compliance.kbsPending': 'Guest data entry pending.',
+        'compliance.agency': 'Agency Messages',
+        'compliance.agencyDone': 'All extranets checked.',
+        'compliance.agencyPending': 'Check agency portals for new messages.',
+        'compliance.markDone': 'Mark Done',
         'compliance.kbs.required': 'KBS Check Required!',
         'compliance.kbs.pastTime': "It's past 23:00",
         'compliance.kbs.desc': 'The KBS system check must be completed before your shift ends. This is a mandatory compliance requirement.',
@@ -2024,9 +2070,11 @@ const translations: Record<Language, Translations> = {
         'common.finish': 'Finish',
         'common.reopen': 'Reopen',
         'common.resolve': 'Resolve',
-        'common.dismiss': 'Dismiss',
         'common.backToHome': 'Back to Home',
         'common.profile': 'Profile',
+        'common.done': 'Done',
+        'common.processing': 'Processing...',
+        'common.close': 'Close',
 
         'currency.title': 'Exchange Rates (TCMB)',
         'currency.buying': 'Bank Buys (Bozma)',
@@ -2107,6 +2155,7 @@ const translations: Record<Language, Translations> = {
         'community.subtitle': 'Connect with other hospitality professionals.',
     },
     tr: {
+        'operations.compliance.desc': 'KBS ve Acente kontrolleri',
         // Auth & Setup
         'auth.login': 'Giriş Yap',
         'auth.register': 'Kayıt Ol',
@@ -2471,7 +2520,9 @@ const translations: Record<Language, Translations> = {
         'shift.selectType': 'Vardiya Tipini Seçin',
         'shift.startingCash': 'Başlangıç Nakiti',
         'shift.proceed': 'Panele Devam Et',
+        'shift.timeLeft': 'Vardiya Sonu',
         'shift.loggedAs': 'Giriş yapan',
+        'shift.management': 'Vardiya Yönetimi',
 
         // App & Common
         'app.welcome': "Aetherius Relay'e Hoşgeldiniz",
@@ -2521,6 +2572,9 @@ const translations: Record<Language, Translations> = {
         'common.dismiss': 'Kapat',
         'common.backToHome': 'Anasayfaya Dön',
         'common.profile': 'Profil',
+        'common.done': 'Bitti',
+        'common.processing': 'İşleniyor...',
+        'common.close': 'Kapat',
         'common.clear': 'Sohbeti Temizle',
 
         // Calendar
@@ -2741,7 +2795,6 @@ const translations: Record<Language, Translations> = {
         'module.reports': 'Yönetim Raporları',
 
         // Reports
-        'report.period': 'Raporlama Dönemi',
         'report.generate': 'Rapor Oluştur',
         'report.generateAI': 'AI Analizi',
         'report.generateManual': 'Standart Rapor',
@@ -2793,8 +2846,26 @@ const translations: Record<Language, Translations> = {
         'hotel.settings.saveShifts': 'Vardiya Ayarlarını Kaydet',
         'hotel.shifts.success': 'Vardiya ayarları güncellendi.',
         'hotel.shifts.error': 'Vardiya ayarları kaydedilemedi.',
+        'shift.management': 'Vardiya Yönetimi',
+        'shift.type': 'Vardiya Tipi',
+        'shift.cashCount': 'Kasa Sayımı',
+        'shift.enterCash': 'Kapanış Kasasını Girin',
+        'shift.startCash': 'Açılış Kasası',
+        'shift.handoverNote': 'Devir Notları',
+        'shift.notePlaceholder': 'Sonraki vardiya için önemli bilgiler...',
+        'shift.endAction': 'Vardiyayı Bitir',
+        'shift.endConfirmTitle': 'Vardiyayı Bitir?',
+        'shift.endConfirmDesc': 'Tüm nakit ve uyumluluk kontrollerinin tamamlandığından emin olun.',
 
         // Compliance
+        'compliance.title': 'Uyumluluk Kontrol Listesi',
+        'compliance.kbs': 'KBS Sistem Kontrolü',
+        'compliance.kbsDone': 'Misafir verileri polise bildirildi.',
+        'compliance.kbsPending': 'Misafir veri girişi bekleniyor.',
+        'compliance.agency': 'Acente Mesajları',
+        'compliance.agencyDone': 'Tüm extranetler kontrol edildi.',
+        'compliance.agencyPending': 'Acente portallarını yeni mesajlar için kontrol edin.',
+        'compliance.markDone': 'Tamamlandı',
         'compliance.kbs.required': 'KBS Kontrolü Gerekli!',
         'compliance.kbs.pastTime': "Saat 23:00'ü geçti",
         'compliance.kbs.desc': 'KBS sistem kontrolü vardiyanız bitmeden tamamlanmalıdır. Bu zorunlu bir uyumluluk gerekliliğidir.',

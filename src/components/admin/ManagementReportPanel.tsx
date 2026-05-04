@@ -4,8 +4,7 @@ import {
     FileText, 
     TrendingUp, 
     ShieldAlert, 
-    Users, 
-    ChevronRight,
+    Users,
     Loader2,
     Calendar,
     Download,
@@ -23,10 +22,8 @@ import { useActivityStore } from '@/stores/activityStore'
 import { useNotesStore } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
 import { 
     Select,
     SelectContent,
@@ -37,6 +34,14 @@ import {
 
 type ReportPeriod = 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth'
 type ReportType = 'ai' | 'manual'
+
+// Helper function to safely convert Firestore Timestamps or Dates
+function toDate(value: any): Date {
+    if (!value) return new Date()
+    if (typeof value.toDate === 'function') return value.toDate()
+    if (value instanceof Date) return value
+    return new Date(value)
+}
 
 export function ManagementReportPanel() {
     const { hotel } = useHotelStore()
@@ -95,17 +100,17 @@ export function ManagementReportPanel() {
         const { start, end } = getPeriodDates(p)
         
         const filteredSales = sales.filter(s => {
-            const date = s.created_at?.toDate ? s.created_at.toDate() : new Date(s.created_at || Date.now())
+            const date = toDate(s.created_at)
             return date >= start && date <= end
         })
 
         const filteredActivity = activityLogs.filter(l => {
-            const date = l.timestamp?.toDate ? l.timestamp.toDate() : new Date(l.timestamp || Date.now())
+            const date = toDate(l.timestamp)
             return date >= start && date <= end
         })
 
         const filteredNotes = notes.filter(n => {
-            const date = n.created_at?.toDate ? n.created_at.toDate() : new Date(n.created_at || Date.now())
+            const date = toDate(n.created_at)
             return date >= start && date <= end
         })
 
@@ -142,7 +147,7 @@ export function ManagementReportPanel() {
             }))
 
             const context = JSON.stringify({
-                hotel_name: hotel?.name,
+                hotel_name: hotel?.info?.name,
                 period: t(`report.${period}`),
                 sales_summary: salesSummary,
                 issues_summary: issuesSummary,
@@ -194,50 +199,49 @@ export function ManagementReportPanel() {
         const resolvedCount = filteredNotes.filter(n => n.status === 'resolved').length
 
         const manualTemplate = `
-# 🏨 ${hotel?.name || 'Relay'} - ${t('report.template.header')}
-**${t('report.period')}:** ${t(`report.${period}`)}
-**${t('common.date')}:** ${new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}
+# 🏨 ${hotel?.info?.name || 'Relay'} - Report
+**Date:** ${new Date().toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}
 
 ---
 
-## 📈 ${t('report.template.sales')}
-${salesStr || `> ${t('report.noData')}`}
+## 📈 Sales
+${salesStr || '> No data available'}
 
-**${t('module.overview')}:**
-- **${t('module.sales')}:** ${filteredSales.length} ${t('common.items')}
-- **${t('sales.total')}:** ${Object.entries(totalSalesByCurrency).map(([c, v]) => `${v.toLocaleString()} ${c}`).join(' / ')}
+**Overview:**
+- **Sales:** ${filteredSales.length} items
+- **Total:** ${Object.entries(totalSalesByCurrency).map(([c, v]) => `${v.toLocaleString()} ${c}`).join(' / ')}
 
 ---
 
-## 👥 ${t('report.template.activity')}
-- **${t('module.activity')}:** ${filteredActivity.length} ${t('common.edited')}
-- **${t('common.staff')}:** ${new Set(filteredActivity.map(l => l.user_id)).size} ${t('common.staff')} aktif
+## 👥 Activity
+- **Activity:** ${filteredActivity.length} records
+- **Staff:** ${new Set(filteredActivity.map(l => l.user_id)).size} staff active
 
-**${t('module.activity')} ${t('module.overview')}:**
+**Activity Summary:**
 - ${filteredActivity.filter(a => a.action === 'sale_create').length} ${t('report.newSales')}
 - ${filteredActivity.filter(a => a.action === 'note_create').length} ${t('report.newNotes')}
-- ${filteredActivity.filter(a => a.action === 'compliance_check').length} ${t('compliance.kbs.required')}
+- ${filteredActivity.filter(a => a.action === 'compliance_check').length} Compliance checks
 
 ---
 
-## ⚠️ ${t('report.template.issues')}
-- **${t('priority.critical')} / ${t('priority.high')}:** ${highPriorityCount}
-- **${t('status.resolved')}:** ${resolvedCount}
-- **${t('status.open')}:** ${filteredNotes.length - resolvedCount}
+## ⚠️ Issues
+- **Critical / High:** ${highPriorityCount}
+- **Resolved:** ${resolvedCount}
+- **Open:** ${filteredNotes.length - resolvedCount}
 
-**${t('module.shiftNotes')}:**
-${filteredNotes.slice(0, 5).map(n => `- [${n.priority.toUpperCase()}] ${n.content.substring(0, 60)}...`).join('\n') || t('report.noData')}
+**Notes:**
+${filteredNotes.slice(0, 5).map(n => `- [${n.priority.toUpperCase()}] ${n.content.substring(0, 60)}...`).join('\n') || 'No data available'}
 
 ---
 
-## 🛠️ ${t('report.template.maintenance')}
-- **${t('report.totalNotes')}:** ${filteredNotes.filter(n => n.category === 'maintenance').length}
-- **${t('report.pendingTasks')}:** ${filteredNotes.filter(n => n.category === 'maintenance' && n.status !== 'resolved').length}
+## 🛠️ Maintenance
+- **Total Notes:** ${filteredNotes.filter(n => n.category === 'maintenance').length}
+- **Pending Tasks:** ${filteredNotes.filter(n => n.category === 'maintenance' && n.status !== 'resolved').length}
 
 ---
 
 <footer>
-${t('report.template.footer')} | ID: ${Math.random().toString(36).substring(7).toUpperCase()}
+Generated Report | ID: ${Math.random().toString(36).substring(7).toUpperCase()}
 </footer>
 `
         setReport(manualTemplate)
@@ -341,7 +345,7 @@ ${t('report.template.footer')} | ID: ${Math.random().toString(36).substring(7).t
                     {generating && (
                         <div className="absolute inset-0 z-10 bg-background/40 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
                             <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-4" />
-                            <h3 className="font-bold text-lg mb-2">{t('report.preparing')}</h3>
+                            <h3 className="font-bold text-lg mb-2">Preparing Report</h3>
                             <p className="text-muted-foreground text-sm max-w-xs">
                                 {t('report.aiAnalyzing')}
                             </p>
@@ -356,8 +360,8 @@ ${t('report.template.footer')} | ID: ${Math.random().toString(36).substring(7).t
                             </CardTitle>
                             {report && (
                                 <div className="flex gap-2">
-                                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" title={t('common.download')}><Download className="w-4 h-4" /></Button>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" title={t('common.share')}><Share2 className="w-4 h-4" /></Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" title="Download"><Download className="w-4 h-4" /></Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg" title="Share"><Share2 className="w-4 h-4" /></Button>
                                 </div>
                             )}
                         </div>
@@ -379,7 +383,7 @@ ${t('report.template.footer')} | ID: ${Math.random().toString(36).substring(7).t
                             ) : !generating && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center text-muted-foreground opacity-30">
                                     <Calendar className="w-16 h-16 mb-4" />
-                                    <p className="text-lg font-medium">{t('report.noData')}</p>
+                                    <p className="text-lg font-medium">No data available</p>
                                     <p className="text-xs mt-2">{t('report.clickToStart')}</p>
                                 </div>
                             )}

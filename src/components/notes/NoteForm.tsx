@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Check, Clock, AlertTriangle } from 'lucide-react'
+import { Check, Clock, AlertTriangle, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -189,12 +189,12 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                 })}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
                 <Input
                     placeholder={(t('common.room') as string) + " #"}
                     value={newRoom}
                     onChange={(e) => setNewRoom(e.target.value)}
-                    className="w-20 text-sm bg-muted/50"
+                    className="w-16 text-sm bg-muted/50"
                 />
                 <Input
                     type="time"
@@ -202,6 +202,15 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                     onChange={(e) => setNewTime(e.target.value)}
                     className="w-24 text-sm bg-muted/50"
                 />
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-transparent focus-within:border-primary/30 transition-all">
+                    <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <input
+                        placeholder="Guest Name"
+                        value={newGuest}
+                        onChange={(e) => setNewGuest(e.target.value)}
+                        className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-muted-foreground/60"
+                    />
+                </div>
                 {isFinancialCategory(newCategory) && (
                     <div className="flex items-center gap-2">
                         <div className="relative">
@@ -358,30 +367,19 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                 </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                    <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.guestName')}</label>
-                    <Input
-                        placeholder="John Doe"
-                        value={newGuest}
-                        onChange={(e) => setNewGuest(e.target.value)}
-                        className="h-9 text-sm bg-muted/50"
-                    />
-                </div>
-                <div className="space-y-1">
-                    <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('common.staff')}</label>
-                    <Select value={newAssignedStaff} onValueChange={setNewAssignedStaff}>
-                        <SelectTrigger className="w-full text-xs h-9 bg-muted/50 border-border">
-                            <SelectValue placeholder="Assign To..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="none">Unassigned</SelectItem>
-                            {staff.map(s => (
-                                <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+            <div className="space-y-1">
+                <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('common.staff')}</label>
+                <Select value={newAssignedStaff} onValueChange={setNewAssignedStaff}>
+                    <SelectTrigger className="w-full text-xs h-9 bg-muted/50 border-border">
+                        <SelectValue placeholder="Assign To..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="none">Unassigned</SelectItem>
+                        {staff.map(s => (
+                            <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Content */}
