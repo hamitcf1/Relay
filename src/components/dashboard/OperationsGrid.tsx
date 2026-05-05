@@ -9,7 +9,8 @@ import {
     DollarSign,
     Users,
     ScrollText,
-    BedDouble
+    BedDouble,
+    Trophy
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
@@ -86,6 +87,13 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             icon: Users,
             color: 'bg-pink-500/10 text-pink-500',
             desc: t('operations.team.desc')
+        },
+        {
+            id: 'games',
+            label: 'Office Games',
+            icon: Trophy,
+            color: 'bg-amber-500/10 text-amber-500',
+            desc: 'Reflex games & staff scoreboard'
         },
     ]
 

@@ -24,7 +24,7 @@ type RosterStore = RosterState & RosterActions
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-const SHIFT_PRIORITY: Record<string, number> = { 'A': 1, 'E': 2, 'B': 3, 'C': 4 }
+const SHIFT_PRIORITY: Record<string, number> = { 'A': 1, 'B': 2, 'C': 3, 'E': 4 }
 
 export const useRosterStore = create<RosterStore>((set, get) => ({
     staff: [],

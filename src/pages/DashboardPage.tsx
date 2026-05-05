@@ -43,6 +43,7 @@ import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
 import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
 import { HotelSettings } from '@/components/settings/HotelSettings'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
+import { OfficeGames } from '@/components/operations/OfficeGames'
 import { Clock as ClockIcon, EyeOff } from 'lucide-react'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { MobileNav } from '@/components/layout/MobileNav'
@@ -422,6 +423,10 @@ export function DashboardPage() {
                                         </TabsContent>
                                         <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
                                             <ActivityLogPanel />
+                                            <ScrollToTopButton />
+                                        </TabsContent>
+                                        <TabsContent value="games" className="h-full m-0 p-6 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                                            <OfficeGames hotelId={hotel?.id || ''} />
                                             <ScrollToTopButton />
                                         </TabsContent>
                                     </div>

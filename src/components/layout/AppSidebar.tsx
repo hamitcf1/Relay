@@ -19,7 +19,8 @@ import {
     Palette,
     Globe,
     Check,
-    Settings
+    Settings,
+    Trophy
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useLayoutStore } from '@/stores/layoutStore'
@@ -74,6 +75,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
         { id: 'sales', icon: CreditCard, label: t('module.sales') || 'Sales', subTab: 'sales' },
         { id: 'pricing', icon: DollarSign, label: t('module.pricing_label') || 'Pricing', subTab: 'pricing' },
         { id: 'team', icon: Users, label: t('module.team_label') || 'Team', subTab: 'team' },
+        { id: 'games', icon: Trophy, label: 'Office Games', subTab: 'games' },
     ]
 
     if (userRole === 'gm') {

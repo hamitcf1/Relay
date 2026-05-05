@@ -17,6 +17,8 @@ export function ShiftTimer() {
     const { startCountdown } = useSecurityStore()
     const [timeLeft, setTimeLeft] = useState<number | null>(null)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
+    const [clickCount, setClickCount] = useState(0)
+    const [showEnough, setShowEnough] = useState<string | null>(null)
 
     const user = useAuthStore(state => state.user)
     const schedule = useRosterStore(state => state.schedule)
@@ -26,19 +28,20 @@ export function ShiftTimer() {
             const now = new Date()
             const dateKey = format(now, 'yyyy-MM-dd')
             
-            // 1. Try current active shift (automated)
-            // 2. Try roster for current user
-            // 3. If GM, try to find any rostered shift active now
-            let shiftType: ShiftType | null = currentShift?.type as ShiftType || null
+            // 1. Try roster for current user (Personalized)
+            // 2. Try current active shift (Fallback/Global)
+            // 3. If GM, try heuristic fallback
+            let shiftType: ShiftType | null = null
             
-            if (!shiftType && user && schedule[user.uid]) {
+            if (user && schedule[user.uid]?.[dateKey] && schedule[user.uid][dateKey] !== 'OFF') {
                 shiftType = schedule[user.uid][dateKey]
+            } else if (currentShift) {
+                shiftType = currentShift.type as ShiftType
             }
 
-            // Fallback for GMs: find any active shift in the roster
+            // Fallback for GMs or non-rostered users: heuristic based on current time
             if (!shiftType && user?.role === 'gm') {
                 const hour = now.getHours()
-                // Simple heuristic for global shift if not on roster
                 if (hour >= 8 && hour < 16) shiftType = 'A'
                 else if (hour >= 16 || hour < 0) shiftType = 'B'
                 else if (hour >= 0 && hour < 8) shiftType = 'C'
@@ -105,39 +108,66 @@ export function ShiftTimer() {
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => {}}
+                onClick={() => {
+                    const newCount = clickCount + 1
+                    setClickCount(newCount)
+                    
+                    const getMessage = (count: number) => {
+                        if (count >= 50) return "GOD MODE: BOREDOM"
+                        if (count >= 20) return "Seriously?"
+                        if (count >= 15) return "Are you bored?"
+                        if (count >= 10) return "Enough!"
+                        if (count >= 5) return "Hey!"
+                        return null
+                    }
+
+                    const msg = getMessage(newCount)
+                    if (msg) {
+                        setShowEnough(msg)
+                        if (newCount >= 50) setClickCount(0) // reset at max
+                        setTimeout(() => setShowEnough(null), 2000)
+                    }
+                }}
                 className={cn(
-                    "flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border backdrop-blur-md transition-all duration-500 group relative",
-                    timeLeft === null
-                        ? "bg-muted/10 border-border/20 text-muted-foreground/60"
-                        : isCritical 
-                            ? "bg-rose-500/10 border-rose-500/30 text-rose-500 shadow-lg shadow-rose-500/10" 
-                            : "bg-primary/10 border-primary/20 text-primary/90 hover:bg-primary/20"
+                    "flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border backdrop-blur-md transition-all duration-500 group relative select-none",
+                    showEnough 
+                        ? "bg-amber-500/20 border-amber-500/40 text-amber-500 cursor-default"
+                        : timeLeft === null
+                            ? "bg-muted/10 border-border/20 text-muted-foreground/60 cursor-default"
+                            : isCritical 
+                                ? "bg-rose-500/10 border-rose-500/30 text-rose-500 shadow-lg shadow-rose-500/10 cursor-default" 
+                                : "bg-primary/10 border-primary/20 text-primary/90 cursor-default"
                 )}
             >
                 <div className="relative">
-                    {timeLeft === null ? (
+                    {showEnough ? (
+                        <div className="w-4 h-4 flex items-center justify-center">
+                            {clickCount >= 50 ? "🤯" : clickCount >= 20 ? "🙄" : "🤫"}
+                        </div>
+                    ) : timeLeft === null ? (
                         <Clock className="w-4 h-4 opacity-40" />
                     ) : isCritical ? (
                         <Hourglass className="w-4 h-4 animate-pulse" />
                     ) : (
-                        <Clock className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                        <Clock className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                     )}
                 </div>
                 <div className="flex flex-col items-start leading-none gap-0.5">
                     <span className="text-[7px] font-black uppercase tracking-widest opacity-60">
-                        {t('shift.timeLeft') || 'Shift Remaining'}
+                        {showEnough ? 'Attention!' : (t('shift.timeLeft') || 'Shift Remaining')}
                     </span>
                     <span className="text-xs font-mono font-black tabular-nums flex items-center gap-1.5">
-                        {timeLeft === null ? (
-                            '--:--'
-                        ) : (
-                            <>
-                                {hours > 0 ? `${hours}:` : ''}
-                                {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
-                            </>
+                        {showEnough || (
+                            timeLeft === null ? (
+                                '--:--'
+                            ) : (
+                                <>
+                                    {hours > 0 ? `${hours}:` : ''}
+                                    {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+                                </>
+                            )
                         )}
-                        <LogOut className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                        {!showEnough && <LogOut className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity ml-1" />}
                     </span>
                 </div>
 
