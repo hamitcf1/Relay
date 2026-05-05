@@ -318,5 +318,3 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
     )
 }
 
-}
-
