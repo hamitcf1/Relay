@@ -17,7 +17,7 @@ export function ShiftTimer() {
     const { startCountdown } = useSecurityStore()
     const [timeLeft, setTimeLeft] = useState<number | null>(null)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
-    const [clickCount, setClickCount] = useState(0)
+    const [, setClickCount] = useState(0)
     const [showEnough, setShowEnough] = useState<string | null>(null)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 

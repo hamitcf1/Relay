@@ -210,6 +210,19 @@ type Translations = {
     'games.reactionTimer': string
     'games.gridMatch': string
     'games.scoreboard': string
+    'games.ready': string
+    'games.waiting': string
+    'games.clickNow': string
+    'games.tooEarly': string
+    'games.tryAgain': string
+    'games.moves': string
+    'games.complete': string
+    'games.best': string
+    'games.fetching': string
+    'games.failed': string
+    'games.beFirst': string
+    'games.fastest': string
+    'games.fewest': string
     'hotel.settings.hotelDetails': string
     'hotel.settings.hotelDetailsDesc': string
     'hotel.settings.roles': string
