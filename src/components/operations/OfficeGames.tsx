@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { useGameStore } from '@/stores/gameStore'
 import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
 
 interface OfficeGamesProps {
@@ -13,7 +14,8 @@ interface OfficeGamesProps {
 
 export function OfficeGames({ hotelId }: OfficeGamesProps) {
     const { user } = useAuthStore()
-    const { scores, submitScore, subscribeToScores } = useGameStore()
+    const { t } = useLanguageStore()
+    const { scores, loading, error, submitScore, subscribeToScores } = useGameStore()
     
     const [activeGame, setActiveGame] = useState<'reaction' | 'memory'>('reaction')
 
@@ -113,9 +115,9 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                 <div className="flex flex-col gap-1">
                     <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                         <Trophy className="w-6 h-6 text-amber-500" />
-                        Office Games
+                        {t('module.games')}
                     </h2>
-                    <p className="text-sm text-muted-foreground">Compete with your colleagues during quiet shifts.</p>
+                    <p className="text-sm text-muted-foreground">{t('games.desc')}</p>
                 </div>
 
                 <div className="flex bg-muted p-1 rounded-2xl border border-border/50 self-start">
@@ -126,7 +128,7 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                             activeGame === 'reaction' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                         )}
                     >
-                        Reaction Timer
+                        {t('games.reactionTimer')}
                     </button>
                     <button 
                         onClick={() => setActiveGame('memory')}
@@ -135,7 +137,7 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                             activeGame === 'memory' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
                         )}
                     >
-                        Grid Match
+                        {t('games.gridMatch')}
                     </button>
                 </div>
             </div>
@@ -146,9 +148,9 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                     <CardHeader className="border-b border-border/40 bg-primary/5">
                         <CardTitle className="text-sm font-bold flex items-center gap-2">
                             {activeGame === 'reaction' ? (
-                                <><Zap className="w-4 h-4 text-primary" /> Reaction Time Test</>
+                                <><Zap className="w-4 h-4 text-primary" /> {t('games.reactionTimer')}</>
                             ) : (
-                                <><Target className="w-4 h-4 text-primary" /> Memory Grid Match</>
+                                <><Target className="w-4 h-4 text-primary" /> {t('games.gridMatch')}</>
                             )}
                         </CardTitle>
                     </CardHeader>
@@ -171,15 +173,15 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                                             <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto border-2 border-primary/30">
                                                 <Play className="w-8 h-8 text-primary fill-primary" />
                                             </div>
-                                            <h3 className="text-xl font-bold">Ready to test your reflexes?</h3>
+                                            <h3 className="text-xl font-bold">{t('games.ready')}</h3>
                                             <p className="text-sm text-muted-foreground max-w-xs mx-auto">Click the area when it turns <span className="text-emerald-500 font-bold uppercase">Green</span>.</p>
-                                            <Button onClick={(e) => { e.stopPropagation(); startReaction(); }} size="lg" className="rounded-2xl font-bold">Start Game</Button>
+                                            <Button onClick={(e) => { e.stopPropagation(); startReaction(); }} size="lg" className="rounded-2xl font-bold">{t('common.add').replace('Add', 'Start Game') === 'Start Game' ? 'Start Game' : 'Oyunu Başlat'}</Button>
                                         </motion.div>
                                     )}
 
                                     {gameState === 'waiting' && (
                                         <motion.div key="waiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-                                            <h3 className="text-3xl font-black text-rose-500 uppercase tracking-tighter">Wait for Green...</h3>
+                                            <h3 className="text-3xl font-black text-rose-500 uppercase tracking-tighter">{t('games.waiting')}</h3>
                                             <p className="text-sm text-rose-500/60 font-medium">Concentrate...</p>
                                         </motion.div>
                                     )}
@@ -187,18 +189,18 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                                     {gameState === 'active' && (
                                         <motion.div key="active" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1.2 }} className="space-y-4">
                                             <Target className="w-24 h-24 text-white mx-auto drop-shadow-lg" />
-                                            <h3 className="text-5xl font-black text-white uppercase tracking-tighter">CLICK NOW!</h3>
+                                            <h3 className="text-5xl font-black text-white uppercase tracking-tighter">{t('games.clickNow')}</h3>
                                         </motion.div>
                                     )}
 
                                     {gameState === 'finished' && (
                                         <motion.div key="finished" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                                             <div className="space-y-1">
-                                                <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Your Result</p>
+                                                <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">{t('report.type').replace('Type', 'Result') === 'Result' ? 'Result' : 'Sonuç'}</p>
                                                 <h3 className="text-7xl font-black text-primary tabular-nums">{reactionTime}ms</h3>
                                             </div>
                                             <Button onClick={(e) => { e.stopPropagation(); startReaction(); }} variant="default" size="lg" className="rounded-2xl font-bold gap-2">
-                                                <RefreshCw className="w-4 h-4" /> Try Again
+                                                <RefreshCw className="w-4 h-4" /> {t('games.tryAgain')}
                                             </Button>
                                         </motion.div>
                                     )}
@@ -206,9 +208,9 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                                     {gameState === 'too-early' && (
                                         <motion.div key="too-early" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
                                             <div className="text-rose-500 text-6xl">⚠️</div>
-                                            <h3 className="text-2xl font-bold text-rose-500">Too Early!</h3>
+                                            <h3 className="text-2xl font-bold text-rose-500">{t('games.tooEarly')}</h3>
                                             <p className="text-sm text-muted-foreground">Wait for the green light before clicking.</p>
-                                            <Button onClick={(e) => { e.stopPropagation(); startReaction(); }} variant="outline" className="rounded-2xl font-bold border-rose-500/50 text-rose-500 hover:bg-rose-500/10">Reset</Button>
+                                            <Button onClick={(e) => { e.stopPropagation(); startReaction(); }} variant="outline" className="rounded-2xl font-bold border-rose-500/50 text-rose-500 hover:bg-rose-500/10">{t('common.clear').replace('Clear', 'Reset') === 'Reset' ? 'Reset' : 'Sıfırla'}</Button>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -220,15 +222,15 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                                         <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto border-2 border-primary/30">
                                             <Target className="w-8 h-8 text-primary" />
                                         </div>
-                                        <h3 className="text-xl font-bold">Memory Grid Match</h3>
+                                        <h3 className="text-xl font-bold">{t('games.gridMatch')}</h3>
                                         <p className="text-sm text-muted-foreground max-w-xs mx-auto">Find all pairs in the fewest moves possible.</p>
-                                        <Button onClick={startMemory} size="lg" className="rounded-2xl font-bold">Start Memory Game</Button>
+                                        <Button onClick={startMemory} size="lg" className="rounded-2xl font-bold">{t('common.add').replace('Add', 'Start Game') === 'Start Game' ? 'Start Game' : 'Oyunu Başlat'}</Button>
                                     </div>
                                 ) : (
                                     <div className="w-full max-w-sm space-y-6">
                                         <div className="flex justify-between items-center px-2">
-                                            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Moves: <span className="text-primary">{moves}</span></span>
-                                            {memoryFinished && <span className="text-xs font-bold text-emerald-500 uppercase">Game Complete!</span>}
+                                            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('games.moves')}: <span className="text-primary">{moves}</span></span>
+                                            {memoryFinished && <span className="text-xs font-bold text-emerald-500 uppercase">{t('games.complete')}</span>}
                                         </div>
                                         <div className="grid grid-cols-4 gap-3">
                                             {cards.map((card, i) => (
@@ -251,7 +253,7 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                                             ))}
                                         </div>
                                         {memoryFinished && (
-                                            <Button onClick={startMemory} className="w-full rounded-2xl font-bold" variant="outline">Play Again</Button>
+                                            <Button onClick={startMemory} className="w-full rounded-2xl font-bold" variant="outline">{t('games.tryAgain')}</Button>
                                         )}
                                     </div>
                                 )}
@@ -265,13 +267,25 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                     <CardHeader className="border-b border-border/40 bg-amber-500/5">
                         <CardTitle className="text-sm font-bold flex items-center gap-2 text-amber-500 uppercase tracking-wider">
                             <Medal className="w-4 h-4" />
-                            {activeGame === 'reaction' ? 'Fastest Reactions' : 'Fewest Moves'}
+                            {activeGame === 'reaction' ? t('games.fastest') : t('games.fewest')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4">
-                        <div className="space-y-3">
-                            {scores.length === 0 ? (
-                                <div className="text-center py-8 opacity-40 italic text-sm">No scores yet. Be the first!</div>
+                        <div className="space-y-3 min-h-[200px]">
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center py-12 gap-3 opacity-50">
+                                    <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+                                    <span className="text-xs font-medium italic">{t('games.fetching')}</span>
+                                </div>
+                            ) : error ? (
+                                <div className="text-center py-8 text-rose-500 text-xs font-medium bg-rose-500/5 rounded-xl border border-rose-500/20 p-4">
+                                    <p>{t('games.failed')}</p>
+                                    <p className="opacity-70 mt-1">This usually means a Firebase index is missing or permissions are restricted.</p>
+                                </div>
+                            ) : scores.length === 0 ? (
+                                <div className="text-center py-12 opacity-40 italic text-sm border-2 border-dashed border-border/40 rounded-xl">
+                                    {t('games.beFirst')}
+                                </div>
                             ) : (
                                 scores.map((score, index) => (
                                     <motion.div 
@@ -298,13 +312,13 @@ export function OfficeGames({ hotelId }: OfficeGamesProps) {
                                             </span>
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-bold truncate max-w-[120px]">{score.userName}</span>
-                                                {score.userId === user?.uid && <span className="text-[8px] uppercase tracking-widest text-primary font-black">Personal Best</span>}
+                                                {score.userId === user?.uid && <span className="text-[8px] uppercase tracking-widest text-primary font-black">{t('games.best')}</span>}
                                             </div>
                                         </div>
                                         <div className="text-right">
                                             <span className="text-lg font-black text-foreground tabular-nums">{score.score}</span>
                                             <span className="text-[10px] font-medium text-muted-foreground ml-1">
-                                                {activeGame === 'reaction' ? 'ms' : 'moves'}
+                                                {activeGame === 'reaction' ? 'ms' : t('games.moves').toLowerCase()}
                                             </span>
                                         </div>
                                     </motion.div>

@@ -209,6 +209,13 @@ service cloud.firestore {
            allow write: if isGM();
         }
       }
+
+      // SCORES - Office games leaderboard
+      match /scores/{scoreId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update, delete: if isGM();
+      }
     }
   }
 }

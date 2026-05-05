@@ -123,7 +123,7 @@ export function HotelSettings() {
                 <TabsList className="bg-muted/50 p-1 mb-8">
                     <TabsTrigger value="general" className="gap-2">
                         <Hotel className="w-4 h-4" />
-                        Hotel Details
+                        {t('hotel.settings.hotelDetails')}
                     </TabsTrigger>
                     <TabsTrigger value="shifts" className="gap-2">
                         <Clock className="w-4 h-4" />
@@ -142,17 +142,17 @@ export function HotelSettings() {
                 <TabsContent value="general" className="space-y-6">
                     <Card className="glass">
                         <CardHeader>
-                            <CardTitle>Hotel Details</CardTitle>
-                            <CardDescription>Update your hotel information</CardDescription>
+                            <CardTitle>{t('hotel.settings.hotelDetails')}</CardTitle>
+                            <CardDescription>{t('hotel.settings.hotelDetailsDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="hotel-name">Hotel Name</Label>
+                                <Label htmlFor="hotel-name">{t('setup.hotelName')}</Label>
                                 <Input 
                                     id="hotel-name" 
                                     value={name} 
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="Enter hotel name"
+                                    placeholder={t('setup.hotelNamePlaceholder')}
                                     className="bg-muted/30 border-border/50"
                                 />
                             </div>
@@ -162,7 +162,7 @@ export function HotelSettings() {
                                 className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                             >
                                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                Update
+                                {t('common.update')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -283,17 +283,17 @@ export function HotelSettings() {
 
                             return [
                                 { role: 'GM', count: gmCount, icon: ShieldCheck, color: 'text-rose-400' },
-                                { role: 'Reception', count: receptionCount, icon: Briefcase, color: 'text-blue-400' },
-                                { role: 'Staff', count: otherCount, icon: Users, color: 'text-zinc-400' }
+                                { role: t('auth.role.receptionist'), count: receptionCount, icon: Briefcase, color: 'text-blue-400' },
+                                { role: t('auth.role.staff'), count: otherCount, icon: Users, color: 'text-zinc-400' }
                             ].map((item, i) => (
                             <Card key={i} className="glass">
                                 <CardContent className="pt-6">
                                     <div className="flex items-center justify-between mb-2">
                                         <item.icon className={cn("w-5 h-5", item.color)} />
-                                        <Badge variant="outline">{item.count} Kişi</Badge>
+                                        <Badge variant="outline">{item.count} {item.count > 1 ? t('common.persons') : t('common.person')}</Badge>
                                     </div>
                                     <h3 className="font-bold text-lg">{item.role}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">Erişim yetkileri ve görev tanımları yapılandırılmış.</p>
+                                    <p className="text-xs text-muted-foreground mt-1">{t('hotel.settings.rolesDesc')}</p>
                                 </CardContent>
                             </Card>
                         ))})()}

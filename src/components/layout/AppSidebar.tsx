@@ -67,7 +67,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
 
     const opsNavItems = [
         { id: 'messaging', icon: MessageCircle, label: t('module.messaging') || 'Messaging', subTab: 'messaging' },
-        { id: 'compliance', icon: Check, label: t('module.compliance') || 'Compliance', subTab: 'compliance' },
+        { id: 'compliance', icon: Check, label: t('module.compliance') || 'Compliance', subTab: 'compliance', createdAt: '2026-05-05' },
         { id: 'feedback', icon: ShieldAlert, label: t('module.complaints') || 'Complaints', subTab: 'feedback' },
         { id: 'off-days', icon: CalendarDays, label: t('module.offDays') || 'Off Days', subTab: 'off-days' },
         { id: 'tours', icon: MapIcon, label: t('module.tours') || 'Tours', subTab: 'tours' },
@@ -75,7 +75,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
         { id: 'sales', icon: CreditCard, label: t('module.sales') || 'Sales', subTab: 'sales' },
         { id: 'pricing', icon: DollarSign, label: t('module.pricing_label') || 'Pricing', subTab: 'pricing' },
         { id: 'team', icon: Users, label: t('module.team_label') || 'Team', subTab: 'team' },
-        { id: 'games', icon: Trophy, label: 'Office Games', subTab: 'games' },
+        { id: 'games', icon: Trophy, label: 'Office Games', subTab: 'games', createdAt: '2026-05-05' },
     ]
 
     if (userRole === 'gm') {
@@ -89,6 +89,15 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
     }
 
     const NavItem = ({ item, active, onClick }: { item: any, active: boolean, onClick: () => void }) => {
+        const isNewFeature = (date?: string) => {
+            if (!date) return false
+            const created = new Date(date)
+            const now = new Date()
+            const diffTime = Math.abs(now.getTime() - created.getTime())
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+            return diffDays <= 7
+        }
+
         const content = (
             <button
                 onClick={onClick}
@@ -100,9 +109,22 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                     sidebarCollapsed && "justify-center px-0 h-10 w-10 mx-auto"
                 )}
             >
-                <item.icon className={cn("w-4 h-4 shrink-0", active && !sidebarCollapsed ? "" : active ? "text-primary-foreground" : "")} />
+                <div className="relative">
+                    <item.icon className={cn("w-4 h-4 shrink-0", active && !sidebarCollapsed ? "" : active ? "text-primary-foreground" : "")} />
+                    {isNewFeature(item.createdAt) && sidebarCollapsed && (
+                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                        </span>
+                    )}
+                </div>
                 {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
-                {active && !sidebarCollapsed && item.subTab && (
+                {!sidebarCollapsed && isNewFeature(item.createdAt) && (
+                    <span className="ml-auto flex h-4 items-center rounded-full bg-primary/20 px-1.5 text-[8px] font-black uppercase tracking-widest text-primary border border-primary/20 shadow-sm animate-pulse">
+                        New
+                    </span>
+                )}
+                {active && !sidebarCollapsed && !isNewFeature(item.createdAt) && item.subTab && (
                     <motion.div 
                         layoutId="sidebar-active-indicator" 
                         className="w-1.5 h-4 bg-primary-foreground/50 ml-auto rounded-full" 

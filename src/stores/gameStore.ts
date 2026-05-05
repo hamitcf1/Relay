@@ -43,8 +43,8 @@ export const useGameStore = create<GameStore>((set) => ({
         try {
             const scoresRef = collection(db, 'hotels', hotelId, 'scores')
             
-            // For reaction-time, lower is better. For others (like clicker), higher is better.
-            const isLowerBetter = gameType === 'reaction-time'
+            // For reaction-time and memory-match, lower is better.
+            const isLowerBetter = ['reaction-time', 'memory-match'].includes(gameType)
 
             // Check if user already has a high score for this game
             const q = query(
@@ -81,7 +81,7 @@ export const useGameStore = create<GameStore>((set) => ({
         if (!hotelId) return () => {}
         set({ loading: true })
         const scoresRef = collection(db, 'hotels', hotelId, 'scores')
-        const isLowerBetter = gameType === 'reaction-time'
+        const isLowerBetter = ['reaction-time', 'memory-match'].includes(gameType)
         
         const q = query(
             scoresRef,

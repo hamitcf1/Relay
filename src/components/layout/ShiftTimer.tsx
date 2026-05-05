@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Clock, Hourglass, LogOut } from 'lucide-react'
 import { format, addDays } from 'date-fns'
@@ -19,6 +19,7 @@ export function ShiftTimer() {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [clickCount, setClickCount] = useState(0)
     const [showEnough, setShowEnough] = useState<string | null>(null)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     const user = useAuthStore(state => state.user)
     const schedule = useRosterStore(state => state.schedule)
@@ -109,24 +110,25 @@ export function ShiftTimer() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
-                    const newCount = clickCount + 1
-                    setClickCount(newCount)
-                    
-                    const getMessage = (count: number) => {
-                        if (count >= 50) return "GOD MODE: BOREDOM"
-                        if (count >= 20) return "Seriously?"
-                        if (count >= 15) return "Are you bored?"
-                        if (count >= 10) return "Enough!"
-                        if (count >= 5) return "Hey!"
-                        return null
-                    }
+                    setClickCount(prev => {
+                        const next = prev + 1
+                        
+                        const messages: Record<number, string> = {
+                            5: "Focus!",
+                            10: "Enough!",
+                            15: "Get a coffee?",
+                            20: "Seriously?",
+                            50: "ULTRA BOREDOM"
+                        }
 
-                    const msg = getMessage(newCount)
-                    if (msg) {
-                        setShowEnough(msg)
-                        if (newCount >= 50) setClickCount(0) // reset at max
-                        setTimeout(() => setShowEnough(null), 2000)
-                    }
+                        if (messages[next]) {
+                            setShowEnough(messages[next])
+                            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+                            timeoutRef.current = setTimeout(() => setShowEnough(null), 2000)
+                        }
+
+                        return next >= 50 ? 0 : next
+                    })
                 }}
                 className={cn(
                     "flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border backdrop-blur-md transition-all duration-500 group relative select-none",
@@ -142,7 +144,7 @@ export function ShiftTimer() {
                 <div className="relative">
                     {showEnough ? (
                         <div className="w-4 h-4 flex items-center justify-center">
-                            {clickCount >= 50 ? "🤯" : clickCount >= 20 ? "🙄" : "🤫"}
+                            {showEnough === "ULTRA BOREDOM" ? "🤯" : showEnough === "Seriously?" ? "🙄" : "🤫"}
                         </div>
                     ) : timeLeft === null ? (
                         <Clock className="w-4 h-4 opacity-40" />

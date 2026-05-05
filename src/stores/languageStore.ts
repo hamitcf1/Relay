@@ -205,6 +205,18 @@ type Translations = {
     'module.activity': string
     'module.setting': string
     'module.reports': string
+    'module.games': string
+    'games.desc': string
+    'games.reactionTimer': string
+    'games.gridMatch': string
+    'games.scoreboard': string
+    'hotel.settings.hotelDetails': string
+    'hotel.settings.hotelDetailsDesc': string
+    'hotel.settings.roles': string
+    'hotel.settings.rolesDesc': string
+    'hotel.settings.update': string
+    'common.person': string
+    'common.persons': string
 
     // Pricing Module (v2)
     'pricing.base.title': string
@@ -1511,6 +1523,31 @@ const translations: Record<Language, Translations> = {
         'hotel.clickEdit': 'Click edit to add',
         'module.setting': 'Settings',
         'module.reports': 'Management Reports',
+        'module.games': 'Office Games',
+        'games.desc': 'Compete with your colleagues during quiet shifts.',
+        'games.reactionTimer': 'Reaction Timer',
+        'games.gridMatch': 'Grid Match',
+        'games.ready': 'Ready to test your reflexes?',
+        'games.waiting': 'Wait for Green...',
+        'games.clickNow': 'CLICK NOW!',
+        'games.tooEarly': 'Too Early!',
+        'games.tryAgain': 'Try Again',
+        'games.moves': 'Moves',
+        'games.complete': 'Game Complete!',
+        'games.best': 'Personal Best',
+        'games.scoreboard': 'Scoreboard',
+        'games.fetching': 'Fetching latest scores...',
+        'games.failed': 'Failed to load scoreboard.',
+        'games.beFirst': 'No scores yet. Be the first to set a record!',
+        'games.fastest': 'Fastest Reactions',
+        'games.fewest': 'Fewest Moves',
+        'hotel.settings.hotelDetails': 'Hotel Details',
+        'hotel.settings.hotelDetailsDesc': 'Update your hotel information',
+        'hotel.settings.roles': 'Staff Roles',
+        'hotel.settings.rolesDesc': 'Role definitions and access levels.',
+        'hotel.settings.update': 'Update Details',
+        'common.person': 'Person',
+        'common.persons': 'Person(s)',
         'hotel.secure.title': 'Secure Information (KBS / Agency)',
         'hotel.secure.encrypted': 'Encrypted Section',
         'hotel.secure.safeCode': 'Safe Code',
@@ -2790,6 +2827,31 @@ const translations: Record<Language, Translations> = {
         'sales.addToNotes': 'Nöbet Notlarına Ekle',
         'module.setting': 'Ayarlar',
         'module.reports': 'Yönetim Raporları',
+        'module.games': 'Ofis Oyunları',
+        'games.desc': 'Sakin vardiyalarda iş arkadaşlarınızla yarışın.',
+        'games.reactionTimer': 'Reaksiyon Testi',
+        'games.gridMatch': 'Hafıza Kartları',
+        'games.ready': 'Reflekslerinizi test etmeye hazır mısınız?',
+        'games.waiting': 'Yeşili Bekleyin...',
+        'games.clickNow': 'ŞİMDİ TIKLA!',
+        'games.tooEarly': 'Çok Erken!',
+        'games.tryAgain': 'Tekrar Dene',
+        'games.moves': 'Hamle',
+        'games.complete': 'Oyun Tamamlandı!',
+        'games.best': 'Kişisel Rekor',
+        'games.scoreboard': 'Skor Tablosu',
+        'games.fetching': 'Skorlar yükleniyor...',
+        'games.failed': 'Skor tablosu yüklenemedi.',
+        'games.beFirst': 'Henüz skor yok. Rekoru ilk siz kırın!',
+        'games.fastest': 'En Hızlı Reaksiyonlar',
+        'games.fewest': 'En Az Hamle',
+        'hotel.settings.hotelDetails': 'Otel Detayları',
+        'hotel.settings.hotelDetailsDesc': 'Otel bilgilerinizi güncelleyin',
+        'hotel.settings.roles': 'Personel Rolleri',
+        'hotel.settings.rolesDesc': 'Rol tanımları ve erişim seviyeleri.',
+        'hotel.settings.update': 'Bilgileri Güncelle',
+        'common.person': 'Kişi',
+        'common.persons': 'Kişi',
 
         // Reports
         'report.generate': 'Rapor Oluştur',

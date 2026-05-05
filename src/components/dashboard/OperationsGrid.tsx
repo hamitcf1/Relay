@@ -37,7 +37,8 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             label: t('module.compliance') || 'Compliance',
             icon: ShieldCheck,
             color: 'bg-emerald-500/10 text-emerald-500',
-            desc: t('operations.compliance.desc') || 'KBS & Agency check-ins'
+            desc: t('operations.compliance.desc') || 'KBS & Agency check-ins',
+            isNew: true
         },
         {
             id: 'feedback',
@@ -93,7 +94,8 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             label: 'Office Games',
             icon: Trophy,
             color: 'bg-amber-500/10 text-amber-500',
-            desc: 'Reflex games & staff scoreboard'
+            desc: 'Reflex games & staff scoreboard',
+            isNew: true
         },
     ]
 
@@ -143,6 +145,11 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
                         <div className={cn("p-3 rounded-xl mb-3 transition-colors group-hover:bg-white/10", item.color)}>
                             <item.icon className="w-6 h-6" />
                         </div>
+                        {item.isNew && (
+                            <div className="absolute top-3 right-3 px-1.5 py-0.5 rounded-full bg-primary/20 border border-primary/20 text-[8px] font-black uppercase tracking-widest text-primary animate-pulse shadow-lg shadow-primary/10">
+                                New
+                            </div>
+                        )}
                         <span className="font-bold text-base tracking-tight mb-1">{item.label}</span>
                         <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider leading-snug">{item.desc}</span>
 
