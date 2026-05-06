@@ -768,8 +768,14 @@ function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides
 function PriceLookup() {
     const { t } = useLanguageStore()
     const { agencies, getEffectivePrice } = usePricingStore()
-    const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+    const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+    const [endDate, setEndDate] = useState(format(addDaysFns(new Date(), 1), 'yyyy-MM-dd'))
     const [agencyId, setAgencyId] = useState<string>('base')
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const nights = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    const dates = Array.from({ length: nights }).map((_, i) => format(addDaysFns(start, i), 'yyyy-MM-dd'));
 
     return (
         <Card className="border-border/50 bg-background/50 backdrop-blur-xl group overflow-hidden relative shadow-2xl">
@@ -784,13 +790,22 @@ function PriceLookup() {
                 </div>
             </CardHeader>
             <CardContent className="space-y-6 pt-6 relative z-10">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.lookup.date')}</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.lookup.date')} (Giriş)</label>
                         <Input
                             type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className="bg-background/80 border-border/50 rounded-xl h-10"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.lookup.date')} (Çıkış)</label>
+                        <Input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
                             className="bg-background/80 border-border/50 rounded-xl h-10"
                         />
                     </div>
@@ -813,8 +828,17 @@ function PriceLookup() {
                 <div className="divide-y divide-border/20 rounded-[2rem] border border-border/30 bg-muted/30 overflow-hidden shadow-inner relative">
                     <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                     {ROOM_TYPES.map((room, idx) => {
-                        const price = getEffectivePrice(date, room, agencyId === 'base' ? undefined : agencyId)
-                        const isOverride = agencyId !== 'base' && price !== getEffectivePrice(date, room)
+                        const pricesForDates = dates.map(d => {
+                            const p = getEffectivePrice(d, room, agencyId === 'base' ? undefined : agencyId);
+                            const isOverride = agencyId !== 'base' && p !== getEffectivePrice(d, room);
+                            return { date: d, price: p, isOverride };
+                        });
+
+                        const totalAmount = pricesForDates.reduce((sum, item) => sum + (item.price?.amount || 0), 0);
+                        const averageAmount = totalAmount / dates.length;
+                        const currency = pricesForDates[0]?.price?.currency || 'EUR';
+                        
+                        const hasOverride = pricesForDates.some(item => item.isOverride);
 
                         return (
                             <motion.div
@@ -822,34 +846,65 @@ function PriceLookup() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: idx * 0.04 }}
-                                className="flex justify-between items-center p-5 group/item hover:bg-primary/5 transition-all duration-300 relative"
+                                className="flex flex-col p-5 group/item hover:bg-primary/5 transition-all duration-300 relative gap-4"
                             >
-                                <div className="space-y-2">
-                                    <div className="text-sm font-bold capitalize flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover/item:scale-150 transition-transform" />
-                                        {t(`room.${room}`)}
-                                    </div>
-                                    <div className={cn(
-                                        "text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5 px-2 py-1 rounded-full",
-                                        isOverride ? "bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20" : "bg-emerald-500/10 text-emerald-500 ring-1 ring-emerald-500/20"
-                                    )}>
-                                        {isOverride ? (
-                                            <><Sparkles className="w-2.5 h-2.5" /> {t('pricing.lookup.overrideUsed')}</>
-                                        ) : (
-                                            <><CheckCircle2 className="w-2.5 h-2.5" /> {t('pricing.lookup.basePriceUsed')}</>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="text-right flex items-center gap-4">
-                                    <div className="space-y-1">
-                                        <div className="text-2xl font-black font-mono tracking-tighter flex items-center justify-end text-foreground group-hover/item:text-primary transition-colors">
-                                            <span className="text-xs font-medium text-muted-foreground mr-1 self-start mt-1.5">{price?.currency || 'EUR'}</span>
-                                            {price?.amount?.toFixed(2) || '---'}
+                                <div className="flex justify-between items-center">
+                                    <div className="space-y-2">
+                                        <div className="text-sm font-bold capitalize flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover/item:scale-150 transition-transform" />
+                                            {t(`room.${room}`)}
                                         </div>
-                                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{t('pricing.perNight')}</div>
+                                        <div className={cn(
+                                            "text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5 px-2 py-1 rounded-full",
+                                            hasOverride ? "bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20" : "bg-emerald-500/10 text-emerald-500 ring-1 ring-emerald-500/20"
+                                        )}>
+                                            {hasOverride ? (
+                                                <><Sparkles className="w-2.5 h-2.5" /> {t('pricing.lookup.overrideUsed') || 'Özel Fiyat'}</>
+                                            ) : (
+                                                <><CheckCircle2 className="w-2.5 h-2.5" /> {t('pricing.lookup.basePriceUsed') || 'Standart Fiyat'}</>
+                                            )}
+                                        </div>
                                     </div>
-                                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover/item:translate-x-1 transition-transform" />
+                                    <div className="text-right flex items-center gap-6">
+                                        {dates.length > 1 && (
+                                            <div className="space-y-1 pr-6 border-r border-border/20">
+                                                <div className="text-xl font-black font-mono tracking-tighter flex items-center justify-end text-primary/80 group-hover/item:text-primary transition-colors">
+                                                    <span className="text-[10px] font-medium text-muted-foreground mr-1 self-start mt-1.5">{currency}</span>
+                                                    {totalAmount.toFixed(2)}
+                                                </div>
+                                                <div className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest text-right">Toplam Fiyat</div>
+                                            </div>
+                                        )}
+                                        <div className="space-y-1">
+                                            <div className="text-2xl font-black font-mono tracking-tighter flex items-center justify-end text-foreground group-hover/item:text-primary transition-colors">
+                                                <span className="text-xs font-medium text-muted-foreground mr-1 self-start mt-1.5">{currency}</span>
+                                                {averageAmount.toFixed(2)}
+                                            </div>
+                                            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                                                {dates.length > 1 ? `Ortalama (${dates.length} Gece)` : t('pricing.perNight')}
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover/item:translate-x-1 transition-transform" />
+                                    </div>
                                 </div>
+                                
+                                {dates.length > 1 && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-2 pt-4 border-t border-border/20">
+                                        {pricesForDates.map((item, i) => (
+                                            <div key={i} className="flex flex-col items-center p-2 rounded-lg bg-background/50 border border-border/30">
+                                                <span className="text-[9px] text-muted-foreground font-medium mb-1 truncate w-full text-center">
+                                                    {formatDisplayDate(item.date)}
+                                                </span>
+                                                <span className={cn(
+                                                    "text-sm font-mono font-bold",
+                                                    item.isOverride ? "text-amber-500" : "text-emerald-500"
+                                                )}>
+                                                    {item.price?.amount?.toFixed(2) || '---'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </motion.div>
                         )
                     })}
