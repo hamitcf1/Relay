@@ -316,17 +316,17 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                         <p className="text-xs text-muted-foreground">{t('hotel.secure.setupDesc')}</p>
                                         <div className="flex gap-2">
                                             <div className="relative flex-1">
-                                                <div className="absolute left-3 right-8 top-0 bottom-0 pointer-events-none flex items-center text-[11px] font-mono tracking-tight overflow-hidden">
-                                                    <PasswordReveal value={passwordInput} visible={showNewPassword} />
-                                                </div>
-                                                <Input
-                                                    type={showNewPassword ? "text" : "password"}
-                                                    placeholder={t('hotel.secure.safeCode')}
-                                                    autoComplete="one-time-code"
-                                                    value={passwordInput}
-                                                    onChange={e => setPasswordInput(e.target.value)}
-                                                    className="h-8 bg-muted/30 border-input text-transparent caret-foreground text-xs pr-8 font-mono tracking-tight"
-                                                />
+                                                 <div className="absolute left-3 right-8 top-0 bottom-0 pointer-events-none flex items-center text-[11px] font-mono tracking-tight overflow-hidden select-none">
+                                                     <PasswordReveal value={passwordInput} visible={showNewPassword} />
+                                                 </div>
+                                                 <Input
+                                                     type={showNewPassword ? "text" : "password"}
+                                                     placeholder={t('hotel.secure.safeCode')}
+                                                     autoComplete="one-time-code"
+                                                     value={passwordInput}
+                                                     onChange={e => setPasswordInput(e.target.value)}
+                                                     className="h-8 bg-muted/30 border-input hide-password-text caret-foreground text-xs pr-8 font-mono tracking-tight"
+                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowNewPassword(!showNewPassword)}
@@ -346,18 +346,18 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                             ) : !isVaultUnlocked ? (
                                 <div className="flex gap-2">
                                     <div className="relative flex-1">
-                                        <div className="absolute left-3 right-10 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
-                                            <PasswordReveal value={passwordInput} visible={showPassword} />
-                                        </div>
-                                        <Input
-                                            type={showPassword ? "text" : "password"}
-                                            placeholder={t('hotel.secure.safeCode')}
-                                            autoComplete="one-time-code"
-                                            value={passwordInput}
-                                            onChange={e => setPasswordInput(e.target.value)}
-                                            onKeyDown={e => e.key === 'Enter' && handleUnlock()}
-                                            className="h-9 bg-background border-border pr-10 text-transparent caret-foreground font-mono tracking-tight"
-                                        />
+                                         <div className="absolute left-3 right-10 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden select-none">
+                                             <PasswordReveal value={passwordInput} visible={showPassword} />
+                                         </div>
+                                         <Input
+                                             type={showPassword ? "text" : "password"}
+                                             placeholder={t('hotel.secure.safeCode')}
+                                             autoComplete="one-time-code"
+                                             value={passwordInput}
+                                             onChange={e => setPasswordInput(e.target.value)}
+                                             onKeyDown={e => e.key === 'Enter' && handleUnlock()}
+                                             className="h-9 bg-background border-border pr-10 hide-password-text caret-foreground font-mono tracking-tight"
+                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}

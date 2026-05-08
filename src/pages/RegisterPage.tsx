@@ -329,17 +329,17 @@ export function RegisterPage() {
                              <div className="grid grid-cols-2 gap-4">
                                  <div className="group/input relative">
                                     <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-300 group-focus-within/input:text-primary transition-colors duration-300" />
-                                    <div className="absolute left-12 right-10 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
-                                        <PasswordReveal value={password} visible={showPassword} />
-                                    </div>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-10 text-transparent caret-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
-                                        placeholder={t('auth.password')}
-                                        required
-                                    />
+                                     <div className="absolute left-12 right-10 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden select-none">
+                                         <PasswordReveal value={password} visible={showPassword} />
+                                     </div>
+                                     <input
+                                         type={showPassword ? "text" : "password"}
+                                         value={password}
+                                         onChange={(e) => setPassword(e.target.value)}
+                                         className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-10 hide-password-text caret-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
+                                         placeholder={t('auth.password')}
+                                         required
+                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
@@ -351,17 +351,17 @@ export function RegisterPage() {
 
                                  <div className="group/input relative">
                                     <Lock className="absolute left-4 top-3.5 w-5 h-5 text-zinc-300 group-focus-within/input:text-primary transition-colors duration-300" />
-                                    <div className="absolute left-12 right-4 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden">
-                                        <PasswordReveal value={confirmPassword} visible={showPassword} />
-                                    </div>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-transparent caret-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
-                                        placeholder={t('auth.confirmPassword')}
-                                        required
-                                    />
+                                     <div className="absolute left-12 right-4 top-0 bottom-0 pointer-events-none flex items-center text-sm font-mono tracking-tight overflow-hidden select-none">
+                                         <PasswordReveal value={confirmPassword} visible={showPassword} />
+                                     </div>
+                                     <input
+                                         type={showPassword ? "text" : "password"}
+                                         value={confirmPassword}
+                                         onChange={(e) => setConfirmPassword(e.target.value)}
+                                         className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 hide-password-text caret-white placeholder:text-zinc-400 focus:outline-none focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all duration-300 text-sm font-mono tracking-tight"
+                                         placeholder={t('auth.confirmPassword')}
+                                         required
+                                     />
                                 </div>
                             </div>
                         </div>

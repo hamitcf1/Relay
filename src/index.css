@@ -181,6 +181,28 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Password Autofill Fix */
+  .hide-password-text {
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    text-shadow: 0 0 0 transparent !important;
+  }
+
+  .hide-password-text::selection {
+    background: transparent !important;
+    color: transparent !important;
+  }
+
+  .hide-password-text:-webkit-autofill,
+  .hide-password-text:-webkit-autofill:hover,
+  .hide-password-text:-webkit-autofill:focus,
+  .hide-password-text:-webkit-autofill:active {
+    -webkit-text-fill-color: transparent !important;
+    transition: background-color 5000s ease-in-out 0s;
+    color: transparent !important;
+    text-shadow: 0 0 0 transparent !important;
+  }
 }
 
 /* Date/Time Picker Icon Visibility */

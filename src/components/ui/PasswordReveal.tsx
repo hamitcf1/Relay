@@ -33,7 +33,7 @@ function ScrambledChar({ char, visible, index }: { char: string; visible: boolea
     }, [char, visible, index])
 
     return (
-        <span className="inline-block min-w-[0.6em] text-center font-mono">
+        <span className="inline-block font-mono">
             {displayChar}
         </span>
     )
