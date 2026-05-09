@@ -58,7 +58,7 @@ export function DownloadPage({ onBack }: DownloadPageProps) {
                                 <p className="text-zinc-400 text-sm mb-4 flex-1">{platform.sub}</p>
                                 <Button size="sm" variant="outline" className="w-full border-zinc-700 text-white hover:bg-zinc-800">
                                     <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                                    Download
+                                    {t('download.button')}
                                 </Button>
                             </motion.div>
                         )
@@ -66,11 +66,11 @@ export function DownloadPage({ onBack }: DownloadPageProps) {
                 </div>
 
                 <div className="mt-12 max-w-3xl mx-auto p-8 rounded-2xl bg-zinc-900/50 border border-zinc-800 text-center">
-                    <h2 className="text-xl font-semibold mb-2 tracking-tight">Enterprise deployment?</h2>
+                    <h2 className="text-xl font-semibold mb-2 tracking-tight">{t('download.enterprise.title')}</h2>
                     <p className="text-zinc-400 text-sm mb-5 max-w-md mx-auto">
-                        White-label builds and private MDM packages for hotel groups.
+                        {t('download.enterprise.desc')}
                     </p>
-                    <Button>Talk to Enterprise Sales</Button>
+                    <Button>{t('download.enterprise.cta')}</Button>
                 </div>
             </div>
         </div>

@@ -45,7 +45,7 @@ export function FeaturesPage() {
                             {t('features.title')}
                         </p>
                         <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-5 leading-tight">
-                            Full-spectrum hotel operations
+                            {t('features.heroH1')}
                         </h1>
                         <p className="text-lg text-zinc-400 leading-relaxed">
                             {t('features.subtitle')}
@@ -75,15 +75,15 @@ export function FeaturesPage() {
 
                 {/* Technical Pillars */}
                 <div className="max-w-4xl mx-auto pt-16 border-t border-zinc-800">
-                    <h2 className="text-2xl font-bold text-white tracking-tight mb-3 text-center">Built for hotel operations</h2>
+                    <h2 className="text-2xl font-bold text-white tracking-tight mb-3 text-center">{t('features.pillars.title')}</h2>
                     <p className="text-zinc-400 text-center mb-10 max-w-xl mx-auto">
-                        Distributed infrastructure designed for 24/7 reception desks.
+                        {t('features.pillars.desc')}
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {[
-                            { icon: ShieldCheck, title: "Vault security", desc: "Encrypted storage for guest data and credentials." },
-                            { icon: Database, title: "Real-time sync", desc: "Sub-50ms updates across all departments." },
-                            { icon: Cpu, title: "AI assistance", desc: "Speech-to-log, summaries, draft replies." }
+                            { icon: ShieldCheck, title: t('features.pillars.vault.title'), desc: t('features.pillars.vault.desc') },
+                            { icon: Database, title: t('features.pillars.sync.title'), desc: t('features.pillars.sync.desc') },
+                            { icon: Cpu, title: t('features.pillars.ai.title'), desc: t('features.pillars.ai.desc') }
                         ].map((item, j) => (
                             <div key={j} className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800">
                                 <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
@@ -99,17 +99,17 @@ export function FeaturesPage() {
                 {/* Call to Action */}
                 <div className="mt-16 p-10 rounded-2xl bg-zinc-900/50 border border-zinc-800 text-center">
                     <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
-                        Ready to digitize your front desk?
+                        {t('features.cta.title')}
                     </h2>
                     <p className="text-zinc-400 mb-6 max-w-md mx-auto">
-                        Start with the free tier. Invite your team in minutes.
+                        {t('features.cta.desc')}
                     </p>
                     <div className="flex flex-wrap justify-center gap-3">
                         <Button onClick={() => navigate('/register')}>
-                            Get Started Free
+                            {t('features.cta.start')}
                         </Button>
                         <Button variant="outline" onClick={() => navigate('/live-demo')} className="border-zinc-700 text-white hover:bg-zinc-800">
-                            View Live Demo
+                            {t('features.cta.demo')}
                         </Button>
                     </div>
                 </div>

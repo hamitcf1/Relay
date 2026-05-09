@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Mail, MessageSquare, Phone } from 'lucide-react'
+import { ArrowLeft, Mail, Github } from 'lucide-react'
 
 export function ContactPage() {
     const navigate = useNavigate()
@@ -27,40 +27,30 @@ export function ContactPage() {
                         {t('auth.contactSales')}
                     </h1>
                     <p className="text-zinc-400 text-lg">
-                        Ready to transform your hotel operations? Our team is here to help.
+                        {t('contact.subtitle')}
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
                     <ContactCard
                         icon={Mail}
                         color="text-blue-400"
                         bg="bg-blue-400/10"
-                        title="Email"
-                        desc="For pricing and custom plans."
-                        value="sales@relay.app"
-                        action="Email Us"
-                        href="mailto:sales@relay.app"
+                        title={t('contact.email.title')}
+                        desc={t('contact.email.desc')}
+                        value="hamitfindik2@gmail.com"
+                        action={t('contact.email.cta')}
+                        href="mailto:hamitfindik2@gmail.com"
                     />
                     <ContactCard
-                        icon={MessageSquare}
-                        color="text-emerald-400"
-                        bg="bg-emerald-400/10"
-                        title="Live Chat"
-                        desc="Talk to our specialists 24/7."
-                        value="In-app chat"
-                        action="Start Chat"
-                        href="#"
-                    />
-                    <ContactCard
-                        icon={Phone}
-                        color="text-indigo-400"
-                        bg="bg-indigo-400/10"
-                        title="Schedule"
-                        desc="Book a discovery call."
-                        value="30 min slot"
-                        action="Request Call"
-                        href="tel:+15551234567"
+                        icon={Github}
+                        color="text-purple-400"
+                        bg="bg-purple-400/10"
+                        title={t('contact.github.title')}
+                        desc={t('contact.github.desc')}
+                        value="@hamitcf1"
+                        action={t('contact.github.cta')}
+                        href="https://github.com/hamitcf1"
                     />
                 </div>
             </div>

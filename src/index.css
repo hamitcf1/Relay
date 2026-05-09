@@ -279,6 +279,16 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 /* ============================================
+   Gradient Utilities
+   ============================================ */
+
+@layer utilities {
+  .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+  }
+}
+
+/* ============================================
    Glassmorphism Utilities
    ============================================ */
 
