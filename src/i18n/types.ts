@@ -907,6 +907,15 @@ export type Translations = {
     'community.newsletter.subscribe': string
     'community.social.title': string
     'community.join': string
+    'community.comingSoon': string
+    'community.github.title': string
+    'community.github.desc': string
+    'community.github.cta': string
+    'community.discord.title': string
+    'community.discord.desc': string
+    'community.email.title': string
+    'community.email.desc': string
+    'community.email.cta': string
     'contact.email.title': string
     'contact.email.desc': string
     'contact.github.title': string
