@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://relay.hotel/sitemap.xml
+# Disallow authenticated areas
+Disallow: /dashboard
+Disallow: /operations
+Disallow: /setup-hotel
+
+Sitemap: https://relay.hamitcf.info/sitemap.xml
