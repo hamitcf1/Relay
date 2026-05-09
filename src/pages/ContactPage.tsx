@@ -9,55 +9,56 @@ export function ContactPage() {
     const { t } = useLanguageStore()
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 relative">
-            {/* Navigation */}
-            <div className="container mx-auto px-6 pt-32">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30">
+            <div className="container mx-auto px-6 pt-12 mb-8">
                 <Button
                     variant="ghost"
-                    className="text-zinc-400 hover:text-white group transition-colors mb-12"
+                    className="text-zinc-400 hover:text-white px-0 hover:bg-transparent"
                     onClick={() => navigate('/')}
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                     {t('common.backToHome')}
                 </Button>
             </div>
 
-            <div className="container mx-auto px-6 py-20">
-                <div className="text-center mb-20">
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]"
-                    >
+            <div className="container mx-auto px-6 pb-24">
+                <div className="max-w-2xl mx-auto text-center mb-12">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
                         {t('auth.contactSales')}
-                    </motion.h1>
-                    <p className="text-zinc-400 text-xl max-w-2xl mx-auto">
-                        Ready to transform your hotel operations? Our team is here to help you get started with the perfect plan.
+                    </h1>
+                    <p className="text-zinc-400 text-lg">
+                        Ready to transform your hotel operations? Our team is here to help.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
                     <ContactCard
-                        icon={<Mail className="w-8 h-8 text-blue-400" />}
+                        icon={Mail}
+                        color="text-blue-400"
+                        bg="bg-blue-400/10"
                         title="Email"
-                        desc="Reach out for pricing and custom implementation."
+                        desc="For pricing and custom plans."
                         value="sales@relay.app"
                         action="Email Us"
                         href="mailto:sales@relay.app"
                     />
                     <ContactCard
-                        icon={<MessageSquare className="w-8 h-8 text-emerald-400" />}
-                        title="Live Support"
-                        desc="Talk to our specialists about technical features."
-                        value="24/7 Live Chat"
+                        icon={MessageSquare}
+                        color="text-emerald-400"
+                        bg="bg-emerald-400/10"
+                        title="Live Chat"
+                        desc="Talk to our specialists 24/7."
+                        value="In-app chat"
                         action="Start Chat"
                         href="#"
                     />
                     <ContactCard
-                        icon={<Phone className="w-8 h-8 text-indigo-400" />}
-                        title="Call"
-                        desc="Schedule a discovery call with our experts."
-                        value="+1 (555) 123-4567"
+                        icon={Phone}
+                        color="text-indigo-400"
+                        bg="bg-indigo-400/10"
+                        title="Schedule"
+                        desc="Book a discovery call."
+                        value="30 min slot"
                         action="Request Call"
                         href="tel:+15551234567"
                     />
@@ -67,19 +68,22 @@ export function ContactPage() {
     )
 }
 
-function ContactCard({ icon, title, desc, value, action, href }: any) {
+function ContactCard({ icon: Icon, color, bg, title, desc, value, action, href }: any) {
     return (
         <motion.div
-            whileHover={{ y: -5 }}
-            className="p-10 rounded-[2.5rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-center group"
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3 }}
+            className="p-6 rounded-xl bg-zinc-900/50 border border-zinc-800 flex flex-col"
         >
-            <div className="w-16 h-16 rounded-2xl bg-black border border-white/5 flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform duration-500">
-                {icon}
+            <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center mb-4`}>
+                <Icon className={`w-4 h-4 ${color}`} aria-hidden="true" />
             </div>
-            <h3 className="text-2xl font-bold mb-4">{title}</h3>
-            <p className="text-zinc-500 mb-6 text-sm">{desc}</p>
-            <div className="text-white font-bold mb-8">{value}</div>
-            <Button variant="outline" className="w-full rounded-xl" asChild>
+            <h3 className="text-base font-semibold mb-1.5 tracking-tight">{title}</h3>
+            <p className="text-zinc-400 text-sm mb-3">{desc}</p>
+            <div className="text-white text-sm font-medium mb-5 flex-1">{value}</div>
+            <Button variant="outline" size="sm" className="w-full border-zinc-700 text-white hover:bg-zinc-800" asChild>
                 <a href={href}>{action}</a>
             </Button>
         </motion.div>

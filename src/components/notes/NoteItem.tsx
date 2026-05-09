@@ -150,8 +150,8 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
 
     const handleConvertToLog = async () => {
         const confirmed = await confirm({
-            title: 'Convert this note to a system log?',
-            confirmLabel: 'Convert',
+            title: t('notes.convertConfirm') as string,
+            confirmLabel: t('notes.convertConfirmAction') as string,
         })
         if (confirmed) {
             await convertToLog(hotelId, note.id)
@@ -168,18 +168,14 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className={cn(
-                'p-3 rounded-lg border transition-all group relative',
-                note.status === 'active'
-                    ? 'border-border bg-muted/30'
-                    : 'border-border/30 bg-muted/10 opacity-60',
-                note.is_pinned && 'border-primary/40 bg-primary/[0.03]'
+                'p-3 rounded-lg border transition-colors group relative',
+                note.is_pinned
+                    ? 'border-l-2 border-l-primary border-y-border border-r-border bg-primary/[0.03]'
+                    : note.status === 'active'
+                        ? 'border-border bg-muted/30'
+                        : 'border-border/30 bg-muted/10 opacity-60',
             )}
         >
-            {note.is_pinned && (
-                <div className="absolute -left-1 -top-1 bg-primary text-primary-foreground rounded-full p-1 shadow-lg shadow-primary/20">
-                    <Pin className="w-2.5 h-2.5 fill-current" />
-                </div>
-            )}
             
             <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
@@ -189,48 +185,44 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                             const catKey = note.category === 'upsell' as any ? 'payment_needed' : note.category
                             const info = categoryInfo[catKey] || categoryInfo.other
                             return (
-                                <span className={cn(
-                                    'text-xs font-bold uppercase px-2 py-0.5 rounded',
-                                    info.color,
-                                    'text-white'
-                                )}>
-                                    {info.icon} {getCategoryLabel(catKey)}
+                                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2 h-6 rounded border border-border/40 bg-muted/40 text-foreground">
+                                    <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', info.color)} aria-hidden="true" />
+                                    {getCategoryLabel(catKey)}
                                 </span>
                             )
                         })()}
 
-                        {/* Priority Indicator */}
+                        {/* Priority Indicator — small colored dot */}
                         {(() => {
                             const p = note.priority || 'low'
                             if (p === 'low') return null
                             const pInfo = priorityInfo[p]
                             return (
                                 <span
-                                    className={cn(
-                                        'inline-flex items-center justify-center min-w-[1.5rem] h-5',
-                                        pInfo.color,
-                                        pInfo.textClass,
-                                        pInfo.glowClass,
-                                        'leading-none select-none transition-all'
+                                    className={cn('inline-flex items-center gap-1 h-6 px-2 rounded text-xs font-medium uppercase tracking-wide border',
+                                        p === 'critical' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                                            p === 'high' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
+                                                'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                     )}
                                     title={t(`priority.${p}` as any) as string}
                                 >
-                                    {pInfo.symbol}
+                                    <span className={cn('w-1 h-1 rounded-full', pInfo.color.replace('text-', 'bg-'))} aria-hidden="true" />
+                                    {t(`priority.${p}` as any) as string}
                                 </span>
                             )
                         })()}
 
                         {note.room_number && (
-                            <Badge variant="outline" className="text-[10px] h-5 py-0 px-2 bg-amber-500/10 text-amber-600 border-amber-500/20 font-medium">#{note.room_number}</Badge>
+                            <Badge variant="outline" className="text-xs h-6 py-0 px-2 bg-muted/40 text-foreground border-border/40 font-mono font-medium">#{note.room_number}</Badge>
                         )}
                         {note.guest_name && (
-                            <Badge variant="outline" className="text-[10px] h-5 py-0 px-2 bg-blue-500/10 text-blue-600 border-blue-500/20 flex items-center gap-1 font-medium">
+                            <Badge variant="outline" className="text-xs h-6 py-0 px-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 flex items-center gap-1 font-medium">
                                 <User className="w-3 h-3" />
                                 {note.guest_name}
                             </Badge>
                         )}
                         {note.assigned_staff_name && (
-                            <Badge variant="outline" className="text-[10px] h-5 py-0 px-1.5 bg-primary/10 text-primary border-primary/20 flex items-center gap-1.5 font-medium">
+                            <Badge variant="outline" className="text-xs h-6 py-0 px-2 bg-primary/10 text-primary border-primary/20 flex items-center gap-1.5 font-medium">
                                 <UserAvatar
                                     user={{
                                         id: note.assigned_staff_uid || '',
@@ -259,21 +251,21 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                             onValueChange={(v) => handleStatusChange(v as NoteStatus)}
                         >
                             <SelectTrigger className={cn(
-                                "h-5 px-2 border-none font-black tracking-widest relative overflow-visible shadow-sm uppercase text-[10px] w-fit min-w-[70px] bg-transparent hover:bg-transparent focus:ring-0 focus:ring-offset-0 transition-all [&>svg]:w-3 [&>svg]:h-3 [&>svg]:opacity-70 [&>svg]:ml-1",
-                                note.status === 'active' ? "text-emerald-400 bg-emerald-500/20 snake-border-active" :
-                                    note.status === 'resolved' ? "text-violet-300 bg-violet-600/30 snake-border-resolved shadow-lg shadow-violet-500/20" :
-                                        "text-zinc-400 bg-zinc-500/10 snake-border-archived"
+                                "h-6 px-2 border font-medium text-xs w-fit gap-1.5 focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-colors [&>svg]:w-3 [&>svg]:h-3 [&>svg]:opacity-60",
+                                note.status === 'active' ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" :
+                                    note.status === 'resolved' ? "text-primary bg-primary/10 border-primary/20" :
+                                        "text-muted-foreground bg-muted/40 border-border/40"
                             )}>
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-card border-border shadow-2xl min-w-[120px]">
-                                <SelectItem value="active" className="text-[10px] font-bold uppercase tracking-wider focus:bg-emerald-500/10 focus:text-emerald-400">
+                            <SelectContent className="bg-card border-border min-w-[120px]">
+                                <SelectItem value="active" className="text-xs">
                                     {t('status.active') as string}
                                 </SelectItem>
-                                <SelectItem value="resolved" className="text-[10px] font-bold uppercase tracking-wider focus:bg-violet-500/10 focus:text-violet-300">
+                                <SelectItem value="resolved" className="text-xs">
                                     {t('status.resolved') as string}
                                 </SelectItem>
-                                <SelectItem value="archived" className="text-[10px] font-bold uppercase tracking-wider focus:bg-zinc-500/10 focus:text-zinc-400">
+                                <SelectItem value="archived" className="text-xs">
                                     {t('status.archived') as string}
                                 </SelectItem>
                             </SelectContent>
@@ -343,7 +335,7 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                             </div>
                             <div className="flex gap-2">
                                 <Input
-                                    placeholder="Room #"
+                                    placeholder={(t('common.room') as string) + ' #'}
                                     value={editRoom}
                                     onChange={(e) => setEditRoom(e.target.value)}
                                     className="h-8 w-20 text-sm bg-background border-border"
@@ -468,7 +460,7 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                                 <div className="space-y-1">
                                     <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.guestName')}</label>
                                     <Input
-                                        placeholder="Guest Name"
+                                        placeholder={t('notes.guestName') as string}
                                         value={editGuest}
                                         onChange={(e) => setEditGuest(e.target.value)}
                                         className="h-8 text-sm bg-background border-border"
@@ -478,10 +470,10 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                                     <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('common.staff')}</label>
                                     <Select value={editAssignedStaff} onValueChange={setEditAssignedStaff}>
                                         <SelectTrigger className="w-full h-8 text-xs bg-background border-border">
-                                            <SelectValue placeholder="Staff" />
+                                            <SelectValue placeholder={t('common.staff') as string} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">Unassigned</SelectItem>
+                                            <SelectItem value='none'>{t('notes.unassigned') as string}</SelectItem>
                                             {staff.map(s => (
                                                 <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
                                             ))}
@@ -529,13 +521,12 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                         )}
 
                         {(user?.role === 'gm' || note.category !== 'feedback') && (
-                            <span className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-full border border-border/30 shadow-inner">
-                                <Clock className="w-3.5 h-3.5 text-primary" />
-                                <span className="opacity-100 text-foreground font-semibold">{formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}</span>
-                                <span className="opacity-100 ml-0.5 font-mono text-[10px] text-foreground/80">({formatDisplayDateTime(note.created_at)})</span>
+                            <span className="flex items-center gap-1.5 text-muted-foreground" title={formatDisplayDateTime(note.created_at)}>
+                                <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                                <span>{formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}</span>
                                 {note.updated_at && note.updated_at.getTime() !== note.created_at.getTime() && (
-                                    <span className="text-amber-400 ml-1 text-[10px] font-black uppercase tracking-tight" title={formatDisplayDateTime(note.updated_at)}>
-                                        • {(t('common.edited') as string) || 'edited'}
+                                    <span className="text-amber-500 text-xs" title={formatDisplayDateTime(note.updated_at)}>
+                                        · {(t('common.edited') as string) || 'edited'}
                                     </span>
                                 )}
                             </span>
@@ -553,7 +544,8 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                             "h-8 w-8 transition-colors",
                             note.is_pinned ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-primary/5"
                         )}
-                        title={note.is_pinned ? 'Unpin from Sticky Board' : 'Pin to Sticky Board'}
+                        title={note.is_pinned ? (t('notes.unpin') as string) : (t('notes.pin') as string)}
+                        aria-label={note.is_pinned ? (t('notes.unpin') as string) : (t('notes.pin') as string)}
                     >
                         {note.is_pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
                     </Button>
@@ -576,7 +568,8 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                                 variant="ghost"
                                 onClick={handleConvertToLog}
                                 className="h-8 w-8 text-indigo-400 hover:bg-indigo-500/10"
-                                title="Convert to Log"
+                                title={t('notes.convertToLog') as string}
+                                aria-label={t('notes.convertToLog') as string}
                             >
                                 <Wand2 className="w-4 h-4" />
                             </Button>

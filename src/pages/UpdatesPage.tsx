@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Zap, ArrowLeft, ChevronRight } from 'lucide-react'
+import { Zap, ArrowLeft } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -14,76 +14,70 @@ export function UpdatesPage() {
             date: t('updates.v1.date'),
             title: t('updates.v1.title'),
             desc: t('updates.v1.desc'),
-            type: 'feature',
-            icon: <Zap className="w-5 h-5 text-yellow-400" />
+            icon: Zap,
+            color: "text-yellow-400",
+            bg: "bg-yellow-400/10"
         }
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 relative">
-            {/* Navigation Backlink */}
-            <div className="container mx-auto px-6 pt-32">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30">
+            <div className="container mx-auto px-6 pt-12 mb-8">
                 <Button
                     variant="ghost"
-                    className="text-zinc-200 hover:text-white group transition-colors"
+                    className="text-zinc-400 hover:text-white px-0 hover:bg-transparent"
                     onClick={() => navigate('/')}
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                     {t('common.backToHome')}
                 </Button>
             </div>
 
-            <div className="container mx-auto px-6 py-20 relative">
-                <div className="text-center mb-20 pt-10">
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-b from-white to-zinc-300 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]"
-                    >
+            <div className="container mx-auto px-6 pb-24">
+                <div className="max-w-2xl mx-auto text-center mb-12">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
                         {t('updates.title')}
-                    </motion.h1>
-                    <p className="text-zinc-200 text-xl max-w-2xl mx-auto">
+                    </h1>
+                    <p className="text-zinc-400 text-lg">
                         {t('updates.subtitle')}
                     </p>
                 </div>
 
-                <div className="max-w-4xl mx-auto">
-                    <div className="relative pl-12 border-l border-white/5 space-y-20">
-                        {updates.map((update, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="relative"
-                            >
-                                {/* Timeline Dot */}
-                                <div className="absolute -left-[3.75rem] top-0 w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center -translate-x-0.5 z-10">
-                                    {update.icon}
-                                </div>
-
-                                <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 hover:bg-white/10 transition-all group">
-                                    <div className="flex flex-wrap items-center gap-4 mb-6">
-                                        <span className="px-4 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-black tracking-widest uppercase border border-indigo-500/20">
-                                            {update.version}
-                                        </span>
-                                        <span className="text-zinc-300 text-xs font-medium">
-                                            {update.date}
-                                        </span>
+                <div className="max-w-2xl mx-auto">
+                    <div className="space-y-4">
+                        {updates.map((update, i) => {
+                            const Icon = update.icon
+                            return (
+                                <motion.article
+                                    key={i}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.05, duration: 0.3 }}
+                                    className="p-6 rounded-xl bg-zinc-900/50 border border-zinc-800"
+                                >
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className={`w-9 h-9 rounded-lg ${update.bg} flex items-center justify-center shrink-0`}>
+                                            <Icon className={`w-4 h-4 ${update.color}`} aria-hidden="true" />
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider">
+                                                {update.version}
+                                            </span>
+                                            <span className="text-zinc-500 text-xs">
+                                                {update.date}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <h3 className="text-3xl font-bold text-white mb-6 group-hover:text-indigo-400 transition-colors">
+                                    <h3 className="text-lg font-semibold text-white mb-2 tracking-tight">
                                         {update.title}
                                     </h3>
-                                    <p className="text-zinc-200 text-lg leading-relaxed mb-8">
+                                    <p className="text-zinc-400 leading-relaxed">
                                         {update.desc}
                                     </p>
-                                    <div className="flex items-center gap-2 text-indigo-400 font-bold group-hover:gap-4 transition-all uppercase tracking-widest text-[10px]">
-                                        {t('updates.changelog')} <ChevronRight className="w-4 h-4" />
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
+                                </motion.article>
+                            )
+                        })}
                     </div>
                 </div>
             </div>

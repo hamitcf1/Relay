@@ -1,253 +1,208 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Moon, Palette, MousePointer2, Sparkles, Smile, User, Type } from 'lucide-react'
-import { useThemeStore, ACCENT_COLORS } from '@/stores/themeStore'
+import { Sun, Moon, BookOpen, Sparkles, Smile, User, Type, MoonStar } from 'lucide-react'
+import { useThemeStore, ACCENT_COLORS, type Theme } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
-import { getCursorEnabled, setCursorEnabled } from '@/components/ui/CustomCursor'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react'
 import { cn } from '@/lib/utils'
+
+interface ToggleProps {
+    label: string
+    value: boolean
+    onChange: () => void
+    description?: string
+}
+
+function Toggle({ label, value, onChange, description }: ToggleProps) {
+    return (
+        <button
+            onClick={onChange}
+            className="w-full flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card/40 hover:bg-card/70 hover:border-border transition-colors text-left"
+            aria-pressed={value}
+        >
+            <div className="flex flex-col">
+                <span className="text-sm font-medium text-foreground">{label}</span>
+                {description && <span className="text-xs text-muted-foreground mt-0.5">{description}</span>}
+            </div>
+            <div
+                className={cn(
+                    "w-9 h-5 rounded-full relative transition-colors shrink-0",
+                    value ? "bg-primary" : "bg-muted"
+                )}
+            >
+                <motion.div
+                    className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
+                    animate={{ left: value ? 18 : 2 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+            </div>
+        </button>
+    )
+}
 
 export function AppearanceOptions() {
     const { theme, setTheme, accentColor, setAccentColor } = useThemeStore()
     const { user, updateSettings } = useAuthStore()
     const { t } = useLanguageStore()
-    const [cursorEnabled, setCursorEnabledLocal] = useState(getCursorEnabled)
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
     const avatar_style = user?.settings?.avatar_style || 'initials'
     const avatar_emoji = user?.settings?.avatar_emoji || '😊'
+    const animationsEnabled = !user?.settings?.disable_animations
 
-    const toggleCursor = () => {
-        const newVal = !cursorEnabled
-        setCursorEnabledLocal(newVal)
-        setCursorEnabled(newVal)
+    const themes: { id: Theme; icon: typeof Sun; label: string }[] = [
+        { id: 'light', icon: Sun, label: t('appearance.theme.light') },
+        { id: 'sepia', icon: BookOpen, label: t('appearance.theme.sepia') },
+        { id: 'comfort', icon: Sparkles, label: t('appearance.theme.comfort') },
+        { id: 'dark', icon: Moon, label: t('appearance.theme.dark') },
+        { id: 'midnight', icon: MoonStar, label: t('appearance.theme.midnight') },
+    ]
+
+    const accentLabels: Record<string, string> = {
+        indigo: t('appearance.accent.indigo'),
+        sky: t('appearance.accent.sky'),
+        emerald: t('appearance.accent.emerald'),
+        rose: t('appearance.accent.rose'),
+        amber: t('appearance.accent.amber'),
+        violet: t('appearance.accent.violet'),
     }
+
+    const avatarStyles = [
+        { id: 'initials' as const, icon: Type, label: t('appearance.avatar.initials') },
+        { id: 'name' as const, icon: User, label: t('appearance.avatar.name') },
+        { id: 'emoji' as const, icon: Smile, label: t('appearance.avatar.emoji') }
+    ]
 
     return (
         <div className="space-y-6 p-1">
-            {/* Theme Toggle */}
-            <div className="space-y-3">
-                <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider px-2">
-                    Visual Theme
+            {/* Theme */}
+            <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
+                    {t('appearance.theme.title')}
                 </label>
-                <div className="grid grid-cols-3 gap-2">
-                    <button
-                        onClick={() => setTheme('light')}
-                        className={cn(
-                            "flex items-center justify-center gap-2 py-2 px-3 rounded-xl border transition-all duration-200",
-                            theme === 'light'
-                                ? "bg-white border-primary text-primary shadow-sm"
-                                : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        )}
-                    >
-                        <Sun className="w-4 h-4" />
-                        <span className="text-xs font-medium">Light</span>
-                    </button>
-                    <button
-                        onClick={() => setTheme('comfort')}
-                        className={cn(
-                            "flex items-center justify-center gap-2 py-2 px-3 rounded-xl border transition-all duration-200",
-                            theme === 'comfort'
-                                ? "bg-zinc-800 border-primary text-primary shadow-sm"
-                                : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        )}
-                    >
-                        <Sparkles className="w-4 h-4" />
-                        <span className="text-xs font-medium">Comfort</span>
-                    </button>
-                    <button
-                        onClick={() => setTheme('dark')}
-                        className={cn(
-                            "flex items-center justify-center gap-2 py-2 px-3 rounded-xl border transition-all duration-200",
-                            theme === 'dark'
-                                ? "bg-zinc-900 border-primary text-primary shadow-sm"
-                                : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        )}
-                    >
-                        <Moon className="w-4 h-4" />
-                        <span className="text-xs font-medium">Dark</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Accent Colors */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 px-2">
-                    <Palette className="w-3.5 h-3.5 text-zinc-500" />
-                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                        Accent Color
-                    </label>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                    {ACCENT_COLORS.map((color) => (
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    {themes.map(({ id, icon: Icon, label }) => (
                         <button
-                            key={color.name}
-                            onClick={() => setAccentColor(color.value)}
+                            key={id}
+                            onClick={() => setTheme(id)}
                             className={cn(
-                                "relative group flex items-center gap-2 p-2 rounded-xl border transition-all duration-200",
-                                accentColor === color.value
-                                    ? "bg-zinc-100 dark:bg-zinc-900 border-primary/50"
-                                    : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                "flex flex-col items-center justify-center gap-1.5 h-16 rounded-lg border transition-colors active:scale-[0.98]",
+                                theme === id
+                                    ? "bg-primary/10 border-primary/50 text-primary"
+                                    : "bg-card/40 border-border/50 text-muted-foreground hover:bg-card/70 hover:text-foreground"
                             )}
+                            aria-pressed={theme === id}
                         >
-                            <div
-                                className="w-4 h-4 rounded-full shadow-inner"
-                                style={{ backgroundColor: `hsl(${color.value})` }}
-                            />
-                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                                {color.name}
-                            </span>
-                            {accentColor === color.value && (
-                                <motion.div
-                                    layoutId="active-accent"
-                                    className="absolute inset-0 border border-primary rounded-xl"
-                                    initial={false}
-                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                />
-                            )}
+                            <Icon className="w-4 h-4" aria-hidden="true" />
+                            <span className="text-xs font-medium">{label}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Custom Cursor Toggle */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 px-2">
-                    <MousePointer2 className="w-3.5 h-3.5 text-zinc-500" />
-                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                        Custom Cursor
-                    </label>
+            {/* Accent Color */}
+            <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
+                    {t('appearance.accent.title')}
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                    {ACCENT_COLORS.map((color) => (
+                        <button
+                            key={color.key}
+                            onClick={() => setAccentColor(color.value)}
+                            className={cn(
+                                "flex items-center gap-2 h-10 px-3 rounded-lg border transition-colors active:scale-[0.98]",
+                                accentColor === color.value
+                                    ? "bg-card border-foreground/20"
+                                    : "bg-card/40 border-border/50 hover:bg-card/70"
+                            )}
+                            aria-pressed={accentColor === color.value}
+                        >
+                            <div
+                                className="w-3.5 h-3.5 rounded-full shrink-0"
+                                style={{ backgroundColor: `hsl(${color.value})` }}
+                                aria-hidden="true"
+                            />
+                            <span className="text-sm font-medium text-foreground">
+                                {accentLabels[color.key] || color.key}
+                            </span>
+                        </button>
+                    ))}
                 </div>
-                <button
-                    onClick={toggleCursor}
-                    className={cn(
-                        "w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-200",
-                        cursorEnabled
-                            ? "bg-primary/10 border-primary/30 text-foreground"
-                            : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    )}
-                >
-                    <span className="text-xs font-medium">
-                        {cursorEnabled ? 'Enabled' : 'Disabled'}
-                    </span>
-                    <div
-                        className={cn(
-                            "w-8 h-4 rounded-full relative transition-colors duration-200",
-                            cursorEnabled ? "bg-primary" : "bg-zinc-600"
-                        )}
-                    >
-                        <motion.div
-                            className="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm"
-                            animate={{ left: cursorEnabled ? 16 : 2 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        />
-                    </div>
-                </button>
             </div>
 
-            {/* Disable Animations Toggle */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-2 px-2">
-                    <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
-                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                        UI Animations
-                    </label>
-                </div>
-                <button
-                    onClick={() => updateSettings({ disable_animations: !user?.settings?.disable_animations })}
-                    className={cn(
-                        "w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-200",
-                        !user?.settings?.disable_animations
-                            ? "bg-primary/10 border-primary/30 text-foreground"
-                            : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    )}
-                >
-                    <span className="text-xs font-medium">
-                        {!user?.settings?.disable_animations ? 'Enabled' : 'Disabled'}
-                    </span>
-                    <div
-                        className={cn(
-                            "w-8 h-4 rounded-full relative transition-colors duration-200",
-                            !user?.settings?.disable_animations ? "bg-primary" : "bg-zinc-600"
-                        )}
-                    >
-                        <motion.div
-                            className="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm"
-                            animate={{ left: !user?.settings?.disable_animations ? 16 : 2 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        />
-                    </div>
-                </button>
+            {/* Animations */}
+            <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
+                    {t('appearance.animations.title')}
+                </label>
+                <Toggle
+                    label={animationsEnabled ? t('common.enabled') : t('common.disabled')}
+                    description={t('appearance.animations.desc')}
+                    value={animationsEnabled}
+                    onChange={() => updateSettings({ disable_animations: animationsEnabled })}
+                />
             </div>
 
-            {/* Avatar Style Section */}
-            <div className="space-y-4 border-t border-border/50 pt-6">
-                <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-primary" />
-                        <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                            {t('appearance.avatar_style')}
-                        </label>
-                    </div>
+            {/* Avatar Style */}
+            <div className="space-y-2 border-t border-border/50 pt-6">
+                <div className="flex items-center justify-between px-1">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        {t('appearance.avatar_style')}
+                    </label>
                     <UserAvatar user={user} size="sm" />
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                    {[
-                        { id: 'initials', icon: Type, label: t('appearance.avatar.initials') },
-                        { id: 'name', icon: User, label: t('appearance.avatar.name') },
-                        { id: 'emoji', icon: Smile, label: t('appearance.avatar.emoji') }
-                    ].map((style) => (
+                    {avatarStyles.map(({ id, icon: Icon, label }) => (
                         <button
-                            key={style.id}
-                            onClick={() => updateSettings({ avatar_style: style.id as any })}
+                            key={id}
+                            onClick={() => updateSettings({ avatar_style: id })}
                             className={cn(
-                                "flex flex-col items-center gap-2 py-3 px-2 rounded-xl border transition-all duration-200",
-                                avatar_style === style.id
-                                    ? "bg-primary/10 border-primary text-primary shadow-sm"
-                                    : "bg-zinc-100/50 dark:bg-zinc-900 border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                "flex items-center justify-center gap-2 h-10 px-3 rounded-lg border transition-colors active:scale-[0.98]",
+                                avatar_style === id
+                                    ? "bg-primary/10 border-primary/50 text-primary"
+                                    : "bg-card/40 border-border/50 text-muted-foreground hover:bg-card/70 hover:text-foreground"
                             )}
+                            aria-pressed={avatar_style === id}
                         >
-                            <style.icon className="w-4 h-4" />
-                            <span className="text-[10px] font-bold uppercase">{style.label}</span>
+                            <Icon className="w-4 h-4" aria-hidden="true" />
+                            <span className="text-sm font-medium">{label}</span>
                         </button>
                     ))}
                 </div>
 
                 {avatar_style === 'emoji' && (
-                    <div className="space-y-3 px-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-2 pt-2">
                         <button
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                            className="w-full flex items-center justify-between p-3 rounded-xl border border-dashed border-primary/30 hover:bg-primary/5 transition-colors group"
+                            className="w-full flex items-center justify-between h-10 px-3 rounded-lg border border-dashed border-primary/40 hover:bg-primary/5 transition-colors"
                         >
                             <div className="flex items-center gap-3">
-                                <span className="text-2xl leading-none">{avatar_emoji}</span>
-                                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                                <span className="text-xl leading-none">{avatar_emoji}</span>
+                                <span className="text-sm font-medium text-muted-foreground">
                                     {t('appearance.avatar.choose_emoji')}
                                 </span>
                             </div>
-                            <Smile className="w-4 h-4 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                            <Smile className="w-4 h-4 text-primary opacity-60" aria-hidden="true" />
                         </button>
 
                         {showEmojiPicker && (
-                            <div className="relative z-50 mt-2">
-                                <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-2xl -m-2 z-[-1]" onClick={() => setShowEmojiPicker(false)} />
-                                <div className="bg-card border border-border rounded-xl p-1 shadow-2xl overflow-hidden">
-                                    <EmojiPicker
-                                        theme={theme === 'dark' ? EmojiTheme.DARK : EmojiTheme.LIGHT}
-                                        onEmojiClick={(emojiData) => {
-                                            updateSettings({ avatar_emoji: emojiData.emoji })
-                                            setShowEmojiPicker(false)
-                                        }}
-                                        width="100%"
-                                        height={350}
-                                        lazyLoadEmojis={true}
-                                        skinTonesDisabled={true}
-                                        searchPlaceholder="Search emoji..."
-                                    />
-                                </div>
+                            <div className="bg-card border border-border rounded-lg overflow-hidden">
+                                <EmojiPicker
+                                    theme={(theme === 'dark' || theme === 'midnight' || theme === 'comfort') ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                                    onEmojiClick={(emojiData) => {
+                                        updateSettings({ avatar_emoji: emojiData.emoji })
+                                        setShowEmojiPicker(false)
+                                    }}
+                                    width="100%"
+                                    height={350}
+                                    lazyLoadEmojis={true}
+                                    skinTonesDisabled={true}
+                                    searchPlaceholder="Search emoji..."
+                                />
                             </div>
                         )}
                     </div>

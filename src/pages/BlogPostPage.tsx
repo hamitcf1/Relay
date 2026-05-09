@@ -2,14 +2,13 @@ import { motion } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Clock, User, Share2 } from 'lucide-react'
+import { ArrowLeft, Clock, User } from 'lucide-react'
 
 export function BlogPostPage() {
     const { id } = useParams()
     const navigate = useNavigate()
     const { t } = useLanguageStore()
 
-    // Mock data matching the BlogPage content but with full text
     const postsContent: Record<string, any> = {
         '1': {
             title: t('blog.post1.title'),
@@ -33,9 +32,10 @@ export function BlogPostPage() {
 
     if (!post) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
+            <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white px-4">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold mb-4">Post Not Found</h1>
+                    <h1 className="text-2xl font-bold mb-3 tracking-tight">Post Not Found</h1>
+                    <p className="text-zinc-400 mb-5">The article you're looking for doesn't exist.</p>
                     <Button onClick={() => navigate('/blog')}>Back to Blog</Button>
                 </div>
             </div>
@@ -43,77 +43,56 @@ export function BlogPostPage() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 pb-32 relative">
-            {/* Navigation */}
-            <div className="container mx-auto px-6 pt-32">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30">
+            <div className="container mx-auto px-6 pt-12 mb-8">
                 <Button
                     variant="ghost"
-                    className="text-zinc-400 hover:text-white group transition-colors mb-12"
+                    className="text-zinc-400 hover:text-white px-0 hover:bg-transparent"
                     onClick={() => navigate('/blog')}
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                     {t('common.back')}
                 </Button>
             </div>
 
-            <article className="container mx-auto px-6 max-w-4xl">
+            <article className="container mx-auto px-6 max-w-3xl pb-24">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
+                    transition={{ duration: 0.3 }}
                 >
-                    <div className="relative aspect-video rounded-[3rem] overflow-hidden mb-12 border border-white/10 shadow-2xl">
+                    <div className="mb-6">
+                        <span className="inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider mb-3">
+                            {post.category}
+                        </span>
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-4">
+                            {post.title}
+                        </h1>
+                        <div className="flex items-center gap-4 text-zinc-500 text-sm">
+                            <span className="flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                                {post.date}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <User className="w-3.5 h-3.5" aria-hidden="true" />
+                                {post.author}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="aspect-[16/9] rounded-xl overflow-hidden mb-8 border border-zinc-800">
                         <img
                             src={post.image}
                             alt={post.title}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <div className="absolute bottom-8 left-8 px-6 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-widest uppercase">
-                            {post.category}
-                        </div>
                     </div>
 
-                    <div className="flex items-center gap-6 text-zinc-500 text-sm mb-8">
-                        <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            {post.date}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <User className="w-4 h-4" />
-                            {post.author}
-                        </div>
-                    </div>
-
-                    <h1 className="text-5xl md:text-6xl font-black mb-12 leading-tight bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
-                        {post.title}
-                    </h1>
-
-                    <div className="prose prose-invert prose-lg max-w-none">
-                        <p className="text-zinc-300 text-xl leading-relaxed mb-8">
+                    <div className="prose prose-invert max-w-none prose-p:text-zinc-300 prose-p:leading-relaxed">
+                        <p className="text-zinc-300 text-lg leading-relaxed">
                             {post.content}
                         </p>
-                        <p className="text-zinc-400 leading-relaxed">
-                            Morbi feugiat, magna sed semper varius, nulla sem dignissim turpis, sed posuere mauris lectus ut libero.
-                            Curabitur non ex urna. Vestibulum vitae ex diam. Etiam et hendrerit risus.
-                            Duis vel libero lectus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;
-                            Suspendisse eget elementum augue, eget porta tellus.
-                        </p>
-                    </div>
-
-                    <div className="mt-20 pt-10 border-t border-white/10 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Share2 className="w-5 h-5 text-indigo-400" />
-                            <span className="text-sm font-bold uppercase tracking-widest text-zinc-500">Share Insight</span>
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer">
-                                <span className="text-xs font-bold">In</span>
-                            </div>
-                            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer">
-                                <span className="text-xs font-bold">X</span>
-                            </div>
-                        </div>
                     </div>
                 </motion.div>
             </article>

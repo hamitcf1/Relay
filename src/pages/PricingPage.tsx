@@ -71,53 +71,49 @@ export function PricingPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 relative overflow-hidden flex flex-col">
-            {/* Ambient Background */}
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/5 blur-[150px] -z-10 rounded-full" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/5 blur-[120px] -z-10 rounded-full" />
-
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30 flex flex-col">
             {/* Navigation Backlink */}
-            <div className="container mx-auto px-6 pt-32 mb-12 relative z-20">
+            <div className="container mx-auto px-6 pt-12 mb-8">
                 <Button
                     variant="ghost"
-                    className="text-zinc-300 hover:text-white group transition-colors px-0 hover:bg-transparent"
+                    className="text-zinc-400 hover:text-white px-0 hover:bg-transparent"
                     onClick={() => navigate('/')}
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                     {t('common.backToHome')}
                 </Button>
             </div>
 
-            <div className="container mx-auto px-6 pb-32 relative z-10 flex-grow">
+            <div className="container mx-auto px-6 pb-24 flex-grow">
                 {/* Header */}
-                <div className="text-center mb-24 relative">
+                <div className="text-center mb-16">
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
                     >
-                        <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-8 leading-[0.85]">
-                            Fair pricing for <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-400 to-rose-400">modern hotels</span>.
+                        <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-5">
+                            {t('pricing.title')}
                         </h1>
-                        <p className="text-2xl text-zinc-200 leading-relaxed max-w-2xl mx-auto mb-16 font-medium">
+                        <p className="text-lg text-zinc-400 max-w-xl mx-auto mb-10">
                             {t('pricing.subtitle')}
                         </p>
 
                         {/* Billing Toggle */}
-                        <div className="flex items-center justify-center gap-6 p-2 rounded-2xl bg-white/5 border border-white/10 w-fit mx-auto backdrop-blur-xl">
+                        <div className="inline-flex items-center gap-1 p-1 rounded-full bg-zinc-900 border border-zinc-800">
                             <button
                                 onClick={() => setBillingCycle('monthly')}
-                                className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${billingCycle === 'monthly' ? 'bg-white text-black shadow-lg' : 'text-zinc-300 hover:text-white'}`}
+                                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${billingCycle === 'monthly' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
                             >
                                 {t('pricing.monthly')}
                             </button>
                             <button
                                 onClick={() => setBillingCycle('annual')}
-                                className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${billingCycle === 'annual' ? 'bg-white text-black shadow-lg' : 'text-zinc-300 hover:text-white'}`}
+                                className={`px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors ${billingCycle === 'annual' ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
                             >
                                 {t('pricing.annual')}
-                                <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-white text-[10px] uppercase tracking-tighter shadow-sm shadow-emerald-500/50">
-                                    -20%
+                                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold">
+                                    −20%
                                 </span>
                             </button>
                         </div>
@@ -125,111 +121,90 @@ export function PricingPage() {
                 </div>
 
                 {/* Plans Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-40 items-stretch">
-                    {plans.map((plan, i) => (
-                        <motion.div
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-24 max-w-5xl mx-auto items-stretch">
+                    {plans.map((plan) => (
+                        <div
                             key={plan.id}
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className={`relative p-12 rounded-[3.5rem] border transition-all duration-500 group flex flex-col ${plan.popular
-                                ? 'bg-gradient-to-b from-indigo-500/10 via-indigo-500/5 to-transparent border-indigo-500/40 shadow-2xl shadow-indigo-500/10'
-                                : 'bg-white/5 border-white/5 hover:border-white/20'
+                            className={`relative p-6 rounded-2xl border flex flex-col transition-colors ${plan.popular
+                                ? 'bg-zinc-900 border-primary/40 ring-1 ring-primary/20'
+                                : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
                                 }`}
                         >
                             {plan.popular && (
-                                <div className="absolute top-0 right-12 px-6 py-2.5 bg-indigo-500 text-[10px] font-black tracking-[0.2em] text-white rounded-b-2xl uppercase shadow-lg shadow-indigo-500/30">
+                                <div className="absolute -top-2.5 right-6 px-2.5 py-0.5 bg-primary text-[10px] font-semibold tracking-wide text-primary-foreground rounded-full uppercase">
                                     {t('pricing.popular')}
                                 </div>
                             )}
 
-                            <div className="flex items-center gap-4 mb-10">
-                                <div className={`w-14 h-14 rounded-2xl ${plan.bg} border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
-                                    <plan.icon className={`w-7 h-7 ${plan.color}`} />
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className={`w-9 h-9 rounded-lg ${plan.bg} flex items-center justify-center`}>
+                                    <plan.icon className={`w-4 h-4 ${plan.color}`} aria-hidden="true" />
                                 </div>
-                                <div>
-                                    <h3 className="text-2xl font-black text-white">{plan.name}</h3>
-                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Entry Level</p>
-                                </div>
+                                <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
                             </div>
 
-                            <div className="mb-12">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-6xl font-black tracking-tighter text-white">{plan.price}</span>
+                            <div className="mb-6">
+                                <div className="flex items-baseline gap-1.5">
+                                    <span className="text-4xl font-bold tracking-tight text-white">{plan.price}</span>
                                     {plan.price !== 'Custom' && plan.price !== 'Kişiye Özel' && (
-                                        <span className="text-zinc-300 text-lg font-bold">/{t('common.month')}</span>
+                                        <span className="text-zinc-500 text-sm">/ {t('common.month')}</span>
                                     )}
                                 </div>
-                                <p className="text-zinc-200 text-lg mt-4 leading-relaxed font-normal italic opacity-80">
-                                    "{plan.desc}"
+                                <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
+                                    {plan.desc}
                                 </p>
                             </div>
 
-                            <div className="space-y-5 mb-12 flex-grow">
+                            <ul className="space-y-2.5 mb-6 flex-grow">
                                 {plan.features.map((feature, idx) => (
-                                    <div key={idx} className="flex items-start gap-4">
-                                        <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center mt-0.5 group-hover:bg-indigo-500/20 transition-colors">
-                                            <Check className="w-3.5 h-3.5 text-indigo-400" />
-                                        </div>
-                                        <span className="text-zinc-300 font-medium">{feature}</span>
-                                    </div>
+                                    <li key={idx} className="flex items-start gap-2.5 text-sm">
+                                        <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" aria-hidden="true" />
+                                        <span className="text-zinc-300">{feature}</span>
+                                    </li>
                                 ))}
-                            </div>
+                            </ul>
 
                             <Button
                                 variant={plan.variant}
-                                className={`w-full py-8 rounded-[2rem] font-black text-lg transition-all duration-300 relative overflow-hidden group/btn ${plan.popular
-                                    ? 'bg-white text-black hover:bg-zinc-100 shadow-2xl shadow-indigo-500/20 active:scale-[0.98]'
-                                    : 'border-white/10 text-white hover:bg-white/10'
-                                    }`}
+                                className={`w-full ${plan.popular ? '' : 'border-zinc-700 text-white hover:bg-zinc-800'}`}
                                 onClick={() => navigate(plan.id === 'lite' ? '/register' : '/contact')}
                             >
-                                <span className="relative z-10">{plan.buttonText}</span>
-                                {plan.popular && (
-                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
-                                )}
+                                {plan.buttonText}
                             </Button>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
 
                 {/* FAQ Section */}
-                <div className="max-w-4xl mx-auto pt-40 border-t border-white/5">
-                    <div className="flex items-center gap-4 mb-16 justify-center">
-                        <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
-                            <HelpCircle className="w-6 h-6 text-zinc-300" />
-                        </div>
-                        <h2 className="text-5xl font-black text-white tracking-tighter">{t('pricing.faq.title')}</h2>
+                <div className="max-w-3xl mx-auto pt-16 border-t border-zinc-800">
+                    <div className="flex items-center justify-center gap-3 mb-10">
+                        <HelpCircle className="w-5 h-5 text-zinc-400" aria-hidden="true" />
+                        <h2 className="text-2xl font-bold text-white tracking-tight">{t('pricing.faq.title')}</h2>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {faqs.map((faq, idx) => (
-                            <motion.div 
-                                key={idx} 
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                className="p-10 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all group"
+                            <div
+                                key={idx}
+                                className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800"
                             >
-                                <h4 className="text-xl font-black text-white mb-4 group-hover:text-indigo-400 transition-colors">{faq.q}</h4>
-                                <p className="text-zinc-300 text-lg leading-relaxed">{faq.a}</p>
-                            </motion.div>
+                                <h3 className="text-base font-semibold text-white mb-2">{faq.q}</h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">{faq.a}</p>
+                            </div>
                         ))}
                     </div>
 
-                    <div className="mt-24 p-12 rounded-[3rem] bg-indigo-600/10 border border-indigo-500/20 text-center">
-                         <h4 className="text-2xl font-black text-white mb-4 italic">Still have questions?</h4>
-                         <p className="text-zinc-200 mb-8 max-w-lg mx-auto leading-relaxed">
-                             Our operations team is available 24/7 to discuss custom integrations and enterprise deployments.
-                         </p>
-                         <Button variant="link" className="text-indigo-400 font-black text-lg hover:text-white transition-colors" onClick={() => navigate('/contact')}>
-                             Contact Support →
-                         </Button>
+                    <div className="mt-12 p-6 rounded-xl bg-zinc-900/50 border border-zinc-800 text-center">
+                        <h3 className="text-base font-semibold text-white mb-2">{t('pricing.needHelp')}</h3>
+                        <p className="text-zinc-400 text-sm mb-4 max-w-md mx-auto">
+                            {t('pricing.subtitle')}
+                        </p>
+                        <Button variant="outline" size="sm" onClick={() => navigate('/contact')}>
+                            {t('pricing.contactSales')}
+                        </Button>
                     </div>
                 </div>
             </div>
-
-            {/* Bottom Glow */}
-            <div className="h-[300px] w-full bg-gradient-to-t from-indigo-500/10 to-transparent mt-32" />
         </div>
     )
 }

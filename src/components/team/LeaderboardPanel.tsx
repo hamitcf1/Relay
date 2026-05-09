@@ -22,7 +22,7 @@ export function LeaderboardPanel() {
 
     const getRankIcon = (rank: number) => {
         switch (rank) {
-            case 1: return <Crown className="w-6 h-6 text-yellow-500 fill-yellow-500/20 animate-pulse" />
+            case 1: return <Crown className="w-6 h-6 text-yellow-500 fill-yellow-500/20" />
             case 2: return <Medal className="w-6 h-6 text-muted-foreground fill-muted-foreground/20" />
             case 3: return <Medal className="w-6 h-6 text-amber-600 fill-amber-600/20" />
             default: return <span className="text-muted-foreground font-bold w-6 text-center tabular-nums">#{rank}</span>
@@ -54,7 +54,7 @@ export function LeaderboardPanel() {
                             onClick={() => setTimeRange('day')}
                             className={cn(
                                 "px-4 py-1.5 text-sm font-medium rounded-md transition-all",
-                                timeRange === 'day' ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "text-muted-foreground hover:text-foreground"
+                                timeRange === 'day' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                             )}
                         >
                             {t('leaderboard.today')}
@@ -63,7 +63,7 @@ export function LeaderboardPanel() {
                             onClick={() => setTimeRange('week')}
                             className={cn(
                                 "px-4 py-1.5 text-sm font-medium rounded-md transition-all",
-                                timeRange === 'week' ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "text-muted-foreground hover:text-foreground"
+                                timeRange === 'week' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                             )}
                         >
                             {t('leaderboard.thisWeek')}
@@ -149,7 +149,7 @@ export function LeaderboardPanel() {
                             {/* Shine effect for top 3 */}
                             {entry.rank <= 3 && (
                                 <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 translate-x-[-200%] group-hover:animate-shine" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 translate-x-[-200%] " />
                                 </div>
                             )}
                         </motion.div>

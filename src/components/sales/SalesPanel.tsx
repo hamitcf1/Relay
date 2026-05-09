@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check } from 'lucide-react'
+import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { EmptyState } from '@/components/ui/empty-state'
 import { cn, formatDisplayDate } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
@@ -588,10 +589,10 @@ export function SalesPanel() {
                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : filteredSales.length === 0 ? (
-                    <div className="py-12 text-center">
-                        <div className="text-4xl mb-2 opacity-20 text-muted-foreground">{saleTypeInfo[activeTab].icon}</div>
-                        <p className="text-muted-foreground text-sm">{t('sales.noSales', { label: t(saleTypeInfo[activeTab].label as any).toLowerCase() })}</p>
-                    </div>
+                    <EmptyState
+                        icon={Receipt}
+                        title={t('sales.noSales', { label: t(saleTypeInfo[activeTab].label as any).toLowerCase() })}
+                    />
                 ) : (
                     <div className="space-y-2">
                         {filteredSales.map(sale => {

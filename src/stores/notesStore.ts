@@ -369,15 +369,15 @@ export const categoryInfo: Record<NoteCategory, { label: string; color: string; 
     other: { label: 'Other', color: 'bg-zinc-500', icon: '📝' },
 }
 
-// Priority display info — visual intensity scales with level
+// Priority display info — minimal dot indicator
 export const priorityInfo: Record<NotePriority, {
     symbol: string
     color: string
     textClass: string
     glowClass: string
 }> = {
-    low: { symbol: '!', color: 'text-zinc-400', textClass: 'font-normal text-xs', glowClass: '' },
-    medium: { symbol: '!!', color: 'text-amber-400', textClass: 'font-semibold text-xs', glowClass: '' },
-    high: { symbol: '!!!', color: 'text-orange-500', textClass: 'font-bold text-sm', glowClass: 'animate-pulse' },
-    critical: { symbol: '!!!!', color: 'text-rose-500', textClass: 'font-black text-base', glowClass: 'animate-pulse-critical shadow-[0_0_15px_rgba(244,63,94,0.4)] rounded-full px-1' },
+    low: { symbol: '', color: 'text-muted-foreground', textClass: '', glowClass: '' },
+    medium: { symbol: '', color: 'text-amber-500', textClass: '', glowClass: '' },
+    high: { symbol: '', color: 'text-orange-500', textClass: '', glowClass: '' },
+    critical: { symbol: '', color: 'text-rose-500', textClass: '', glowClass: '' },
 }

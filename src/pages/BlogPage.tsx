@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Clock, User, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Clock, User } from 'lucide-react'
 
 export function BlogPage() {
     const { t } = useLanguageStore()
@@ -28,78 +28,70 @@ export function BlogPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 relative">
-            {/* Navigation Backlink */}
-            <div className="container mx-auto px-6 pt-32">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30">
+            <div className="container mx-auto px-6 pt-12 mb-8">
                 <Button
                     variant="ghost"
-                    className="text-zinc-400 hover:text-white group transition-colors"
+                    className="text-zinc-400 hover:text-white px-0 hover:bg-transparent"
                     onClick={() => navigate('/')}
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                     {t('common.backToHome')}
                 </Button>
             </div>
 
-            <div className="container mx-auto px-6 py-20 relative">
-                <div className="text-center mb-20 pt-10">
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]"
-                    >
+            <div className="container mx-auto px-6 pb-24">
+                <div className="max-w-2xl mx-auto text-center mb-12">
+                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
                         {t('blog.title')}
-                    </motion.h1>
-                    <p className="text-zinc-400 text-xl max-w-2xl mx-auto">
+                    </h1>
+                    <p className="text-zinc-400 text-lg">
                         {t('blog.subtitle')}
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
                     {posts.map((post, i) => (
-                        <motion.div
+                        <motion.button
                             key={i}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 8 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className="group cursor-pointer"
+                            transition={{ delay: i * 0.05, duration: 0.3 }}
                             onClick={() => navigate(`/blog/${i + 1}`)}
+                            className="group text-left rounded-xl overflow-hidden bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors"
                         >
-                            <div className="relative aspect-[16/9] rounded-[2.5rem] overflow-hidden mb-8 border border-white/10">
+                            <div className="relative aspect-[16/9] overflow-hidden">
                                 <img
                                     src={post.image}
                                     alt={post.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                                <div className="absolute top-6 left-6 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] font-bold tracking-widest uppercase">
+                                <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-zinc-950/80 backdrop-blur-sm text-[10px] font-semibold uppercase tracking-wider">
                                     {post.category}
                                 </div>
                             </div>
 
-                            <div className="px-4">
-                                <div className="flex items-center gap-6 text-zinc-500 text-xs mb-4">
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-3.5 h-3.5" />
+                            <div className="p-5">
+                                <div className="flex items-center gap-3 text-zinc-500 text-xs mb-2">
+                                    <span className="flex items-center gap-1.5">
+                                        <Clock className="w-3 h-3" aria-hidden="true" />
                                         {post.date}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <User className="w-3.5 h-3.5" />
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <User className="w-3 h-3" aria-hidden="true" />
                                         {post.author}
-                                    </div>
+                                    </span>
                                 </div>
-                                <h3 className="text-3xl font-bold mb-4 group-hover:text-indigo-400 transition-colors">
+                                <h3 className="text-base font-semibold mb-2 tracking-tight group-hover:text-primary transition-colors">
                                     {post.title}
                                 </h3>
-                                <p className="text-zinc-400 leading-relaxed mb-6 italic">
-                                    "{post.excerpt}"
+                                <p className="text-zinc-400 text-sm leading-relaxed">
+                                    {post.excerpt}
                                 </p>
-                                <div className="flex items-center gap-2 text-indigo-400 font-bold group-hover:gap-4 transition-all uppercase tracking-widest text-[10px]">
-                                    {t('blog.readMore')} <ChevronRight className="w-4 h-4" />
-                                </div>
                             </div>
-                        </motion.div>
+                        </motion.button>
                     ))}
                 </div>
             </div>

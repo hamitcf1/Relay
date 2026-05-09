@@ -216,8 +216,10 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                     >
                         {/* IBAN */}
                         <div className="space-y-2">
-                            <label className="text-xs text-muted-foreground">{t('hotel.iban')}</label>
+                            <label htmlFor="hotel-iban" className="text-xs text-muted-foreground">{t('hotel.iban')}</label>
                             <Input
+                                id="hotel-iban"
+                                name="iban"
                                 placeholder="TR00 0000 0000 0000 0000 0000 00"
                                 value={editInfo.iban}
                                 onChange={(e) => setEditInfo((prev) => ({ ...prev, iban: e.target.value }))}
@@ -225,8 +227,10 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         </div>
 
                         <div>
-                            <label className="text-xs text-muted-foreground">{t('hotel.bankName')}</label>
+                            <label htmlFor="hotel-bank-name" className="text-xs text-muted-foreground">{t('hotel.bankName')}</label>
                             <Input
+                                id="hotel-bank-name"
+                                name="bankName"
                                 placeholder={t('hotel.bankNamePlaceholder')}
                                 value={editInfo.bank_name}
                                 onChange={(e) => setEditInfo((prev) => ({ ...prev, bank_name: e.target.value }))}
@@ -237,8 +241,9 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         <div className="grid grid-cols-2 gap-3">
                             {priceItems.map((item) => (
                                 <div key={item.key}>
-                                    <label className="text-xs text-muted-foreground">{item.label} (₺)</label>
+                                    <label htmlFor={`hotel-price-${item.key}`} className="text-xs text-muted-foreground">{item.label} (₺)</label>
                                     <Input
+                                        id={`hotel-price-${item.key}`}
                                         type="number"
                                         value={String(editInfo[item.key as keyof HotelInfoData] || 0)}
                                         onChange={(e) => setEditInfo((prev) => ({
@@ -253,7 +258,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                         {/* Notes */}
                         <div>
                             <div className="flex items-center justify-between mb-1">
-                                <label className="text-xs text-muted-foreground">{t('hotel.additionalNotes')}</label>
+                                <label htmlFor="hotel-notes" className="text-xs text-muted-foreground">{t('hotel.additionalNotes')}</label>
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -270,11 +275,13 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                                 </Button>
                             </div>
                             <textarea
+                                id="hotel-notes"
+                                name="notes"
                                 placeholder={t('hotel.notesPlaceholder')}
                                 value={editInfo.notes}
                                 onChange={(e) => setEditInfo((prev) => ({ ...prev, notes: e.target.value }))}
                                 rows={5}
-                                className="w-full rounded-lg border border-input bg-muted/30 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200"
+                                className="w-full rounded-lg border border-input bg-muted/30 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-colors"
                             />
                         </div>
 

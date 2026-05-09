@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { CardTitle } from '@/components/ui/card'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { useNotesStore, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
@@ -74,13 +73,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         <CollapsibleCard
             id="shift-notes"
             title={
-                <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
-                    📋 {t('module.shiftNotes') as string}
-                    {counts.active > 0 && (
-                        <Badge variant="success" className="text-[10px] h-5 py-0 px-2 bg-emerald-500/10 text-emerald-400 border-transparent snake-border-active relative overflow-visible font-bold">
-                            <span>{counts.active} {t('status.active') as string}</span>
-                        </Badge>
-                    )}
+                <CardTitle className="text-sm font-semibold text-foreground">
+                    {t('module.shiftNotes') as string}
                 </CardTitle>
             }
             headerActions={
@@ -98,7 +92,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                     </Button>
                 )
             }
-            className="glass border-border/50"
+            className="border-border/50"
         >
             <NoteFilters
                 statusFilter={statusFilter}
@@ -126,8 +120,8 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                 {pinnedNotes.length > 0 && (
                     <div className="space-y-2 pb-4 border-b border-border/40">
                         <div className="flex items-center gap-2 px-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Sticky Board</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Pinned</span>
                         </div>
                         <NoteList
                             notes={pinnedNotes}

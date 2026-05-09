@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Check, ShieldCheck, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguageStore } from '@/stores/languageStore'
 import {
     Tooltip,
     TooltipContent,
@@ -15,6 +16,7 @@ interface CompliancePulseProps {
 }
 
 export function CompliancePulse({ agencyChecked, kbsChecked, className }: CompliancePulseProps) {
+    const { t } = useLanguageStore()
     
     const total = 2
     const checked = (agencyChecked ? 1 : 0) + (kbsChecked ? 1 : 0)
@@ -63,49 +65,41 @@ export function CompliancePulse({ agencyChecked, kbsChecked, className }: Compli
                         {/* Center Icon */}
                         <div className="absolute inset-0 flex items-center justify-center">
                             {percentage === 100 ? (
-                                <ShieldCheck className="w-4 h-4 text-emerald-500 animate-in zoom-in duration-500" />
+                                <ShieldCheck className="w-4 h-4 text-emerald-500" aria-hidden="true" />
                             ) : (
-                                <span className="text-[10px] font-black tabular-nums">
+                                <span className="text-[10px] font-semibold tabular-nums">
                                     {checked}/{total}
                                 </span>
                             )}
                         </div>
-
-                        {/* Pulsing Aura if incomplete */}
-                        {percentage < 100 && (
-                            <div className={cn(
-                                "absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none",
-                                percentage >= 50 ? "bg-amber-500" : "bg-rose-500"
-                            )} />
-                        )}
                     </div>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="p-3 bg-card border-border shadow-2xl z-[100]">
-                    <div className="space-y-2">
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-primary">Compliance Pulse</h4>
+                <TooltipContent side="bottom" className="p-3 bg-card border-border shadow-md z-[100]">
+                    <div className="space-y-2 min-w-[180px]">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">{t('compliance.pulse.title')}</h4>
                         <div className="space-y-1.5">
                             <div className="flex items-center justify-between gap-4">
-                                <span className="text-[10px] font-medium text-muted-foreground">KBS System Check</span>
+                                <span className="text-xs text-muted-foreground">{t('compliance.kbs')}</span>
                                 {kbsChecked ? (
-                                    <Check className="w-3 h-3 text-emerald-500" />
+                                    <Check className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
                                 ) : (
-                                    <AlertCircle className="w-3 h-3 text-rose-500" />
+                                    <AlertCircle className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
                                 )}
                             </div>
                             <div className="flex items-center justify-between gap-4">
-                                <span className="text-[10px] font-medium text-muted-foreground">Agency Messages</span>
+                                <span className="text-xs text-muted-foreground">{t('compliance.agency')}</span>
                                 {agencyChecked ? (
-                                    <Check className="w-3 h-3 text-emerald-500" />
+                                    <Check className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
                                 ) : (
-                                    <AlertCircle className="w-3 h-3 text-rose-500" />
+                                    <AlertCircle className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
                                 )}
                             </div>
                         </div>
                         <div className="pt-1 border-t border-border/50">
-                            <p className="text-[9px] text-muted-foreground leading-tight italic">
-                                {percentage === 100 
-                                    ? "Operations compliant." 
-                                    : "Checks pending for current shift."}
+                            <p className="text-xs text-muted-foreground leading-snug">
+                                {percentage === 100
+                                    ? t('compliance.pulse.compliant')
+                                    : t('compliance.pulse.pending')}
                             </p>
                         </div>
                     </div>

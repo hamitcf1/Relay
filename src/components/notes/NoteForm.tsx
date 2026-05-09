@@ -144,19 +144,19 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
             className="space-y-3 p-3 bg-card/50 rounded-lg border border-border"
         >
             {/* Category Selection */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
                 {(Object.keys(categoryInfo) as NoteCategory[]).map((cat) => (
                     <button
                         key={cat}
                         onClick={() => setNewCategory(cat)}
                         className={cn(
-                            'text-xs px-2 py-1 rounded-full flex items-center gap-1.5 transition-all',
+                            'text-xs h-7 px-2.5 rounded-full flex items-center gap-1.5 transition-colors border',
                             newCategory === cat
-                                ? `${categoryInfo[cat].color} text-white shadow-sm`
-                                : 'bg-muted text-muted-foreground hover:bg-accent'
+                                ? 'bg-foreground/10 text-foreground border-foreground/20'
+                                : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 border-transparent'
                         )}
                     >
-                        {categoryInfo[cat].icon}
+                        <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', categoryInfo[cat].color)} aria-hidden="true" />
                         {getCategoryLabel(cat)}
                     </button>
                 ))}
@@ -165,28 +165,31 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
             {/* Priority Selection */}
             <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground font-medium">{t('priority.label')}:</span>
-                {(Object.keys(priorityInfo) as NotePriority[]).map((p) => {
-                    const info = priorityInfo[p]
-                    return (
-                        <button
-                            key={p}
-                            type="button"
-                            onClick={() => setNewPriority(p)}
-                            className={cn(
-                                'px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-all border',
-                                newPriority === p
-                                    ? `${info.color} ${info.textClass} ${info.glowClass} border-current bg-current/10`
-                                    : 'text-muted-foreground border-transparent hover:bg-muted'
-                            )}
-                            title={t(`priority.${p}` as any) as string}
-                        >
-                            <span className={cn(info.textClass, newPriority === p ? info.color : '')}>
-                                {info.symbol}
-                            </span>
-                            <span className="text-[10px]">{t(`priority.${p}` as any) as string}</span>
-                        </button>
-                    )
-                })}
+                <div className="flex items-center gap-1 p-1 bg-muted/40 rounded-lg" role="radiogroup">
+                    {(Object.keys(priorityInfo) as NotePriority[]).map((p) => {
+                        const dotColor = p === 'critical' ? 'bg-rose-500' :
+                            p === 'high' ? 'bg-orange-500' :
+                                p === 'medium' ? 'bg-amber-500' : 'bg-muted-foreground'
+                        return (
+                            <button
+                                key={p}
+                                type="button"
+                                role="radio"
+                                aria-checked={newPriority === p}
+                                onClick={() => setNewPriority(p)}
+                                className={cn(
+                                    'h-7 px-2.5 rounded-md flex items-center gap-1.5 text-xs font-medium transition-colors',
+                                    newPriority === p
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                )}
+                            >
+                                {p !== 'low' && <span className={cn('w-1.5 h-1.5 rounded-full', dotColor)} aria-hidden="true" />}
+                                {t(`priority.${p}` as any) as string}
+                            </button>
+                        )
+                    })}
+                </div>
             </div>
 
             <div className="flex gap-2 items-center">
@@ -202,10 +205,10 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                     onChange={(e) => setNewTime(e.target.value)}
                     className="w-24 text-sm bg-muted/50"
                 />
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-transparent focus-within:border-primary/30 transition-all">
-                    <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-transparent focus-within:border-primary/30 transition-colors">
+                    <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
                     <input
-                        placeholder="Guest Name"
+                        placeholder={t('notes.guestName') as string}
                         value={newGuest}
                         onChange={(e) => setNewGuest(e.target.value)}
                         className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-muted-foreground/60"
@@ -367,14 +370,14 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                 </div>
             )}
 
-            <div className="space-y-1">
-                <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('common.staff')}</label>
+            <div className="space-y-1.5">
+                <label htmlFor="note-assignee" className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('common.staff')}</label>
                 <Select value={newAssignedStaff} onValueChange={setNewAssignedStaff}>
-                    <SelectTrigger className="w-full text-xs h-9 bg-muted/50 border-border">
-                        <SelectValue placeholder="Assign To..." />
+                    <SelectTrigger id="note-assignee" className="w-full text-sm h-9 bg-muted/50 border-border">
+                        <SelectValue placeholder={t('notes.assignTo') as string} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="none">Unassigned</SelectItem>
+                        <SelectItem value="none">{t('notes.unassigned') as string}</SelectItem>
                         {staff.map(s => (
                             <SelectItem key={s.uid} value={s.uid}>{s.name}</SelectItem>
                         ))}
@@ -383,13 +386,12 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
             </div>
 
             {/* Content */}
-            <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t('module.shiftNotes')}</label>
-                </div>
+            <div className="space-y-1.5">
+                <label htmlFor="note-content" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t('module.shiftNotes')}</label>
                 <Textarea
+                    id="note-content"
                     ref={newContentRef}
-                    placeholder={(t('module.shiftNotes') as string) + "..."}
+                    placeholder={t('notes.placeholder') as string}
                     value={newContent}
                     onChange={(e) => setNewContent(e.target.value)}
                     onContextMenu={newFormatting.handleContextMenu}

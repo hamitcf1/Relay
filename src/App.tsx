@@ -1,12 +1,12 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
+import { MotionConfig, AnimatePresence } from 'framer-motion'
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TabNotifications } from '@/components/ui/TabNotifications'
 import { UpdateNotifier } from '@/components/layout/UpdateNotifier'
 import { PublicLayout } from '@/components/layout/PublicLayout'
-import { CustomCursor } from '@/components/ui/CustomCursor'
 import { ConfirmProvider } from '@/components/ui/confirm-dialog'
 import { PageSkeleton } from '@/components/ui/skeleton'
 
@@ -16,7 +16,6 @@ import { ActivityTracker } from '@/components/tracking/ActivityTracker'
 import { AIChatBot } from '@/components/ai/AIChatBot'
 import { CyberLoadingScreen } from '@/components/ui/CyberLoadingScreen'
 
-// Lazy-loaded pages — each becomes a separate chunk
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })))
 const LoginPage = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })))
 const RegisterPage = lazy(() => import('@/pages/RegisterPage').then(m => ({ default: m.RegisterPage })))
@@ -36,55 +35,64 @@ const PrivacyPage = lazy(() => import('@/pages/legal/PrivacyPage').then(m => ({ 
 const TermsPage = lazy(() => import('@/pages/legal/TermsPage').then(m => ({ default: m.TermsPage })))
 const StatusPage = lazy(() => import('@/pages/legal/StatusPage').then(m => ({ default: m.StatusPage })))
 
-import { MotionConfig, AnimatePresence } from 'framer-motion'
+function ProtectedDashboardShell() {
+    const user = useAuthStore(s => s.user)
+    const isBooted = useAuthStore(s => s.isBooted)
+    const setBooted = useAuthStore(s => s.setBooted)
+
+    return (
+        <ProtectedRoute>
+            <ActivityTracker />
+            <AIChatBot />
+            <div className="relative w-full h-full">
+                <DashboardPage />
+                <AnimatePresence>
+                    {user && !isBooted && (
+                        <CyberLoadingScreen onComplete={() => setBooted(true)} />
+                    )}
+                </AnimatePresence>
+            </div>
+        </ProtectedRoute>
+    )
+}
 
 function App() {
-    const applyTheme = useThemeStore(state => state.applyTheme)
-    const { user, isBooted, setBooted } = useAuthStore()
-    const disableAnimations = user?.settings?.disable_animations
+    const applyTheme = useThemeStore(s => s.applyTheme)
+    const disableAnimations = useAuthStore(s => s.user?.settings?.disable_animations)
 
     useEffect(() => {
         applyTheme()
+    }, [applyTheme])
 
-        if (disableAnimations) {
-            document.body.classList.add('disable-animations')
-        } else {
-            document.body.classList.remove('disable-animations')
-        }
-
-        // Global right-click prevention
-        const handleContextMenu = (e: MouseEvent) => {
-            e.preventDefault()
-        }
-
-        window.addEventListener('contextmenu', handleContextMenu)
-        return () => window.removeEventListener('contextmenu', handleContextMenu)
-    }, [applyTheme, disableAnimations])
+    useEffect(() => {
+        document.body.classList.toggle('disable-animations', !!disableAnimations)
+    }, [disableAnimations])
 
     return (
         <ConfirmProvider>
             <MotionConfig reducedMotion={disableAnimations ? "always" : "user"}>
-                <div className="relative">
-                    <BrowserRouter>
-                        <UpdateNotifier />
+                <BrowserRouter>
+                    <UpdateNotifier />
                     <TabNotifications />
-                    <CustomCursor />
-                    <ActivityTracker />
 
-                    {/* Sonner Toast — positioned bottom-right with theme-aware styling */}
                     <Toaster
                         position="bottom-right"
+                        theme="system"
                         toastOptions={{
-                            className: 'bg-card border-border text-foreground',
                             duration: 4000,
+                            classNames: {
+                                toast: 'group toast bg-card text-card-foreground border border-border shadow-lg rounded-lg',
+                                description: 'text-muted-foreground',
+                                actionButton: 'bg-primary text-primary-foreground',
+                                cancelButton: 'bg-muted text-muted-foreground',
+                                closeButton: 'bg-card border-border text-muted-foreground hover:text-foreground',
+                            },
                         }}
-                        richColors
                         closeButton
                     />
 
-                     <Suspense fallback={<PageSkeleton />}>
+                    <Suspense fallback={<PageSkeleton />}>
                         <Routes>
-                            {/* Public Routes with Layout */}
                             <Route element={<PublicLayout />}>
                                 <Route path="/" element={<LandingPage />} />
                                 <Route path="/legal/privacy" element={<PrivacyPage />} />
@@ -101,12 +109,10 @@ function App() {
                                 <Route path="/contact" element={<ContactPage />} />
                             </Route>
 
-                            {/* Auth & Demo Pages */}
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
                             <Route path="/live-demo" element={<LiveDemoPage />} />
 
-                            {/* Protected Routes */}
                             <Route
                                 path="/setup-hotel"
                                 element={
@@ -115,43 +121,13 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
-                            <Route
-                                path="/dashboard"
-                                element={
-                                    <ProtectedRoute>
-                                        <div className="relative w-full h-full">
-                                            <DashboardPage />
-                                            <AnimatePresence>
-                                                {user && !isBooted && (
-                                                    <CyberLoadingScreen onComplete={() => setBooted(true)} />
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/operations"
-                                element={
-                                    <ProtectedRoute>
-                                        <div className="relative w-full h-full">
-                                            <DashboardPage />
-                                            <AnimatePresence>
-                                                {user && !isBooted && (
-                                                    <CyberLoadingScreen onComplete={() => setBooted(true)} />
-                                                )}
-                                            </AnimatePresence>
-                                        </div>
-                                    </ProtectedRoute>
-                                }
-                            />
+                            <Route path="/dashboard" element={<ProtectedDashboardShell />} />
+                            <Route path="/operations" element={<ProtectedDashboardShell />} />
                         </Routes>
                     </Suspense>
-                    <AIChatBot />
                 </BrowserRouter>
-            </div>
-        </MotionConfig>
-    </ConfirmProvider>
+            </MotionConfig>
+        </ConfirmProvider>
     )
 }
 

@@ -56,7 +56,7 @@ export interface UserSettings {
     language?: 'en' | 'tr'
     onboarding_seen?: boolean
     dismissed_announcements?: string[]
-    theme?: 'light' | 'dark' | 'comfort'
+    theme?: 'light' | 'sepia' | 'comfort' | 'dark' | 'midnight'
     accent_color?: string
     notifications?: boolean
     show_datetime?: boolean

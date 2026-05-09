@@ -270,14 +270,14 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                 </Badge>
                                             ))
                                         ) : (
-                                            <span className="text-[10px] text-zinc-600 italic">{t('calendar.noShifts')}</span>
+                                            <span className="text-[10px] text-muted-foreground italic">{t('calendar.noShifts')}</span>
                                         )}
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs text-zinc-400">
+                                        <span className="text-xs text-muted-foreground">
                                             {format(selectedDate, 'EEEE', { locale: getDateLocale() })}, {formatDisplayDate(selectedDate)}
                                         </span>
                                         <Button
@@ -394,7 +394,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
 
                                     {/* Events List */}
                                     {selectedDateEvents.length === 0 && !isAdding ? (
-                                        <p className="text-xs text-zinc-500 text-center py-2">{t('calendar.noEvents')}</p>
+                                        <p className="text-xs text-muted-foreground text-center py-2">{t('calendar.noEvents')}</p>
                                     ) : (
                                         <div className="space-y-1.5 md:max-h-32 md:overflow-y-auto scrollbar-thin">
                                             {selectedDateEvents.map((event) => (
