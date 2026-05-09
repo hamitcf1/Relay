@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, Hourglass, LogOut } from 'lucide-react'
+import { Clock, Hourglass } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 import { useShiftStore } from '@/stores/shiftStore'
 import { useRosterStore, type ShiftType } from '@/stores/rosterStore'
@@ -17,9 +17,6 @@ export function ShiftTimer() {
     const { startCountdown } = useSecurityStore()
     const [timeLeft, setTimeLeft] = useState<number | null>(null)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
-    const [, setClickCount] = useState(0)
-    const [showEnough, setShowEnough] = useState<string | null>(null)
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     const user = useAuthStore(state => state.user)
     const schedule = useRosterStore(state => state.schedule)
@@ -107,76 +104,38 @@ export function ShiftTimer() {
             <motion.button
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                    setClickCount(prev => {
-                        const next = prev + 1
-                        
-                        const messages: Record<number, string> = {
-                            5: "Focus!",
-                            10: "Enough!",
-                            15: "Get a coffee?",
-                            20: "Seriously?",
-                            50: "ULTRA BOREDOM"
-                        }
-
-                        if (messages[next]) {
-                            setShowEnough(messages[next])
-                            if (timeoutRef.current) clearTimeout(timeoutRef.current)
-                            timeoutRef.current = setTimeout(() => setShowEnough(null), 2000)
-                        }
-
-                        return next >= 50 ? 0 : next
-                    })
-                }}
                 className={cn(
-                    "flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border backdrop-blur-md transition-all duration-500 group relative select-none",
-                    showEnough 
-                        ? "bg-amber-500/20 border-amber-500/40 text-amber-500 cursor-default"
-                        : timeLeft === null
-                            ? "bg-muted/10 border-border/20 text-muted-foreground/60 cursor-default"
-                            : isCritical 
-                                ? "bg-rose-500/10 border-rose-500/30 text-rose-500 shadow-lg shadow-rose-500/10 cursor-default" 
-                                : "bg-primary/10 border-primary/20 text-primary/90 cursor-default"
+                    "flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-colors group select-none",
+                    timeLeft === null
+                        ? "bg-muted/40 border-border text-muted-foreground"
+                        : isCritical
+                            ? "bg-destructive/10 border-destructive/30 text-destructive"
+                            : "bg-muted/40 border-border text-foreground"
                 )}
             >
                 <div className="relative">
-                    {showEnough ? (
-                        <div className="w-4 h-4 flex items-center justify-center">
-                            {showEnough === "ULTRA BOREDOM" ? "🤯" : showEnough === "Seriously?" ? "🙄" : "🤫"}
-                        </div>
-                    ) : timeLeft === null ? (
-                        <Clock className="w-4 h-4 opacity-40" />
+                    {timeLeft === null ? (
+                        <Clock className="w-3.5 h-3.5 opacity-40" aria-hidden="true" />
                     ) : isCritical ? (
-                        <Hourglass className="w-4 h-4 animate-pulse" />
+                        <Hourglass className="w-3.5 h-3.5 animate-pulse" aria-hidden="true" />
                     ) : (
-                        <Clock className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                        <Clock className="w-3.5 h-3.5" aria-hidden="true" />
                     )}
                 </div>
                 <div className="flex flex-col items-start leading-none gap-0.5">
-                    <span className="text-[7px] font-black uppercase tracking-widest opacity-60">
-                        {showEnough ? 'Attention!' : (t('shift.timeLeft') || 'Shift Remaining')}
+                    <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                        {t('shift.timeLeft') || 'Shift'}
                     </span>
-                    <span className="text-xs font-mono font-black tabular-nums flex items-center gap-1.5">
-                        {showEnough || (
-                            timeLeft === null ? (
-                                '--:--'
-                            ) : (
-                                <>
-                                    {hours > 0 ? `${hours}:` : ''}
-                                    {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
-                                </>
-                            )
+                    <span className="text-xs font-mono font-semibold tabular-nums">
+                        {timeLeft === null ? (
+                            '--:--'
+                        ) : (
+                            <>
+                                {hours > 0 ? `${hours}:` : ''}
+                                {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+                            </>
                         )}
-                        {!showEnough && <LogOut className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity ml-1" />}
                     </span>
-                </div>
-
-                {/* Hover Indicator */}
-                <div className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-20"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary/40"></span>
                 </div>
             </motion.button>
 

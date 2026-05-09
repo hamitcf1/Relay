@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { doc, setDoc, arrayUnion, increment, Timestamp } from 'firebase/firestore'
+import { addDoc, collection, doc, setDoc, increment, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -11,12 +11,10 @@ export function ActivityTracker() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
 
-    // Refs to hold state without triggering re-renders
     const sessionStartRef = useRef<Date | null>(null)
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const timeoutRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const isVisibleRef = useRef<boolean>(document.visibilityState === 'visible')
 
-    // Helper to flush data to Firestore
     const flushData = async () => {
         if (!user || !hotel || !sessionStartRef.current) return
 
@@ -24,38 +22,32 @@ export function ActivityTracker() {
         const start = sessionStartRef.current
         const durationMinutes = (now.getTime() - start.getTime()) / 1000 / 60
 
-        if (durationMinutes < 0.1) return // Ignore very short sessions (< 6 seconds)
+        if (durationMinutes < 0.1) return
 
         const dateKey = format(now, 'yyyy-MM-dd')
         const logId = `${user.uid}_${dateKey}`
         const logRef = doc(db, 'hotels', hotel.id, 'activity_logs', logId)
-
-        const sessionData = {
-            start: Timestamp.fromDate(start),
-            end: Timestamp.fromDate(now),
-            duration_minutes: durationMinutes
-        }
+        const sessionsRef = collection(logRef, 'sessions')
 
         try {
-            // Use setDoc with merge to create if not exists or update
-            await setDoc(logRef, {
-                id: logId,
-                user_id: user.uid,
-                user_name: user.name,
-                hotel_id: hotel.id,
-                date: dateKey,
-                last_active: Timestamp.fromDate(now),
-                total_active_minutes: increment(durationMinutes),
-                sessions: arrayUnion(sessionData)
-            }, { merge: true })
+            await Promise.all([
+                setDoc(logRef, {
+                    id: logId,
+                    user_id: user.uid,
+                    user_name: user.name,
+                    hotel_id: hotel.id,
+                    date: dateKey,
+                    last_active: Timestamp.fromDate(now),
+                    total_active_minutes: increment(durationMinutes),
+                }, { merge: true }),
+                addDoc(sessionsRef, {
+                    start: Timestamp.fromDate(start),
+                    end: Timestamp.fromDate(now),
+                    duration_minutes: durationMinutes,
+                }),
+            ])
 
-            // Reset local session
-            if (isVisibleRef.current) {
-                sessionStartRef.current = new Date() // Start new session immediately if still visible
-            } else {
-                sessionStartRef.current = null
-            }
-
+            sessionStartRef.current = isVisibleRef.current ? new Date() : null
         } catch (error) {
             console.error("Error syncing activity log:", error)
         }

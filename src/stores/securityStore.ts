@@ -11,7 +11,6 @@ interface SecurityActions {
     setShowOverlay: (val: boolean) => void
     startCountdown: (seconds: number, reason: 'shift_end' | 'manual' | 'idle') => void
     stopCountdown: () => void
-    triggerManualCheck: () => void
 }
 
 type SecurityStore = SecurityState & SecurityActions
@@ -50,8 +49,4 @@ export const useSecurityStore = create<SecurityStore>((set, get) => ({
         if (countdownInterval) clearInterval(countdownInterval)
         set({ countdown: null, showOverlay: false, lastTriggerReason: null })
     },
-
-    triggerManualCheck: () => {
-        get().startCountdown(60, 'manual')
-    }
 }))

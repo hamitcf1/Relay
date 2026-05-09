@@ -484,12 +484,12 @@ function BulkRateEditor({ hotelId }: { hotelId: string }) {
     }
 
     return (
-        <Card className="border-primary/20 bg-primary/5 backdrop-blur-2xl border-dashed group overflow-hidden relative">
+        <Card className="border-primary/20 bg-primary/5 backdrop-blur-md border-dashed group overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
             <CardHeader className="pb-2 relative z-10">
                 <div>
                     <CardTitle className="text-lg flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-primary animate-pulse" />
+                        <Zap className="w-5 h-5 text-primary" />
                         {t('pricing.bulk.title') || 'Bulk Rate Editor'}
                     </CardTitle>
                     <CardDescription className="text-xs">
@@ -868,7 +868,7 @@ function PriceLookup() {
                                     <div className="text-right flex items-center gap-6">
                                         {dates.length > 1 && (
                                             <div className="space-y-1 pr-6 border-r border-border/20">
-                                                <div className="text-xl font-black font-mono tracking-tighter flex items-center justify-end text-primary/80 group-hover/item:text-primary transition-colors">
+                                                <div className="text-xl font-bold font-mono tracking-tighter flex items-center justify-end text-primary/80 group-hover/item:text-primary transition-colors">
                                                     <span className="text-[10px] font-medium text-muted-foreground mr-1 self-start mt-1.5">{currency}</span>
                                                     {totalAmount.toFixed(2)}
                                                 </div>
@@ -876,7 +876,7 @@ function PriceLookup() {
                                             </div>
                                         )}
                                         <div className="space-y-1">
-                                            <div className="text-2xl font-black font-mono tracking-tighter flex items-center justify-end text-foreground group-hover/item:text-primary transition-colors">
+                                            <div className="text-2xl font-bold font-mono tracking-tighter flex items-center justify-end text-foreground group-hover/item:text-primary transition-colors">
                                                 <span className="text-xs font-medium text-muted-foreground mr-1 self-start mt-1.5">{currency}</span>
                                                 {averageAmount.toFixed(2)}
                                             </div>
@@ -1246,7 +1246,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                                             />
                                         ) : (
                                             <div className="flex flex-col items-center">
-                                                <span className="font-mono font-black text-sm text-emerald-600 dark:text-emerald-400">
+                                                <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
                                                     {globalPrices[room]?.amount?.toFixed(2) || '---'}
                                                 </span>
                                                 <span className="text-[8px] opacity-40 uppercase">

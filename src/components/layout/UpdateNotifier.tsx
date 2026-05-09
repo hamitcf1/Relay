@@ -71,7 +71,7 @@ export function UpdateNotifier() {
                     <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/20 border border-primary/30">
-                                <AlertCircle className="h-4 w-4 text-primary animate-pulse" />
+                                <AlertCircle className="h-4 w-4 text-primary" aria-hidden="true" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-foreground leading-tight">

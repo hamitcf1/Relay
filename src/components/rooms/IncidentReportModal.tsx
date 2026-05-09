@@ -80,7 +80,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
                             <AlertTriangle className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-black tracking-tight">Report Incident</h3>
+                            <h3 className="text-lg font-semibold tracking-tight">Report Incident</h3>
                             <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest opacity-60">Room {roomNumber}</p>
                         </div>
                     </div>
@@ -91,7 +91,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
 
                 <div className="p-6 space-y-5">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Incident Type</label>
+                        <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground ml-1">Incident Type</label>
                         <div className="grid grid-cols-2 gap-2">
                             {(['damage', 'theft'] as IncidentType[]).map((t) => (
                                 <button
@@ -100,7 +100,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
                                     className={cn(
                                         "px-4 py-3 rounded-xl border text-sm font-bold transition-all flex items-center gap-2",
                                         type === t 
-                                            ? "bg-rose-500/10 border-rose-500/50 text-rose-500 shadow-lg shadow-rose-500/5" 
+                                            ? "bg-rose-500/10 border-rose-500/50 text-rose-500 " 
                                             : "bg-muted/50 border-border text-muted-foreground hover:bg-muted"
                                     )}
                                 >
@@ -112,7 +112,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Damaged/Missing Item</label>
+                        <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground ml-1">Damaged/Missing Item</label>
                         <div className="relative">
                             <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
@@ -126,7 +126,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Estimated Cost (TRY)</label>
+                            <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground ml-1">Estimated Cost (TRY)</label>
                             <div className="relative">
                                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <Input
@@ -139,7 +139,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Payment Status</label>
+                            <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground ml-1">Payment Status</label>
                             <Select value={status} onValueChange={(v: any) => setStatus(v)}>
                                 <SelectTrigger className="h-11 bg-muted/30 border-border rounded-xl text-xs">
                                     <SelectValue />
@@ -168,7 +168,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
                     <Button 
                         onClick={handleSubmit} 
                         disabled={loading || !item.trim()} 
-                        className="flex-1 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20"
+                        className="flex-1 rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                     >
                         {loading ? "Processing..." : "Report Incident"}
                     </Button>

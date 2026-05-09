@@ -33,7 +33,7 @@ export function TextFormatter({ text, className }: TextFormatterProps) {
         return parts.map((part, i) => {
             if (part.startsWith('#') && !isNaN(parseInt(part.substring(1)))) {
                 return (
-                    <span key={i} className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-500 font-black text-[11px] border border-amber-500/20 shadow-sm mx-0.5 inline-flex items-center">
+                    <span key={i} className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-500 font-semibold text-[11px] border border-amber-500/20 shadow-sm mx-0.5 inline-flex items-center">
                         {part}
                     </span>
                 )

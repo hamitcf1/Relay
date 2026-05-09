@@ -316,7 +316,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         >
             <div className="overflow-x-auto pt-2">
                 {staff.length === 0 ? (
-                    <p className="text-zinc-500 text-sm text-center py-8">
+                    <p className="text-muted-foreground text-sm text-center py-8">
                         {t('roster.noStaff')}
                     </p>
                 ) : (
@@ -338,7 +338,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                             )}>{dateStr}</div>
                                             <div className={cn(
                                                 "text-[7px] sm:text-[8px] md:text-[9px] truncate leading-tight uppercase",
-                                                isToday && "font-black"
+                                                isToday && "font-semibold"
                                             )}>{t(dayKey)}</div>
                                             {isToday && <div className="h-0.5 w-3 sm:w-4 mx-auto mt-0.5 rounded-full bg-primary" />}
                                         </th>
@@ -388,7 +388,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                                                     })
                                                             }
                                                         }}
-                                                        className="p-1 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
+                                                        className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors shrink-0"
                                                         title={member.is_hidden_in_roster ? t('roster.show') : t('roster.hide')}
                                                     >
                                                         {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
@@ -402,7 +402,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                             return (
                                                 <td key={day} className={cn(
                                                     "py-1 sm:py-2 px-0.5 sm:px-1 text-center align-middle relative",
-                                                    isToday && "bg-primary/5 animate-highlight-pulse rounded-md"
+                                                    isToday && "bg-primary/5 rounded-md"
                                                 )}>
                                                     <motion.button
                                                         onClick={() => cycleShift(member.uid, day, 'forward')}
@@ -413,7 +413,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                                         disabled={!canEdit}
                                                         className={cn(
                                                             'w-full max-w-[36px] sm:max-w-[48px] h-7 sm:h-9 mx-auto rounded text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center',
-                                                            shift ? shiftColors[shift] : 'bg-zinc-800/50 text-zinc-600',
+                                                            shift ? shiftColors[shift] : 'bg-muted/30 text-muted-foreground/50',
                                                             canEdit && 'hover:opacity-80 cursor-pointer',
                                                             !canEdit && 'cursor-default'
                                                         )}
@@ -432,7 +432,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                 )}
 
                 {/* Legend */}
-                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-zinc-800">
+                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
                     {shifts.map((shift) => {
                         const shiftInfo = hotel?.settings?.shifts?.find((s: any) => s.code === shift)
                         return (
@@ -440,7 +440,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                 <div className={cn('w-4 h-4 rounded text-[10px] flex items-center justify-center font-bold', shiftColors[shift])}>
                                     {shift}
                                 </div>
-                                <span className="text-xs text-zinc-500">
+                                <span className="text-xs text-muted-foreground">
                                     {shiftInfo ? shiftInfo.name : (
                                         <>
                                             {shift === 'A' && t('shift.morning')}

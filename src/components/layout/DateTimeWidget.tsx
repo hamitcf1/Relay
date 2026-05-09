@@ -13,8 +13,24 @@ export function DateTimeWidget({ className }: DateTimeWidgetProps) {
     const [time, setTime] = useState(new Date())
 
     useEffect(() => {
-        const timer = setInterval(() => setTime(new Date()), 1000)
-        return () => clearInterval(timer)
+        let timeoutId: ReturnType<typeof setTimeout>
+        let intervalId: ReturnType<typeof setInterval>
+
+        const align = () => {
+            const now = new Date()
+            setTime(now)
+            const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds()
+            timeoutId = setTimeout(() => {
+                setTime(new Date())
+                intervalId = setInterval(() => setTime(new Date()), 60_000)
+            }, msUntilNextMinute)
+        }
+        align()
+
+        return () => {
+            clearTimeout(timeoutId)
+            clearInterval(intervalId)
+        }
     }, [])
 
     const formatTime = (date: Date) => {

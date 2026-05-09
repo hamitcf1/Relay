@@ -21,6 +21,7 @@ import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
 import { TextFormatter } from '@/components/ui/TextFormatter'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { useConfirm } from '@/components/ui/confirm-dialog'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
@@ -303,7 +304,7 @@ export function MessagingPanel() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 ml-2"
+                            className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 ml-2"
                             title={t('messaging.clearTooltip')}
                             onClick={async () => {
                                 const confirmed = await confirm({
@@ -325,10 +326,7 @@ export function MessagingPanel() {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 relative" ref={scrollRef}>
                     {groupedMessages.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-                            <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="text-sm">{t('messaging.noMessages')}</p>
-                        </div>
+                        <EmptyState icon={MessageSquare} title={t('messaging.noMessages')} />
                     ) : (
                         groupedMessages.map((group, i) => (
                             <div key={i} className="space-y-4">
@@ -390,7 +388,7 @@ export function MessagingPanel() {
                                                             }
                                                         }}
                                                         className={cn(
-                                                            "absolute -top-2 p-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 opacity-0 group-hover/msg:opacity-100 transition-opacity hover:text-rose-500 hover:border-rose-500",
+                                                            "absolute -top-2 p-1 rounded-full bg-muted border border-border text-muted-foreground opacity-0 group-hover/msg:opacity-100 transition-opacity hover:text-rose-500 hover:border-rose-500",
                                                             isMe ? "-left-2" : "-right-2"
                                                         )}
                                                         title={t('messaging.deleteTooltip')}
