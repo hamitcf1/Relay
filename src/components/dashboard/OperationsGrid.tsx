@@ -9,8 +9,7 @@ import {
     DollarSign,
     Users,
     ScrollText,
-    BedDouble,
-    Trophy
+    BedDouble
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
@@ -38,7 +37,6 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             icon: ShieldCheck,
             color: 'bg-emerald-500/10 text-emerald-500',
             desc: t('operations.compliance.desc') || 'KBS & Agency check-ins',
-            isNew: true
         },
         {
             id: 'feedback',
@@ -89,14 +87,6 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             color: 'bg-pink-500/10 text-pink-500',
             desc: t('operations.team.desc')
         },
-        {
-            id: 'games',
-            label: 'Office Games',
-            icon: Trophy,
-            color: 'bg-amber-500/10 text-amber-500',
-            desc: 'Reflex games & staff scoreboard',
-            isNew: true
-        },
     ]
 
     if (userRole === 'gm') {
@@ -125,36 +115,28 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
     }
 
     return (
-        <div className="p-4 pb-32 overflow-y-auto h-full relative custom-scrollbar">
+        <div className="p-4 lg:p-6 pb-32 overflow-y-auto h-full relative custom-scrollbar">
             <h2 className="text-2xl font-bold mb-6 px-1">{t('dashboard.operationsHub')}</h2>
 
             <motion.div
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4 max-w-[1400px]"
             >
                 {items.map((item) => (
                     <motion.button
                         key={item.id}
                         variants={itemAnim}
                         onClick={() => onSelect(item.id)}
-                        whileTap={{ scale: 0.95 }}
-                        className="group relative flex flex-col items-start p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-left snake-border-glow"
+                        whileTap={{ scale: 0.97 }}
+                        className="group relative flex flex-col items-start p-4 rounded-xl border border-border/40 bg-card/40 hover:bg-card/70 hover:border-border transition-colors text-left active:scale-[0.98]"
                     >
-                        <div className={cn("p-3 rounded-xl mb-3 transition-colors group-hover:bg-white/10", item.color)}>
-                            <item.icon className="w-6 h-6" />
+                        <div className={cn("p-2.5 rounded-lg mb-3 transition-colors", item.color)}>
+                            <item.icon className="w-5 h-5" />
                         </div>
-                        {item.isNew && (
-                            <div className="absolute top-3 right-3 px-1.5 py-0.5 rounded-full bg-primary/20 border border-primary/20 text-[8px] font-black uppercase tracking-widest text-primary animate-pulse shadow-lg shadow-primary/10">
-                                New
-                            </div>
-                        )}
-                        <span className="font-bold text-base tracking-tight mb-1">{item.label}</span>
-                        <span className="text-xs text-zinc-400 font-medium uppercase tracking-wider leading-snug">{item.desc}</span>
-
-                        {/* Glow Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                        <span className="font-semibold text-sm tracking-tight mb-0.5">{item.label}</span>
+                        <span className="text-xs text-muted-foreground leading-snug">{item.desc}</span>
                     </motion.button>
                 ))}
             </motion.div>

@@ -20,7 +20,6 @@ import {
     Globe,
     Check,
     Settings,
-    Trophy
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useLayoutStore } from '@/stores/layoutStore'
@@ -75,7 +74,6 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
         { id: 'sales', icon: CreditCard, label: t('module.sales') || 'Sales', subTab: 'sales' },
         { id: 'pricing', icon: DollarSign, label: t('module.pricing_label') || 'Pricing', subTab: 'pricing' },
         { id: 'team', icon: Users, label: t('module.team_label') || 'Team', subTab: 'team' },
-        { id: 'games', icon: Trophy, label: 'Office Games', subTab: 'games', createdAt: '2026-05-05' },
     ]
 
     if (userRole === 'gm') {
@@ -112,15 +110,12 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                 <div className="relative">
                     <item.icon className={cn("w-4 h-4 shrink-0", active && !sidebarCollapsed ? "" : active ? "text-primary-foreground" : "")} />
                     {isNewFeature(item.createdAt) && sidebarCollapsed && (
-                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                        </span>
+                        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
                     )}
                 </div>
                 {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                 {!sidebarCollapsed && isNewFeature(item.createdAt) && (
-                    <span className="ml-auto flex h-4 items-center rounded-full bg-primary/20 px-1.5 text-[8px] font-black uppercase tracking-widest text-primary border border-primary/20 shadow-sm animate-pulse">
+                    <span className="ml-auto flex h-4 items-center rounded-full bg-primary/15 px-1.5 text-[9px] font-semibold uppercase tracking-wide text-primary">
                         New
                     </span>
                 )}
@@ -155,7 +150,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                 initial={false}
                 animate={{ width: sidebarCollapsed ? 80 : 260 }}
                 className={cn(
-                    "hidden md:flex flex-col bg-card/60 backdrop-blur-2xl border-r border-border/40 shrink-0 select-none z-50 relative",
+                    "hidden md:flex flex-col bg-card/60 backdrop-blur-md border-r border-border/40 shrink-0 select-none z-50 relative",
                 )}
             >
                 {/* Collapse Toggle */}
@@ -171,8 +166,8 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                     "h-16 flex items-center border-b border-border/40 shrink-0 transition-all duration-300",
                     sidebarCollapsed ? "justify-center px-0" : "px-6 gap-3"
                 )}>
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                        <ConciergeBell className="w-4 h-4 text-primary-foreground" />
+                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                        <ConciergeBell className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
                     </div>
                     {!sidebarCollapsed && (
                         <motion.h1 
@@ -204,14 +199,9 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                         ))}
                     </div>
 
-                    {/* AI Assistant - Integrated */}
+                    {/* AI Assistant */}
                     <div className="space-y-1">
-                         {!sidebarCollapsed && (
-                            <h4 className="px-3 text-xs font-semibold uppercase tracking-wider text-violet-400/70 mb-2 truncate">
-                                AI Hub
-                            </h4>
-                        )}
-                        <NavItem 
+                        <NavItem
                             item={{ id: 'ai-assistant', icon: Sparkles, label: 'AI Assistant' }}
                             active={false}
                             onClick={toggleChat}
@@ -289,11 +279,11 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent className="w-40 bg-card border-border p-1">
-                                        <DropdownMenuItem onClick={() => setLanguage('en')} className="text-xs">
-                                            🇺🇸 English {language === 'en' && <Check className="ml-auto w-3 h-3" />}
+                                        <DropdownMenuItem onClick={() => setLanguage('en')} className="text-sm cursor-pointer">
+                                            English {language === 'en' && <Check className="ml-auto w-3.5 h-3.5" aria-hidden="true" />}
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-xs">
-                                            🇹🇷 Türkçe {language === 'tr' && <Check className="ml-auto w-3 h-3" />}
+                                        <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-sm cursor-pointer">
+                                            Türkçe {language === 'tr' && <Check className="ml-auto w-3.5 h-3.5" aria-hidden="true" />}
                                         </DropdownMenuItem>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>

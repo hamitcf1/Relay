@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
-import { RoomManagementPanel } from '@/components/rooms/RoomManagementPanel'
 import { ShiftNotes } from '@/components/notes/ShiftNotes'
 import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
@@ -33,17 +33,7 @@ import { useStaffMealStore } from '@/stores/staffMealStore'
 import { useBlacklistStore } from '@/stores/blacklistStore'
 
 import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { MessagingPanel } from '@/components/messaging/MessagingPanel'
-import { FeedbackSection } from '@/components/feedback/FeedbackSection'
-import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
-import { TourCatalogue } from '@/components/tours/TourCatalogue'
-import { SalesPanel } from '@/components/sales/SalesPanel'
-import { PricingPanel } from '@/components/pricing/PricingPanel'
-import { LeaderboardPanel } from '@/components/team/LeaderboardPanel'
-import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
-import { HotelSettings } from '@/components/settings/HotelSettings'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
-import { OfficeGames } from '@/components/operations/OfficeGames'
 import { Clock as ClockIcon, EyeOff } from 'lucide-react'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { MobileNav } from '@/components/layout/MobileNav'
@@ -57,7 +47,28 @@ import { SecurityTimer } from '@/components/layout/SecurityTimer'
 import { SecurityModal } from '@/components/layout/SecurityModal'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
+import { KpiBadges } from '@/components/dashboard/KpiBadges'
 import { useSecurityStore } from '@/stores/securityStore'
+
+// Lazy-loaded operations panels — each tab becomes its own chunk
+const MessagingPanel = lazy(() => import('@/components/messaging/MessagingPanel').then(m => ({ default: m.MessagingPanel })))
+const FeedbackSection = lazy(() => import('@/components/feedback/FeedbackSection').then(m => ({ default: m.FeedbackSection })))
+const OffDayScheduler = lazy(() => import('@/components/staff/OffDayScheduler').then(m => ({ default: m.OffDayScheduler })))
+const TourCatalogue = lazy(() => import('@/components/tours/TourCatalogue').then(m => ({ default: m.TourCatalogue })))
+const SalesPanel = lazy(() => import('@/components/sales/SalesPanel').then(m => ({ default: m.SalesPanel })))
+const PricingPanel = lazy(() => import('@/components/pricing/PricingPanel').then(m => ({ default: m.PricingPanel })))
+const LeaderboardPanel = lazy(() => import('@/components/team/LeaderboardPanel').then(m => ({ default: m.LeaderboardPanel })))
+const ActivityLogPanel = lazy(() => import('@/components/activity/ActivityLogPanel').then(m => ({ default: m.ActivityLogPanel })))
+const HotelSettings = lazy(() => import('@/components/settings/HotelSettings').then(m => ({ default: m.HotelSettings })))
+const RoomManagementPanel = lazy(() => import('@/components/rooms/RoomManagementPanel').then(m => ({ default: m.RoomManagementPanel })))
+
+function TabFallback() {
+    return (
+        <div className="flex items-center justify-center h-full p-8">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        </div>
+    )
+}
 
 export function DashboardPage() {
     const location = useLocation()
@@ -216,11 +227,6 @@ export function DashboardPage() {
 
     return (
         <div className="h-[100dvh] overflow-hidden bg-background text-foreground flex font-sans selection:bg-primary/30 relative">
-            {/* Background Gradients (Cyber Theme) */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-[120px]" />
-            </div>
 
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
@@ -243,17 +249,24 @@ export function DashboardPage() {
             {/* Main Content Pane */}
             <div className="flex flex-col flex-1 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-0 relative min-w-0 overflow-hidden">
                 {/* Header Navbar (Visible mostly for Mobile layout and utility items) */}
-                <header className="safe-header border-b border-border/40 bg-background/50 backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 z-40 transition-all duration-300 relative h-16">
-                    <div className="flex items-center gap-8 md:hidden">
+                <header className="safe-header border-b border-border/40 bg-background flex items-center justify-between px-4 lg:px-6 shrink-0 z-40 relative h-16">
+                    <div className="flex items-center md:hidden">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                                <span className="font-bold text-primary-foreground">R</span>
+                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                                <span className="font-bold text-primary-foreground text-sm">R</span>
                             </div>
                             <div>
-                                <h1 className="font-semibold text-lg tracking-tight leading-none text-foreground">Relay</h1>
-                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium max-w-[150px] truncate">{hotel?.info.name}</p>
+                                <h1 className="font-semibold text-base tracking-tight leading-none text-foreground">Relay</h1>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium max-w-[150px] truncate mt-0.5">{hotel?.info.name}</p>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="hidden md:flex items-center pl-2">
+                        <KpiBadges onNavigate={(tab, subTab) => {
+                            setActiveTab(tab)
+                            if (tab === 'operations' && subTab) setOperationTab(subTab)
+                        }} />
                     </div>
 
                     <div className="flex-1" />
@@ -292,13 +305,13 @@ export function DashboardPage() {
                     </div>
                 </header>
 
-            <main className="flex-1 overflow-hidden p-4 lg:p-6 flex flex-col transition-all duration-300 relative min-h-0 bg-background/30">
+            <main className="flex-1 overflow-hidden p-4 lg:p-6 flex flex-col relative min-h-0">
                 <AnnouncementBanner />
                 
                 <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
                     
                     {/* OVERVIEW VIEW */}
-                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden">
                         {isMobile && overviewTab !== 'grid' && (
                             <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20 mb-4 rounded-xl">
                                 <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
@@ -360,7 +373,7 @@ export function DashboardPage() {
                         </TabsContent>
 
                         {/* OPERATIONS VIEW */}
-                        <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
+                        <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden">
                             <Tabs value={operationTab} onValueChange={setOperationTab} className="flex-1 flex flex-col min-h-0">
                                 {/* Mobile Header for Sub-pages */}
                                 {isMobile && operationTab !== 'grid' && (
@@ -378,57 +391,54 @@ export function DashboardPage() {
                                     )}
 
                                     <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
-                                        <TabsContent value="messaging" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <MessagingPanel />
-                                        </TabsContent>
-                                        <TabsContent value="compliance" className="h-full m-0 p-6 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500 overflow-y-auto">
-                                            <div className="max-w-2xl mx-auto space-y-6">
-                                                <div className="space-y-1">
-                                                    <h2 className="text-2xl font-bold tracking-tight">{t('module.compliance') || 'Compliance'}</h2>
-                                                    <p className="text-sm text-muted-foreground">{t('operations.compliance.desc') || 'Maintain operational standards for the current shift.'}</p>
+                                        <Suspense fallback={<TabFallback />}>
+                                            <TabsContent value="messaging" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0">
+                                                <MessagingPanel />
+                                            </TabsContent>
+                                            <TabsContent value="compliance" className="h-full m-0 p-6 outline-none pb-24 lg:pb-0 overflow-y-auto">
+                                                <div className="max-w-2xl mx-auto space-y-6">
+                                                    <div className="space-y-1">
+                                                        <h2 className="text-2xl font-bold tracking-tight">{t('module.compliance') || 'Compliance'}</h2>
+                                                        <p className="text-sm text-muted-foreground">{t('operations.compliance.desc') || 'Maintain operational standards for the current shift.'}</p>
+                                                    </div>
+                                                    <CompliancePanel hotelId={hotel?.id || ''} className="p-2" />
                                                 </div>
-                                                <CompliancePanel hotelId={hotel?.id || ''} className="p-2" />
-                                            </div>
-                                        </TabsContent>
-                                        <TabsContent value="settings" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <HotelSettings />
-                                        </TabsContent>
-                                        <TabsContent value="sales" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <SalesPanel />
-                                        </TabsContent>
-                                        
-                                        <TabsContent value="feedback" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <FeedbackSection />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
-                                        <TabsContent value="off-days" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <OffDayScheduler />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
-                                        <TabsContent value="tours" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <TourCatalogue />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
-                                        <TabsContent value="rooms" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <RoomManagementPanel />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
-                                        <TabsContent value="pricing" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <PricingPanel />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
-                                        <TabsContent value="team" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <LeaderboardPanel />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
-                                        <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <ActivityLogPanel />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
-                                        <TabsContent value="games" className="h-full m-0 p-6 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0 data-[state=active]:animate-in data-[state=active]:fade-in duration-500">
-                                            <OfficeGames hotelId={hotel?.id || ''} />
-                                            <ScrollToTopButton />
-                                        </TabsContent>
+                                            </TabsContent>
+                                            <TabsContent value="settings" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <HotelSettings />
+                                            </TabsContent>
+                                            <TabsContent value="sales" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0">
+                                                <SalesPanel />
+                                            </TabsContent>
+                                            <TabsContent value="feedback" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <FeedbackSection />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="off-days" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <OffDayScheduler />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="tours" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <TourCatalogue />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="rooms" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <RoomManagementPanel />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="pricing" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <PricingPanel />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="team" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <LeaderboardPanel />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <ActivityLogPanel />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                        </Suspense>
                                     </div>
                                 </div>
                             </Tabs>

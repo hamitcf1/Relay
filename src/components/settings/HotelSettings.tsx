@@ -216,7 +216,7 @@ export function HotelSettings() {
                             <div className="space-y-3">
                                 {shifts.map((shift) => (
                                     <div key={shift.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 border border-border/40 group">
-                                        <div className="w-12 h-10 rounded-lg bg-primary/20 flex items-center justify-center font-black text-primary shrink-0 border border-primary/30">
+                                        <div className="w-12 h-10 rounded-lg bg-primary/20 flex items-center justify-center font-semibold text-primary shrink-0 border border-primary/30">
                                             <Input 
                                                 value={shift.code} 
                                                 onChange={(e) => updateShift(shift.id, 'code', e.target.value.toUpperCase())}
@@ -284,7 +284,7 @@ export function HotelSettings() {
                             return [
                                 { role: 'GM', count: gmCount, icon: ShieldCheck, color: 'text-rose-400' },
                                 { role: t('auth.role.receptionist'), count: receptionCount, icon: Briefcase, color: 'text-blue-400' },
-                                { role: t('auth.role.staff'), count: otherCount, icon: Users, color: 'text-zinc-400' }
+                                { role: t('auth.role.staff'), count: otherCount, icon: Users, color: 'text-muted-foreground' }
                             ].map((item, i) => (
                             <Card key={i} className="glass">
                                 <CardContent className="pt-6">

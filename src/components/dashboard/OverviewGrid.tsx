@@ -83,32 +83,28 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
     }
 
     return (
-        <div className="p-4 pb-32">
+        <div className="p-4 lg:p-6 pb-32">
             <h2 className="text-2xl font-bold mb-6 px-1">{t('module.overview')}</h2>
 
             <motion.div
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4"
             >
                 {items.map((item) => (
                     <motion.button
                         key={item.id}
                         variants={itemAnim}
                         onClick={() => onSelect(item.id)}
-                        whileTap={{ scale: 0.95 }}
-                        whileHover={{ scale: 1.02 }}
-                        className="group relative flex flex-col items-start p-5 rounded-2xl card-modern text-left snake-border-glow"
+                        whileTap={{ scale: 0.97 }}
+                        className="group relative flex flex-col items-start p-4 rounded-xl card-modern text-left active:scale-[0.98]"
                     >
-                        <div className={cn("p-3 rounded-xl mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg", item.color)}>
-                            <item.icon className="w-6 h-6" />
+                        <div className={cn("p-2.5 rounded-lg mb-3 transition-colors", item.color)}>
+                            <item.icon className="w-5 h-5" />
                         </div>
-                        <span className="font-bold text-base tracking-tight mb-1">{item.label}</span>
-                        <span className="text-xs text-muted-foreground font-medium leading-snug">{item.desc}</span>
-
-                        {/* Gradient Glow Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl" />
+                        <span className="font-semibold text-sm tracking-tight mb-0.5">{item.label}</span>
+                        <span className="text-xs text-muted-foreground leading-snug">{item.desc}</span>
                     </motion.button>
                 ))}
             </motion.div>

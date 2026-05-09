@@ -95,7 +95,7 @@ export function ShiftManagementModal({ isOpen, onClose, hotelId }: ShiftManageme
                                     type="number"
                                     value={cashEnd}
                                     onChange={(e) => setCashEnd(e.target.value)}
-                                    className="h-12 pl-10 bg-muted/30 border-border focus:border-primary/50 text-lg font-black"
+                                    className="h-12 pl-10 bg-muted/30 border-border focus:border-primary/50 text-lg font-semibold"
                                     placeholder="0.00"
                                 />
                             </div>
@@ -125,13 +125,14 @@ export function ShiftManagementModal({ isOpen, onClose, hotelId }: ShiftManageme
                     <Button
                         onClick={handleEndShift}
                         disabled={!cashEnd || isEnding}
-                        className="w-full h-12 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20 group"
+                        variant="destructive"
+                        className="w-full"
                     >
                         {isEnding ? (
-                            <span className="animate-pulse">{t('common.processing') || 'Processing...'}</span>
+                            <span>{t('common.processing') || 'Processing...'}</span>
                         ) : (
                             <>
-                                <LogOut className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                                <LogOut className="w-4 h-4" aria-hidden="true" />
                                 {t('shift.endAction') || 'End Shift'}
                             </>
                         )}
