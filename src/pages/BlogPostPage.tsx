@@ -34,9 +34,9 @@ export function BlogPostPage() {
         return (
             <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white px-4">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-3 tracking-tight">Post Not Found</h1>
-                    <p className="text-zinc-400 mb-5">The article you're looking for doesn't exist.</p>
-                    <Button onClick={() => navigate('/blog')}>Back to Blog</Button>
+                    <h1 className="text-2xl font-bold mb-3 tracking-tight">{t('blog.notFound.title')}</h1>
+                    <p className="text-zinc-400 mb-5">{t('blog.notFound.desc')}</p>
+                    <Button onClick={() => navigate('/blog')}>{t('blog.notFound.back')}</Button>
                 </div>
             </div>
         )

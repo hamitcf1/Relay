@@ -42,7 +42,7 @@ export function HowItWorksPage() {
                             {t('howItWorks.title')}
                         </p>
                         <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-5 leading-tight">
-                            From paper logs to real-time
+                            {t('howItWorks.heroH1')}
                         </h1>
                         <p className="text-lg text-zinc-400 leading-relaxed">
                             {t('howItWorks.subtitle')}
@@ -86,12 +86,12 @@ export function HowItWorksPage() {
 
                 {/* CTA */}
                 <div className="mt-16 max-w-2xl mx-auto p-8 rounded-2xl bg-zinc-900/50 border border-zinc-800 text-center">
-                    <h2 className="text-xl font-semibold text-white mb-2 tracking-tight">Zero configuration. Ready in minutes.</h2>
+                    <h2 className="text-xl font-semibold text-white mb-2 tracking-tight">{t('howItWorks.cta.title')}</h2>
                     <p className="text-zinc-400 text-sm mb-5">
-                        Start your free workspace and invite your team to collaborate.
+                        {t('howItWorks.cta.desc')}
                     </p>
                     <Button onClick={() => navigate('/register')}>
-                        Get Started Free
+                        {t('features.cta.start')}
                     </Button>
                 </div>
             </div>
