@@ -218,8 +218,8 @@ function ProductMockup({ t: _t }: { t: any }) {
                     {/* Notes preview */}
                     <div className="space-y-2">
                         <MockNote tone="primary" pinned title="ÖDEME ALINACAK 4000TL — 406" sub="Sema Döner · 2 saat önce" critical />
-                        <MockNote tone="default" title="KBS kontrolü tamamlandı" sub="Ahmet Yılmaz · 35 dk önce" />
-                        <MockNote tone="default" title="LAUNDRY 800TL — kadın çıkış 504" sub="Sinan Olyvnik · 6 saat önce" />
+                        <MockNote tone="default" title="KBS kontrolü tamamlandı" sub="Hamit Can Fındık · 35 dk önce" />
+                        <MockNote tone="default" title="LAUNDRY 800TL — 504" sub="Deniz Yılmaz · 6 saat önce" />
                     </div>
                 </div>
             </div>
