@@ -618,6 +618,10 @@ export type Translations = {
     'roster.show': string
     'roster.hide': string
     'roster.unknown': string
+    'roster.exportPuantaj': string
+    'roster.exportSuccess': string
+    'roster.exportError': string
+    'roster.exportEmpty': string
     'common.clear': string
 
     // Tours
