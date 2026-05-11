@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, Reorder } from 'framer-motion'
-import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical, Eye, EyeOff } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical, Eye, EyeOff, FileSpreadsheet } from 'lucide-react'
+import { toast } from 'sonner'
 import {
     doc,
     getDoc,
@@ -55,6 +56,38 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const [weekOffset, setWeekOffset] = useState(0)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
+    const [exporting, setExporting] = useState(false)
+
+    const isGM = user?.role === 'gm'
+
+    const handleExportPuantaj = async () => {
+        if (!staff.length) {
+            toast.error(t('roster.exportEmpty'))
+            return
+        }
+        setExporting(true)
+        try {
+            const { generatePuantaj } = await import('@/lib/puantaj')
+            const now = new Date()
+            // Use the full date-keyed schedule from the store (covers entire
+            // month). The local `schedule` here is only the current week and
+            // keyed by short day names ('Mon', 'Tue', ...).
+            const fullSchedule = useRosterStore.getState().schedule
+            await generatePuantaj({
+                staff,
+                schedule: fullSchedule,
+                year: now.getFullYear(),
+                month: now.getMonth(),
+                today: now,
+            })
+            toast.success(t('roster.exportSuccess'))
+        } catch (err) {
+            console.error('Puantaj export failed:', err)
+            toast.error(t('roster.exportError'))
+        } finally {
+            setExporting(false)
+        }
+    }
 
     // Sync store staff to local staff for reordering
     useEffect(() => {
@@ -280,6 +313,26 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             }
             headerActions={
                 <div className="flex items-center gap-2">
+                    {isGM && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleExportPuantaj()
+                            }}
+                            disabled={exporting}
+                            title={t('roster.exportPuantaj')}
+                        >
+                            {exporting ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                            ) : (
+                                <FileSpreadsheet className="w-3.5 h-3.5" aria-hidden="true" />
+                            )}
+                            <span className="hidden sm:inline text-xs">{t('roster.exportPuantaj')}</span>
+                        </Button>
+                    )}
                     <Button
                         variant="ghost"
                         size="icon"
