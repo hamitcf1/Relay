@@ -82,14 +82,14 @@ export async function generatePuantaj({
     ws.getCell(MONTH_CELL).value = TR_MONTH_NAMES[month]
     ws.getCell(YEAR_CELL).value = year
 
-    // Ensure day columns are wide enough for 2-digit numbers + X/HT.
-    // Original template uses width 3.0 which clips "10"-"30" to "###" in Excel.
+    // Force day columns to width 5 so both 2-digit day numbers (10..30) and
+    // X/HT codes fit at Excel's default zoom. Template's original 3.0 width
+    // clips numbers to "###". This intentionally overrides the template.
     for (let day = 1; day <= 31; day++) {
-        const col = ws.getColumn(FIRST_DAY_COL + day - 1)
-        if (!col.width || col.width < 4) {
-            col.width = 4
-        }
+        ws.getColumn(FIRST_DAY_COL + day - 1).width = 5
     }
+    // Row 7 (day header) — ensure tall enough for centered text
+    ws.getRow(7).height = 28
 
     // Determine which days to write up to (today if current month, full month otherwise)
     const isCurrentOrFutureMonth =
