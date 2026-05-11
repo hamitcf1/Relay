@@ -567,6 +567,10 @@ const tr: Translations = {
         'roster.show': 'Çizelgede Göster',
         'roster.hide': 'Çizelgeden Gizle',
         'roster.unknown': 'Bilinmeyen Kullanıcı',
+        'roster.exportPuantaj': 'Puantaj İndir',
+        'roster.exportSuccess': 'Puantaj indirildi',
+        'roster.exportError': 'Puantaj oluşturulamadı',
+        'roster.exportEmpty': 'Personel bulunamadı',
 
         // Tours
         'tours.catalogue.title': 'Tur Kataloğu',

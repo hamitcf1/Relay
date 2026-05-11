@@ -618,6 +618,10 @@ const en: Translations = {
         'roster.show': 'Show in Roster',
         'roster.hide': 'Hide from Roster',
         'roster.unknown': 'Unknown User',
+        'roster.exportPuantaj': 'Export Puantaj',
+        'roster.exportSuccess': 'Puantaj downloaded',
+        'roster.exportError': 'Failed to generate puantaj',
+        'roster.exportEmpty': 'No staff to export',
 
         // Calendar
         'calendar.noShifts': 'No shifts scheduled',
