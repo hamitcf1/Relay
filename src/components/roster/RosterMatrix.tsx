@@ -69,9 +69,13 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         try {
             const { generatePuantaj } = await import('@/lib/puantaj')
             const now = new Date()
+            // Use the full date-keyed schedule from the store (covers entire
+            // month). The local `schedule` here is only the current week and
+            // keyed by short day names ('Mon', 'Tue', ...).
+            const fullSchedule = useRosterStore.getState().schedule
             await generatePuantaj({
                 staff,
-                schedule,
+                schedule: fullSchedule,
                 year: now.getFullYear(),
                 month: now.getMonth(),
                 today: now,
