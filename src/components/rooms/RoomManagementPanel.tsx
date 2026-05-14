@@ -12,7 +12,9 @@ import {
     Layers,
     CheckSquare,
     Square,
-    AlertTriangle
+    AlertTriangle,
+    KeyRound,
+    Package
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,10 +26,12 @@ import { useRoomStore } from '@/stores/roomStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useIncidentStore } from '@/stores/incidentStore'
+import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
 import type { Room, RoomStatus, RoomType, BedConfig } from '@/types'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { IncidentReportModal } from './IncidentReportModal'
+import { LoanModal } from './LoanModal'
 
 const statusColors: Record<RoomStatus, string> = {
     clean: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
@@ -63,13 +67,16 @@ export function RoomManagementPanel() {
         updateRoomOccupancy,
         updateRoom,
         deleteRoom,
-        updateMultipleRooms
+        updateMultipleRooms,
+        resetRoomBorrowables,
     } = useRoomStore()
     const { incidents, subscribeToIncidents } = useIncidentStore()
+    const { t } = useLanguageStore()
 
     const [activeTab, setActiveTab] = useState<'overview' | 'setup'>('overview')
     const [searchQuery, setSearchQuery] = useState('')
     const [filterStatus, setFilterStatus] = useState<RoomStatus | 'all'>('all')
+    const [loanRoomId, setLoanRoomId] = useState<string | null>(null)
 
     // Setup Form State
     const [newRoomNumber, setNewRoomNumber] = useState('')
@@ -83,6 +90,9 @@ export function RoomManagementPanel() {
 
     // Incident Modal State
     const [reportingRoom, setReportingRoom] = useState<string | null>(null)
+
+    // Checkout-with-borrowables prompt state
+    const [checkoutPromptRoomId, setCheckoutPromptRoomId] = useState<string | null>(null)
 
     useEffect(() => {
         if (hotelId) {
@@ -127,7 +137,23 @@ export function RoomManagementPanel() {
     const toggleOccupancy = async (room: Room) => {
         if (!hotelId) return
         const newOccupancy = room.occupancy === 'vacant' ? 'occupied' : 'vacant'
+        // If checking guest out and they still have borrowed items / extra cards, prompt first
+        const hasBorrowables = (room.key_card_count ?? 0) > 0 || (room.active_loans ?? []).length > 0
+        if (newOccupancy === 'vacant' && hasBorrowables) {
+            setCheckoutPromptRoomId(room.id)
+            return
+        }
         await updateRoomOccupancy(hotelId, room.id, newOccupancy)
+    }
+
+    const confirmCheckout = async (clearBorrowables: boolean) => {
+        if (!hotelId || !checkoutPromptRoomId) return
+        const roomId = checkoutPromptRoomId
+        setCheckoutPromptRoomId(null)
+        if (clearBorrowables) {
+            await resetRoomBorrowables(hotelId, roomId)
+        }
+        await updateRoomOccupancy(hotelId, roomId, 'vacant')
     }
 
     const cycleStatus = async (room: Room) => {
@@ -193,6 +219,64 @@ export function RoomManagementPanel() {
             <div className="flex-1 min-h-0 bg-background rounded-xl border border-border overflow-hidden flex flex-col">
                 <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0">
                     <TabsContent value="overview" className="flex-1 flex flex-col min-h-0 m-0 p-4 sm:p-6 space-y-6 overflow-y-auto relative custom-scrollbar data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                        {(() => {
+                            const roomsWithBorrowables = rooms.filter(
+                                r => (r.key_card_count ?? 0) > 0 || (r.active_loans ?? []).length > 0
+                            )
+                            if (roomsWithBorrowables.length === 0) return null
+                            const totalItems = roomsWithBorrowables.reduce((sum, r) => {
+                                const cards = r.key_card_count ?? 0
+                                const loans = (r.active_loans ?? []).reduce((s, l) => s + l.qty, 0)
+                                return sum + cards + loans
+                            }, 0)
+                            return (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+                                        <KeyRound className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h4 className="text-sm font-semibold">{t('loans.summary.title')}</h4>
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500">
+                                                {totalItems}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {roomsWithBorrowables.map(r => {
+                                                const cards = r.key_card_count ?? 0
+                                                const loans = (r.active_loans ?? []).reduce((s, l) => s + l.qty, 0)
+                                                return (
+                                                    <button
+                                                        key={r.id}
+                                                        onClick={() => setLoanRoomId(r.id)}
+                                                        className="group/chip inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border hover:border-amber-500/50 transition-colors text-xs"
+                                                    >
+                                                        <span className="font-bold">{r.number}</span>
+                                                        {cards > 0 && (
+                                                            <span className="inline-flex items-center gap-0.5 text-amber-500">
+                                                                <KeyRound className="w-3 h-3" />
+                                                                {cards}
+                                                            </span>
+                                                        )}
+                                                        {loans > 0 && (
+                                                            <span className="inline-flex items-center gap-0.5 text-primary">
+                                                                <Package className="w-3 h-3" />
+                                                                {loans}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )
+                        })()}
+
                         {/* Filters */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <div className="relative w-full sm:w-auto max-w-12 focus-within:max-w-full sm:focus-within:max-w-64 transition-[max-width] ease-in-out duration-300 group">
@@ -228,6 +312,9 @@ export function RoomManagementPanel() {
                                 {filteredRooms.map((room) => {
                                     const roomIncidents = incidents.filter(i => i.room === room.number && i.status === 'pending_payment')
                                     const hasIncident = roomIncidents.length > 0
+                                    const keyCardCount = room.key_card_count ?? 0
+                                    const loanCount = (room.active_loans ?? []).length
+                                    const hasBorrowables = keyCardCount > 0 || loanCount > 0
 
                                     return (
                                         <motion.div
@@ -258,6 +345,23 @@ export function RoomManagementPanel() {
                                                     <span className="text-[10px] text-muted-foreground uppercase font-medium">{roomTypeLabels[room.type]}</span>
                                                 </div>
                                                 <div className="flex gap-1">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setLoanRoomId(room.id); }}
+                                                        className={cn(
+                                                            "relative p-1.5 rounded-full transition-all",
+                                                            hasBorrowables
+                                                                ? "bg-amber-500/15 text-amber-500 hover:bg-amber-500/25"
+                                                                : "bg-zinc-800/10 text-zinc-500 hover:bg-zinc-700/10 opacity-0 group-hover:opacity-100"
+                                                        )}
+                                                        title={t('loans.openDialog')}
+                                                    >
+                                                        <KeyRound className="w-3.5 h-3.5" />
+                                                        {hasBorrowables && (
+                                                            <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-amber-500 text-[9px] font-bold text-amber-950 flex items-center justify-center leading-none">
+                                                                {keyCardCount + loanCount}
+                                                            </span>
+                                                        )}
+                                                    </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setReportingRoom(room.number); }}
                                                         className="p-1.5 rounded-full bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all opacity-0 group-hover:opacity-100"
@@ -317,12 +421,76 @@ export function RoomManagementPanel() {
                             </AnimatePresence>
                         </div>
                         
-                        <IncidentReportModal 
+                        <IncidentReportModal
                             isOpen={!!reportingRoom}
                             onClose={() => setReportingRoom(null)}
                             roomNumber={reportingRoom || ''}
                             hotelId={hotelId || ''}
                         />
+
+                        <LoanModal
+                            isOpen={!!loanRoomId}
+                            onClose={() => setLoanRoomId(null)}
+                            room={rooms.find(r => r.id === loanRoomId) || null}
+                            hotelId={hotelId || ''}
+                        />
+
+                        {checkoutPromptRoomId && (() => {
+                            const r = rooms.find(x => x.id === checkoutPromptRoomId)
+                            if (!r) return null
+                            const cards = r.key_card_count ?? 0
+                            const loans = r.active_loans ?? []
+                            return (
+                                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        className="w-full max-w-md bg-card border border-border shadow-2xl rounded-3xl overflow-hidden"
+                                    >
+                                        <div className="p-6 border-b border-border/40 bg-muted/20 flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                                <KeyRound className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-semibold tracking-tight">{t('loans.checkout.title')}</h3>
+                                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                                                    {t('loans.roomLabel')} {r.number}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="p-6 space-y-4">
+                                            <p className="text-sm text-muted-foreground">{t('loans.checkout.body')}</p>
+                                            <div className="space-y-2 p-3 rounded-2xl bg-muted/30 border border-border">
+                                                {cards > 0 && (
+                                                    <div className="flex items-center gap-2 text-sm">
+                                                        <KeyRound className="w-4 h-4 text-amber-500" />
+                                                        <span>{t('loans.extraKeyCards')}: <strong>{cards}</strong></span>
+                                                    </div>
+                                                )}
+                                                {loans.map(loan => (
+                                                    <div key={loan.id} className="flex items-center gap-2 text-sm">
+                                                        <Package className="w-4 h-4 text-primary" />
+                                                        <span>{t(`loans.item.${loan.item}` as any)} <strong>x{loan.qty}</strong>{loan.label && <span className="text-muted-foreground italic"> · {loan.label}</span>}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="p-4 bg-muted/10 border-t border-border/40 flex flex-col sm:flex-row gap-2">
+                                            <Button variant="ghost" onClick={() => setCheckoutPromptRoomId(null)} className="flex-1 rounded-xl">
+                                                Cancel
+                                            </Button>
+                                            <Button variant="outline" onClick={() => confirmCheckout(false)} className="flex-1 rounded-xl border-border">
+                                                {t('loans.checkout.keep')}
+                                            </Button>
+                                            <Button onClick={() => confirmCheckout(true)} className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-500">
+                                                <Sparkles className="w-4 h-4 mr-1" />
+                                                {t('loans.checkout.clear')}
+                                            </Button>
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            )
+                        })()}
 
 
                         {filteredRooms.length === 0 && (
