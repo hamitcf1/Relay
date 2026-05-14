@@ -9,7 +9,8 @@ import {
     DollarSign,
     Users,
     ScrollText,
-    BedDouble
+    BedDouble,
+    KeyRound
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
@@ -65,6 +66,13 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             icon: BedDouble,
             color: 'bg-indigo-500/10 text-indigo-500',
             desc: t('operations.rooms.desc')
+        },
+        {
+            id: 'cards-loans',
+            label: t('module.cards-loans'),
+            icon: KeyRound,
+            color: 'bg-amber-500/10 text-amber-500',
+            desc: t('operations.cards-loans.desc')
         },
         {
             id: 'sales',

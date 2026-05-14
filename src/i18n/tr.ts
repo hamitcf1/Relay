@@ -349,6 +349,16 @@ const tr: Translations = {
         'loans.item.extra_towel': 'Ek Havlu',
         'loans.item.umbrella': 'Şemsiye',
         'loans.item.other': 'Diğer',
+        'loans.panelSubtitle': 'Misafirlere verilen oda kartları ve resepsiyondan ödünç verilen eşyalar.',
+        'loans.stat.cards': 'Kart',
+        'loans.stat.items': 'Eşya',
+        'loans.stat.rooms': 'Oda',
+        'loans.searchRoom': 'Oda no ara...',
+        'loans.filter.onlyActive': 'Sadece aktif olanlar',
+        'loans.filter.showAll': 'Tüm odalar',
+        'loans.empty.search': 'Bu aramayla eşleşen oda yok.',
+        'module.cards-loans': 'Kart & Ödünç',
+        'operations.cards-loans.desc': 'Oda kartları ve misafire ödünç verilen eşyalar',
 
         // Hotel
         'hotel.laundry': 'Çamaşırhane Hizmeti',
