@@ -61,6 +61,7 @@ const LeaderboardPanel = lazy(() => import('@/components/team/LeaderboardPanel')
 const ActivityLogPanel = lazy(() => import('@/components/activity/ActivityLogPanel').then(m => ({ default: m.ActivityLogPanel })))
 const HotelSettings = lazy(() => import('@/components/settings/HotelSettings').then(m => ({ default: m.HotelSettings })))
 const RoomManagementPanel = lazy(() => import('@/components/rooms/RoomManagementPanel').then(m => ({ default: m.RoomManagementPanel })))
+const CardsAndLoansPanel = lazy(() => import('@/components/loans/CardsAndLoansPanel').then(m => ({ default: m.CardsAndLoansPanel })))
 
 function TabFallback() {
     return (
@@ -424,6 +425,10 @@ export function DashboardPage() {
                                             </TabsContent>
                                             <TabsContent value="rooms" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
                                                 <RoomManagementPanel />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="cards-loans" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <CardsAndLoansPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                             <TabsContent value="pricing" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">

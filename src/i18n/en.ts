@@ -554,6 +554,16 @@ const en: Translations = {
         'loans.item.extra_towel': 'Extra Towel',
         'loans.item.umbrella': 'Umbrella',
         'loans.item.other': 'Other',
+        'loans.panelSubtitle': 'Key cards given to guests and items lent out from reception.',
+        'loans.stat.cards': 'Cards',
+        'loans.stat.items': 'Items',
+        'loans.stat.rooms': 'Rooms',
+        'loans.searchRoom': 'Search room number...',
+        'loans.filter.onlyActive': 'Active only',
+        'loans.filter.showAll': 'Show all rooms',
+        'loans.empty.search': 'No rooms match this search.',
+        'module.cards-loans': 'Cards & Loans',
+        'operations.cards-loans.desc': 'Key cards & items lent to guests',
 
         // Hotel
         'hotel.laundry': 'Laundry Service',
