@@ -7,7 +7,7 @@ import {
     ShieldAlert, 
     CalendarDays, 
     Map as MapIcon, 
-    BedDouble, 
+    BedDouble,
     CreditCard,
     DollarSign,
     Users,
@@ -20,6 +20,7 @@ import {
     Globe,
     Check,
     Settings,
+    KeyRound,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useLayoutStore } from '@/stores/layoutStore'
@@ -71,6 +72,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
         { id: 'off-days', icon: CalendarDays, label: t('module.offDays') || 'Off Days', subTab: 'off-days' },
         { id: 'tours', icon: MapIcon, label: t('module.tours') || 'Tours', subTab: 'tours' },
         { id: 'rooms', icon: BedDouble, label: t('dashboard.rooms') || 'Rooms', subTab: 'rooms' },
+        { id: 'cards-loans', icon: KeyRound, label: t('module.cards-loans') || 'Cards & Loans', subTab: 'cards-loans', createdAt: '2026-05-14' },
         { id: 'sales', icon: CreditCard, label: t('module.sales') || 'Sales', subTab: 'sales' },
         { id: 'pricing', icon: DollarSign, label: t('module.pricing_label') || 'Pricing', subTab: 'pricing' },
         { id: 'team', icon: Users, label: t('module.team_label') || 'Team', subTab: 'team' },

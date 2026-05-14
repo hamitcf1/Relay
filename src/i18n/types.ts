@@ -403,6 +403,17 @@ export type Translations = {
     'loans.item.extra_towel': string
     'loans.item.umbrella': string
     'loans.item.other': string
+    // Dedicated panel
+    'loans.panelSubtitle': string
+    'loans.stat.cards': string
+    'loans.stat.items': string
+    'loans.stat.rooms': string
+    'loans.searchRoom': string
+    'loans.filter.onlyActive': string
+    'loans.filter.showAll': string
+    'loans.empty.search': string
+    'module.cards-loans': string
+    'operations.cards-loans.desc': string
 
     // Hotel
     'hotel.laundry': string

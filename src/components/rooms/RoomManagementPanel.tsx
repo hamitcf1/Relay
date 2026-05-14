@@ -9,9 +9,6 @@ import {
     Sparkles,
     SprayCan,
     Search,
-    Layers,
-    CheckSquare,
-    Square,
     AlertTriangle,
     KeyRound,
     Package
@@ -67,7 +64,6 @@ export function RoomManagementPanel() {
         updateRoomOccupancy,
         updateRoom,
         deleteRoom,
-        updateMultipleRooms,
         resetRoomBorrowables,
     } = useRoomStore()
     const { incidents, subscribeToIncidents } = useIncidentStore()
@@ -83,10 +79,6 @@ export function RoomManagementPanel() {
     const [newRoomType, setNewRoomType] = useState<RoomType>('standard')
     const [newRoomFloor, setNewRoomFloor] = useState('')
     const [newRoomBedConfig, setNewRoomBedConfig] = useState<BedConfig>('separated')
-
-    // Bulk Setup State
-    const [selectedRoomIds, setSelectedRoomIds] = useState<Set<string>>(new Set())
-    const [bulkBedConfig, setBulkBedConfig] = useState<BedConfig>('separated')
 
     // Incident Modal State
     const [reportingRoom, setReportingRoom] = useState<string | null>(null)
@@ -169,33 +161,6 @@ export function RoomManagementPanel() {
         await updateRoom(hotelId, room.id, { bed_config: newConfig })
     }
 
-    const toggleRoomSelection = (roomId: string) => {
-        setSelectedRoomIds(prev => {
-            const newSet = new Set(prev)
-            if (newSet.has(roomId)) {
-                newSet.delete(roomId)
-            } else {
-                newSet.add(roomId)
-            }
-            return newSet
-        })
-    }
-
-    const selectAllStandardRooms = () => {
-        const standardRoomIds = rooms.filter(r => r.type === 'standard').map(r => r.id)
-        setSelectedRoomIds(new Set(standardRoomIds))
-    }
-
-    const clearSelection = () => setSelectedRoomIds(new Set())
-
-    const handleBulkUpdate = async () => {
-        if (!hotelId || selectedRoomIds.size === 0) return
-        await updateMultipleRooms(hotelId, Array.from(selectedRoomIds), { bed_config: bulkBedConfig })
-        clearSelection()
-    }
-
-    const standardRooms = rooms.filter(r => r.type === 'standard')
-
     return (
         <div className="flex flex-col h-full bg-background/50">
             {/* Header / Tabs */}
@@ -219,64 +184,6 @@ export function RoomManagementPanel() {
             <div className="flex-1 min-h-0 bg-background rounded-xl border border-border overflow-hidden flex flex-col">
                 <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0">
                     <TabsContent value="overview" className="flex-1 flex flex-col min-h-0 m-0 p-4 sm:p-6 space-y-6 overflow-y-auto relative custom-scrollbar data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
-                        {(() => {
-                            const roomsWithBorrowables = rooms.filter(
-                                r => (r.key_card_count ?? 0) > 0 || (r.active_loans ?? []).length > 0
-                            )
-                            if (roomsWithBorrowables.length === 0) return null
-                            const totalItems = roomsWithBorrowables.reduce((sum, r) => {
-                                const cards = r.key_card_count ?? 0
-                                const loans = (r.active_loans ?? []).reduce((s, l) => s + l.qty, 0)
-                                return sum + cards + loans
-                            }, 0)
-                            return (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-                                        <KeyRound className="w-5 h-5" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="text-sm font-semibold">{t('loans.summary.title')}</h4>
-                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500">
-                                                {totalItems}
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {roomsWithBorrowables.map(r => {
-                                                const cards = r.key_card_count ?? 0
-                                                const loans = (r.active_loans ?? []).reduce((s, l) => s + l.qty, 0)
-                                                return (
-                                                    <button
-                                                        key={r.id}
-                                                        onClick={() => setLoanRoomId(r.id)}
-                                                        className="group/chip inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border hover:border-amber-500/50 transition-colors text-xs"
-                                                    >
-                                                        <span className="font-bold">{r.number}</span>
-                                                        {cards > 0 && (
-                                                            <span className="inline-flex items-center gap-0.5 text-amber-500">
-                                                                <KeyRound className="w-3 h-3" />
-                                                                {cards}
-                                                            </span>
-                                                        )}
-                                                        {loans > 0 && (
-                                                            <span className="inline-flex items-center gap-0.5 text-primary">
-                                                                <Package className="w-3 h-3" />
-                                                                {loans}
-                                                            </span>
-                                                        )}
-                                                    </button>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )
-                        })()}
-
                         {/* Filters */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <div className="relative w-full sm:w-auto max-w-12 focus-within:max-w-full sm:focus-within:max-w-64 transition-[max-width] ease-in-out duration-300 group">
@@ -568,73 +475,6 @@ export function RoomManagementPanel() {
                                             Add Room
                                         </Button>
                                     </form>
-                                </div>
-
-                                {/* Bulk Setup Section */}
-                                <div className="bg-card border border-border rounded-xl p-6">
-                                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                        <Layers className="w-5 h-5 text-primary" />
-                                        Bulk Room Setup
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground mb-4">Select standard rooms to update their bed configuration.</p>
-
-                                    <div className="flex gap-2 mb-4">
-                                        <Button variant="outline" size="sm" onClick={selectAllStandardRooms} className="border-border">
-                                            Select All Standard ({standardRooms.length})
-                                        </Button>
-                                        <Button variant="ghost" size="sm" onClick={clearSelection} disabled={selectedRoomIds.size === 0}>
-                                            Clear ({selectedRoomIds.size})
-                                        </Button>
-                                    </div>
-
-                                    <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 mb-4 max-h-48 overflow-y-auto p-2 bg-muted/30 rounded-lg border border-border">
-                                        {standardRooms.map(room => (
-                                            <button
-                                                key={room.id}
-                                                onClick={() => toggleRoomSelection(room.id)}
-                                                className={cn(
-                                                    'p-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1',
-                                                    selectedRoomIds.has(room.id)
-                                                        ? 'bg-primary text-primary-foreground'
-                                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                                )}
-                                            >
-                                                {selectedRoomIds.has(room.id) ? <CheckSquare className="w-3 h-3" /> : <Square className="w-3 h-3" />}
-                                                {room.number}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                                        <div className="space-y-1 w-full sm:w-auto">
-                                            <Label className="text-xs text-zinc-500">Bed Configuration</Label>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    variant={bulkBedConfig === 'separated' ? 'default' : 'outline'}
-                                                    size="sm"
-                                                    onClick={() => setBulkBedConfig('separated')}
-                                                    className={bulkBedConfig === 'separated' ? 'bg-primary' : 'border-border'}
-                                                >
-                                                    Ayrık Yataklar
-                                                </Button>
-                                                <Button
-                                                    variant={bulkBedConfig === 'together' ? 'default' : 'outline'}
-                                                    size="sm"
-                                                    onClick={() => setBulkBedConfig('together')}
-                                                    className={bulkBedConfig === 'together' ? 'bg-primary' : 'border-border'}
-                                                >
-                                                    Birleşik Yatak
-                                                </Button>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            onClick={handleBulkUpdate}
-                                            disabled={selectedRoomIds.size === 0}
-                                            className="bg-emerald-600 hover:bg-emerald-500 sm:ml-auto w-full sm:w-auto"
-                                        >
-                                            Update {selectedRoomIds.size} Rooms
-                                        </Button>
-                                    </div>
                                 </div>
 
                                 <div className="rounded-xl border border-border overflow-hidden bg-card">
