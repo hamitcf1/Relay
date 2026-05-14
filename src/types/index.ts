@@ -256,6 +256,33 @@ export type RoomOccupancy = 'vacant' | 'occupied'
 export type RoomType = 'standard' | 'corner' | 'corner_jacuzzi' | 'triple' | 'teras_suite'
 export type BedConfig = 'separated' | 'together'
 
+// Loan item presets — guests often borrow these. Free-form "other" is also supported.
+export type LoanItemPreset =
+    | 'charger'
+    | 'usb_cable'
+    | 'adapter'
+    | 'scissors'
+    | 'stapler'
+    | 'hair_dryer'
+    | 'iron'
+    | 'extra_blanket'
+    | 'extra_pillow'
+    | 'extra_towel'
+    | 'umbrella'
+    | 'other'
+
+export interface RoomLoan {
+    id: string
+    item: LoanItemPreset
+    label?: string          // free-form description when item === 'other' (or custom note)
+    qty: number
+    lent_at: Date           // when given to guest
+    lent_by?: string        // uid of staff who recorded
+    lent_by_name?: string
+    returned_at?: Date | null
+    returned_by_name?: string
+}
+
 export interface Room {
     id: string
     number: string
@@ -265,6 +292,8 @@ export interface Room {
     floor: number
     bed_config?: BedConfig | null  // Only for standard rooms
     notes?: string
+    key_card_count?: number        // Extra key cards handed to guest (0 by default)
+    active_loans?: RoomLoan[]      // Items currently lent to guest (not yet returned)
 }
 
 // Notification types

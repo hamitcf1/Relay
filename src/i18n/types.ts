@@ -360,6 +360,50 @@ export type Translations = {
     'rooms.inspect': string
     'rooms.dnd': string
 
+    // Loans & Key Cards
+    'loans.title': string
+    'loans.roomLabel': string
+    'loans.keyCards': string
+    'loans.keyCardsHint': string
+    'loans.extraKeyCards': string
+    'loans.activeLoans': string
+    'loans.noActive': string
+    'loans.addNew': string
+    'loans.itemType': string
+    'loans.qty': string
+    'loans.noteLabel': string
+    'loans.notePlaceholder': string
+    'loans.lentAt': string
+    'loans.lentBy': string
+    'loans.return': string
+    'loans.returning': string
+    'loans.confirmReturnAll': string
+    'loans.openDialog': string
+    'loans.cardCount': string
+    'loans.lendItem': string
+    'loans.adding': string
+    'loans.summary.title': string
+    'loans.summary.empty': string
+    'loans.summary.countPerRoom': string
+    'loans.summary.totalItems': string
+    'loans.checkout.title': string
+    'loans.checkout.body': string
+    'loans.checkout.keep': string
+    'loans.checkout.clear': string
+    // Item presets
+    'loans.item.charger': string
+    'loans.item.usb_cable': string
+    'loans.item.adapter': string
+    'loans.item.scissors': string
+    'loans.item.stapler': string
+    'loans.item.hair_dryer': string
+    'loans.item.iron': string
+    'loans.item.extra_blanket': string
+    'loans.item.extra_pillow': string
+    'loans.item.extra_towel': string
+    'loans.item.umbrella': string
+    'loans.item.other': string
+
     // Hotel
     'hotel.laundry': string
     'hotel.ironing': string
