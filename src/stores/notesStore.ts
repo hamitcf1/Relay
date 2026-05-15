@@ -10,7 +10,8 @@ import {
     orderBy,
     onSnapshot,
     serverTimestamp,
-    Timestamp
+    Timestamp,
+    arrayUnion,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { ShiftNote, NoteCategory, NoteStatus, NotePriority } from '@/types'
@@ -128,7 +129,15 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         guest_name: data.guest_name || null,
                         assigned_staff_uid: data.assigned_staff_uid || null,
                         assigned_staff_name: data.assigned_staff_name || null,
-                        is_pinned: data.is_pinned || false
+                        is_pinned: data.is_pinned || false,
+                        edit_history: Array.isArray(data.edit_history)
+                            ? data.edit_history.map((e: any) => ({
+                                edited_at: convertTimestamp(e.edited_at),
+                                edited_by: e.edited_by || 'system',
+                                edited_by_name: e.edited_by_name || 'Unknown',
+                                changes: e.changes || {},
+                            }))
+                            : undefined,
                     }
                 })
 
@@ -194,6 +203,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
     updateNote: async (hotelId, noteId, updates) => {
         try {
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
+            const currentNote = useNotesStore.getState().notes.find(n => n.id === noteId)
 
             // Optimize: if status is changing to resolved, handle metadata
             if (updates.status === 'resolved' || updates.status === 'archived') {
@@ -202,11 +212,51 @@ export const useNotesStore = create<NotesStore>((set) => ({
 
             updates.updated_at = serverTimestamp() as any
 
+            // Build a diff entry for fields users can edit on the card. We log the
+            // PREVIOUS value so GMs can see what got rewritten. Compare with === —
+            // null/empty-string distinctions are intentional (room_number is null
+            // vs empty string, etc).
+            const TRACKED_FIELDS: (keyof ShiftNote)[] = [
+                'content',
+                'category',
+                'priority',
+                'room_number',
+                'amount_due',
+                'time',
+                'guest_name',
+                'assigned_staff_uid',
+                'assigned_staff_name',
+            ]
+            const changes: Record<string, { before: unknown; after: unknown }> = {}
+            if (currentNote) {
+                for (const field of TRACKED_FIELDS) {
+                    if (!(field in updates)) continue
+                    const before = currentNote[field] ?? null
+                    const after = (updates as any)[field] ?? null
+                    if (before !== after) {
+                        changes[field] = { before, after }
+                    }
+                }
+            }
+
             // Clean undefined
             const cleanUpdates = Object.entries(updates).reduce((acc, [k, v]) => {
                 if (v !== undefined) acc[k] = v
                 return acc
             }, {} as any)
+
+            // Only append a history entry when we actually have a tracked change.
+            // Pure status/pin/paid flips don't touch updateNote, so they won't be logged here.
+            if (Object.keys(changes).length > 0) {
+                const user = useAuthStore.getState().user
+                const entry = {
+                    edited_at: Timestamp.now(),
+                    edited_by: user?.uid || 'system',
+                    edited_by_name: user?.name || 'System',
+                    changes,
+                }
+                cleanUpdates.edit_history = arrayUnion(entry)
+            }
 
             await updateDoc(noteRef, cleanUpdates)
 
