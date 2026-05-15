@@ -2,7 +2,8 @@ import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale, formatDisplayDateTime, cn } from '@/lib/utils'
-import { User, Trash2, Wand2, Pencil, DollarSign, Clock, Pin, PinOff } from 'lucide-react'
+import { User, Trash2, Wand2, Pencil, DollarSign, Clock, Pin, PinOff, History } from 'lucide-react'
+import { NoteHistoryModal } from './NoteHistoryModal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -37,6 +38,7 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
 
     const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [showHistory, setShowHistory] = useState(false)
 
     // Edit Form State
     const [editContent, setEditContent] = useState(note.content)
@@ -525,9 +527,24 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                                 <Clock className="w-3.5 h-3.5" aria-hidden="true" />
                                 <span>{formatDistanceToNow(note.created_at, { addSuffix: true, locale: getDateLocale() })}</span>
                                 {note.updated_at && note.updated_at.getTime() !== note.created_at.getTime() && (
-                                    <span className="text-amber-500 text-xs" title={formatDisplayDateTime(note.updated_at)}>
-                                        · {(t('common.edited') as string) || 'edited'}
-                                    </span>
+                                    user?.role === 'gm' ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowHistory(true)}
+                                            className="text-amber-500 text-xs hover:underline hover:text-amber-400 transition-colors cursor-pointer flex items-center gap-1"
+                                            title={t('notes.history.button') as string}
+                                        >
+                                            <History className="w-3 h-3" />
+                                            · {(t('common.edited') as string) || 'edited'}
+                                            {note.edit_history && note.edit_history.length > 0 && (
+                                                <span className="text-[10px] opacity-70">({note.edit_history.length})</span>
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <span className="text-amber-500 text-xs" title={formatDisplayDateTime(note.updated_at)}>
+                                            · {(t('common.edited') as string) || 'edited'}
+                                        </span>
+                                    )
                                 )}
                             </span>
                         )}
@@ -563,6 +580,21 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
 
                     {user?.role === 'gm' && (
                         <>
+                            {note.edit_history && note.edit_history.length > 0 && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => setShowHistory(true)}
+                                    className="h-8 w-8 text-amber-500 hover:bg-amber-500/10 relative"
+                                    title={t('notes.history.button') as string}
+                                    aria-label={t('notes.history.button') as string}
+                                >
+                                    <History className="w-4 h-4" />
+                                    <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-1 rounded-full bg-amber-500 text-[9px] font-bold text-amber-950 flex items-center justify-center leading-none">
+                                        {note.edit_history.length}
+                                    </span>
+                                </Button>
+                            )}
                             <Button
                                 size="icon"
                                 variant="ghost"
@@ -594,6 +626,15 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                     </Button>
                 </div>
             </div>
+
+            {showHistory && (
+                <NoteHistoryModal
+                    isOpen={showHistory}
+                    onClose={() => setShowHistory(false)}
+                    note={note}
+                    staff={staff}
+                />
+            )}
         </motion.div>
     )
 }

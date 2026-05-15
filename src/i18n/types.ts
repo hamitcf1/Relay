@@ -570,6 +570,23 @@ export type Translations = {
     'notes.convertToLog': string
     'notes.convertConfirm': string
     'notes.convertConfirmAction': string
+    // Edit history
+    'notes.history.button': string
+    'notes.history.title': string
+    'notes.history.entry': string
+    'notes.history.entries': string
+    'notes.history.currentState': string
+    'notes.history.empty': string
+    'notes.history.emptyHint': string
+    'notes.history.noVisibleChanges': string
+    'notes.history.field.content': string
+    'notes.history.field.category': string
+    'notes.history.field.priority': string
+    'notes.history.field.room': string
+    'notes.history.field.amount': string
+    'notes.history.field.time': string
+    'notes.history.field.guest': string
+    'notes.history.field.assignee': string
     'minibar.cola': string
     'minibar.cola_zero': string
     'minibar.fanta': string

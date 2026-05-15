@@ -209,6 +209,16 @@ export type NoteCategory =
 
 export type NoteStatus = 'active' | 'resolved' | 'archived'
 
+// One edit entry — written on every successful updateNote() call that
+// actually changes one or more user-editable fields.
+export interface NoteEditEntry {
+    edited_at: Date
+    edited_by: string                                    // uid (or 'system')
+    edited_by_name: string
+    // field -> previous/new value pair. Only fields that actually changed.
+    changes: Record<string, { before: unknown; after: unknown }>
+}
+
 export interface ShiftNote {
     id: string
     category: NoteCategory
@@ -234,6 +244,7 @@ export interface ShiftNote {
     assigned_staff_name?: string | null
     updated_at?: Date
     is_pinned?: boolean
+    edit_history?: NoteEditEntry[]   // Newest-last log of content edits
 }
 
 export interface BlacklistedGuest {
