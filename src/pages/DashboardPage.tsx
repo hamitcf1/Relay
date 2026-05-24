@@ -43,12 +43,10 @@ import { ChevronLeft } from 'lucide-react'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { ShiftTimer } from '@/components/layout/ShiftTimer'
-import { SecurityTimer } from '@/components/layout/SecurityTimer'
-import { SecurityModal } from '@/components/layout/SecurityModal'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { KpiBadges } from '@/components/dashboard/KpiBadges'
-import { useSecurityStore } from '@/stores/securityStore'
+
 
 // Lazy-loaded operations panels — each tab becomes its own chunk
 const MessagingPanel = lazy(() => import('@/components/messaging/MessagingPanel').then(m => ({ default: m.MessagingPanel })))
@@ -132,44 +130,7 @@ export function DashboardPage() {
     // Due payment notifications
     useDuePaymentNotifier()
 
-    // 23:00 Security Check Trigger
-    const { startCountdown } = useSecurityStore()
-    useEffect(() => {
-        const checkSecurityTime = () => {
-            const now = new Date()
-            const hours = now.getHours()
-            const minutes = now.getMinutes()
-            
-            // Trigger at 23:00 (11 PM)
-            if (hours === 23 && minutes === 0) {
-                const alreadyTriggered = localStorage.getItem('relay_security_triggered_today')
-                const today = now.toISOString().split('T')[0]
-                
-                if (alreadyTriggered !== today) {
-                    startCountdown(300, 'idle') // 5 min countdown for night check
-                    localStorage.setItem('relay_security_triggered_today', today)
-                }
-            }
-        }
 
-        const interval = setInterval(checkSecurityTime, 60000) // Check every minute
-        return () => clearInterval(interval)
-    }, [startCountdown])
-
-    // Auto-logout when countdown hits 0
-    const { countdown, stopCountdown } = useSecurityStore()
-    const signOut = useAuthStore(state => state.signOut)
-
-    useEffect(() => {
-        if (countdown === 0) {
-            const performLogout = async () => {
-                stopCountdown()
-                await signOut()
-                window.location.href = '/login'
-            }
-            performLogout()
-        }
-    }, [countdown, signOut, stopCountdown])
 
     // Subscribe to sales for dashboard visibility
     const { subscribeToSales } = useSalesStore()
@@ -282,7 +243,6 @@ export function DashboardPage() {
                                 />
                             )}
                             <ShiftTimer />
-                            <SecurityTimer />
                         </div>
                         <AnimatePresence>
                             {showDateTime && (
@@ -462,7 +422,7 @@ export function DashboardPage() {
                 }}
             />
             <AnnouncementModal />
-            <SecurityModal />
+
         </div>
     )
 }
