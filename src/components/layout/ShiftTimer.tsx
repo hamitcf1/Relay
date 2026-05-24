@@ -7,16 +7,13 @@ import { useRosterStore, type ShiftType } from '@/stores/rosterStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
-import { useSecurityStore } from '@/stores/securityStore'
 import { cn } from '@/lib/utils'
 
 export function ShiftTimer() {
     const { currentShift } = useShiftStore()
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
-    const { startCountdown } = useSecurityStore()
     const [timeLeft, setTimeLeft] = useState<number | null>(null)
-    const [isLoggingOut, setIsLoggingOut] = useState(false)
 
     const user = useAuthStore(state => state.user)
     const schedule = useRosterStore(state => state.schedule)
@@ -69,12 +66,6 @@ export function ShiftTimer() {
             }
 
             const diff = Math.floor((end.getTime() - now.getTime()) / 1000)
-            
-            // Check for Auto-Logout
-            if (diff <= 0 && !isLoggingOut) {
-                setIsLoggingOut(true)
-                startCountdown(60, 'shift_end')
-            }
 
             // Only show timer if we are within the shift window (roughly)
             // If shift starts at 08:00 and ends at 16:00, and it's 07:00, diff is positive.
@@ -88,7 +79,7 @@ export function ShiftTimer() {
         calculateTimeLeft()
         const interval = setInterval(calculateTimeLeft, 1000)
         return () => clearInterval(interval)
-    }, [currentShift, hotel, user, schedule, startCountdown, isLoggingOut])
+    }, [currentShift, hotel, user, schedule])
 
     if (timeLeft === null) {
         return null
