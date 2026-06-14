@@ -46,25 +46,29 @@ export function RegisterPage() {
             return
         }
 
-        let validatedHotelId: string | null = null
-        if (!isGM) {
-            if (!hotelCode.trim()) {
-                setError(t('auth.error.joinHotelCode'))
-                return
-            }
-            setLoading(true)
-            validatedHotelId = await validateHotelCode(hotelCode.trim().toUpperCase())
-            if (!validatedHotelId) {
-                setLoading(false)
-                setError(t('auth.error.invalidJoinCode'))
-                return
-            }
+        if (!isGM && !hotelCode.trim()) {
+            setError(t('auth.error.joinHotelCode'))
+            return
         }
 
         setLoading(true)
 
         try {
             const credential = await createUserWithEmailAndPassword(auth, email, password)
+
+            let validatedHotelId: string | null = null
+            
+            // Validate hotel code AFTER user is created so Firestore rules allow reading hotels collection
+            if (!isGM) {
+                validatedHotelId = await validateHotelCode(hotelCode.trim().toUpperCase())
+                if (!validatedHotelId) {
+                    await credential.user.delete()
+                    auth.signOut()
+                    setLoading(false)
+                    setError(t('auth.error.invalidJoinCode'))
+                    return
+                }
+            }
 
             await setDoc(doc(db, 'users', credential.user.uid), {
                 email: email,
