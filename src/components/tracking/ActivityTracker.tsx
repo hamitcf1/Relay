@@ -22,6 +22,9 @@ export function ActivityTracker() {
         const start = sessionStartRef.current
         const durationMinutes = (now.getTime() - start.getTime()) / 1000 / 60
 
+        // Synchronously reset start time to prevent exponential accumulation if device sleeps/disconnects
+        sessionStartRef.current = isVisibleRef.current ? now : null
+
         if (durationMinutes < 0.1) return
 
         const dateKey = format(now, 'yyyy-MM-dd')
@@ -46,8 +49,6 @@ export function ActivityTracker() {
                     duration_minutes: durationMinutes,
                 }),
             ])
-
-            sessionStartRef.current = isVisibleRef.current ? new Date() : null
         } catch (error) {
             console.error("Error syncing activity log:", error)
         }
