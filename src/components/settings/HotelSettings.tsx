@@ -10,7 +10,6 @@ import {
     Settings, 
     Users, 
     ShieldCheck,
-    Briefcase,
     BarChart3,
     Loader2
 } from 'lucide-react'
@@ -27,13 +26,11 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
 
 export function HotelSettings() {
     const { hotel, updateHotelSettings, updateHotelInfo } = useHotelStore()
     const { t } = useLanguageStore()
     const { user } = useAuthStore()
-    const staff = useRosterStore(state => state.staff)
     const subscribeToRoster = useRosterStore(state => state.subscribeToRoster)
     
     const [name, setName] = useState('')
