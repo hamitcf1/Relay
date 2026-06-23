@@ -63,14 +63,6 @@ export function PricingPanel() {
     const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null)
     const selectedAgency = agencies.find(a => a.id === selectedAgencyId)
 
-    if (!user || !hotelId) {
-        return (
-            <div className="flex items-center justify-center p-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-        )
-    }
-
     useEffect(() => {
         if (!hotelId) return
         const unsubBase = subscribeToBasePrices(hotelId)
@@ -82,6 +74,14 @@ export function PricingPanel() {
             unsubAgencies()
         }
     }, [hotelId, subscribeToBasePrices, subscribeToBaseOverrides, subscribeToAgencies])
+
+    if (!user || !hotelId) {
+        return (
+            <div className="flex items-center justify-center p-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        )
+    }
 
     if (loading && !basePrices) {
         return (

@@ -17,7 +17,7 @@ export async function syncNoteToCalendar(hotelId: string, note: ShiftNote) {
         const querySnapshot = await getDocs(q)
 
         // Parse time if available, otherwise use created_at
-        let eventDate = note.created_at instanceof Timestamp ? note.created_at.toDate() : note.created_at
+        const eventDate = note.created_at instanceof Timestamp ? note.created_at.toDate() : note.created_at
 
         if (note.time) {
             const [hours, minutes] = note.time.split(':').map(Number)
@@ -110,7 +110,7 @@ export async function syncRosterToCalendar(
         )
 
         const snapshot = await getDocs(q)
-        let existingEvent = snapshot.docs.find(d => d.data().description?.includes(`User ID: ${userId}`))
+        const existingEvent = snapshot.docs.find(d => d.data().description?.includes(`User ID: ${userId}`))
 
         if (shift === 'OFF') {
             if (!existingEvent) {
