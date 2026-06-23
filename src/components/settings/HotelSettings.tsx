@@ -15,6 +15,7 @@ import {
     Loader2
 } from 'lucide-react'
 import { ManagementReportPanel } from '@/components/admin/ManagementReportPanel'
+import { StaffManagement } from './StaffManagement'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -275,29 +276,7 @@ export function HotelSettings() {
                 </TabsContent>
 
                 <TabsContent value="roles" className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {(() => {
-                            const gmCount = staff.filter(s => s.role === 'gm').length
-                            const receptionCount = staff.filter(s => s.role === 'receptionist').length
-                            const otherCount = staff.filter(s => s.role !== 'gm' && s.role !== 'receptionist').length
-
-                            return [
-                                { role: 'GM', count: gmCount, icon: ShieldCheck, color: 'text-rose-400' },
-                                { role: t('auth.role.receptionist'), count: receptionCount, icon: Briefcase, color: 'text-blue-400' },
-                                { role: t('auth.role.staff'), count: otherCount, icon: Users, color: 'text-muted-foreground' }
-                            ].map((item, i) => (
-                            <Card key={i} className="glass">
-                                <CardContent className="pt-6">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <item.icon className={cn("w-5 h-5", item.color)} />
-                                        <Badge variant="outline">{item.count} {item.count > 1 ? t('common.persons') : t('common.person')}</Badge>
-                                    </div>
-                                    <h3 className="font-bold text-lg">{item.role}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">{t('hotel.settings.rolesDesc')}</p>
-                                </CardContent>
-                            </Card>
-                        ))})()}
-                    </div>
+                    <StaffManagement />
                 </TabsContent>
 
                 <TabsContent value="reports" className="space-y-6">

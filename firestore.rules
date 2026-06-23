@@ -7,20 +7,31 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    // Helper function to get the current user's document
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Helper function to check if user is active
+    function isActiveEmployee() {
+      let userDoc = getUserDoc();
+      return !('status' in userDoc) || userDoc.status != 'inactive';
+    }
+    
     // Helper function to get user's role from their document
     function getUserRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return getUserDoc().role;
     }
     
     // Helper function to check if user is GM
     function isGM() {
-      return isAuthenticated() && getUserRole() == 'gm';
+      return isAuthenticated() && isActiveEmployee() && getUserRole() == 'gm';
     }
     
     // Helper function to check if user belongs to the hotel
     function belongsToHotel(hotelId) {
-      let userData = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-      return userData.hotel_id == hotelId;
+      let userDoc = getUserDoc();
+      return userDoc.hotel_id == hotelId && (!('status' in userDoc) || userDoc.status != 'inactive');
     }
     
     // ==========================================
@@ -35,10 +46,11 @@ service cloud.firestore {
         (resource != null && resource.data.hotel_id == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotel_id)
       );
       
-      // Users can only be created during registration (by themselves)
-      allow create: if isAuthenticated() && 
-        request.auth.uid == userId &&
-        request.resource.data.role in ['receptionist', 'housekeeping'];
+      // Users can only be created during registration (by themselves) OR by GMs
+      allow create: if isAuthenticated() && (
+        (request.auth.uid == userId && request.resource.data.role in ['receptionist', 'housekeeping']) ||
+        isGM()
+      );
       
       // Users can update their own non-role fields
       // Only GMs can update role field

@@ -80,7 +80,9 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
                         name: uData.name,
                         role: uData.role,
                         is_hidden_in_roster: uData.is_hidden_in_roster,
-                        settings: uData.settings
+                        settings: uData.settings,
+                        status: uData.status || 'active',
+                        deactivated_at: uData.deactivated_at
                     })
                 }
             })
