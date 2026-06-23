@@ -339,7 +339,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     },
 
     sendMessage: async (text: string) => {
-        let { activeThreadId, selectedModel, selectedTask, isPublic } = get()
+        let { activeThreadId } = get()
+        const { selectedModel, selectedTask, isPublic } = get()
 
         // Auto-create thread if none active
         if (!activeThreadId) {
