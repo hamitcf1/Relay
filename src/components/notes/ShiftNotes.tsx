@@ -21,7 +21,7 @@ interface ShiftNotesProps {
 export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
     const { notes } = useNotesStore()
     const { t } = useLanguageStore()
-    const { staff, subscribeToRoster } = useRosterStore()
+    const { activeStaff, subscribeToRoster } = useRosterStore()
     const { hotel } = useHotelStore()
 
     // Ensure we have staff list
@@ -110,7 +110,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                         <NoteForm
                             hotelId={hotelId}
                             hotel={hotel}
-                            staff={staff}
+                            staff={activeStaff}
                             onCancel={() => setIsAdding(false)}
                         />
                     )}
@@ -127,7 +127,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                             notes={pinnedNotes}
                             hotelId={hotelId}
                             hotel={hotel}
-                            staff={staff}
+                            staff={activeStaff}
                         />
                     </div>
                 )}
@@ -136,7 +136,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
                     notes={filteredNotes}
                     hotelId={hotelId}
                     hotel={hotel}
-                    staff={staff}
+                    staff={activeStaff}
                 />
             </div>
         </CollapsibleCard>
