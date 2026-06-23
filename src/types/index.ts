@@ -50,6 +50,8 @@ export interface User {
     settings?: UserSettings
     is_hidden_in_roster?: boolean
     is_demo?: boolean
+    status?: 'active' | 'inactive'
+    deactivated_at?: string
 }
 
 export interface UserSettings {
@@ -72,6 +74,8 @@ export interface StaffMember {
     role?: string
     is_hidden_in_roster?: boolean
     settings?: UserSettings
+    status?: 'active' | 'inactive'
+    deactivated_at?: string
 }
 
 export interface HotelInfo {

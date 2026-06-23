@@ -58,6 +58,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
             if (userDoc.exists()) {
                 const userData = userDoc.data()
+                
+                if (userData.status === 'inactive') {
+                    await firebaseSignOut(auth)
+                    set({ error: 'Your account has been deactivated. Please contact your manager.', loading: false })
+                    return
+                }
+
                 set({
                     user: {
                         uid: credential.user.uid,
@@ -213,6 +220,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
                     if (userDoc.exists()) {
                         const userData = userDoc.data()
+                        
+                        if (userData.status === 'inactive') {
+                            await firebaseSignOut(auth)
+                            set({
+                                user: null,
+                                firebaseUser: null,
+                                initialized: true,
+                                loading: false
+                            })
+                            return
+                        }
+
                         set({
                             user: {
                                 uid: firebaseUser.uid,
