@@ -50,7 +50,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const { hotel, updateHotelSettings } = useHotelStore()
     const { user } = useAuthStore()
     const { toggleStaffVisibility } = useRosterStore()
-    const { staff: storeStaff } = useRosterStore()
+    const { activeStaff: storeStaff } = useRosterStore()
     const [staff, setStaff] = useState<StaffMember[]>([])
     const [schedule, setSchedule] = useState<Record<string, Record<string, ShiftValue>>>({})
     const [weekOffset, setWeekOffset] = useState(0)

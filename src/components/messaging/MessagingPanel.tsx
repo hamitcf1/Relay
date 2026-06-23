@@ -28,7 +28,7 @@ export function MessagingPanel() {
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
     const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat, deleteMessage } = useMessageStore()
-    const { staff, subscribeToRoster } = useRosterStore()
+    const { activeStaff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
     const confirm = useConfirm()
     const [searchParams] = useSearchParams()
@@ -83,12 +83,12 @@ export function MessagingPanel() {
 
     // Filter staff list
     const filteredStaff = useMemo(() => {
-        return staff.filter(s =>
+        return activeStaff.filter(s =>
             s.uid !== user?.uid && // Exclude self
             (s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 s.role?.toLowerCase().includes(searchTerm.toLowerCase()))
         )
-    }, [staff, user?.uid, searchTerm])
+    }, [activeStaff, user?.uid, searchTerm])
 
     // Group messages by conversation logic
     const getUnreadCount = (uid: string) => {
@@ -282,18 +282,18 @@ export function MessagingPanel() {
                                 <UserAvatar
                                     user={{
                                         id: activeConversation,
-                                        name: staff.find(s => s.uid === activeConversation)?.name || '',
-                                        settings: staff.find(s => s.uid === activeConversation)?.settings
+                                        name: activeStaff.find(s => s.uid === activeConversation)?.name || '',
+                                        settings: activeStaff.find(s => s.uid === activeConversation)?.settings
                                     } as any}
                                     size="sm"
                                     className="w-8 h-8 border border-border bg-muted shadow-none"
                                 />
                                 <div>
                                     <h2 className="font-bold text-foreground">
-                                        {staff.find(s => s.uid === activeConversation)?.name || t('roster.unknown')}
+                                        {activeStaff.find(s => s.uid === activeConversation)?.name || t('roster.unknown')}
                                     </h2>
                                     <p className="text-xs text-muted-foreground">
-                                        {staff.find(s => s.uid === activeConversation)?.role || t('common.staff')}
+                                        {activeStaff.find(s => s.uid === activeConversation)?.role || t('common.staff')}
                                     </p>
                                 </div>
                             </>
@@ -351,7 +351,7 @@ export function MessagingPanel() {
                                                     user={{
                                                         id: msg.sender_id,
                                                         name: msg.sender_name,
-                                                        settings: staff.find(s => s.uid === msg.sender_id)?.settings
+                                                        settings: activeStaff.find(s => s.uid === msg.sender_id)?.settings
                                                     } as any}
                                                     size="sm"
                                                     className="w-8 h-8 border border-border shrink-0 bg-muted shadow-none"

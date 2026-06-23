@@ -9,6 +9,7 @@ export type ShiftType = 'A' | 'B' | 'C' | 'E' | 'OFF'
 
 interface RosterState {
     staff: StaffMember[]
+    activeStaff: StaffMember[]
     schedule: Record<string, Record<string, ShiftType>> // [uid][yyyy-MM-dd] -> Shift
     loading: boolean
     error: string | null
@@ -28,6 +29,7 @@ const SHIFT_PRIORITY: Record<string, number> = { 'A': 1, 'B': 2, 'C': 3, 'E': 4 
 
 export const useRosterStore = create<RosterStore>((set, get) => ({
     staff: [],
+    activeStaff: [],
     schedule: {},
     loading: true,
     error: null,
@@ -56,8 +58,12 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
             set({
                 staff: [
-                    { uid: 'demo-user-gm', name: 'Demo Manager', role: 'gm' },
-                    { uid: 'demo-user-staff', name: 'Demo Staff', role: 'receptionist' }
+                    { uid: 'demo-user-gm', name: 'Demo Manager', role: 'gm', status: 'active' },
+                    { uid: 'demo-user-staff', name: 'Demo Staff', role: 'receptionist', status: 'active' }
+                ],
+                activeStaff: [
+                    { uid: 'demo-user-gm', name: 'Demo Manager', role: 'gm', status: 'active' },
+                    { uid: 'demo-user-staff', name: 'Demo Staff', role: 'receptionist', status: 'active' }
                 ],
                 schedule: mockSchedule,
                 loading: false,
@@ -86,7 +92,10 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
                     })
                 }
             })
-            set({ staff: staffList })
+            set({ 
+                staff: staffList,
+                activeStaff: staffList.filter(s => s.status !== 'inactive')
+            })
         }, (err) => {
             console.error("Staff subscription error", err)
         })
@@ -133,11 +142,11 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     },
 
     getShiftsForDate: (date: Date) => {
-        const { schedule, staff } = get()
+        const { schedule, activeStaff } = get()
         const dateKey = format(date, 'yyyy-MM-dd')
         const result: Array<{ name: string; shift: ShiftType; uid: string }> = []
 
-        staff.forEach(member => {
+        activeStaff.forEach(member => {
             const userShifts = schedule[member.uid]
             if (userShifts && userShifts[dateKey]) {
                 const shift = userShifts[dateKey]
@@ -166,7 +175,10 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             })
             const { staff } = get()
             const updatedStaff = staff.map(s => s.uid === userId ? { ...s, is_hidden_in_roster: isHidden } : s)
-            set({ staff: updatedStaff })
+            set({ 
+                staff: updatedStaff,
+                activeStaff: updatedStaff.filter(s => s.status !== 'inactive')
+            })
         } catch (error) {
             console.error("Error toggling staff visibility:", error)
             throw error
