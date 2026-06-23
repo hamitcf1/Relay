@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Plus, Trash2, PowerOff, ShieldCheck, Briefcase, Users, Loader2, Key } from 'lucide-react'
+import { Plus, PowerOff, ShieldCheck, Briefcase, Users, Loader2 } from 'lucide-react'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useRosterStore } from '@/stores/rosterStore'
