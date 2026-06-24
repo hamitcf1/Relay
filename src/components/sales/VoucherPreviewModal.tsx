@@ -20,6 +20,7 @@ import {
 import { useSalesStore, saleTypeInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useCurrencyStore } from '@/stores/currencyStore'
 import { cn, formatDisplayDate } from '@/lib/utils'
 
 interface VoucherPreviewModalProps {
@@ -31,12 +32,20 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
     const { sales } = useSalesStore()
+    const { rates, fetchRates } = useCurrencyStore()
 
     const voucherRef = useRef<HTMLDivElement>(null)
     const [isGenerating, setIsGenerating] = useState(false)
     const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
     const sale = sales.find(s => s.id === saleId)
+
+    // Fetch rates when opened
+    useState(() => {
+        if (saleId) {
+            fetchRates()
+        }
+    })
 
     if (!sale) return null
 
@@ -199,40 +208,42 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                     </div>
                 </div>
 
-                <div className="flex justify-center bg-muted/30 p-8 rounded-xl overflow-x-auto border border-border/50">
+                <div className="w-full flex justify-center print:m-0 print:p-0 overflow-x-auto p-1">
                     <div 
                         ref={voucherRef}
-                        className={cn("relative flex w-[850px] h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0", bgContainer)}
+                        className={cn("relative flex flex-col sm:flex-row w-full sm:w-[850px] sm:h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[850px] print:h-[380px] print:flex-row", bgContainer)}
                         style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                         <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30", gradientFrom, isDark ? "to-[#111318]" : "to-white")} />
                         
                         {/* LEFT STUB */}
-                        <div className={cn("w-[28%] border-r border-dashed relative flex flex-col justify-between p-6 backdrop-blur-sm z-10", bgStub)}>
-                            <div className={cn("absolute -top-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
-                            <div className={cn("absolute -bottom-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
+                        <div className={cn("w-full sm:w-[28%] border-b sm:border-b-0 sm:border-r border-dashed relative flex flex-col sm:justify-between p-6 sm:p-6 gap-6 sm:gap-0 backdrop-blur-sm z-10", bgStub)}>
+                            <div className={cn("hidden sm:block absolute -top-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
+                            <div className={cn("hidden sm:block absolute -bottom-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
                             
-                            <div>
-                                <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4", textMuted)}>{hotel?.info.name || 'AETHERIUS'}</h3>
-                                <div className={cn("p-3 rounded-xl inline-block", qrWrapper)}>
-                                    <QRCode 
-                                        value={qrData} 
-                                        size={120} 
-                                        bgColor="#ffffff"
-                                        fgColor="#000000"
-                                        level="L"
-                                    />
+                            <div className="flex sm:flex-col justify-between items-center sm:items-start">
+                                <div>
+                                    <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4", textMuted)}>{hotel?.info.name || 'AETHERIUS'}</h3>
+                                    <div className={cn("p-3 rounded-xl inline-block", qrWrapper)}>
+                                        <QRCode 
+                                            value={qrData} 
+                                            size={160} 
+                                            bgColor="#ffffff"
+                                            fgColor="#000000"
+                                            level="L"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div className="mt-4">
-                                <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>{t('sales.details.ticket')}</p>
-                                <p className={cn("text-xs font-mono truncate", isDark ? 'text-white/80' : 'text-zinc-700')}>{sale.id.split('-')[0]}</p>
+                                
+                                <div className="mt-0 sm:mt-4 text-center sm:text-left">
+                                    <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>{t('sales.details.ticket')}</p>
+                                    <p className={cn("text-xs font-mono truncate", isDark ? 'text-white/80' : 'text-zinc-700')}>{sale.id.split('-')[0]}</p>
+                                </div>
                             </div>
                         </div>
 
                         {/* RIGHT MAIN */}
-                        <div className="flex-1 relative p-8 flex flex-col justify-between z-10">
+                        <div className="flex-1 relative p-6 sm:p-8 flex flex-col justify-between z-10 gap-6 sm:gap-0">
                             
                             {/* Header */}
                             <div className="flex justify-between items-start">
@@ -260,11 +271,16 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                 <div className="text-right">
                                     <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.total')}</p>
                                     <p className={cn("text-2xl font-black", textValue)}>{sale.total_price} <span className={cn("text-base", isDark ? 'text-white/60' : 'text-zinc-500')}>{sale.currency}</span></p>
+                                    {sale.currency !== 'TRY' && rates?.[sale.currency as keyof typeof rates] && (
+                                        <p className={cn("text-xs mt-1 font-medium", textMuted)}>
+                                            ≈ {(sale.total_price * rates[sale.currency as keyof typeof rates].selling).toFixed(2)} ₺
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Middle Grid */}
-                            <div className={cn("grid grid-cols-3 gap-6 mt-4 rounded-xl p-4 border", bgGrid)}>
+                            <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mt-0 sm:mt-4 rounded-xl p-4 border", bgGrid)}>
                                 <div>
                                     <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
                                     <p className={cn("text-sm font-bold truncate", textValue)}>{sale.customer_name}</p>
@@ -280,9 +296,9 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                             </div>
 
                             {/* Logistics & Notes */}
-                            <div className="flex items-start justify-between mt-4">
-                                <div className="space-y-4">
-                                    <div className="flex gap-8">
+                            <div className="flex flex-col sm:flex-row items-start justify-between mt-0 sm:mt-4 gap-4 sm:gap-0">
+                                <div className="space-y-4 w-full sm:w-auto">
+                                    <div className="flex gap-6 sm:gap-8">
                                         <div>
                                             <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.date')}</p>
                                             <p className={cn("text-base font-bold", textValue)}>{formatDisplayDate(sale.date)}</p>

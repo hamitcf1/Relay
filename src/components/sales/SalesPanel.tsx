@@ -23,6 +23,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useNotesStore } from '@/stores/notesStore'
+import { useCurrencyStore } from '@/stores/currencyStore'
 import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { SaleType, Currency, SaleStatus } from '@/types'
@@ -33,6 +34,7 @@ export function SalesPanel() {
     const { tours, subscribeToTours } = useTourStore()
     const { hotel } = useHotelStore()
     const { user } = useAuthStore()
+    const { rates, fetchRates } = useCurrencyStore()
 
     const [activeTab, setActiveTab] = useState<SaleType>('tour')
     const [isAdding, setIsAdding] = useState(false)
@@ -81,11 +83,13 @@ export function SalesPanel() {
             if (snap.exists()) setHotelInfo(snap.data())
         })
 
+        fetchRates()
+
         return () => {
             unsubSales()
             unsubTours()
         }
-    }, [hotel?.id, subscribeToSales, subscribeToTours])
+    }, [hotel?.id, subscribeToSales, subscribeToTours, fetchRates])
 
     // Auto-calculate Laundry Price
     useEffect(() => {
@@ -277,7 +281,7 @@ export function SalesPanel() {
                                                     setFormData(p => ({
                                                         ...p,
                                                         name: value,
-                                                        total_price: selectedTour ? selectedTour.adult_price.toString() : p.total_price,
+                                                        total_price: selectedTour ? (selectedTour.adult_price * p.pax).toString() : p.total_price,
                                                         currency: 'EUR'
                                                     }))
                                                 }}
@@ -407,7 +411,19 @@ export function SalesPanel() {
                                             type="number"
                                             min={1}
                                             value={formData.pax}
-                                            onChange={e => setFormData(p => ({ ...p, pax: parseInt(e.target.value) || 1 }))}
+                                            onChange={e => {
+                                                const newPax = parseInt(e.target.value) || 1;
+                                                setFormData(p => {
+                                                    let newPrice = p.total_price;
+                                                    if (activeTab === 'tour' && p.name && p.name !== 'other') {
+                                                        const selectedTour = tours.find(t => t.name === p.name);
+                                                        if (selectedTour) {
+                                                            newPrice = (selectedTour.adult_price * newPax).toString();
+                                                        }
+                                                    }
+                                                    return { ...p, pax: newPax, total_price: newPrice };
+                                                });
+                                            }}
                                             className="h-8 text-xs bg-background border-border"
                                         />
                                     </div>
@@ -503,6 +519,11 @@ export function SalesPanel() {
                                                 </Select>
                                             )}
                                         </div>
+                                        {formData.total_price && formData.currency !== 'TRY' && rates?.[formData.currency as keyof typeof rates] && (
+                                            <div className="text-[10px] text-muted-foreground mt-1 text-right">
+                                                ≈ {(parseFloat(formData.total_price) * rates[formData.currency as keyof typeof rates].selling).toFixed(2)} ₺
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="col-span-2 space-y-1">
@@ -650,6 +671,11 @@ export function SalesPanel() {
                                             <div className="text-sm font-bold text-foreground">
                                                 {sale.currency === 'EUR' ? '€' : (sale.currency === 'TRY' ? '₺' : '$')}
                                                 {sale.total_price}
+                                                {sale.currency !== 'TRY' && rates?.[sale.currency as keyof typeof rates] && (
+                                                    <span className="text-[10px] text-muted-foreground ml-1 font-normal whitespace-nowrap">
+                                                        (₺{(sale.total_price * rates[sale.currency as keyof typeof rates].selling).toFixed(2)})
+                                                    </span>
+                                                )}
                                             </div>
                                             <div className={cn("text-[10px] font-medium", paymentStatusInfo[sale.payment_status].color.replace('bg-', 'text-').split(' ')[1])}>
                                                 {t(paymentStatusInfo[sale.payment_status].label as any)}
