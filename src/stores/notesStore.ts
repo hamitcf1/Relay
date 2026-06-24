@@ -136,6 +136,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
                                 edited_by: e.edited_by || 'system',
                                 edited_by_name: e.edited_by_name || 'Unknown',
                                 changes: e.changes || {},
+                            }))
                             : undefined,
                         sale_id: data.sale_id || undefined
                     }

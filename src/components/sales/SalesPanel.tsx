@@ -521,7 +521,7 @@ export function SalesPanel() {
                                         </div>
                                         {formData.total_price && formData.currency !== 'TRY' && rates?.[formData.currency as keyof typeof rates] && (
                                             <div className="text-[10px] text-muted-foreground mt-1 text-right">
-                                                ≈ {(parseFloat(formData.total_price) * rates[formData.currency as keyof typeof rates].selling).toFixed(2)} ₺
+                                                ≈ {(parseFloat(formData.total_price) * rates[formData.currency as keyof typeof rates]!.selling).toFixed(2)} ₺
                                             </div>
                                         )}
                                     </div>
@@ -673,7 +673,7 @@ export function SalesPanel() {
                                                 {sale.total_price}
                                                 {sale.currency !== 'TRY' && rates?.[sale.currency as keyof typeof rates] && (
                                                     <span className="text-[10px] text-muted-foreground ml-1 font-normal whitespace-nowrap">
-                                                        (₺{(sale.total_price * rates[sale.currency as keyof typeof rates].selling).toFixed(2)})
+                                                        (₺{(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)})
                                                     </span>
                                                 )}
                                             </div>

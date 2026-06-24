@@ -9,6 +9,7 @@ type TFn = (key: keyof Translations, params?: Record<string, string>) => string
 const loaders: Record<Language, () => Promise<Translations>> = {
     en: () => import('@/i18n/en').then(m => m.default),
     tr: () => import('@/i18n/tr').then(m => m.default),
+    ru: () => import('@/i18n/ru').then(m => m.default),
 }
 
 const cache: Partial<Record<Language, Translations>> = {}
