@@ -205,7 +205,7 @@ export function VoucherPage() {
                                     if (currency && currency !== 'TRY' && rates?.[currency as keyof typeof rates]) {
                                         return (
                                             <p className={cn("text-xs mt-1 font-medium", textMuted)}>
-                                                ≈ {(amount * rates[currency as keyof typeof rates].selling).toFixed(2)} ₺
+                                                ≈ {(amount * rates[currency as keyof typeof rates]!.selling).toFixed(2)} ₺
                                             </p>
                                         );
                                     }

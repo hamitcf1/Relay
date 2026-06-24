@@ -273,7 +273,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                     <p className={cn("text-2xl font-black", textValue)}>{sale.total_price} <span className={cn("text-base", isDark ? 'text-white/60' : 'text-zinc-500')}>{sale.currency}</span></p>
                                     {sale.currency !== 'TRY' && rates?.[sale.currency as keyof typeof rates] && (
                                         <p className={cn("text-xs mt-1 font-medium", textMuted)}>
-                                            ≈ {(sale.total_price * rates[sale.currency as keyof typeof rates].selling).toFixed(2)} ₺
+                                            ≈ {(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)} ₺
                                         </p>
                                     )}
                                 </div>

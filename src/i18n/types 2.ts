@@ -1,4 +1,4 @@
-export type Language = 'en' | 'tr'
+export type Language = 'en' | 'tr' | 'ru'
 
 
 
