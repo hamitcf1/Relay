@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt } from 'lucide-react'
+import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,7 @@ import { cn, formatDisplayDate } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
 import { SalesDetailModal } from './SalesDetailModal'
+import { VoucherPreviewModal } from './VoucherPreviewModal'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import {
     Select,
@@ -36,6 +37,7 @@ export function SalesPanel() {
     const [activeTab, setActiveTab] = useState<SaleType>('tour')
     const [isAdding, setIsAdding] = useState(false)
     const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
+    const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null)
 
     // Form state
     const [formData, setFormData] = useState({
@@ -160,7 +162,7 @@ export function SalesPanel() {
             finalNotes = [transferInfo, finalNotes].filter(Boolean).join('\n')
         }
 
-        await addSale(hotel.id, {
+        const saleId = await addSale(hotel.id, {
             type: activeTab,
             name: finalName,
             customer_name: formData.customer_name.trim(),
@@ -189,7 +191,9 @@ export function SalesPanel() {
                 guest_name: formData.customer_name.trim(),
                 shift_id: null,
                 amount_due: totalPrice,
-                is_paid: false
+                is_paid: false,
+                currency: isLaundry ? 'TRY' : formData.currency,
+                sale_id: saleId
             })
         }
 
@@ -620,6 +624,16 @@ export function SalesPanel() {
                                                 <span className="text-lg group-hover:scale-110 transition-transform">{saleTypeInfo[sale.type].icon}</span>
                                                 <span className="font-semibold text-foreground truncate">{sale.name}</span>
                                                 {remaining > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+                                                
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="w-6 h-6 ml-auto hover:bg-primary/20 hover:text-primary" 
+                                                    onClick={(e) => { e.stopPropagation(); setSelectedVoucherId(sale.id); }}
+                                                    title="Digital Voucher"
+                                                >
+                                                    <Ticket className="w-4 h-4" />
+                                                </Button>
                                             </div>
 
                                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
@@ -681,6 +695,11 @@ export function SalesPanel() {
             <SalesDetailModal
                 saleId={selectedSaleId}
                 onClose={() => setSelectedSaleId(null)}
+            />
+            
+            <VoucherPreviewModal
+                saleId={selectedVoucherId}
+                onClose={() => setSelectedVoucherId(null)}
             />
         </Card >
     )

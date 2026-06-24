@@ -47,10 +47,13 @@ export function VoucherPage() {
     }
 
     // Determine theme colors based on type
-    // Fallback to 'other' if type is missing or malformed
     const typeInfo = saleTypeInfo[data.type as keyof typeof saleTypeInfo] || saleTypeInfo['other']
     const themeColor = typeInfo.color.split(' ')[0]
-    const gradientFrom = themeColor.replace('text-', 'from-').replace('400', '900/40')
+    
+    const isDark = data.th !== 'light' // Default to dark if not provided
+    const gradientFrom = isDark 
+        ? themeColor.replace('text-', 'from-').replace('400', '900/40')
+        : themeColor.replace('text-', 'from-').replace('400', '200/40')
 
     const qrData = window.location.href
 
@@ -75,6 +78,15 @@ export function VoucherPage() {
         }
     }
 
+    const bgContainer = isDark ? 'bg-[#111318] text-white' : 'bg-white text-zinc-900 border border-zinc-200'
+    const bgStub = isDark ? 'bg-black/40 border-white/20' : 'bg-zinc-50 border-zinc-200'
+    const textLabel = isDark ? 'text-white/40' : 'text-zinc-500'
+    const textValue = isDark ? 'text-white' : 'text-zinc-900'
+    const textMuted = isDark ? 'text-white/50' : 'text-zinc-600'
+    const bgGrid = isDark ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+    const cutoutBg = 'bg-background print:bg-white' 
+    const qrWrapper = isDark ? 'bg-white' : 'bg-white border border-zinc-200'
+
     return (
         <div className="min-h-screen bg-background flex flex-col items-center py-12 px-4">
             <div className="max-w-[850px] w-full flex justify-between items-center mb-8 print:hidden">
@@ -95,19 +107,19 @@ export function VoucherPage() {
             <div className="w-full flex justify-center print:m-0 print:p-0">
                 <div 
                     id="voucher-canvas"
-                    className="relative flex w-[850px] h-[380px] bg-[#111318] text-white rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none"
+                    className={cn("relative flex w-[850px] h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none", bgContainer)}
                     style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                    <div className={cn("absolute inset-0 bg-gradient-to-br to-[#111318] opacity-30", gradientFrom)} />
+                    <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30", gradientFrom, isDark ? "to-[#111318]" : "to-white")} />
                     
                     {/* LEFT STUB */}
-                    <div className="w-[28%] border-r border-dashed border-white/20 relative flex flex-col justify-between p-6 bg-black/40 backdrop-blur-sm z-10">
-                        <div className="absolute -top-4 -right-4 w-8 h-8 bg-background print:bg-white rounded-full" />
-                        <div className="absolute -bottom-4 -right-4 w-8 h-8 bg-background print:bg-white rounded-full" />
+                    <div className={cn("w-[28%] border-r border-dashed relative flex flex-col justify-between p-6 backdrop-blur-sm z-10", bgStub)}>
+                        <div className={cn("absolute -top-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
+                        <div className={cn("absolute -bottom-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
                         
                         <div>
-                            <h3 className="text-sm font-bold tracking-widest text-white/50 uppercase mb-4">{data.hotelName || 'AETHERIUS'}</h3>
-                            <div className="p-3 bg-white rounded-xl inline-block">
+                            <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4", textMuted)}>{data.hotelName || 'AETHERIUS'}</h3>
+                            <div className={cn("p-3 rounded-xl inline-block", qrWrapper)}>
                                 <QRCode 
                                     value={qrData} 
                                     size={120} 
@@ -119,8 +131,8 @@ export function VoucherPage() {
                         </div>
                         
                         <div className="mt-4">
-                            <p className="text-[10px] text-white/40 uppercase tracking-wider">{t('sales.details.ticket')}</p>
-                            <p className="text-xs font-mono text-white/80 truncate">{data.id?.split('-')[0]}</p>
+                            <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>{t('sales.details.ticket')}</p>
+                            <p className={cn("text-xs font-mono truncate", isDark ? 'text-white/80' : 'text-zinc-700')}>{data.id?.split('-')[0]}</p>
                         </div>
                     </div>
 
@@ -131,39 +143,43 @@ export function VoucherPage() {
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider", 
-                                        data.payment === 'paid' ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
+                                        data.payment === 'paid' 
+                                            ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-100 text-emerald-700") 
+                                            : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
                                     )}>
                                         {data.payment}
                                     </span>
-                                    <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white/70")}>
+                                    <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
+                                        isDark ? "bg-white/10 text-white/70" : "bg-zinc-200 text-zinc-600"
+                                    )}>
                                         {t(saleStatusInfo[(data.status || 'waiting') as keyof typeof saleStatusInfo]?.label as any) || data.status}
                                     </span>
                                 </div>
-                                <h1 className="text-3xl font-black tracking-tight text-white/90 uppercase">{data.name}</h1>
-                                <p className="text-sm font-medium text-white/50 uppercase tracking-widest mt-1">
+                                <h1 className={cn("text-3xl font-black tracking-tight uppercase", isDark ? 'text-white/90' : 'text-zinc-900')}>{data.name}</h1>
+                                <p className={cn("text-sm font-medium uppercase tracking-widest mt-1", textMuted)}>
                                     {t(typeInfo.label as any)}
                                 </p>
                             </div>
                             
                             <div className="text-right">
-                                <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{t('sales.details.total')}</p>
-                                <p className="text-2xl font-black text-white">{data.total}</p>
+                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.total')}</p>
+                                <p className={cn("text-2xl font-black", textValue)}>{data.total}</p>
                             </div>
                         </div>
 
                         {/* Middle Grid */}
-                        <div className="grid grid-cols-3 gap-6 mt-4 bg-white/5 rounded-xl p-4 border border-white/10">
+                        <div className={cn("grid grid-cols-3 gap-6 mt-4 rounded-xl p-4 border", bgGrid)}>
                             <div>
-                                <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{t('tours.book.guestName')}</p>
-                                <p className="text-sm font-bold text-white truncate">{data.guest}</p>
+                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                <p className={cn("text-sm font-bold truncate", textValue)}>{data.guest}</p>
                             </div>
                             <div>
-                                <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{t('common.room')}</p>
-                                <p className="text-sm font-bold text-white">{data.room}</p>
+                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
+                                <p className={cn("text-sm font-bold", textValue)}>{data.room}</p>
                             </div>
                             <div>
-                                <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{t('sales.details.pax')}</p>
-                                <p className="text-sm font-bold text-white">{data.pax}</p>
+                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pax')}</p>
+                                <p className={cn("text-sm font-bold", textValue)}>{data.pax}</p>
                             </div>
                         </div>
 
@@ -172,31 +188,31 @@ export function VoucherPage() {
                             <div className="space-y-4">
                                 <div className="flex gap-8">
                                     <div>
-                                        <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{t('common.date')}</p>
-                                        <p className="text-base font-bold text-white">{formatDisplayDate(new Date(data.date))}</p>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.date')}</p>
+                                        <p className={cn("text-base font-bold", textValue)}>{formatDisplayDate(new Date(data.date))}</p>
                                     </div>
                                     {(data.pickup_time || data.type === 'transfer') && (
                                         <div>
-                                            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{t('sales.details.pickup')}</p>
-                                            <p className="text-base font-bold text-white">{data.pickup_time || '--:--'}</p>
+                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pickup')}</p>
+                                            <p className={cn("text-base font-bold", textValue)}>{data.pickup_time || '--:--'}</p>
                                         </div>
                                     )}
                                 </div>
                                 
                                 {data.notes && (
                                     <div>
-                                        <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{t('sales.details.notes')}</p>
-                                        <p className="text-xs text-white/80 max-w-[400px] line-clamp-2">{data.notes}</p>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.notes')}</p>
+                                        <p className={cn("text-xs max-w-[400px] line-clamp-2", isDark ? 'text-white/80' : 'text-zinc-600')}>{data.notes}</p>
                                     </div>
                                 )}
                             </div>
                             
                             <div className="flex flex-col items-end justify-end h-full mt-auto text-right gap-4">
-                                <div className="w-12 h-12 rounded-full border-2 border-white/20 flex items-center justify-center opacity-50">
+                                <div className={cn("w-12 h-12 rounded-full border-2 flex items-center justify-center opacity-50", isDark ? 'border-white/20' : 'border-zinc-300')}>
                                     <span className="text-xl">{typeInfo.icon}</span>
                                 </div>
                                 {data.by && (
-                                    <p className="text-[9px] text-white/30 uppercase tracking-widest mt-auto">
+                                    <p className={cn("text-[9px] uppercase tracking-widest mt-auto", isDark ? 'text-white/30' : 'text-zinc-400')}>
                                         {t('sales.soldBy', { name: data.by })}
                                     </p>
                                 )}

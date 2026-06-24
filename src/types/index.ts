@@ -249,6 +249,7 @@ export interface ShiftNote {
     updated_at?: Date
     is_pinned?: boolean
     edit_history?: NoteEditEntry[]   // Newest-last log of content edits
+    sale_id?: string                 // Link back to a sale voucher
 }
 
 export interface BlacklistedGuest {

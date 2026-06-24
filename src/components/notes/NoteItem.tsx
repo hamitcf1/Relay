@@ -2,8 +2,9 @@ import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale, formatDisplayDateTime, cn } from '@/lib/utils'
-import { User, Trash2, Wand2, Pencil, DollarSign, Clock, Pin, PinOff, History } from 'lucide-react'
+import { User, Trash2, Wand2, Pencil, DollarSign, Clock, Pin, PinOff, History, Ticket } from 'lucide-react'
 import { NoteHistoryModal } from './NoteHistoryModal'
+import { VoucherPreviewModal } from '../sales/VoucherPreviewModal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -39,6 +40,7 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
     const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(false)
     const [showHistory, setShowHistory] = useState(false)
+    const [showVoucher, setShowVoucher] = useState(false)
 
     // Edit Form State
     const [editContent, setEditContent] = useState(note.content)
@@ -246,6 +248,17 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                                 {CURRENCY_SYMBOLS[note.currency || 'TRY']}{note.amount_due.toLocaleString()}
                                 {note.is_paid && ' ✓'}
                             </span>
+                        )}
+
+                        {note.sale_id && (
+                            <Badge 
+                                variant="outline" 
+                                className="text-xs h-6 py-0 px-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 flex items-center gap-1 font-medium cursor-pointer hover:bg-indigo-500/20 transition-colors"
+                                onClick={(e) => { e.stopPropagation(); setShowVoucher(true); }}
+                            >
+                                <Ticket className="w-3 h-3" />
+                                Voucher
+                            </Badge>
                         )}
 
                         <Select
@@ -633,6 +646,13 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                     onClose={() => setShowHistory(false)}
                     note={note}
                     staff={staff}
+                />
+            )}
+            
+            {showVoucher && note.sale_id && (
+                <VoucherPreviewModal
+                    saleId={note.sale_id}
+                    onClose={() => setShowVoucher(false)}
                 />
             )}
         </motion.div>
