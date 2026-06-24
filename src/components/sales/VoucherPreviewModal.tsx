@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
 import QRCode from 'react-qr-code'
-import { format } from 'date-fns'
-import { Download, Printer, X } from 'lucide-react'
+import { Download, Printer } from 'lucide-react'
 
 import {
     Dialog,
@@ -11,9 +10,8 @@ import {
     DialogDescription
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 
-import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
+import { useSalesStore, saleTypeInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { cn, formatDisplayDate } from '@/lib/utils'
