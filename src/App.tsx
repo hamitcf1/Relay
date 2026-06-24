@@ -34,6 +34,7 @@ const CommunityPage = lazy(() => import('@/pages/CommunityPage').then(m => ({ de
 const PrivacyPage = lazy(() => import('@/pages/legal/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
 const TermsPage = lazy(() => import('@/pages/legal/TermsPage').then(m => ({ default: m.TermsPage })))
 const StatusPage = lazy(() => import('@/pages/legal/StatusPage').then(m => ({ default: m.StatusPage })))
+const VoucherPage = lazy(() => import('@/pages/VoucherPage').then(m => ({ default: m.VoucherPage })))
 
 function ProtectedDashboardShell() {
     const user = useAuthStore(s => s.user)
@@ -112,6 +113,7 @@ function App() {
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/register" element={<RegisterPage />} />
                             <Route path="/live-demo" element={<LiveDemoPage />} />
+                            <Route path="/voucher" element={<VoucherPage />} />
 
                             <Route
                                 path="/setup-hotel"
