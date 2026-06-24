@@ -12,7 +12,6 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                     "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                     "disabled:cursor-not-allowed disabled:opacity-50",
                     "resize-none custom-scrollbar",
-                    "[color-scheme:light] dark:[color-scheme:dark]",
                     className
                 )}
                 ref={ref}
