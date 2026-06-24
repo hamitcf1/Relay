@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toPng } from 'html-to-image'
 import QRCode from 'react-qr-code'
-import { Printer, Download, MapPin } from 'lucide-react'
+import { Printer, Download } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
+import { saleTypeInfo, saleStatusInfo } from '@/stores/salesStore'
 import { cn, formatDisplayDate } from '@/lib/utils'
 
 // Since this is a public page and doesn't load the full store/i18n by default,
@@ -136,7 +136,7 @@ export function VoucherPage() {
                                         {data.payment}
                                     </span>
                                     <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white/70")}>
-                                        {t(saleStatusInfo[(data.status as any) || 'waiting']?.label as any) || data.status}
+                                        {t(saleStatusInfo[(data.status || 'waiting') as keyof typeof saleStatusInfo]?.label as any) || data.status}
                                     </span>
                                 </div>
                                 <h1 className="text-3xl font-black tracking-tight text-white/90 uppercase">{data.name}</h1>
