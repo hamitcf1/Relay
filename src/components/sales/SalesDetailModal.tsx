@@ -22,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { VoucherPreviewModal } from './VoucherPreviewModal'
 
 // Inline Textarea to avoid missing component
 const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
@@ -48,6 +49,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const [isEditing, setIsEditing] = useState(false)
     const [editForm, setEditForm] = useState<Partial<Sale>>({})
     const [collectAmount, setCollectAmount] = useState('')
+    const [showVoucherPreview, setShowVoucherPreview] = useState(false)
     const [paymentCurrency, setPaymentCurrency] = useState<Currency>('EUR')
     const [targetAmount, setTargetAmount] = useState('')
 
@@ -137,6 +139,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const dateLocale = getDateLocale()
 
     return (
+        <>
         <Dialog open={!!saleId} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="bg-card border-border text-foreground max-w-2xl p-0 overflow-hidden">
                 <DialogTitle className="sr-only">{t('module.sales')} - {sale.name}</DialogTitle>
@@ -147,6 +150,9 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                         <div className="absolute top-0 right-0 p-4 flex items-center gap-2">
                             {!isEditing ? (
                                 <>
+                                    <Button size="icon" variant="ghost" className="text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 mr-1" onClick={() => setShowVoucherPreview(true)} title="Generate Voucher">
+                                        <Ticket className="w-4 h-4" />
+                                    </Button>
                                     <Button size="icon" variant="ghost" className="hover:bg-white/10" onClick={() => setIsEditing(true)}>
                                         <Edit3 className="w-4 h-4" />
                                     </Button>
@@ -437,5 +443,13 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                 </div>
             </DialogContent>
         </Dialog>
+        
+        {showVoucherPreview && (
+            <VoucherPreviewModal 
+                saleId={saleId} 
+                onClose={() => setShowVoucherPreview(false)} 
+            />
+        )}
+        </>
     )
 }
