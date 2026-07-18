@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { format, subDays } from 'date-fns'
-import { CheckCircle2, Clock3, Download, Loader2, Search, ShieldQuestion, TimerOff, TriangleAlert, Users, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock3, Download, Loader2, Search, ShieldCheck, ShieldQuestion, TimerOff, TriangleAlert, Users, XCircle } from 'lucide-react'
 import { useAttendanceStore } from '@/stores/attendanceStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -34,6 +34,9 @@ export function AttendanceReportPanel() {
         minute: t('attendance.unit.minute'), pending: t('attendance.report.pending'), search: t('attendance.report.search'),
         export: t('attendance.report.export'), employee: t('attendance.report.employee'), date: t('attendance.report.date'),
         planned: t('attendance.report.planned'), in: t('attendance.report.clockIn'), out: t('attendance.report.clockOut'),
+        declaredIn: t('attendance.report.declaredClockIn'), actualIn: t('attendance.report.actualClockIn'),
+        declaredOut: t('attendance.report.declaredClockOut'), actualOut: t('attendance.report.actualClockOut'),
+        gmAuditNote: t('attendance.report.gmAuditNote'),
         duration: t('attendance.report.duration'), status: t('attendance.report.status'), excuse: t('attendance.report.excuse'),
         permission: t('attendance.report.permission'), onTime: t('attendance.report.onTime'), working: t('attendance.report.working'),
         completed: t('attendance.report.completed'), noExit: t('attendance.report.noExit'), permissionYes: t('attendance.report.permissionYes'),
@@ -55,7 +58,7 @@ export function AttendanceReportPanel() {
     const filtered = useMemo(() => records
         .filter((record) => record.work_date >= fromDate && record.work_date <= toDate)
         .filter((record) => record.staff_name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))
-        .sort((a, b) => b.clock_in_at.getTime() - a.clock_in_at.getTime()), [fromDate, records, search, toDate])
+        .sort((a, b) => (b.actual_clock_in_at || b.declared_clock_in_at).getTime() - (a.actual_clock_in_at || a.declared_clock_in_at).getTime()), [fromDate, records, search, toDate])
 
     const lateRecords = filtered.filter((record) => record.late_minutes > 0)
     const averageLate = lateRecords.length
@@ -69,7 +72,8 @@ export function AttendanceReportPanel() {
     const exportCsv = () => {
         const header = [
             text.employee, text.date, t('attendance.report.shiftLabel'),
-            t('attendance.report.scheduledIn'), t('attendance.report.scheduledOut'), text.in, text.out,
+            t('attendance.report.scheduledIn'), t('attendance.report.scheduledOut'),
+            text.declaredIn, text.actualIn, text.declaredOut, text.actualOut,
             t('attendance.report.lateMinutes'), text.excuse, t('attendance.report.permissionDeclaration'),
             t('attendance.report.approvalStatus'), t('attendance.report.reviewedBy'), t('attendance.report.reviewedAt'),
             text.reviewNote, t('attendance.report.workedMinutes'), text.status,
@@ -77,7 +81,10 @@ export function AttendanceReportPanel() {
         const rows = filtered.map((record) => [
             record.staff_name, record.work_date, record.shift_type,
             format(record.scheduled_start, 'yyyy-MM-dd HH:mm'), format(record.scheduled_end, 'yyyy-MM-dd HH:mm'),
-            format(record.clock_in_at, 'yyyy-MM-dd HH:mm:ss'), record.clock_out_at ? format(record.clock_out_at, 'yyyy-MM-dd HH:mm:ss') : '',
+            format(record.declared_clock_in_at, 'yyyy-MM-dd HH:mm:ss'),
+            record.actual_clock_in_at ? format(record.actual_clock_in_at, 'yyyy-MM-dd HH:mm:ss') : '',
+            record.declared_clock_out_at ? format(record.declared_clock_out_at, 'yyyy-MM-dd HH:mm:ss') : '',
+            record.actual_clock_out_at ? format(record.actual_clock_out_at, 'yyyy-MM-dd HH:mm:ss') : '',
             record.late_minutes, record.late_excuse || '',
             record.manager_permission_declared == null ? '' : record.manager_permission_declared ? text.permissionYes : text.permissionNo,
             record.approval_status === 'approved' ? text.approved : record.approval_status === 'rejected' ? text.rejected : text.approvalPending,
@@ -142,10 +149,14 @@ export function AttendanceReportPanel() {
             </div>
 
             <Card className="overflow-hidden border-border/50 bg-card/60">
-                <div className="border-b border-border/50 p-4">
-                    <div className="relative max-w-sm">
+                <div className="flex flex-col gap-3 border-b border-border/50 p-4 md:flex-row md:items-center md:justify-between">
+                    <div className="relative w-full max-w-sm">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={text.search} className="pl-9" />
+                    </div>
+                    <div className="flex max-w-xl items-start gap-2 rounded-lg bg-primary/[0.06] px-3 py-2 text-[11px] leading-relaxed text-muted-foreground ring-1 ring-primary/15">
+                        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                        <span>{text.gmAuditNote}</span>
                     </div>
                 </div>
                 {loading ? (
@@ -167,8 +178,10 @@ export function AttendanceReportPanel() {
                                 <dl className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-background/40 p-3 text-xs">
                                     <div><dt className="text-muted-foreground">{text.planned}</dt><dd className="mt-1 font-mono font-semibold">{format(record.scheduled_start, 'HH:mm')}–{format(record.scheduled_end, 'HH:mm')}</dd></div>
                                     <div><dt className="text-muted-foreground">{text.duration}</dt><dd className="mt-1 font-semibold">{durationLabel(record.worked_minutes, t)}</dd></div>
-                                    <div><dt className="text-muted-foreground">{text.in}</dt><dd className="mt-1 font-mono font-semibold">{format(record.clock_in_at, 'HH:mm:ss')}</dd></div>
-                                    <div><dt className="text-muted-foreground">{text.out}</dt><dd className="mt-1 font-mono font-semibold">{record.clock_out_at ? format(record.clock_out_at, 'HH:mm:ss') : text.noExit}</dd></div>
+                                    <div><dt className="text-muted-foreground">{text.declaredIn}</dt><dd className="mt-1 font-mono font-semibold">{format(record.declared_clock_in_at, 'HH:mm:ss')}</dd></div>
+                                    <div><dt className="text-primary">{text.actualIn}</dt><dd className="mt-1 font-mono font-semibold">{record.actual_clock_in_at ? format(record.actual_clock_in_at, 'HH:mm:ss') : '—'}</dd></div>
+                                    <div><dt className="text-muted-foreground">{text.declaredOut}</dt><dd className="mt-1 font-mono font-semibold">{record.declared_clock_out_at ? format(record.declared_clock_out_at, 'HH:mm:ss') : text.noExit}</dd></div>
+                                    <div><dt className="text-primary">{text.actualOut}</dt><dd className="mt-1 font-mono font-semibold">{record.actual_clock_out_at ? format(record.actual_clock_out_at, 'HH:mm:ss') : text.noExit}</dd></div>
                                 </dl>
                                 {record.late_minutes > 0 && (
                                     <div className="mt-3 rounded-xl bg-amber-500/10 p-3 text-xs ring-1 ring-amber-500/20">
@@ -190,9 +203,9 @@ export function AttendanceReportPanel() {
                         ))}
                     </div>
                     <div className="relay-table-scroll hidden md:block">
-                        <table className="w-full min-w-[1280px] text-left text-sm">
+                        <table className="w-full min-w-[1520px] text-left text-sm">
                             <thead className="bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
-                                <tr>{[text.employee, text.date, text.planned, text.in, text.out, text.duration, text.status, text.excuse, text.permission].map((label) => <th key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr>
+                                <tr>{[text.employee, text.date, text.planned, text.declaredIn, text.actualIn, text.declaredOut, text.actualOut, text.duration, text.status, text.excuse, text.permission].map((label) => <th key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr>
                             </thead>
                             <tbody className="divide-y divide-border/40">
                                 {filtered.map((record) => (
@@ -200,8 +213,10 @@ export function AttendanceReportPanel() {
                                         <td className="px-4 py-3 font-semibold">{record.staff_name}<div className="text-[10px] font-normal uppercase text-muted-foreground">{record.staff_role}</div></td>
                                         <td className="px-4 py-3"><span className="font-medium">{record.work_date}</span><div className="text-xs text-muted-foreground">{t('attendance.report.shift', { type: record.shift_type })}</div></td>
                                         <td className="px-4 py-3 font-mono text-xs">{format(record.scheduled_start, 'HH:mm')}–{format(record.scheduled_end, 'HH:mm')}</td>
-                                        <td className="px-4 py-3 font-mono text-xs">{format(record.clock_in_at, 'HH:mm:ss')}<div className={record.late_minutes > 0 ? 'text-amber-600' : 'text-emerald-600'}>{record.late_minutes > 0 ? `+${record.late_minutes} ${text.minute}` : text.onTime}</div></td>
-                                        <td className="px-4 py-3 font-mono text-xs">{record.clock_out_at ? format(record.clock_out_at, 'HH:mm:ss') : <span className="font-sans text-muted-foreground">{text.noExit}</span>}</td>
+                                        <td className="px-4 py-3 font-mono text-xs">{format(record.declared_clock_in_at, 'HH:mm:ss')}<div className={record.late_minutes > 0 ? 'text-amber-600' : 'text-emerald-600'}>{record.late_minutes > 0 ? `+${record.late_minutes} ${text.minute}` : text.onTime}</div></td>
+                                        <td className="px-4 py-3 font-mono text-xs font-semibold text-primary">{record.actual_clock_in_at ? format(record.actual_clock_in_at, 'HH:mm:ss') : '—'}</td>
+                                        <td className="px-4 py-3 font-mono text-xs">{record.declared_clock_out_at ? format(record.declared_clock_out_at, 'HH:mm:ss') : <span className="font-sans text-muted-foreground">{text.noExit}</span>}</td>
+                                        <td className="px-4 py-3 font-mono text-xs font-semibold text-primary">{record.actual_clock_out_at ? format(record.actual_clock_out_at, 'HH:mm:ss') : <span className="font-sans font-normal text-muted-foreground">{text.noExit}</span>}</td>
                                         <td className="px-4 py-3 font-medium">{durationLabel(record.worked_minutes, t)}</td>
                                         <td className="px-4 py-3"><Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : text.completed}</Badge></td>
                                         <td className="max-w-[260px] px-4 py-3 text-xs text-muted-foreground"><span className="line-clamp-2" title={record.late_excuse || ''}>{record.late_excuse || '—'}</span></td>

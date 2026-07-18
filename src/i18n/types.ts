@@ -1321,6 +1321,10 @@ export type Translations = {
     'attendance.clock.titleOut': string
     'attendance.clock.planned': string
     'attendance.clock.actual': string
+    'attendance.clock.declaredIn': string
+    'attendance.clock.declaredOut': string
+    'attendance.clock.auditHelp': string
+    'attendance.clock.invalidDeclaredTime': string
     'attendance.clock.late': string
     'attendance.clock.excuseLabel': string
     'attendance.clock.excusePlaceholder': string
@@ -1351,6 +1355,11 @@ export type Translations = {
     'attendance.report.planned': string
     'attendance.report.clockIn': string
     'attendance.report.clockOut': string
+    'attendance.report.declaredClockIn': string
+    'attendance.report.actualClockIn': string
+    'attendance.report.declaredClockOut': string
+    'attendance.report.actualClockOut': string
+    'attendance.report.gmAuditNote': string
     'attendance.report.duration': string
     'attendance.report.status': string
     'attendance.report.excuse': string
