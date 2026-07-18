@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import {
-    MessageCircle,
+    LayoutDashboard,
     ShieldAlert,
     ShieldCheck,
     CalendarDays,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { cn } from '@/lib/utils'
 
 interface OperationsGridProps {
     onSelect: (tabIs: string) => void
@@ -21,14 +22,21 @@ interface OperationsGridProps {
 }
 
 export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
 
-    const items = [
+    const items: Array<{
+        id: string
+        label: string
+        icon: typeof LayoutDashboard
+        desc: string
+        featured?: boolean
+    }> = [
         {
-            id: 'messaging',
-            label: t('module.messaging'),
-            icon: MessageCircle,
-            desc: t('operations.messaging.desc')
+            id: 'overview',
+            label: language === 'tr' ? 'Operasyon özeti' : language === 'ru' ? 'Обзор операций' : 'Operations overview',
+            icon: LayoutDashboard,
+            desc: language === 'tr' ? 'Günün durumu, açık işler ve tahsilatlar' : language === 'ru' ? 'Состояние дня, задачи и платежи' : 'Today, open work and payments',
+            featured: true,
         },
         {
             id: 'compliance',
@@ -113,7 +121,9 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
     return (
         <section className="relative pb-6">
             <div className="mb-5 px-1">
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Relay workspace</p>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+                    {language === 'tr' ? 'Relay çalışma alanı' : language === 'ru' ? 'Рабочая область Relay' : 'Relay workspace'}
+                </p>
                 <h2 className="text-2xl font-semibold tracking-[-0.035em]">{t('dashboard.operationsHub')}</h2>
             </div>
 
@@ -129,9 +139,12 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
                         variants={itemAnim}
                         onClick={() => onSelect(item.id)}
                         whileTap={{ scale: 0.97 }}
-                        className="group relative min-h-40 overflow-hidden rounded-[1.35rem] border-[5px] border-surface-deep bg-card p-4 text-left ring-1 ring-border/30 transition-[transform,border-color,background-color] duration-500 ease-premium hover:-translate-y-1 hover:border-primary/20 hover:bg-card/80 active:scale-[0.98]"
+                        className={cn(
+                            "group relative min-h-[7.5rem] overflow-hidden rounded-2xl border border-border/70 bg-card/70 p-3.5 text-left shadow-[inset_0_1px_0_hsl(var(--foreground)/0.035)] transition-[transform,border-color,background-color] duration-300 hover:-translate-y-0.5 hover:border-primary/35 hover:bg-card active:scale-[0.98]",
+                            item.featured && "col-span-2 min-h-[6.5rem] border-primary/25 bg-primary/[0.055]"
+                        )}
                     >
-                        <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-500 ease-premium group-hover:scale-105">
+                        <div className="mb-3.5 flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover:scale-105">
                             <item.icon className="w-5 h-5" />
                         </div>
                         <span className="mb-1 text-sm font-semibold tracking-tight">{item.label}</span>

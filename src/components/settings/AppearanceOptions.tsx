@@ -115,7 +115,7 @@ export function AppearanceOptions() {
                             className={cn(
                                 "flex min-w-0 items-center gap-2 rounded-lg border px-3 py-2.5 transition-colors active:scale-[0.98]",
                                 accentColor === color.value
-                                    ? "bg-card border-foreground/20"
+                                    ? "bg-primary/10 border-primary/50 text-primary"
                                     : "bg-card/40 border-border/50 hover:bg-card/70"
                             )}
                             aria-pressed={accentColor === color.value}
@@ -125,7 +125,7 @@ export function AppearanceOptions() {
                                 style={{ backgroundColor: `hsl(${color.value})` }}
                                 aria-hidden="true"
                             />
-                            <span className="min-w-0 truncate text-sm font-medium text-foreground">
+                            <span className={cn("min-w-0 truncate text-sm font-medium", accentColor === color.value ? "text-primary" : "text-foreground")}>
                                 {accentLabels[color.key] || color.key}
                             </span>
                         </button>

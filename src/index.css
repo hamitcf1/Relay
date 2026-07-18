@@ -754,7 +754,7 @@ body.disable-animations *::after {
   box-shadow: 0 0 0 3px hsl(var(--primary) / 0.14) !important;
 }
 
-/* Operations console — intentionally fixed to the Relay obsidian brand system. */
+/* Relay keeps its obsidian surfaces while inheriting the user's accent color. */
 .relay-app {
   color-scheme: dark;
   --background: 216 19% 4%;
@@ -765,8 +765,6 @@ body.disable-animations *::after {
   --card-foreground: 40 14% 92%;
   --popover: 216 13% 7%;
   --popover-foreground: 40 14% 92%;
-  --primary: 38 89% 53%;
-  --primary-foreground: 216 19% 4%;
   --secondary: 216 9% 13%;
   --secondary-foreground: 40 12% 90%;
   --muted: 216 9% 12%;
@@ -775,9 +773,8 @@ body.disable-animations *::after {
   --accent-foreground: 40 12% 92%;
   --border: 216 8% 23%;
   --input: 216 8% 24%;
-  --ring: 38 89% 53%;
   background:
-    radial-gradient(circle at 72% 0%, hsl(38 70% 28% / 0.055), transparent 34rem),
+    radial-gradient(circle at 72% 0%, hsl(var(--primary) / 0.055), transparent 34rem),
     hsl(var(--background));
 }
 
@@ -843,8 +840,8 @@ body.disable-animations *::after {
   border-radius: 0.85rem;
   padding: 0.28rem 0.32rem 0.28rem 1.15rem;
   color: hsl(var(--primary-foreground));
-  background: linear-gradient(180deg, hsl(40 96% 59%), hsl(var(--primary)));
-  box-shadow: inset 0 1px 0 hsl(48 100% 88% / 0.55), 0 14px 32px -20px hsl(var(--primary) / 0.95);
+  background: hsl(var(--primary));
+  box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.24), 0 14px 32px -20px hsl(var(--primary) / 0.95);
   font-size: 0.85rem;
   font-weight: 700;
   transition: transform 500ms cubic-bezier(0.32, 0.72, 0, 1), filter 500ms cubic-bezier(0.32, 0.72, 0, 1);

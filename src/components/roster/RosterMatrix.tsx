@@ -36,17 +36,24 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 // Default shifts if none configured in hotel settings
 const DEFAULT_SHIFT_COLORS: Record<string, string> = {
-    'A': 'bg-primary/80 text-primary-foreground',
-    'B': 'bg-amber-700/80 text-white',
-    'C': 'bg-rose-500/80 text-white',
-    'E': 'bg-amber-500/80 text-white',
-    'OFF': 'bg-muted text-muted-foreground border border-border/50',
+    'A': 'border border-sky-400/45 bg-sky-500/15 text-sky-300',
+    'B': 'border border-amber-400/45 bg-amber-500/15 text-amber-300',
+    'C': 'border border-violet-400/45 bg-violet-500/15 text-violet-300',
+    'E': 'border border-emerald-400/45 bg-emerald-500/15 text-emerald-300',
+    'OFF': 'border border-zinc-500/30 bg-zinc-500/10 text-zinc-400',
 }
+
+const SHIFT_COLOR_FALLBACKS = [
+    'border border-cyan-400/45 bg-cyan-500/15 text-cyan-300',
+    'border border-fuchsia-400/45 bg-fuchsia-500/15 text-fuchsia-300',
+    'border border-lime-400/45 bg-lime-500/15 text-lime-300',
+    'border border-orange-400/45 bg-orange-500/15 text-orange-300',
+]
 
 const DEFAULT_SHIFT_CYCLE: (ShiftType | 'OFF')[] = ['A', 'B', 'C', 'E', 'OFF']
 
 export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const { hotel, updateHotelSettings } = useHotelStore()
     const { user } = useAuthStore()
     const { toggleStaffVisibility } = useRosterStore()
@@ -57,6 +64,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [exporting, setExporting] = useState(false)
+    const [selectedDayIndex, setSelectedDayIndex] = useState(() => (new Date().getDay() + 6) % 7)
 
     const isGM = user?.role === 'gm'
 
@@ -109,8 +117,8 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const shiftColors = useMemo(() => {
         if (hotel?.settings?.shifts && hotel.settings.shifts.length > 0) {
             const colors: Record<string, string> = { ...DEFAULT_SHIFT_COLORS }
-            hotel.settings.shifts.forEach((s: any) => {
-                if (s.code) colors[s.code] = `${s.color || 'bg-primary'} text-white`
+            hotel.settings.shifts.forEach((s: any, index: number) => {
+                if (s.code && !colors[s.code]) colors[s.code] = SHIFT_COLOR_FALLBACKS[index % SHIFT_COLOR_FALLBACKS.length]
             })
             return colors
         }
@@ -156,6 +164,10 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         })
     }, [weekStart])
 
+    useEffect(() => {
+        setSelectedDayIndex(weekOffset === 0 ? (new Date().getDay() + 6) % 7 : 0)
+    }, [weekOffset])
+
     // Sorted staff based on hotel settings AND visibility
     const sortedStaff = useMemo(() => {
         let currentStaff = [...staff]
@@ -179,6 +191,32 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             return indexA - indexB;
         });
     }, [staff, hotel?.settings?.staff_order, user?.role]);
+
+    const mobileStaff = useMemo(() => (
+        [...sortedStaff].sort((a, b) => {
+            if (a.uid === user?.uid) return -1
+            if (b.uid === user?.uid) return 1
+            return 0
+        })
+    ), [sortedStaff, user?.uid])
+
+    const getShiftLabel = (shift: string) => {
+        if (shift === 'E') return language === 'tr' ? 'Ara vardiya' : language === 'ru' ? 'Промежуточная смена' : 'Mid shift'
+        const shiftInfo = hotel?.settings?.shifts?.find((item: any) => item.code === shift)
+        if (shiftInfo?.name) return shiftInfo.name
+        if (shift === 'A') return t('shift.morning')
+        if (shift === 'B') return t('shift.afternoon')
+        if (shift === 'C') return t('shift.night')
+        if (shift === 'E') return t('shift.extra')
+        if (shift === 'OFF') return t('shift.off')
+        return shift
+    }
+
+    const getShiftTime = (shift: string) => {
+        const shiftInfo = hotel?.settings?.shifts?.find((item: any) => item.code === shift)
+        if (shiftInfo?.startTime && shiftInfo?.endTime) return `${shiftInfo.startTime}–${shiftInfo.endTime}`
+        return ({ A: '08:00–16:00', B: '16:00–00:00', C: '00:00–08:00', E: '10:00–18:00' } as Record<string, string>)[shift] || ''
+    }
 
     const handleReorder = async (newOrder: StaffMember[]) => {
         setStaff(newOrder);
@@ -304,20 +342,23 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     return (
         <CollapsibleCard
             id="roster-matrix"
+            collapsible={false}
+            focusable={false}
             title={
                 <CardTitle className="text-sm font-medium text-foreground flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary" />
-                    {t('roster.title')}
+                    <span className="md:hidden">{language === 'tr' ? 'Haftalık' : language === 'ru' ? 'Неделя' : 'Roster'}</span>
+                    <span className="hidden md:inline">{t('roster.title')}</span>
                     {saving && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
                 </CardTitle>
             }
             headerActions={
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-0.5 sm:gap-2">
                     {isGM && (
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
+                            className="hidden h-8 gap-1.5 text-muted-foreground hover:text-foreground sm:flex"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 handleExportPuantaj()
@@ -336,7 +377,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 shrink-0"
                         onClick={(e) => {
                             e.stopPropagation()
                             setWeekOffset((prev) => prev - 1)
@@ -345,18 +386,18 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
                     {weekOffset === 0 ? (
-                        <span className="text-xs text-primary font-semibold min-w-[100px] text-center px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+                        <span className="min-w-[68px] rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-center text-[10px] font-semibold text-primary sm:min-w-[100px] sm:px-2 sm:text-xs">
                             {t('roster.currentWeek') || 'This Week'}
                         </span>
                     ) : (
-                        <span className="text-xs text-muted-foreground min-w-[100px] text-center font-mono">
+                        <span className="min-w-[68px] text-center font-mono text-[10px] text-muted-foreground sm:min-w-[100px] sm:text-xs">
                             {formatDisplayDate(weekStart)}
                         </span>
                     )}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 shrink-0"
                         onClick={(e) => {
                             e.stopPropagation()
                             setWeekOffset((prev) => prev + 1)
@@ -367,12 +408,96 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                 </div>
             }
         >
-            <div className="overflow-x-auto pt-2">
+            <div className="pt-2">
+                {staff.length > 0 && (
+                    <div className="space-y-3 md:hidden">
+                        <div className="grid grid-cols-7 gap-1" role="tablist" aria-label={t('roster.title')}>
+                            {weekDates.map(({ day, dateStr, isToday }, index) => (
+                                <button
+                                    key={day}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={selectedDayIndex === index}
+                                    onClick={() => setSelectedDayIndex(index)}
+                                    className={cn(
+                                        'flex min-w-0 flex-col items-center rounded-xl border px-0.5 py-2 transition-colors',
+                                        selectedDayIndex === index
+                                            ? 'border-primary/45 bg-primary/10 text-primary'
+                                            : 'border-border/60 bg-card/45 text-muted-foreground',
+                                        isToday && selectedDayIndex !== index && 'border-primary/20'
+                                    )}
+                                >
+                                    <span className="text-[9px] font-semibold uppercase">{t(`day.${day.toLowerCase()}` as any).slice(0, 2)}</span>
+                                    <span className="mt-1 font-mono text-[10px]">{dateStr.slice(0, 2)}</span>
+                                    {isToday && <span className="mt-1 h-1 w-1 rounded-full bg-primary" />}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/45">
+                            <div className="flex items-center justify-between border-b border-border/60 px-3.5 py-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-foreground">{t(`day.${DAYS[selectedDayIndex].toLowerCase()}` as any)}</p>
+                                    <p className="mt-0.5 text-[11px] text-muted-foreground">{weekDates[selectedDayIndex].dateStr}</p>
+                                </div>
+                                {canEdit && <span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary">{t('common.edit')}</span>}
+                            </div>
+
+                            <div className="divide-y divide-border/55">
+                                {mobileStaff.map((member) => {
+                                    const shift = schedule[member.uid]?.[DAYS[selectedDayIndex]]
+                                    const isCurrentUser = user?.uid === member.uid
+                                    return (
+                                        <button
+                                            key={member.uid}
+                                            type="button"
+                                            disabled={!canEdit}
+                                            onClick={() => cycleShift(member.uid, DAYS[selectedDayIndex], 'forward')}
+                                            className={cn(
+                                                'flex min-h-[4.5rem] w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors',
+                                                canEdit ? 'active:bg-muted/60' : 'cursor-default',
+                                                isCurrentUser && 'bg-primary/[0.045]'
+                                            )}
+                                        >
+                                            <span className={cn(
+                                                'grid h-9 w-9 shrink-0 place-items-center rounded-full border text-xs font-semibold',
+                                                isCurrentUser ? 'border-primary/35 bg-primary/10 text-primary' : 'border-border bg-muted/60 text-muted-foreground'
+                                            )}>
+                                                {member.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()}
+                                            </span>
+                                            <span className="min-w-0 flex-1">
+                                                <span className={cn('block truncate text-sm font-medium text-foreground', member.is_hidden_in_roster && 'opacity-50 line-through')}>{member.name}</span>
+                                                <span className="mt-0.5 block text-[11px] text-muted-foreground">{isCurrentUser ? (language === 'tr' ? 'Siz' : language === 'ru' ? 'Вы' : 'You') : t('common.staff')}</span>
+                                            </span>
+                                            <span className={cn(
+                                                'flex min-w-[6.6rem] flex-col items-end rounded-xl px-2.5 py-1.5',
+                                                shift ? shiftColors[shift] : 'border border-border/50 bg-muted/20 text-muted-foreground'
+                                            )}>
+                                                <span className="text-xs font-bold">{shift ? `${shift} · ${getShiftLabel(shift)}` : '—'}</span>
+                                                {shift && shift !== 'OFF' && <span className="mt-0.5 text-[10px] opacity-75">{getShiftTime(shift)}</span>}
+                                            </span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                            {shifts.map((shift) => (
+                                <div key={shift} className={cn('rounded-xl px-2.5 py-2', shiftColors[shift])}>
+                                    <div className="text-xs font-bold">{shift} · {getShiftLabel(shift)}</div>
+                                    {shift !== 'OFF' && <div className="mt-0.5 text-[10px] opacity-75">{getShiftTime(shift)}</div>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 {staff.length === 0 ? (
                     <p className="text-muted-foreground text-sm text-center py-8">
                         {t('roster.noStaff')}
                     </p>
                 ) : (
+                    <div className="hidden overflow-x-auto md:block">
                     <table className="w-full text-sm table-fixed">
                         <thead>
                             <tr className="border-b border-border">
@@ -482,10 +607,11 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                             })}
                         </Reorder.Group>
                     </table>
+                    </div>
                 )}
 
                 {/* Legend */}
-                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
+                <div className="mt-4 hidden flex-wrap gap-2 border-t border-border pt-4 md:flex">
                     {shifts.map((shift) => {
                         const shiftInfo = hotel?.settings?.shifts?.find((s: any) => s.code === shift)
                         return (

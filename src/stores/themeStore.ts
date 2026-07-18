@@ -83,6 +83,7 @@ export const useThemeStore = create<ThemeStore>()(
                 root.classList.add(theme)
 
                 root.style.setProperty('--primary', accentColor)
+                root.style.setProperty('--primary-foreground', '216 19% 4%')
                 root.style.setProperty('--ring', accentColor)
 
                 const metaThemeColor = window.document.querySelector('meta[name="theme-color"]')

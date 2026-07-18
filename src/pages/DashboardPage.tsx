@@ -121,7 +121,7 @@ export function DashboardPage() {
             if (tabParam) {
                 setOverviewTab(tabParam)
             } else {
-                setOverviewTab('grid')
+                setOverviewTab(window.matchMedia('(max-width: 767px)').matches ? 'notes' : 'grid')
             }
         }
     }, [location.pathname, location.search])
@@ -290,7 +290,7 @@ export function DashboardPage() {
                     
                     {/* OVERVIEW VIEW */}
                     <TabsContent value="overview" className="m-0 border-none p-0 outline-none">
-                        {overviewTab !== 'grid' && (
+                        {overviewTab !== 'grid' && !isMobile && (
                             <div className="sticky top-0 z-30 mb-5 flex items-center gap-2 rounded-[1.1rem] border border-border/50 bg-background/[0.82] px-3 py-2 backdrop-blur-xl">
                                 <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
                                     <ChevronLeft className="w-5 h-5" />
@@ -347,7 +347,7 @@ export function DashboardPage() {
                         <TabsContent value="operations" className="m-0 border-none p-0 outline-none">
                             <Tabs value={operationTab} onValueChange={setOperationTab}>
                                 {/* Mobile Header for Sub-pages */}
-                                {isMobile && operationTab !== 'grid' && (
+                                {isMobile && operationTab !== 'grid' && operationTab !== 'messaging' && (
                                     <div className="sticky top-0 z-30 mb-4 flex items-center gap-2 rounded-[1.1rem] border border-border/50 bg-background/[0.82] px-3 py-2 backdrop-blur-xl">
                                         <Button variant="ghost" size="icon" onClick={() => setOperationTab('grid')} className="-ml-2">
                                             <ChevronLeft className="w-5 h-5" />
@@ -362,7 +362,17 @@ export function DashboardPage() {
 
                                 <div>
                                     {isMobile && operationTab === 'grid' && (
-                                        <OperationsGrid onSelect={(id) => setOperationTab(id)} userRole={user?.role} />
+                                        <OperationsGrid
+                                            onSelect={(id) => {
+                                                if (id === 'overview') {
+                                                    setActiveTab('overview')
+                                                    setOverviewTab('grid')
+                                                    return
+                                                }
+                                                setOperationTab(id)
+                                            }}
+                                            userRole={user?.role}
+                                        />
                                     )}
 
                                     <div className={cn(isMobile && operationTab === 'grid' ? "hidden" : "block")}>
@@ -432,9 +442,10 @@ export function DashboardPage() {
                 activeTab={activeTab}
                 overviewTab={overviewTab}
                 operationTab={operationTab}
-                setActiveTab={(tab) => {
-                    setActiveTab(tab)
-                    if (tab === 'overview') setOverviewTab('grid')
+                onOpenNotes={() => {
+                    setActiveTab('overview')
+                    setOpenNewNote(false)
+                    setOverviewTab('notes')
                 }}
                 onOpenRoster={() => {
                     setActiveTab('overview')
