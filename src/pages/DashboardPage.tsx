@@ -31,7 +31,6 @@ import { useSalesStore } from '@/stores/salesStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useStaffMealStore } from '@/stores/staffMealStore'
 import { useBlacklistStore } from '@/stores/blacklistStore'
-import { useRoomStore } from '@/stores/roomStore'
 
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
@@ -59,7 +58,6 @@ const PricingPanel = lazy(() => import('@/components/pricing/PricingPanel').then
 const LeaderboardPanel = lazy(() => import('@/components/team/LeaderboardPanel').then(m => ({ default: m.LeaderboardPanel })))
 const ActivityLogPanel = lazy(() => import('@/components/activity/ActivityLogPanel').then(m => ({ default: m.ActivityLogPanel })))
 const HotelSettings = lazy(() => import('@/components/settings/HotelSettings').then(m => ({ default: m.HotelSettings })))
-const RoomManagementPanel = lazy(() => import('@/components/rooms/RoomManagementPanel').then(m => ({ default: m.RoomManagementPanel })))
 const CardsAndLoansPanel = lazy(() => import('@/components/loans/CardsAndLoansPanel').then(m => ({ default: m.CardsAndLoansPanel })))
 const AttendanceReportPanel = lazy(() => import('@/components/attendance/AttendanceReportPanel').then(m => ({ default: m.AttendanceReportPanel })))
 
@@ -84,7 +82,6 @@ export function DashboardPage() {
     const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
     const subscribeToAttendance = useAttendanceStore((state) => state.subscribeToAttendance)
-    const subscribeToRooms = useRoomStore((state) => state.subscribeToRooms)
     const { t, language } = useLanguageStore()
 
     const [showTour, setShowTour] = useState(false)
@@ -173,7 +170,6 @@ export function DashboardPage() {
         const unsubAttendance = (user?.role === 'gm' || user?.role === 'receptionist')
             ? subscribeToAttendance(userHotelId, user.role === 'gm' ? undefined : user.uid)
             : () => undefined
-        const unsubRooms = subscribeToRooms(userHotelId)
         const subscribeToBlacklist = useBlacklistStore.getState().subscribeToBlacklist
         const unsubBlacklist = subscribeToBlacklist(userHotelId)
 
@@ -184,10 +180,9 @@ export function DashboardPage() {
             unsubRoster()
             unsubMenu()
             unsubAttendance()
-            unsubRooms()
             unsubBlacklist()
         }
-    }, [userHotelId, user?.role, user?.uid, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu, subscribeToAttendance, subscribeToRooms])
+    }, [userHotelId, user?.role, user?.uid, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu, subscribeToAttendance])
 
 
 
@@ -300,13 +295,8 @@ export function DashboardPage() {
                                 <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
                                     <ChevronLeft className="w-5 h-5" />
                                 </Button>
-                                <span className="font-semibold text-lg capitalize">
-                                    {overviewTab === 'notes' ? t('module.shiftNotes') :
-                                        overviewTab === 'hotel-info' ? t('module.hotelInfo') :
-                                            overviewTab === 'calendar' ? t('module.calendar') :
-                                                overviewTab === 'menu' ? 'Daily Menu' :
-                                                    overviewTab === 'currency' ? t('currency.title') :
-                                                        overviewTab === 'roster' ? t('module.roster') : 'Overview'}
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    {language === 'tr' ? 'Operasyon özetine dön' : language === 'ru' ? 'Вернуться к операциям' : 'Back to operations'}
                                 </span>
                             </div>
                         )}
@@ -325,9 +315,9 @@ export function DashboardPage() {
                                     setActiveTab('operations')
                                     setOperationTab('attendance')
                                 }}
-                                onOpenRooms={() => {
-                                    setActiveTab('operations')
-                                    setOperationTab('rooms')
+                                onOpenRoster={() => {
+                                    setOpenNewNote(false)
+                                    setOverviewTab('roster')
                                 }}
                             />
                         ) : (
@@ -403,10 +393,6 @@ export function DashboardPage() {
                                                 <TourCatalogue />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="rooms" className="m-0 p-0 outline-none">
-                                                <RoomManagementPanel />
-                                                <ScrollToTopButton />
-                                            </TabsContent>
                                             <TabsContent value="cards-loans" className="m-0 p-0 outline-none">
                                                 <CardsAndLoansPanel />
                                                 <ScrollToTopButton />
@@ -446,10 +432,10 @@ export function DashboardPage() {
                     setActiveTab(tab)
                     if (tab === 'overview') setOverviewTab('grid')
                 }}
-                onOpenNotes={() => {
+                onOpenRoster={() => {
                     setActiveTab('overview')
                     setOpenNewNote(false)
-                    setOverviewTab('notes')
+                    setOverviewTab('roster')
                 }}
                 onNewRecord={() => {
                     setActiveTab('overview')

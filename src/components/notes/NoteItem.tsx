@@ -172,7 +172,7 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className={cn(
-                'p-3 rounded-lg border transition-colors group relative',
+                'handover-note p-3 rounded-lg border transition-colors group relative',
                 note.is_pinned
                     ? 'border-l-2 border-l-primary border-y-border border-r-border bg-primary/[0.03]'
                     : note.status === 'active'
@@ -565,7 +565,7 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <Button
                         size="icon"
                         variant="ghost"

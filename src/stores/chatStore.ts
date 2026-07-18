@@ -8,7 +8,6 @@ import { useSalesStore } from './salesStore'
 import { usePricingStore } from './pricingStore'
 import { useRosterStore } from './rosterStore'
 import { useLogsStore } from './logsStore'
-import { useRoomStore } from './roomStore'
 import { useTourStore } from './tourStore'
 import { useFeedbackStore } from './feedbackStore'
 import { useStaffMealStore } from './staffMealStore'
@@ -181,22 +180,6 @@ function buildContext(): string {
         openLogs.slice(0, 15).forEach(l => {
             parts.push(`  - [${l.type}/${l.urgency}] ${l.content} ${l.room_number ? `(Room ${l.room_number})` : ''} by ${l.created_by_name}`)
         })
-    }
-
-    // ── ROOMS ─────────────────────────────────
-    const rooms = useRoomStore.getState().rooms
-    if (rooms.length > 0) {
-        const occupied = rooms.filter(r => r.occupancy === 'occupied')
-        const vacant = rooms.filter(r => r.occupancy === 'vacant')
-        const dirty = rooms.filter(r => r.status === 'dirty').length
-        const clean = rooms.filter(r => r.status === 'clean').length
-        parts.push(`[ROOM STATUS SUMMARY] Total: ${rooms.length}, Occupied: ${occupied.length}, Vacant: ${vacant.length}, Clean: ${clean}, Dirty: ${dirty}`)
-        if (occupied.length > 0) {
-            parts.push(`[OCCUPIED ROOMS DETAILS]`)
-            occupied.forEach(r => {
-                parts.push(`  - Room ${r.number}: ${r.type}, status=${r.status}, floor=${r.floor}`)
-            })
-        }
     }
 
     // ── TOURS ─────────────────────────────────

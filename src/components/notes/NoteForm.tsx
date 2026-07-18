@@ -141,10 +141,10 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="space-y-3 p-3 bg-card/50 rounded-lg border border-border"
+            className="handover-compose space-y-3 p-3 bg-card/50 rounded-lg border border-border"
         >
             {/* Category Selection */}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="handover-compose__categories flex gap-1.5">
                 {(Object.keys(categoryInfo) as NoteCategory[]).map((cat) => (
                     <button
                         key={cat}
@@ -163,9 +163,9 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
             </div>
 
             {/* Priority Selection */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs text-muted-foreground font-medium">{t('priority.label')}:</span>
-                <div className="flex items-center gap-1 p-1 bg-muted/40 rounded-lg" role="radiogroup">
+                <div className="flex flex-wrap items-center gap-1 p-1 bg-muted/40 rounded-lg" role="radiogroup">
                     {(Object.keys(priorityInfo) as NotePriority[]).map((p) => {
                         const dotColor = p === 'critical' ? 'bg-rose-500' :
                             p === 'high' ? 'bg-orange-500' :
@@ -192,7 +192,7 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                 </div>
             </div>
 
-            <div className="flex gap-2 items-center">
+            <div className="flex flex-wrap gap-2 items-center">
                 <Input
                     placeholder={(t('common.room') as string) + " #"}
                     value={newRoom}
@@ -205,7 +205,7 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                     onChange={(e) => setNewTime(e.target.value)}
                     className="w-24 text-sm bg-muted/50"
                 />
-                <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-transparent focus-within:border-primary/30 transition-colors">
+                <div className="min-w-[12rem] flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-transparent focus-within:border-primary/30 transition-colors">
                     <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
                     <input
                         placeholder={t('notes.guestName') as string}

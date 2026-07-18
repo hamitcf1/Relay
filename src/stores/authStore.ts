@@ -287,7 +287,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         const sub = useAuthStore.subscribe((state) => {
             const firestoreLang = state.user?.settings?.language
             if (firestoreLang && firestoreLang !== useLanguageStore.getState().language) {
-                useLanguageStore.setState({ language: firestoreLang as any })
+                void useLanguageStore.getState().setLanguage(firestoreLang, false)
             }
         })
 

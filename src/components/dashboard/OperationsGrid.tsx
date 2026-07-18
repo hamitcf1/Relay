@@ -9,7 +9,6 @@ import {
     DollarSign,
     Users,
     ScrollText,
-    BedDouble,
     KeyRound,
     ClipboardCheck,
 } from 'lucide-react'
@@ -54,12 +53,6 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             label: t('module.tours'),
             icon: Map,
             desc: t('operations.tours.desc')
-        },
-        {
-            id: 'rooms',
-            label: t('dashboard.rooms'),
-            icon: BedDouble,
-            desc: t('operations.rooms.desc')
         },
         {
             id: 'cards-loans',

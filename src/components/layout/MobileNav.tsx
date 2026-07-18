@@ -1,4 +1,4 @@
-import { ClipboardList, LayoutGrid, MessageCircle, MoreHorizontal, Plus } from 'lucide-react'
+import { CalendarRange, LayoutGrid, MessageCircle, MoreHorizontal, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -9,7 +9,7 @@ interface MobileNavProps {
     operationTab: string
     setActiveTab: (tab: string) => void
     onOpenMenu: () => void
-    onOpenNotes: () => void
+    onOpenRoster: () => void
     onNewRecord: () => void
     onOpenMessages: () => void
 }
@@ -20,16 +20,16 @@ export function MobileNav({
     operationTab,
     setActiveTab,
     onOpenMenu,
-    onOpenNotes,
+    onOpenRoster,
     onNewRecord,
     onOpenMessages,
 }: MobileNavProps) {
     const { language } = useLanguageStore()
     const labels = language === 'tr'
-        ? { operations: 'Operasyon', daily: 'Günlük', messages: 'Mesajlar', menu: 'Menü', add: 'Yeni kayıt' }
+        ? { operations: 'Operasyon', roster: 'Vardiya planı', messages: 'Mesajlar', menu: 'Diğer', add: 'Devir kaydı ekle' }
         : language === 'ru'
-            ? { operations: 'Операции', daily: 'Журнал', messages: 'Сообщения', menu: 'Меню', add: 'Новая запись' }
-            : { operations: 'Operations', daily: 'Daily', messages: 'Messages', menu: 'Menu', add: 'New record' }
+            ? { operations: 'Операции', roster: 'График', messages: 'Сообщения', menu: 'Ещё', add: 'Добавить запись' }
+            : { operations: 'Operations', roster: 'Roster', messages: 'Messages', menu: 'More', add: 'Add handover record' }
 
     const items = [
         {
@@ -40,11 +40,11 @@ export function MobileNav({
             action: () => setActiveTab('overview'),
         },
         {
-            id: 'daily',
-            label: labels.daily,
-            icon: ClipboardList,
-            active: activeTab === 'overview' && overviewTab === 'notes',
-            action: onOpenNotes,
+            id: 'roster',
+            label: labels.roster,
+            icon: CalendarRange,
+            active: activeTab === 'overview' && overviewTab === 'roster',
+            action: onOpenRoster,
         },
         {
             id: 'messages',
