@@ -10,7 +10,8 @@ import {
     Users,
     ScrollText,
     BedDouble,
-    KeyRound
+    KeyRound,
+    ClipboardCheck,
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
@@ -22,7 +23,7 @@ interface OperationsGridProps {
 }
 
 export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
 
     const items = [
         {
@@ -98,6 +99,13 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
     ]
 
     if (userRole === 'gm') {
+        items.push({
+            id: 'attendance',
+            label: language === 'tr' ? 'Mesai Raporları' : 'Attendance',
+            icon: ClipboardCheck,
+            color: 'bg-cyan-500/10 text-cyan-500',
+            desc: language === 'tr' ? 'Giriş, çıkış ve geç kalma kayıtları' : 'Clock-in, clock-out and late records',
+        })
         items.push({
             id: 'activity',
             label: t('module.activity'),

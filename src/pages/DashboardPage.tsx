@@ -43,6 +43,8 @@ import { ChevronLeft } from 'lucide-react'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { ShiftTimer } from '@/components/layout/ShiftTimer'
+import { AttendanceClock } from '@/components/attendance/AttendanceClock'
+import { useAttendanceStore } from '@/stores/attendanceStore'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { KpiBadges } from '@/components/dashboard/KpiBadges'
@@ -60,6 +62,7 @@ const ActivityLogPanel = lazy(() => import('@/components/activity/ActivityLogPan
 const HotelSettings = lazy(() => import('@/components/settings/HotelSettings').then(m => ({ default: m.HotelSettings })))
 const RoomManagementPanel = lazy(() => import('@/components/rooms/RoomManagementPanel').then(m => ({ default: m.RoomManagementPanel })))
 const CardsAndLoansPanel = lazy(() => import('@/components/loans/CardsAndLoansPanel').then(m => ({ default: m.CardsAndLoansPanel })))
+const AttendanceReportPanel = lazy(() => import('@/components/attendance/AttendanceReportPanel').then(m => ({ default: m.AttendanceReportPanel })))
 
 function TabFallback() {
     return (
@@ -81,7 +84,8 @@ export function DashboardPage() {
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
     const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
-    const { t } = useLanguageStore()
+    const subscribeToAttendance = useAttendanceStore((state) => state.subscribeToAttendance)
+    const { t, language } = useLanguageStore()
 
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
@@ -165,6 +169,9 @@ export function DashboardPage() {
         const unsubNotes = subscribeToNotes(userHotelId)
         const unsubRoster = subscribeToRoster(userHotelId)
         const unsubMenu = subscribeToTodayMenu(userHotelId)
+        const unsubAttendance = (user?.role === 'gm' || user?.role === 'receptionist')
+            ? subscribeToAttendance(userHotelId, user.role === 'gm' ? undefined : user.uid)
+            : () => undefined
         const subscribeToBlacklist = useBlacklistStore.getState().subscribeToBlacklist
         const unsubBlacklist = subscribeToBlacklist(userHotelId)
 
@@ -174,9 +181,10 @@ export function DashboardPage() {
             unsubNotes()
             unsubRoster()
             unsubMenu()
+            unsubAttendance()
             unsubBlacklist()
         }
-    }, [userHotelId, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu])
+    }, [userHotelId, user?.role, user?.uid, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu, subscribeToAttendance])
 
 
 
@@ -243,6 +251,7 @@ export function DashboardPage() {
                                 />
                             )}
                             <ShiftTimer />
+                            <AttendanceClock />
                         </div>
                         <AnimatePresence>
                             {showDateTime && (
@@ -342,7 +351,11 @@ export function DashboardPage() {
                                         <Button variant="ghost" size="icon" onClick={() => setOperationTab('grid')} className="-ml-2">
                                             <ChevronLeft className="w-5 h-5" />
                                         </Button>
-                                        <span className="font-semibold text-lg capitalize">{(t(`module.${operationTab}` as any) as string) || operationTab}</span>
+                                        <span className="font-semibold text-lg capitalize">
+                                            {operationTab === 'attendance'
+                                                ? (language === 'tr' ? 'Mesai Raporları' : 'Attendance')
+                                                : ((t(`module.${operationTab}` as any) as string) || operationTab)}
+                                        </span>
                                     </div>
                                 )}
 
@@ -401,6 +414,10 @@ export function DashboardPage() {
                                             </TabsContent>
                                             <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
                                                 <ActivityLogPanel />
+                                                <ScrollToTopButton />
+                                            </TabsContent>
+                                            <TabsContent value="attendance" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                                <AttendanceReportPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                         </Suspense>

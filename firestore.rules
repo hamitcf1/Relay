@@ -141,6 +141,69 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // ATTENDANCE - Personal timekeeping records. Staff can only create and
+      // close their own record; GMs can inspect the hotel's full report.
+      match /attendance/{attendanceId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId) && (
+          isGM() || resource.data.staff_id == request.auth.uid
+        );
+        allow create: if isAuthenticated() && belongsToHotel(hotelId)
+          && getUserRole() == 'receptionist'
+          && request.resource.data.staff_id == request.auth.uid
+          && request.resource.data.status == 'clocked_in'
+          && request.resource.data.staff_name == getUserDoc().name
+          && request.resource.data.staff_role == 'receptionist'
+          && request.resource.data.late_minutes >= 0
+          && request.resource.data.reviewed_by == null
+          && request.resource.data.reviewed_by_name == null
+          && request.resource.data.reviewed_at == null
+          && request.resource.data.review_note == null
+          && (
+            (
+              request.resource.data.late_minutes > 0
+              && request.resource.data.late_excuse is string
+              && request.resource.data.late_excuse.size() > 0
+              && request.resource.data.manager_permission_declared is bool
+              && request.resource.data.approval_status == 'pending'
+            ) || (
+              request.resource.data.late_minutes == 0
+              && request.resource.data.manager_permission_declared == null
+              && request.resource.data.approval_status == 'not_required'
+            )
+          );
+        allow update: if isAuthenticated() && belongsToHotel(hotelId) && (
+          (
+            resource.data.staff_id == request.auth.uid
+            && resource.data.status == 'clocked_in'
+            && request.resource.data.status == 'clocked_out'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'clock_out_at', 'status', 'worked_minutes', 'updated_at'
+            ])
+          ) || (
+            isGM()
+            && resource.data.late_minutes > 0
+            && resource.data.approval_status == 'pending'
+            && request.resource.data.approval_status in ['approved', 'rejected']
+            && request.resource.data.reviewed_by == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'approval_status', 'reviewed_by', 'reviewed_by_name',
+              'reviewed_at', 'review_note', 'updated_at'
+            ])
+          )
+        );
+        allow delete: if false;
+      }
+
+      // Immutable event trail for every clock-in and clock-out operation.
+      match /attendance_events/{eventId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId) && isGM();
+        allow create: if isAuthenticated() && belongsToHotel(hotelId) && (
+          (getUserRole() == 'receptionist' && request.resource.data.staff_id == request.auth.uid) ||
+          (isGM() && request.resource.data.event == 'manager_review' && request.resource.data.reviewed_by == request.auth.uid)
+        );
+        allow update, delete: if false;
+      }
+
       // NOTIFICATIONS
       match /notifications/{notifId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
