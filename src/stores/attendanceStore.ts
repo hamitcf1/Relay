@@ -15,6 +15,7 @@ import { db } from '@/lib/firebase'
 import { minutesLate, type AttendanceAssignment } from '@/lib/attendance'
 import type { AttendanceRecord, User } from '@/types'
 import { useActivityStore } from './activityStore'
+import { useLanguageStore } from './languageStore'
 
 interface AttendanceState {
     records: AttendanceRecord[]
@@ -121,6 +122,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
     },
 
     clockIn: async (hotelId, user, assignment, excuse = '', managerPermission) => {
+        const t = useLanguageStore.getState().t
         const now = new Date()
         const lateMinutes = minutesLate(now, assignment.scheduledStart)
         const cleanExcuse = excuse.trim()
@@ -156,7 +158,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
                 worked_minutes: null,
             }
             set({ records: [record, ...get().records.filter((item) => item.id !== record.id)] })
-            toast.success('Mesai başlangıcı kaydedildi')
+            toast.success(t('attendance.toast.clockIn'))
             return
         }
 
@@ -203,12 +205,13 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
         })
         await useActivityStore.getState().logActivity(
             hotelId, user.uid, user.name, user.role, 'attendance_clock_in',
-            `${assignment.shiftType} vardiyası · ${lateMinutes > 0 ? `${lateMinutes} dk geç · ${cleanExcuse}` : 'zamanında'}`,
+            `${t('attendance.report.shift', { type: assignment.shiftType })} · ${lateMinutes > 0 ? `${lateMinutes} ${t('attendance.unit.minute')} ${t('attendance.clock.late')} · ${cleanExcuse}` : t('attendance.report.onTime')}`,
         )
-        toast.success('Mesai başlangıcı kaydedildi')
+        toast.success(t('attendance.toast.clockIn'))
     },
 
     clockOut: async (hotelId, user, recordId) => {
+        const t = useLanguageStore.getState().t
         const now = new Date()
         if (hotelId === 'demo-hotel-id') {
             set({ records: get().records.map((record) => record.id === recordId ? {
@@ -217,7 +220,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
                 status: 'clocked_out',
                 worked_minutes: Math.max(0, Math.floor((now.getTime() - record.clock_in_at.getTime()) / 60_000)),
             } : record) })
-            toast.success('Mesai bitişi kaydedildi')
+            toast.success(t('attendance.toast.clockOut'))
             return
         }
 
@@ -249,12 +252,13 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
         })
         await useActivityStore.getState().logActivity(
             hotelId, user.uid, user.name, user.role, 'attendance_clock_out',
-            `${Math.floor(workedMinutes / 60)} sa ${workedMinutes % 60} dk çalışıldı`,
+            `${Math.floor(workedMinutes / 60)} ${t('attendance.unit.hour')} ${workedMinutes % 60} ${t('attendance.unit.minute')}`,
         )
-        toast.success('Mesai bitişi kaydedildi')
+        toast.success(t('attendance.toast.clockOut'))
     },
 
     reviewLateArrival: async (hotelId, gm, recordId, decision, note = '') => {
+        const t = useLanguageStore.getState().t
         if (gm.role !== 'gm') throw new Error('GM_REQUIRED')
         const now = new Date()
         const cleanNote = note.trim()
@@ -269,7 +273,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
                 reviewed_at: now,
                 review_note: cleanNote || null,
             } : record) })
-            toast.success(decision === 'approved' ? 'Geç kalma kaydı onaylandı' : 'Geç kalma kaydı reddedildi')
+            toast.success(decision === 'approved' ? t('attendance.toast.approved') : t('attendance.toast.rejected'))
             return
         }
 
@@ -301,8 +305,8 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
         })
         await useActivityStore.getState().logActivity(
             hotelId, gm.uid, gm.name, gm.role, 'attendance_review',
-            `${decision === 'approved' ? 'Onaylandı' : 'Reddedildi'} · ${cleanNote || 'Yönetici notu yok'}`,
+            `${decision === 'approved' ? t('attendance.report.approved') : t('attendance.report.rejected')} · ${cleanNote || '—'}`,
         )
-        toast.success(decision === 'approved' ? 'Geç kalma kaydı onaylandı' : 'Geç kalma kaydı reddedildi')
+        toast.success(decision === 'approved' ? t('attendance.toast.approved') : t('attendance.toast.rejected'))
     },
 }))

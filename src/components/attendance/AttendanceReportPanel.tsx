@@ -11,43 +11,11 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { AttendanceRecord } from '@/types'
+import type { Translations } from '@/i18n/types'
 
-const labels = {
-    tr: {
-        title: 'Mesai Raporları', desc: 'Resepsiyonist giriş, çıkış ve geç kalma denetim kayıtları.',
-        total: 'Toplam Kayıt', late: 'Geç Giriş', active: 'Mesaide', avgLate: 'Ort. Gecikme', minute: 'dk',
-        pending: 'İzin Onayı Bekleyen',
-        search: 'Personel ara…', export: 'CSV İndir', employee: 'Personel', date: 'Tarih / Vardiya',
-        planned: 'Planlanan', in: 'Giriş', out: 'Çıkış', duration: 'Süre', status: 'Durum', excuse: 'Mazeret', permission: 'Yönetici İzni',
-        onTime: 'Zamanında', working: 'Mesaide', completed: 'Tamamlandı', noExit: 'Henüz çıkış yok',
-        permissionYes: 'İzin alındı beyanı', permissionNo: 'İzin alınmadı', approvalPending: 'GM onayı bekliyor',
-        approved: 'Onaylandı', rejected: 'Reddedildi', approve: 'Onayla', reject: 'Reddet',
-        reviewTitleApprove: 'Geç kalma kaydını onayla', reviewTitleReject: 'Geç kalma kaydını reddet',
-        reviewDesc: 'Kararınız, adınız ve işlem zamanı denetim kaydına eklenecektir.',
-        reviewNote: 'Yönetici notu', reviewNotePlaceholder: 'Kararla ilgili açıklama…', rejectionRequired: 'Reddetme işleminde yönetici notu zorunludur.',
-        cancel: 'Vazgeç', saveDecision: 'Kararı Kaydet',
-        empty: 'Seçilen tarih aralığında mesai kaydı bulunamadı.', access: 'Bu raporu yalnızca GM kullanıcıları görüntüleyebilir.',
-    },
-    en: {
-        title: 'Attendance Reports', desc: 'Receptionist clock-in, clock-out and late-arrival audit records.',
-        total: 'Total Records', late: 'Late Arrivals', active: 'On Shift', avgLate: 'Avg. Delay', minute: 'min',
-        pending: 'Awaiting Approval',
-        search: 'Search employee…', export: 'Download CSV', employee: 'Employee', date: 'Date / Shift',
-        planned: 'Scheduled', in: 'Clock In', out: 'Clock Out', duration: 'Duration', status: 'Status', excuse: 'Excuse', permission: 'Manager Permission',
-        onTime: 'On time', working: 'On shift', completed: 'Completed', noExit: 'No clock-out yet',
-        permissionYes: 'Permission declared', permissionNo: 'No permission', approvalPending: 'Awaiting GM approval',
-        approved: 'Approved', rejected: 'Rejected', approve: 'Approve', reject: 'Reject',
-        reviewTitleApprove: 'Approve late arrival', reviewTitleReject: 'Reject late arrival',
-        reviewDesc: 'Your decision, name and action time will be added to the audit trail.',
-        reviewNote: 'Manager note', reviewNotePlaceholder: 'Explanation for the decision…', rejectionRequired: 'A manager note is required when rejecting.',
-        cancel: 'Cancel', saveDecision: 'Save Decision',
-        empty: 'No attendance records found in the selected date range.', access: 'Only GM users can view this report.',
-    },
-}
-
-function durationLabel(minutes: number | null) {
+function durationLabel(minutes: number | null, t: (key: keyof Translations) => string) {
     if (minutes == null) return '—'
-    return `${Math.floor(minutes / 60)}s ${minutes % 60}dk`
+    return `${Math.floor(minutes / 60)} ${t('attendance.unit.hour')} ${minutes % 60} ${t('attendance.unit.minute')}`
 }
 
 function csvCell(value: string | number) {
@@ -59,8 +27,24 @@ export function AttendanceReportPanel() {
     const records = useAttendanceStore((state) => state.records)
     const loading = useAttendanceStore((state) => state.loading)
     const reviewLateArrival = useAttendanceStore((state) => state.reviewLateArrival)
-    const language = useLanguageStore((state) => state.language)
-    const text = language === 'tr' ? labels.tr : labels.en
+    const t = useLanguageStore((state) => state.t)
+    const text = {
+        title: t('attendance.report.title'), desc: t('attendance.report.desc'), total: t('attendance.report.total'),
+        late: t('attendance.report.late'), active: t('attendance.report.active'), avgLate: t('attendance.report.avgLate'),
+        minute: t('attendance.unit.minute'), pending: t('attendance.report.pending'), search: t('attendance.report.search'),
+        export: t('attendance.report.export'), employee: t('attendance.report.employee'), date: t('attendance.report.date'),
+        planned: t('attendance.report.planned'), in: t('attendance.report.clockIn'), out: t('attendance.report.clockOut'),
+        duration: t('attendance.report.duration'), status: t('attendance.report.status'), excuse: t('attendance.report.excuse'),
+        permission: t('attendance.report.permission'), onTime: t('attendance.report.onTime'), working: t('attendance.report.working'),
+        completed: t('attendance.report.completed'), noExit: t('attendance.report.noExit'), permissionYes: t('attendance.report.permissionYes'),
+        permissionNo: t('attendance.report.permissionNo'), approvalPending: t('attendance.report.approvalPending'),
+        approved: t('attendance.report.approved'), rejected: t('attendance.report.rejected'), approve: t('attendance.report.approve'),
+        reject: t('attendance.report.reject'), reviewTitleApprove: t('attendance.report.reviewTitleApprove'),
+        reviewTitleReject: t('attendance.report.reviewTitleReject'), reviewDesc: t('attendance.report.reviewDesc'),
+        reviewNote: t('attendance.report.reviewNote'), reviewNotePlaceholder: t('attendance.report.reviewNotePlaceholder'),
+        rejectionRequired: t('attendance.report.rejectionRequired'), cancel: t('attendance.clock.cancel'),
+        saveDecision: t('attendance.report.saveDecision'), empty: t('attendance.report.empty'), access: t('attendance.report.access'),
+    }
     const [fromDate, setFromDate] = useState(format(subDays(new Date(), 29), 'yyyy-MM-dd'))
     const [toDate, setToDate] = useState(format(new Date(), 'yyyy-MM-dd'))
     const [search, setSearch] = useState('')
@@ -83,15 +67,22 @@ export function AttendanceReportPanel() {
     }
 
     const exportCsv = () => {
-        const header = ['Personel', 'Tarih', 'Vardiya', 'Planlanan Giriş', 'Planlanan Çıkış', 'Gerçek Giriş', 'Gerçek Çıkış', 'Geç Dakika', 'Mazeret', 'Yönetici İzni Beyanı', 'GM Onay Durumu', 'Onaylayan GM', 'Onay Zamanı', 'Yönetici Notu', 'Çalışma Dakikası', 'Durum']
+        const header = [
+            text.employee, text.date, t('attendance.report.shiftLabel'),
+            t('attendance.report.scheduledIn'), t('attendance.report.scheduledOut'), text.in, text.out,
+            t('attendance.report.lateMinutes'), text.excuse, t('attendance.report.permissionDeclaration'),
+            t('attendance.report.approvalStatus'), t('attendance.report.reviewedBy'), t('attendance.report.reviewedAt'),
+            text.reviewNote, t('attendance.report.workedMinutes'), text.status,
+        ]
         const rows = filtered.map((record) => [
             record.staff_name, record.work_date, record.shift_type,
             format(record.scheduled_start, 'yyyy-MM-dd HH:mm'), format(record.scheduled_end, 'yyyy-MM-dd HH:mm'),
             format(record.clock_in_at, 'yyyy-MM-dd HH:mm:ss'), record.clock_out_at ? format(record.clock_out_at, 'yyyy-MM-dd HH:mm:ss') : '',
             record.late_minutes, record.late_excuse || '',
-            record.manager_permission_declared == null ? '' : record.manager_permission_declared ? 'İzin alındı' : 'İzin alınmadı',
-            record.approval_status, record.reviewed_by_name || '', record.reviewed_at ? format(record.reviewed_at, 'yyyy-MM-dd HH:mm:ss') : '', record.review_note || '',
-            record.worked_minutes ?? '', record.status,
+            record.manager_permission_declared == null ? '' : record.manager_permission_declared ? text.permissionYes : text.permissionNo,
+            record.approval_status === 'approved' ? text.approved : record.approval_status === 'rejected' ? text.rejected : text.approvalPending,
+            record.reviewed_by_name || '', record.reviewed_at ? format(record.reviewed_at, 'yyyy-MM-dd HH:mm:ss') : '', record.review_note || '',
+            record.worked_minutes ?? '', record.status === 'clocked_in' ? text.working : text.completed,
         ])
         const csv = `\uFEFF${[header, ...rows].map((row) => row.map(csvCell).join(';')).join('\n')}`
         const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
@@ -171,11 +162,11 @@ export function AttendanceReportPanel() {
                                 {filtered.map((record) => (
                                     <tr key={record.id} className="hover:bg-muted/20">
                                         <td className="px-4 py-3 font-semibold">{record.staff_name}<div className="text-[10px] font-normal uppercase text-muted-foreground">{record.staff_role}</div></td>
-                                        <td className="px-4 py-3"><span className="font-medium">{record.work_date}</span><div className="text-xs text-muted-foreground">{record.shift_type} vardiyası</div></td>
+                                        <td className="px-4 py-3"><span className="font-medium">{record.work_date}</span><div className="text-xs text-muted-foreground">{t('attendance.report.shift', { type: record.shift_type })}</div></td>
                                         <td className="px-4 py-3 font-mono text-xs">{format(record.scheduled_start, 'HH:mm')}–{format(record.scheduled_end, 'HH:mm')}</td>
                                         <td className="px-4 py-3 font-mono text-xs">{format(record.clock_in_at, 'HH:mm:ss')}<div className={record.late_minutes > 0 ? 'text-amber-600' : 'text-emerald-600'}>{record.late_minutes > 0 ? `+${record.late_minutes} ${text.minute}` : text.onTime}</div></td>
                                         <td className="px-4 py-3 font-mono text-xs">{record.clock_out_at ? format(record.clock_out_at, 'HH:mm:ss') : <span className="font-sans text-muted-foreground">{text.noExit}</span>}</td>
-                                        <td className="px-4 py-3 font-medium">{durationLabel(record.worked_minutes)}</td>
+                                        <td className="px-4 py-3 font-medium">{durationLabel(record.worked_minutes, t)}</td>
                                         <td className="px-4 py-3"><Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : text.completed}</Badge></td>
                                         <td className="max-w-[260px] px-4 py-3 text-xs text-muted-foreground"><span className="line-clamp-2" title={record.late_excuse || ''}>{record.late_excuse || '—'}</span></td>
                                         <td className="min-w-[220px] px-4 py-3 text-xs">

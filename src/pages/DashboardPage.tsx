@@ -85,7 +85,7 @@ export function DashboardPage() {
     const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
     const subscribeToAttendance = useAttendanceStore((state) => state.subscribeToAttendance)
-    const { t, language } = useLanguageStore()
+    const { t } = useLanguageStore()
 
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
@@ -353,7 +353,7 @@ export function DashboardPage() {
                                         </Button>
                                         <span className="font-semibold text-lg capitalize">
                                             {operationTab === 'attendance'
-                                                ? (language === 'tr' ? 'Mesai Raporları' : 'Attendance')
+                                                ? t('module.attendance')
                                                 : ((t(`module.${operationTab}` as any) as string) || operationTab)}
                                         </span>
                                     </div>
