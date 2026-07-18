@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Globe, Menu, X, ArrowLeft, ConciergeBell } from 'lucide-react'
+import { Globe, Menu, X, ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -10,6 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
+import { RelayBrand } from '@/components/brand/RelayBrand'
 
 export function PublicNavbar() {
     const navigate = useNavigate()
@@ -25,10 +26,7 @@ export function PublicNavbar() {
 
                 {/* Brand */}
                 <Link to="/" className="flex items-center gap-2.5 group">
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                        <ConciergeBell className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
-                    </div>
-                    <span className="font-semibold text-base text-white tracking-tight">Aetherius Relay</span>
+                    <RelayBrand markClassName="h-8 w-8" wordmarkClassName="text-base text-white" />
                 </Link>
 
                 {/* Desktop Nav Links */}
@@ -55,6 +53,10 @@ export function PublicNavbar() {
                             <DropdownMenuItem onClick={() => setLanguage('tr')} className="hover:bg-white/5 cursor-pointer">
                                 Türkçe
                                 {language === 'tr' && <span className="ml-2 text-primary">✓</span>}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setLanguage('ru')} className="hover:bg-white/5 cursor-pointer">
+                                Русский
+                                {language === 'ru' && <span className="ml-2 text-primary">✓</span>}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

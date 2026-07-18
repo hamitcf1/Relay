@@ -13,7 +13,6 @@ import {
     Users,
     Activity,
     LogOut,
-    ConciergeBell,
     ChevronLeft,
     Sparkles,
     Palette,
@@ -46,6 +45,7 @@ import {
     DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu'
 import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
+import { RelayBrand } from '@/components/brand/RelayBrand'
 
 interface AppSidebarProps {
     activeTab: string
@@ -170,16 +170,14 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                     "h-16 flex items-center border-b border-border/40 shrink-0 transition-all duration-300",
                     sidebarCollapsed ? "justify-center px-0" : "px-6 gap-3"
                 )}>
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-                        <ConciergeBell className="w-4 h-4 text-primary-foreground" aria-hidden="true" />
-                    </div>
+                    <RelayBrand compact markClassName="h-8 w-8" />
                     {!sidebarCollapsed && (
                         <motion.h1 
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             className="font-bold tracking-tight text-lg"
                         >
-                            Aetherius <span className="text-primary font-medium tracking-normal select-text">Relay</span>
+                            Aetherius <span className="text-primary font-semibold tracking-normal select-text">Relay</span>
                         </motion.h1>
                     )}
                 </div>
