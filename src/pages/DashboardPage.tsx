@@ -319,6 +319,10 @@ export function DashboardPage() {
                                     setOpenNewNote(false)
                                     setOverviewTab('roster')
                                 }}
+                                onOpenSales={() => {
+                                    setActiveTab('operations')
+                                    setOperationTab('sales')
+                                }}
                             />
                         ) : (
                             <motion.div
@@ -363,7 +367,7 @@ export function DashboardPage() {
 
                                     <div className={cn(isMobile && operationTab === 'grid' ? "hidden" : "block")}>
                                         <Suspense fallback={<TabFallback />}>
-                                            <TabsContent value="messaging" className="m-0 min-h-[680px] p-0 outline-none">
+                                            <TabsContent value="messaging" className="m-0 h-[calc(100dvh-7rem)] min-h-[36rem] p-3 outline-none md:p-5">
                                                 <MessagingPanel />
                                             </TabsContent>
                                             <TabsContent value="compliance" className="m-0 p-4 outline-none lg:p-6">
@@ -381,15 +385,15 @@ export function DashboardPage() {
                                             <TabsContent value="sales" className="m-0 p-0 outline-none">
                                                 <SalesPanel />
                                             </TabsContent>
-                                            <TabsContent value="feedback" className="m-0 p-0 outline-none">
+                                            <TabsContent value="feedback" className="m-0 p-4 outline-none md:p-6">
                                                 <FeedbackSection />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="off-days" className="m-0 p-0 outline-none">
+                                            <TabsContent value="off-days" className="m-0 p-4 outline-none md:p-6">
                                                 <OffDayScheduler />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="tours" className="m-0 p-0 outline-none">
+                                            <TabsContent value="tours" className="m-0 p-4 outline-none md:p-6">
                                                 <TourCatalogue />
                                                 <ScrollToTopButton />
                                             </TabsContent>

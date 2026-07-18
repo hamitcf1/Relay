@@ -82,7 +82,7 @@ export function UserNav() {
                                 <span>{t('common.appearance')}</span>
                             </DropdownMenuSubTrigger>
                             <DropdownMenuPortal>
-                                <DropdownMenuSubContent className="w-80 bg-card border-border p-4">
+                                <DropdownMenuSubContent className="max-h-[calc(100dvh-1rem)] w-[min(22rem,calc(100vw-1rem))] overflow-y-auto overscroll-contain border-border bg-card p-4">
                                     <AppearanceOptions />
                                 </DropdownMenuSubContent>
                             </DropdownMenuPortal>
@@ -128,7 +128,7 @@ export function UserNav() {
 
             {/* Mobile Modals */}
             <Dialog open={showAppearanceDialog} onOpenChange={setShowAppearanceDialog}>
-                <DialogContent className="sm:max-w-md bg-card border-border">
+                <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-y-auto border-border bg-card sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>{t('common.appearance')}</DialogTitle>
                         <DialogDescription className="sr-only">

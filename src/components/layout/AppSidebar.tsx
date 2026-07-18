@@ -270,7 +270,7 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
                                     <span className="text-foreground">{t('common.appearance') || 'Appearance'}</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
-                                    <DropdownMenuSubContent className="w-80 bg-card border-border p-4">
+                                    <DropdownMenuSubContent className="max-h-[calc(100dvh-1rem)] w-[min(22rem,calc(100vw-1rem))] overflow-y-auto overscroll-contain border-border bg-card p-4">
                                         <AppearanceOptions />
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>

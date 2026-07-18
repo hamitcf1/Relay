@@ -78,8 +78,8 @@ export function FeedbackSection() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <section className="mx-auto w-full max-w-[82rem] space-y-6">
+            <header className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">{t('feedback.anonymous.title')}</h2>
                     <p className="text-muted-foreground text-sm">{t('offday.petitions')} - {t('feedback.anonymous.subtitle')}</p>
@@ -89,11 +89,11 @@ export function FeedbackSection() {
                         {t('feedback.management.view')}
                     </Badge>
                 )}
-            </div>
+            </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(17rem,0.7fr)]">
                 {/* Submission Form */}
-                <Card className="md:col-span-2 bg-card/50 border-border backdrop-blur-sm overflow-hidden relative">
+                <Card className="relative overflow-hidden border-border bg-card/50 backdrop-blur-sm">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-foreground">
                             <Shield className="w-5 h-5 text-emerald-500" />
@@ -208,6 +208,6 @@ export function FeedbackSection() {
                     )}
                 </div>
             </div>
-        </div>
+        </section>
     )
 }

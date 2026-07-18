@@ -126,8 +126,8 @@ export function TourCatalogue() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <section className="mx-auto w-full max-w-[90rem] space-y-6">
+            <header className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">{t('tours.catalogue.title')}</h2>
                     <p className="text-muted-foreground text-sm">{t('tours.catalogue.desc')}</p>
@@ -138,9 +138,9 @@ export function TourCatalogue() {
                         {t('tours.add')}
                     </Button>
                 )}
-            </div>
+            </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
                 {/* Add/Edit Form */}
                 <AnimatePresence>
                     {(isAdding || editingId) && (
@@ -308,9 +308,10 @@ export function TourCatalogue() {
                                         ))}
                                     </div>
                                     <div className="grid grid-cols-1 gap-2">
-                                        <div
+                                        <button
+                                            type="button"
                                             onClick={() => openBookingModal(tour, 'adult')}
-                                            className="p-3 bg-muted/30 rounded-xl border border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer transition-all group/price"
+                                            className="group/price w-full rounded-xl border border-border bg-muted/30 p-3 text-left transition-all hover:border-primary/50 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                         >
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="text-[10px] text-muted-foreground uppercase font-bold">{t('tours.form.adultPrice')}</span>
@@ -320,22 +321,24 @@ export function TourCatalogue() {
                                                 €{tour.adult_price.toLocaleString()}
                                                 <span className="text-xs text-muted-foreground ml-1 font-normal">(Base: €{tour.base_price_eur})</span>
                                             </p>
-                                        </div>
+                                        </button>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <div
+                                            <button
+                                                type="button"
                                                 onClick={() => openBookingModal(tour, 'child_3_7')}
-                                                className="p-2.5 bg-muted/30 rounded-xl border border-border hover:border-amber-500/50 hover:bg-muted/50 cursor-pointer transition-all group/price"
+                                                className="group/price rounded-xl border border-border bg-muted/30 p-2.5 text-left transition-all hover:border-amber-500/50 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                             >
                                                 <p className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('tours.form.child37Price')}</p>
                                                 <p className="text-sm font-bold text-amber-500">€{tour.child_3_7_price}</p>
-                                            </div>
-                                            <div
+                                            </button>
+                                            <button
+                                                type="button"
                                                 onClick={() => openBookingModal(tour, 'child_0_3')}
-                                                className="p-2.5 bg-muted/30 rounded-xl border border-border hover:border-emerald-500/50 hover:bg-muted/50 cursor-pointer transition-all group/price"
+                                                className="group/price rounded-xl border border-border bg-muted/30 p-2.5 text-left transition-all hover:border-emerald-500/50 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                             >
                                                 <p className="text-[9px] text-muted-foreground uppercase font-bold mb-1">{t('tours.form.child03Price')}</p>
                                                 <p className="text-sm font-bold text-emerald-500">€{tour.child_0_3_price}</p>
-                                            </div>
+                                            </button>
                                         </div>
                                     </div>
                                     <div className="mt-auto pt-4 border-t border-border/50">
@@ -415,6 +418,6 @@ export function TourCatalogue() {
                     </DialogContent>
                 </Dialog>
             </div>
-        </div>
+        </section>
     )
 }

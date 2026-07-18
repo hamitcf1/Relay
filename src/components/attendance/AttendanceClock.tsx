@@ -117,16 +117,16 @@ export function AttendanceClock() {
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="max-w-md overflow-hidden p-0">
-                    <DialogHeader className="border-b border-border/50 bg-muted/20 p-6">
-                        <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <DialogContent className="flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-md flex-col overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)]">
+                    <DialogHeader className="shrink-0 border-b border-border/50 bg-muted/20 p-4 pr-12 sm:p-5 sm:pr-12">
+                        <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                             {activeRecord ? <LogOut className="h-5 w-5" /> : <Clock3 className="h-5 w-5" />}
                         </div>
                         <DialogTitle>{activeRecord ? t('attendance.clock.titleOut') : t('attendance.clock.titleIn')}</DialogTitle>
-                        <DialogDescription>{activeRecord ? t('attendance.clock.outDesc') : t('attendance.clock.inDesc')}</DialogDescription>
+                        <DialogDescription className="max-w-[42ch] text-pretty leading-relaxed">{activeRecord ? t('attendance.clock.outDesc') : t('attendance.clock.inDesc')}</DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-5 p-6">
+                    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 sm:p-5">
                         <div className="grid grid-cols-2 gap-3">
                             <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('attendance.clock.planned')}</p>
@@ -146,7 +146,7 @@ export function AttendanceClock() {
                         </div>
 
                         {!activeRecord && lateMinutes > 0 && (
-                            <div className="space-y-5">
+                            <div className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold" htmlFor="late-excuse">{t('attendance.clock.excuseLabel')} *</label>
                                     <Textarea
@@ -184,7 +184,9 @@ export function AttendanceClock() {
                             </div>
                         )}
 
-                        <div className="flex gap-3 pt-1">
+                    </div>
+
+                    <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-border/50 bg-background/95 p-4 backdrop-blur sm:px-5">
                             <Button variant="outline" className="flex-1" onClick={() => setOpen(false)} disabled={saving}>{t('attendance.clock.cancel')}</Button>
                             <Button
                                 className="flex-1 gap-2"
@@ -195,7 +197,6 @@ export function AttendanceClock() {
                                 {activeRecord ? <LogOut className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
                                 {activeRecord ? t('attendance.clock.confirmOut') : t('attendance.clock.confirmIn')}
                             </Button>
-                        </div>
                     </div>
                 </DialogContent>
             </Dialog>

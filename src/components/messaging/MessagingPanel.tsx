@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Send, MessageSquare, Megaphone, Search, Check, CheckCheck, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -91,9 +91,9 @@ export function MessagingPanel() {
     }, [activeStaff, user?.uid, searchTerm])
 
     // Group messages by conversation logic
-    const getUnreadCount = (uid: string) => {
+    const getUnreadCount = useCallback((uid: string) => {
         return messages.filter(m => !m.is_read && m.sender_id === uid && m.receiver_id === user?.uid).length
-    }
+    }, [messages, user?.uid])
 
     // Sort staff: Unread first, then alphabetical
     const sortedStaff = useMemo(() => {
@@ -103,7 +103,7 @@ export function MessagingPanel() {
             if (unreadA !== unreadB) return unreadB - unreadA
             return a.name.localeCompare(b.name)
         })
-    }, [filteredStaff, messages, user?.uid])
+    }, [filteredStaff, getUnreadCount])
 
     // Get active conversation messages
     const currentMessages = useMemo(() => {
@@ -173,10 +173,10 @@ export function MessagingPanel() {
     }
 
     return (
-        <div className="h-full flex flex-col md:flex-row gap-4 bg-background rounded-xl overflow-hidden border border-border shadow-sm">
+        <section className="mx-auto flex h-full min-h-0 w-full max-w-[92rem] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-sm md:flex-row">
             {/* Sidebar */}
             <div className={cn(
-                "w-full md:w-72 bg-muted/30 flex flex-col border-r border-border",
+                "min-h-0 w-full bg-muted/30 flex flex-col border-b border-border md:w-72 md:shrink-0 md:border-b-0 md:border-r",
                 activeConversation !== 'all' && activeConversation !== '' ? "hidden md:flex" : "flex"
             )}>
                 <div className="p-4 border-b border-border">
@@ -253,7 +253,7 @@ export function MessagingPanel() {
 
             {/* Chat Area */}
             <div className={cn(
-                "flex-1 flex flex-col bg-background/50",
+                "min-h-0 min-w-0 flex-1 flex-col bg-background/50",
                 activeConversation === 'all' || activeConversation === '' ? "hidden md:flex" : "flex"
             )}>
                 {/* Header */}
@@ -324,7 +324,7 @@ export function MessagingPanel() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 relative" ref={scrollRef}>
+                <div className="relative flex-1 space-y-5 overflow-y-auto overscroll-contain p-3 sm:p-5" ref={scrollRef}>
                     {groupedMessages.length === 0 ? (
                         <EmptyState icon={MessageSquare} title={t('messaging.noMessages')} />
                     ) : (
@@ -344,7 +344,7 @@ export function MessagingPanel() {
                                             key={msg.id}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className={cn("flex gap-3 max-w-[75%]", isMe ? "ml-auto flex-row-reverse" : "")}
+                                            className={cn("flex max-w-[92%] gap-3 sm:max-w-[82%] lg:max-w-[72%]", isMe ? "ml-auto flex-row-reverse" : "")}
                                         >
                                             {!isMe && (
                                                 <UserAvatar
@@ -359,7 +359,7 @@ export function MessagingPanel() {
                                             )}
 
                                             <div className={cn(
-                                                "p-3 rounded-2xl text-sm leading-relaxed relative group/msg",
+                                                "group/msg relative min-w-0 break-words rounded-2xl p-3 text-sm leading-relaxed [overflow-wrap:anywhere]",
                                                 isMe ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-card border border-border text-foreground rounded-tl-sm"
                                             )}>
                                                 {activeConversation === 'all' && !isMe && (
@@ -406,7 +406,7 @@ export function MessagingPanel() {
                     <ScrollToTopButton />
                 </div>
 
-                <div className="p-4 bg-muted/20 border-t border-border">
+                <div className="shrink-0 border-t border-border bg-muted/20 p-3 sm:p-4">
                     <form onSubmit={handleSend} className="flex gap-3">
                         <Textarea
                             ref={messageInputRef}
@@ -443,6 +443,6 @@ export function MessagingPanel() {
                     </form>
                 </div>
             </div>
-        </div>
+        </section>
     )
 }
