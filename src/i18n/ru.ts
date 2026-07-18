@@ -641,11 +641,11 @@ const en: Translations = {
         'sticky.pinnedCount': '{count} pinned',
 
         // Shifts & Roster
-        'shift.morning': 'Morning',
-        'shift.afternoon': 'Evening',
-        'shift.night': 'Night',
-        'shift.extra': 'Middle Shift',
-        'shift.off': 'Off',
+        'shift.morning': 'Утро',
+        'shift.afternoon': 'Вечер',
+        'shift.night': 'Ночь',
+        'shift.extra': 'Промежуточная смена',
+        'shift.off': 'Выходной',
         'shift.none': 'None',
         'shift.welcome': 'Welcome! Please initialize your shift data.',
         'shift.selectType': 'Select Shift Type',

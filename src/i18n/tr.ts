@@ -414,7 +414,7 @@ const tr: Translations = {
         'shift.morning': 'Sabah',
         'shift.afternoon': 'Akşam',
         'shift.night': 'Gece',
-        'shift.extra': 'Ara Shift',
+        'shift.extra': 'Ara vardiya',
         'shift.off': 'İzinli',
         'shift.none': 'Yok',
         'shift.welcome': 'Hoşgeldiniz! Lütfen vardiya verilerinizi başlatın.',

@@ -14,6 +14,8 @@ interface CollapsibleCardProps {
     headerActions?: React.ReactNode
     defaultCollapsed?: boolean
     onToggle?: (isCollapsed: boolean) => void
+    collapsible?: boolean
+    focusable?: boolean
 }
 
 export function CollapsibleCard({
@@ -23,7 +25,9 @@ export function CollapsibleCard({
     className,
     headerActions,
     defaultCollapsed = false,
-    onToggle
+    onToggle,
+    collapsible = true,
+    focusable = true,
 }: CollapsibleCardProps) {
     const [isCollapsed, setIsCollapsed] = useState(() => {
         // Read initial state from localStorage
@@ -49,6 +53,7 @@ export function CollapsibleCard({
     }, [isFocused])
 
     const handleToggle = () => {
+        if (!collapsible) return
         if (isFocused) return // Disable collapsing when focused
         const newState = !isCollapsed
         setIsCollapsed(newState)
@@ -102,11 +107,11 @@ export function CollapsibleCard({
                     <CardHeader className="pb-3 select-none flex-shrink-0">
                         <div className="flex items-center justify-between">
                             <div
-                                className={cn("flex-1 flex items-center gap-2 group", !isFocused && "cursor-pointer")}
+                                className={cn("flex-1 flex items-center gap-2 group", collapsible && !isFocused && "cursor-pointer")}
                                 onClick={handleToggle}
                             >
                                 {title}
-                                {!isFocused && (
+                                {collapsible && !isFocused && (
                                     <div className="p-1 rounded-md hover:bg-muted transition-colors">
                                         {isCollapsed ? (
                                             <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" />
@@ -118,7 +123,7 @@ export function CollapsibleCard({
                             </div>
                             <div className="flex items-center gap-2">
                                 {headerActions}
-                                <Button
+                                {focusable && <Button
                                     variant="ghost"
                                     size="icon"
                                     onClick={toggleFocus}
@@ -130,13 +135,13 @@ export function CollapsibleCard({
                                     ) : (
                                         <Maximize2 className="w-3.5 h-3.5" />
                                     )}
-                                </Button>
+                                </Button>}
                             </div>
                         </div>
                     </CardHeader>
 
                     <AnimatePresence initial={false}>
-                        {(!isCollapsed || isFocused) && (
+                        {(!collapsible || !isCollapsed || isFocused) && (
                             <motion.div
                                 initial={isFocused ? { opacity: 1, height: 'auto' } : { height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
