@@ -16,9 +16,10 @@ import { NoteList } from './NoteList'
 interface ShiftNotesProps {
     hotelId: string
     showAddButton?: boolean
+    initialAddOpen?: boolean
 }
 
-export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
+export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = false }: ShiftNotesProps) {
     const { notes } = useNotesStore()
     const { t } = useLanguageStore()
     const { activeStaff, subscribeToRoster } = useRosterStore()
@@ -32,7 +33,7 @@ export function ShiftNotes({ hotelId, showAddButton = true }: ShiftNotesProps) {
         }
     }, [hotelId, subscribeToRoster])
 
-    const [isAdding, setIsAdding] = useState(false)
+    const [isAdding, setIsAdding] = useState(initialAddOpen)
     const [statusFilter, setStatusFilter] = useState<NoteStatus | 'all'>('active')
     const [filter, setFilter] = useState<NoteCategory | 'all'>('all')
     const [searchQuery, setSearchQuery] = useState('')

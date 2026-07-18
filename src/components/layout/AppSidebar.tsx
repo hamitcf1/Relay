@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 import { useLanguageStore } from '@/stores/languageStore'
 import { 
     LayoutDashboard, 
+    ArrowLeftRight,
     MessageCircle, 
     ShieldAlert, 
     CalendarDays, 
@@ -45,16 +46,17 @@ import {
     DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu'
 import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
-import { RelayBrand } from '@/components/brand/RelayBrand'
+import { RelayMark } from '@/components/brand/RelayBrand'
 
 interface AppSidebarProps {
     activeTab: string
     operationTab: string
+    overviewTab: string
     onNavigate: (tab: 'overview' | 'operations', subTab?: string) => void
     userRole?: string
 }
 
-export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: AppSidebarProps) {
+export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, userRole }: AppSidebarProps) {
     const { t, language, setLanguage } = useLanguageStore()
     const { user, signOut } = useAuthStore()
     const { sidebarCollapsed, toggleSidebar } = useLayoutStore()
@@ -62,31 +64,40 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
 
     const isOverview = activeTab === 'overview'
 
-    const mainNavItems = [
-        { id: 'overview', icon: LayoutDashboard, label: t('module.overview') || 'Overview', tab: 'overview' }
+    const overviewNavItems = [
+        { id: 'overview', icon: LayoutDashboard, label: t('module.overview') || 'Overview', tab: 'overview' },
+        { id: 'notes', icon: ArrowLeftRight, label: t('module.shiftNotes') || 'Shift notes', tab: 'overview', subTab: 'notes' },
     ]
 
-    const opsNavItems = [
+    const operationNavItems = [
         { id: 'messaging', icon: MessageCircle, label: t('module.messaging') || 'Messaging', subTab: 'messaging' },
         { id: 'compliance', icon: Check, label: t('module.compliance') || 'Compliance', subTab: 'compliance', createdAt: '2026-05-05' },
         { id: 'feedback', icon: ShieldAlert, label: t('module.complaints') || 'Complaints', subTab: 'feedback' },
-        { id: 'off-days', icon: CalendarDays, label: t('module.offDays') || 'Off Days', subTab: 'off-days' },
-        { id: 'tours', icon: MapIcon, label: t('module.tours') || 'Tours', subTab: 'tours' },
+    ]
+
+    const assetNavItems = [
         { id: 'rooms', icon: BedDouble, label: t('dashboard.rooms') || 'Rooms', subTab: 'rooms' },
         { id: 'cards-loans', icon: KeyRound, label: t('module.cards-loans') || 'Cards & Loans', subTab: 'cards-loans', createdAt: '2026-05-14' },
-        { id: 'sales', icon: CreditCard, label: t('module.sales') || 'Sales', subTab: 'sales' },
         { id: 'pricing', icon: DollarSign, label: t('module.pricing_label') || 'Pricing', subTab: 'pricing' },
+        { id: 'tours', icon: MapIcon, label: t('module.tours') || 'Tours', subTab: 'tours' },
+    ]
+
+    const teamNavItems = [
+        { id: 'off-days', icon: CalendarDays, label: t('module.offDays') || 'Off Days', subTab: 'off-days' },
+        { id: 'sales', icon: CreditCard, label: t('module.sales') || 'Sales', subTab: 'sales' },
         { id: 'team', icon: Users, label: t('module.team_label') || 'Team', subTab: 'team' },
     ]
 
+    const systemNavItems: Array<Record<string, any>> = []
+
     if (userRole === 'gm') {
-        opsNavItems.push({ id: 'attendance', icon: ClipboardCheck, label: t('module.attendance'), subTab: 'attendance', createdAt: '2026-07-18' })
-        opsNavItems.push({ id: 'activity', icon: Activity, label: t('module.activity') || 'Activity Log', subTab: 'activity' })
-        opsNavItems.push({ id: 'settings', icon: Settings, label: t('module.setting') || 'Hotel Settings', subTab: 'settings' })
+        operationNavItems.push({ id: 'attendance', icon: ClipboardCheck, label: t('module.attendance'), subTab: 'attendance', createdAt: '2026-07-18' })
+        systemNavItems.push({ id: 'activity', icon: Activity, label: t('module.activity') || 'Activity Log', subTab: 'activity' })
+        systemNavItems.push({ id: 'settings', icon: Settings, label: t('module.setting') || 'Hotel Settings', subTab: 'settings' })
     }
 
     const isActive = (tab: string, subTab?: string) => {
-        if (tab === 'overview') return isOverview
+        if (tab === 'overview') return isOverview && (subTab ? overviewTab === subTab : overviewTab === 'grid')
         return activeTab === 'operations' && operationTab === subTab
     }
 
@@ -104,15 +115,15 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
             <button
                 onClick={onClick}
                 className={cn(
-                    "group relative flex min-h-10 w-full items-center gap-3 rounded-[0.9rem] px-3 py-2 text-sm font-medium outline-none transition-[transform,background-color,color,box-shadow] duration-500 ease-premium",
+                    "group relative flex min-h-9 w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium outline-none transition-[transform,background-color,color] duration-300 ease-premium",
                     active 
-                        ? "bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(var(--primary-foreground)/0.22),0_10px_28px_-18px_hsl(var(--primary)/0.9)]"
-                        : "text-muted-foreground hover:translate-x-0.5 hover:bg-muted/70 hover:text-foreground",
+                        ? "bg-white/[0.065] text-foreground before:absolute before:inset-y-1 before:left-0 before:w-px before:bg-primary"
+                        : "text-muted-foreground hover:translate-x-0.5 hover:bg-white/[0.04] hover:text-foreground",
                     sidebarCollapsed && "justify-center px-0 h-10 w-10 mx-auto"
                 )}
             >
                 <div className="relative">
-                    <item.icon className={cn("w-4 h-4 shrink-0", active && !sidebarCollapsed ? "" : active ? "text-primary-foreground" : "")} />
+                    <item.icon className={cn("w-4 h-4 shrink-0", active && "text-primary")} />
                     {isNewFeature(item.createdAt) && sidebarCollapsed && (
                         <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
                     )}
@@ -124,10 +135,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                     </span>
                 )}
                 {active && !sidebarCollapsed && !isNewFeature(item.createdAt) && item.subTab && (
-                    <motion.div 
-                        layoutId="sidebar-active-indicator" 
-                        className="w-1.5 h-4 bg-primary-foreground/50 ml-auto rounded-full" 
-                    />
+                    <motion.div layoutId="sidebar-active-indicator" className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
                 )}
             </button>
         )
@@ -152,26 +160,27 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
         <TooltipProvider>
             <motion.aside 
                 initial={false}
-                animate={{ width: sidebarCollapsed ? 80 : 260 }}
-                className="relative z-50 hidden shrink-0 select-none flex-col border-r-[5px] border-surface-deep bg-card md:flex"
+                animate={{ width: sidebarCollapsed ? 74 : 230 }}
+                className="relative z-50 hidden shrink-0 select-none flex-col border-r border-border/80 bg-[#070a0d] md:flex"
             >
                 {/* Collapse Toggle */}
                 <button 
                     onClick={toggleSidebar}
-                    className="absolute -right-3.5 top-20 z-50 flex h-7 w-7 items-center justify-center rounded-full border-[4px] border-surface-deep bg-card text-muted-foreground shadow-sm transition-colors hover:text-primary"
+                    className="absolute -right-3 top-[66px] z-50 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-[#0d1115] text-muted-foreground shadow-sm transition-colors hover:text-primary"
                 >
                     <ChevronLeft className={cn("w-3.5 h-3.5 transition-transform duration-300", sidebarCollapsed && "rotate-180")} />
                 </button>
 
                 {/* Logo Area */}
                 <div className={cn(
-                    "flex h-[76px] shrink-0 items-center border-b border-border/40 transition-all duration-500",
+                    "flex h-[84px] shrink-0 items-center border-b border-border/70 transition-all duration-500",
                     sidebarCollapsed ? "justify-center px-0" : "px-5"
                 )}>
-                    <RelayBrand compact={sidebarCollapsed} markClassName="h-8 w-8" wordmarkClassName="text-[17px]" />
+                    <RelayMark className="h-8 w-8 text-primary" />
+                    {!sidebarCollapsed && <span className="ml-2.5 text-xl font-semibold tracking-[-0.035em] text-foreground">Relay</span>}
                 </div>
 
-                <div className="custom-scrollbar flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-5">
+                <div className="custom-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-4">
                     
                     {/* Core Navigation */}
                     <div className="space-y-1">
@@ -180,23 +189,14 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                                 {t('module.overview') || 'Dashboard'}
                             </h4>
                         )}
-                        {mainNavItems.map(item => (
+                        {overviewNavItems.map(item => (
                             <NavItem 
                                 key={item.id} 
                                 item={item} 
-                                active={isActive(item.tab)} 
-                                onClick={() => onNavigate(item.tab as 'overview')} 
+                                active={isActive(item.tab, item.subTab)}
+                                onClick={() => onNavigate(item.tab as 'overview', item.subTab)}
                             />
                         ))}
-                    </div>
-
-                    {/* AI Assistant */}
-                    <div className="space-y-1">
-                        <NavItem
-                            item={{ id: 'ai-assistant', icon: Sparkles, label: 'AI Assistant' }}
-                            active={false}
-                            onClick={toggleChat}
-                        />
                     </div>
 
                     {/* Operations Navigation */}
@@ -206,7 +206,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                                 {t('dashboard.operationsHub') || 'Operations'}
                             </h4>
                         )}
-                        {opsNavItems.map(item => (
+                        {operationNavItems.map(item => (
                             <NavItem 
                                 key={item.id} 
                                 item={item} 
@@ -216,10 +216,25 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                         ))}
                     </div>
 
+                    {[
+                        { label: language === 'tr' ? 'Varlık' : language === 'ru' ? 'Активы' : 'Assets', items: assetNavItems },
+                        { label: language === 'tr' ? 'Ekibim' : language === 'ru' ? 'Команда' : 'My team', items: teamNavItems },
+                        { label: language === 'tr' ? 'Sistem' : language === 'ru' ? 'Система' : 'System', items: systemNavItems },
+                    ].filter(group => group.items.length).map(group => (
+                        <div key={group.label} className="space-y-1 border-t border-border/60 pt-4">
+                            {!sidebarCollapsed && <h4 className="mb-2 px-3 text-[10px] font-medium tracking-wide text-muted-foreground">{group.label}</h4>}
+                            {group.items.map(item => <NavItem key={item.id} item={item} active={isActive('operations', item.subTab)} onClick={() => onNavigate('operations', item.subTab)} />)}
+                        </div>
+                    ))}
+
+                    <div className="space-y-1 border-t border-border/60 pt-4">
+                        <NavItem item={{ id: 'ai-assistant', icon: Sparkles, label: 'AI Assistant' }} active={false} onClick={toggleChat} />
+                    </div>
+
                 </div>
 
                 {/* User & Settings Block */}
-                <div className="space-y-1 border-t border-border/40 bg-surface-deep/40 p-3">
+                <div className="space-y-1 border-t border-border/70 bg-[#070a0d] p-3">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className={cn(
