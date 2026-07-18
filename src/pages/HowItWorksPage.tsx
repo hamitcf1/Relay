@@ -12,9 +12,9 @@ export function HowItWorksPage() {
 
     const steps = [
         { title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc'), icon: Zap, color: "text-amber-400", bg: "bg-amber-400/10" },
-        { title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), icon: Laptop, color: "text-blue-400", bg: "bg-blue-400/10" },
+        { title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc'), icon: Laptop, color: "text-primary", bg: "bg-primary/10" },
         { title: t('howItWorks.step3.title'), desc: t('howItWorks.step3.desc'), icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10" },
-        { title: t('howItWorks.step4.title'), desc: t('howItWorks.step4.desc'), icon: Smartphone, color: "text-purple-400", bg: "bg-purple-400/10" }
+        { title: t('howItWorks.step4.title'), desc: t('howItWorks.step4.desc'), icon: Smartphone, color: "text-primary", bg: "bg-primary/10" }
     ]
 
     return (

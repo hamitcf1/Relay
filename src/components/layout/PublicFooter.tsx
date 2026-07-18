@@ -7,7 +7,7 @@ export function PublicFooter() {
     const { t } = useLanguageStore()
 
     return (
-        <footer className="py-12 border-t border-white/5 bg-zinc-950 shrink-0">
+        <footer className="mt-10 shrink-0 border-t border-border/50 bg-surface-deep/40 py-12">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
 

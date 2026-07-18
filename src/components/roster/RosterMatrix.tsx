@@ -36,8 +36,8 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 // Default shifts if none configured in hotel settings
 const DEFAULT_SHIFT_COLORS: Record<string, string> = {
-    'A': 'bg-indigo-500/80 text-white',
-    'B': 'bg-purple-500/80 text-white',
+    'A': 'bg-primary/80 text-primary-foreground',
+    'B': 'bg-amber-700/80 text-white',
     'C': 'bg-rose-500/80 text-white',
     'E': 'bg-amber-500/80 text-white',
     'OFF': 'bg-muted text-muted-foreground border border-border/50',

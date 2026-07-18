@@ -70,9 +70,9 @@ export function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4 py-10 font-sans selection:bg-primary/30">
+        <div className="auth-shell flex items-center justify-center px-4 py-10 font-sans text-foreground selection:bg-primary/30">
             <motion.div
-                className="relative w-full max-w-[400px]"
+                className="auth-panel relative w-full max-w-[440px]"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}

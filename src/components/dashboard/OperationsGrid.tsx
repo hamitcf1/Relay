@@ -14,7 +14,6 @@ import {
     ClipboardCheck,
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
-import { cn } from '@/lib/utils'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 
 interface OperationsGridProps {
@@ -30,70 +29,60 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             id: 'messaging',
             label: t('module.messaging'),
             icon: MessageCircle,
-            color: 'bg-blue-500/10 text-blue-500',
             desc: t('operations.messaging.desc')
         },
         {
             id: 'compliance',
             label: t('module.compliance') || 'Compliance',
             icon: ShieldCheck,
-            color: 'bg-emerald-500/10 text-emerald-500',
             desc: t('operations.compliance.desc') || 'KBS & Agency check-ins',
         },
         {
             id: 'feedback',
             label: t('module.complaints'),
             icon: ShieldAlert,
-            color: 'bg-red-500/10 text-red-500',
             desc: t('operations.feedback.desc')
         },
         {
             id: 'off-days',
             label: t('module.offDays'),
             icon: CalendarDays,
-            color: 'bg-purple-500/10 text-purple-500',
             desc: t('operations.offdays.desc')
         },
         {
             id: 'tours',
             label: t('module.tours'),
             icon: Map,
-            color: 'bg-emerald-500/10 text-emerald-500',
             desc: t('operations.tours.desc')
         },
         {
             id: 'rooms',
             label: t('dashboard.rooms'),
             icon: BedDouble,
-            color: 'bg-indigo-500/10 text-indigo-500',
             desc: t('operations.rooms.desc')
         },
         {
             id: 'cards-loans',
             label: t('module.cards-loans'),
             icon: KeyRound,
-            color: 'bg-amber-500/10 text-amber-500',
             desc: t('operations.cards-loans.desc')
         },
         {
             id: 'sales',
             label: t('module.sales'),
             icon: CreditCard,
-            color: 'bg-amber-500/10 text-amber-500',
             desc: t('operations.sales.desc')
         },
         {
             id: 'pricing',
             label: t('module.pricing_label'),
             icon: DollarSign,
-            color: 'bg-green-500/10 text-green-500',
             desc: t('operations.pricing.desc')
         },
         {
             id: 'team',
             label: t('module.team_label'),
             icon: Users,
-            color: 'bg-pink-500/10 text-pink-500',
             desc: t('operations.team.desc')
         },
     ]
@@ -103,14 +92,12 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             id: 'attendance',
             label: t('module.attendance'),
             icon: ClipboardCheck,
-            color: 'bg-cyan-500/10 text-cyan-500',
             desc: t('operations.attendance.desc'),
         })
         items.push({
             id: 'activity',
             label: t('module.activity'),
             icon: ScrollText,
-            color: 'bg-orange-500/10 text-orange-500',
             desc: t('operations.activity.desc')
         })
     }
@@ -131,14 +118,17 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
     }
 
     return (
-        <div className="p-4 lg:p-6 pb-32 overflow-y-auto h-full relative custom-scrollbar">
-            <h2 className="text-2xl font-bold mb-6 px-1">{t('dashboard.operationsHub')}</h2>
+        <section className="relative pb-6">
+            <div className="mb-5 px-1">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Relay workspace</p>
+                <h2 className="text-2xl font-semibold tracking-[-0.035em]">{t('dashboard.operationsHub')}</h2>
+            </div>
 
             <motion.div
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4 max-w-[1400px]"
+                className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             >
                 {items.map((item) => (
                     <motion.button
@@ -146,17 +136,17 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
                         variants={itemAnim}
                         onClick={() => onSelect(item.id)}
                         whileTap={{ scale: 0.97 }}
-                        className="group relative flex flex-col items-start p-4 rounded-xl border border-border/40 bg-card/40 hover:bg-card/70 hover:border-border transition-colors text-left active:scale-[0.98]"
+                        className="group relative min-h-40 overflow-hidden rounded-[1.35rem] border-[5px] border-surface-deep bg-card p-4 text-left ring-1 ring-border/30 transition-[transform,border-color,background-color] duration-500 ease-premium hover:-translate-y-1 hover:border-primary/20 hover:bg-card/80 active:scale-[0.98]"
                     >
-                        <div className={cn("p-2.5 rounded-lg mb-3 transition-colors", item.color)}>
+                        <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-500 ease-premium group-hover:scale-105">
                             <item.icon className="w-5 h-5" />
                         </div>
-                        <span className="font-semibold text-sm tracking-tight mb-0.5">{item.label}</span>
-                        <span className="text-xs text-muted-foreground leading-snug">{item.desc}</span>
+                        <span className="mb-1 text-sm font-semibold tracking-tight">{item.label}</span>
+                        <span className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.desc}</span>
                     </motion.button>
                 ))}
             </motion.div>
             <ScrollToTopButton />
-        </div>
+        </section>
     )
 }

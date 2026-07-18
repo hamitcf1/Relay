@@ -147,7 +147,7 @@ export function CardsAndLoansPanel() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-background/50 p-4 sm:p-6 gap-5 overflow-y-auto custom-scrollbar relative">
+        <div className="relative flex flex-col gap-5 bg-background/50 p-4 sm:p-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>

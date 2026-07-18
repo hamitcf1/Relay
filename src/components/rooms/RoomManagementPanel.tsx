@@ -34,7 +34,7 @@ const statusColors: Record<RoomStatus, string> = {
     clean: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     dirty: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
     inspect: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    dnd: 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+    dnd: 'bg-primary/15 text-primary border-primary/25'
 }
 
 const statusLabels: Record<RoomStatus, string> = {
@@ -162,7 +162,7 @@ export function RoomManagementPanel() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-background/50">
+        <div className="w-full bg-background/50">
             {/* Header / Tabs */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
@@ -181,9 +181,9 @@ export function RoomManagementPanel() {
                 </Tabs>
             </div>
 
-            <div className="flex-1 min-h-0 bg-background rounded-xl border border-border overflow-hidden flex flex-col">
-                <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0">
-                    <TabsContent value="overview" className="flex-1 flex flex-col min-h-0 m-0 p-4 sm:p-6 space-y-6 overflow-y-auto relative custom-scrollbar data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+            <div className="rounded-[1.5rem] border-[5px] border-surface-deep bg-card">
+                <Tabs value={activeTab}>
+                    <TabsContent value="overview" className="relative m-0 space-y-6 p-4 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 sm:p-6 duration-500">
                         {/* Filters */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-4 rounded-xl border border-border">
                             <div className="relative w-full sm:w-auto max-w-12 focus-within:max-w-full sm:focus-within:max-w-64 transition-[max-width] ease-in-out duration-300 group">
@@ -408,7 +408,7 @@ export function RoomManagementPanel() {
                         <ScrollToTopButton />
                     </TabsContent>
 
-                    <TabsContent value="setup" className="flex-1 overflow-y-auto m-0 p-4 sm:p-6 space-y-6 relative custom-scrollbar data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 duration-500">
+                    <TabsContent value="setup" className="relative m-0 space-y-6 p-4 data-[state=active]:animate-in data-[state=active]:fade-in data-[state=active]:slide-in-from-bottom-4 sm:p-6 duration-500">
                         {!isGM ? (
                             <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
                                 <ShieldAlert className="w-12 h-12 mb-4 text-zinc-700" />

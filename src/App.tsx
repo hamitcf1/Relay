@@ -82,7 +82,7 @@ function App() {
                         toastOptions={{
                             duration: 4000,
                             classNames: {
-                                toast: 'group toast bg-card text-card-foreground border border-border shadow-lg rounded-lg',
+                                toast: 'group toast bg-card text-card-foreground border-[5px] border-surface-deep shadow-lg rounded-[1.25rem]',
                                 description: 'text-muted-foreground',
                                 actionButton: 'bg-primary text-primary-foreground',
                                 cancelButton: 'bg-muted text-muted-foreground',

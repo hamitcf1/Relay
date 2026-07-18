@@ -160,7 +160,7 @@ export function OffDayScheduler() {
                     <Card className="bg-card border-border backdrop-blur-sm">
                         <CardHeader>
                             <CardTitle className="text-foreground flex items-center gap-2 text-base">
-                                <CalendarIcon className="w-5 h-5 text-indigo-400" />
+                                <CalendarIcon className="w-5 h-5 text-primary" />
                                 {editingId ? 'Talebi Düzenle' : 'Yeni Talep'}
                             </CardTitle>
                             <CardDescription className="text-xs">
@@ -209,7 +209,7 @@ export function OffDayScheduler() {
                                     <label className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
                                         Seçilen Tarih{dates.length > 1 ? 'ler' : ''}
                                         {!editingId && (
-                                            <Button type="button" variant="ghost" size="sm" onClick={addDateField} className="h-5 px-1 text-indigo-400">
+                                            <Button type="button" variant="ghost" size="sm" onClick={addDateField} className="h-5 px-1 text-primary">
                                                 <Plus className="w-3 h-3" />
                                             </Button>
                                         )}
@@ -261,7 +261,7 @@ export function OffDayScheduler() {
                                     )}
                                     <Button
                                         disabled={submitting || dates.every(d => !d.trim()) || !reason.trim()}
-                                        className="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white gap-2"
+                                        className="flex-[2] gap-2"
                                     >
                                         {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                                         {editingId ? 'Güncelle' : 'Talebi Gönder'}
@@ -280,7 +280,7 @@ export function OffDayScheduler() {
                             {isGM ? t('offday.pending') : t('offday.history')}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-0 overflow-y-auto custom-scrollbar">
+                    <CardContent className="p-0">
                         {loading ? (
                             <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
                         ) : requests.length === 0 ? (
@@ -361,7 +361,7 @@ export function OffDayScheduler() {
                                                         variant="secondary"
                                                         size="sm"
                                                         onClick={() => handleAction(r, 'pending')}
-                                                        className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 text-xs"
+                                                        className="h-8 text-xs"
                                                     >
                                                         <RefreshCcw className="w-3 h-3 mr-1" />
                                                         Yeniden Talep Et

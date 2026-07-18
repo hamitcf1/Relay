@@ -104,10 +104,10 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
             <button
                 onClick={onClick}
                 className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-sm font-medium outline-none relative group",
+                    "group relative flex min-h-10 w-full items-center gap-3 rounded-[0.9rem] px-3 py-2 text-sm font-medium outline-none transition-[transform,background-color,color,box-shadow] duration-500 ease-premium",
                     active 
-                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/10" 
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        ? "bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(var(--primary-foreground)/0.22),0_10px_28px_-18px_hsl(var(--primary)/0.9)]"
+                        : "text-muted-foreground hover:translate-x-0.5 hover:bg-muted/70 hover:text-foreground",
                     sidebarCollapsed && "justify-center px-0 h-10 w-10 mx-auto"
                 )}
             >
@@ -153,41 +153,30 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
             <motion.aside 
                 initial={false}
                 animate={{ width: sidebarCollapsed ? 80 : 260 }}
-                className={cn(
-                    "hidden md:flex flex-col bg-card/60 backdrop-blur-md border-r border-border/40 shrink-0 select-none z-50 relative",
-                )}
+                className="relative z-50 hidden shrink-0 select-none flex-col border-r-[5px] border-surface-deep bg-card md:flex"
             >
                 {/* Collapse Toggle */}
                 <button 
                     onClick={toggleSidebar}
-                    className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-border border border-border flex items-center justify-center hover:bg-muted transition-colors shadow-sm z-50"
+                    className="absolute -right-3.5 top-20 z-50 flex h-7 w-7 items-center justify-center rounded-full border-[4px] border-surface-deep bg-card text-muted-foreground shadow-sm transition-colors hover:text-primary"
                 >
                     <ChevronLeft className={cn("w-3.5 h-3.5 transition-transform duration-300", sidebarCollapsed && "rotate-180")} />
                 </button>
 
                 {/* Logo Area */}
                 <div className={cn(
-                    "h-16 flex items-center border-b border-border/40 shrink-0 transition-all duration-300",
-                    sidebarCollapsed ? "justify-center px-0" : "px-6 gap-3"
+                    "flex h-[76px] shrink-0 items-center border-b border-border/40 transition-all duration-500",
+                    sidebarCollapsed ? "justify-center px-0" : "px-5"
                 )}>
-                    <RelayBrand compact markClassName="h-8 w-8" />
-                    {!sidebarCollapsed && (
-                        <motion.h1 
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="font-bold tracking-tight text-lg"
-                        >
-                            Aetherius <span className="text-primary font-semibold tracking-normal select-text">Relay</span>
-                        </motion.h1>
-                    )}
+                    <RelayBrand compact={sidebarCollapsed} markClassName="h-8 w-8" wordmarkClassName="text-[17px]" />
                 </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar py-4 px-3 flex flex-col gap-6">
+                <div className="custom-scrollbar flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-5">
                     
                     {/* Core Navigation */}
                     <div className="space-y-1">
                         {!sidebarCollapsed && (
-                            <h4 className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-2 truncate">
+                            <h4 className="mb-2 truncate px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
                                 {t('module.overview') || 'Dashboard'}
                             </h4>
                         )}
@@ -213,7 +202,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                     {/* Operations Navigation */}
                     <div className="space-y-1">
                         {!sidebarCollapsed && (
-                            <h4 className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-2 truncate">
+                            <h4 className="mb-2 truncate px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
                                 {t('dashboard.operationsHub') || 'Operations'}
                             </h4>
                         )}
@@ -230,11 +219,11 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                 </div>
 
                 {/* User & Settings Block */}
-                <div className="p-3 border-t border-border/40 space-y-1 bg-muted/20">
+                <div className="space-y-1 border-t border-border/40 bg-surface-deep/40 p-3">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className={cn(
-                                "w-full flex items-center gap-3 p-2 rounded-xl transition-all duration-200 outline-none hover:bg-muted group/user",
+                                "group/user flex min-h-12 w-full items-center gap-3 rounded-[1rem] p-2 outline-none transition-colors duration-500 hover:bg-muted/70",
                                 sidebarCollapsed && "justify-center"
                             )}>
                                 <UserAvatar user={user} size="sm" className="shrink-0 group-hover/user:ring-2 ring-primary/20" />
@@ -262,7 +251,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
 
                             {/* APPEARANCE */}
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-indigo-500/10">
+                                <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-primary/10">
                                     <Palette className="w-4 h-4 text-primary" />
                                     <span className="text-foreground">{t('common.appearance') || 'Appearance'}</span>
                                 </DropdownMenuSubTrigger>
@@ -275,7 +264,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
 
                             {/* LANGUAGE */}
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-indigo-500/10">
+                                <DropdownMenuSubTrigger className="gap-2 cursor-pointer focus:bg-primary/10">
                                     <Globe className="w-4 h-4 text-primary" />
                                     <span className="text-foreground">{t('common.language') || 'Language'}</span>
                                 </DropdownMenuSubTrigger>

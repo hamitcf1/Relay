@@ -80,9 +80,9 @@ function HeroSection({ t, navigate }: { t: any; navigate: any }) {
         <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 px-4 overflow-hidden">
             {/* Animated gradient mesh background */}
             <div className="absolute inset-0 -z-10">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[700px] bg-gradient-radial from-primary/25 via-purple-500/10 to-transparent blur-3xl" />
-                <div className="absolute top-1/3 left-[10%] w-[400px] h-[400px] bg-blue-500/15 rounded-full blur-[100px]" />
-                <div className="absolute top-1/2 right-[10%] w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[100px]" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[700px] bg-gradient-radial from-primary/20 via-amber-700/10 to-transparent blur-3xl" />
+                <div className="absolute top-1/3 left-[10%] w-[400px] h-[400px] bg-amber-500/10 rounded-full blur-[100px]" />
+                <div className="absolute top-1/2 right-[10%] w-[400px] h-[400px] bg-orange-900/15 rounded-full blur-[100px]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,transparent_50%,rgb(0_0_0/0.4)_100%)]" />
                 <div
                     className="absolute inset-0 opacity-[0.03]"
@@ -113,7 +113,7 @@ function HeroSection({ t, navigate }: { t: any; navigate: any }) {
                 >
                     {t('landing.hero.title.prefix')}
                     <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-pink-400">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-amber-300 to-orange-400">
                         {t('landing.hero.title.suffix')}
                     </span>
                 </motion.h1>
@@ -167,7 +167,7 @@ function HeroSection({ t, navigate }: { t: any; navigate: any }) {
 
 function ProductMockup({ t: _t }: { t: any }) {
     return (
-        <div className="relative rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-md shadow-[0_30px_80px_-20px_rgba(124,58,237,0.4)] overflow-hidden">
+        <div className="relative rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-md shadow-[0_30px_80px_-26px_hsl(var(--primary)/0.34)] overflow-hidden">
             {/* Browser chrome */}
             <div className="flex items-center gap-1.5 px-4 h-9 border-b border-white/10 bg-zinc-900/60">
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
@@ -235,7 +235,7 @@ function MockNote({ title, sub, pinned, critical }: { title: string; sub: string
         <div className={`p-2.5 rounded-md border ${pinned ? 'border-l-2 border-l-primary border-y-white/10 border-r-white/10 bg-primary/5' : 'border-white/10 bg-white/[0.02]'} text-left`}>
             <div className="flex items-center gap-1.5 mb-1">
                 <span className="inline-flex items-center gap-1 h-4 px-1.5 rounded text-[9px] font-medium uppercase tracking-wide border border-white/10 bg-white/5 text-zinc-300">
-                    <span className="w-1 h-1 rounded-full bg-indigo-400" /> Devir Teslim
+                    <span className="w-1 h-1 rounded-full bg-primary" /> Devir Teslim
                 </span>
                 {critical && (
                     <span className="inline-flex items-center gap-1 h-4 px-1.5 rounded text-[9px] font-medium uppercase tracking-wide border border-rose-500/20 bg-rose-500/10 text-rose-400">
@@ -293,13 +293,13 @@ function StatsSection({ t }: { t: any }) {
 
 function FeatureGrid({ t }: { t: any }) {
     const features = [
-        { icon: Smartphone, color: 'text-blue-400', title: t('landing.feature.mobile.title'), desc: t('landing.feature.mobile.desc') },
+        { icon: Smartphone, color: 'text-primary', title: t('landing.feature.mobile.title'), desc: t('landing.feature.mobile.desc') },
         { icon: Shield, color: 'text-emerald-400', title: t('landing.feature.security.title'), desc: t('landing.feature.security.desc') },
-        { icon: Globe, color: 'text-purple-400', title: t('landing.feature.sync.title'), desc: t('landing.feature.sync.desc') },
+        { icon: Globe, color: 'text-amber-300', title: t('landing.feature.sync.title'), desc: t('landing.feature.sync.desc') },
         { icon: MessageSquare, color: 'text-pink-400', title: t('landing.feature.messaging.title'), desc: t('landing.feature.messaging.desc') },
         { icon: Clock, color: 'text-orange-400', title: t('landing.feature.handovers.title'), desc: t('landing.feature.handovers.desc') },
         { icon: Users, color: 'text-cyan-400', title: t('landing.feature.roster.title'), desc: t('landing.feature.roster.desc') },
-        { icon: BarChart3, color: 'text-indigo-400', title: t('landing.feature.analytics.title'), desc: t('landing.feature.analytics.desc') },
+        { icon: BarChart3, color: 'text-orange-300', title: t('landing.feature.analytics.title'), desc: t('landing.feature.analytics.desc') },
         { icon: Lock, color: 'text-red-400', title: t('landing.feature.vault.title'), desc: t('landing.feature.vault.desc') },
         { icon: Zap, color: 'text-yellow-400', title: t('landing.feature.tasks.title'), desc: t('landing.feature.tasks.desc') },
     ]
@@ -503,8 +503,8 @@ function OperationsVisual() {
         ['C', 'A', 'A', 'A', 'OFF', 'B', 'B'],
     ]
     const colors: Record<string, string> = {
-        A: 'bg-indigo-500/80 text-white',
-        B: 'bg-purple-500/80 text-white',
+        A: 'bg-primary/80 text-primary-foreground',
+        B: 'bg-amber-700/80 text-white',
         C: 'bg-rose-500/80 text-white',
         OFF: 'bg-zinc-800 text-zinc-500',
     }
@@ -681,7 +681,7 @@ function FinalCta({ t, navigate }: { t: any; navigate: any }) {
     return (
         <section className="py-24 relative overflow-hidden">
             <div className="absolute inset-0 -z-10">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/30 via-purple-500/15 to-transparent blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/25 via-amber-700/10 to-transparent blur-3xl" />
             </div>
 
             <motion.div

@@ -32,10 +32,10 @@ interface RelayBrandProps {
 export function RelayBrand({ className, markClassName, wordmarkClassName, compact = false }: RelayBrandProps) {
     return (
         <span className={cn('inline-flex items-center gap-2.5', className)}>
-            <RelayMark className={cn('h-8 w-8 text-primary', markClassName)} />
+            <RelayMark className={cn('h-8 w-8 text-[#F2A51A]', markClassName)} />
             {!compact && (
                 <span className={cn('font-semibold tracking-[-0.025em]', wordmarkClassName)}>
-                    Aetherius <span className="text-primary">Relay</span>
+                    Aetherius <span className="text-[#F2A51A]">Relay</span>
                 </span>
             )}
         </span>

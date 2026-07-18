@@ -37,12 +37,12 @@ export function LeaderboardPanel() {
     }
 
     return (
-        <Card className="h-full border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
             <CardHeader className="pb-4 border-b border-border/30">
                 <div className="flex flex-row items-center justify-between">
                     <div>
                         <CardTitle className="text-2xl font-bold flex items-center gap-3 text-foreground">
-                            <Trophy className="w-6 h-6 text-indigo-500" />
+                            <Trophy className="w-6 h-6 text-primary" />
                             {t('leaderboard.title')}
                         </CardTitle>
                         <CardDescription className="text-muted-foreground mt-1">
@@ -71,7 +71,7 @@ export function LeaderboardPanel() {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-250px)] custom-scrollbar">
+            <CardContent className="space-y-4 p-6">
                 {loading ? (
                     <div className="space-y-4">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -117,7 +117,7 @@ export function LeaderboardPanel() {
                                     />
 
                                     <div>
-                                        <p className="font-bold text-foreground text-lg group-hover:text-indigo-400 transition-colors">
+                                        <p className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">
                                             {entry.userName}
                                         </p>
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">

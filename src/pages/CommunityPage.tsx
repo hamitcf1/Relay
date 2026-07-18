@@ -34,8 +34,8 @@ export function CommunityPage({ onBack }: CommunityPageProps) {
         },
         {
             icon: Mail,
-            color: 'text-blue-400',
-            bg: 'bg-blue-400/10',
+            color: 'text-primary',
+            bg: 'bg-primary/10',
             title: t('community.email.title'),
             desc: t('community.email.desc'),
             href: 'mailto:hamitfindik2@gmail.com',
@@ -43,8 +43,8 @@ export function CommunityPage({ onBack }: CommunityPageProps) {
         },
         {
             icon: MessageSquare,
-            color: 'text-indigo-400',
-            bg: 'bg-indigo-400/10',
+            color: 'text-primary',
+            bg: 'bg-primary/10',
             title: t('community.discord.title'),
             desc: t('community.discord.desc'),
             cta: t('community.comingSoon'),
