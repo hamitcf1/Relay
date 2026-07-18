@@ -139,16 +139,44 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create, update: if isAuthenticated() && belongsToHotel(hotelId);
         allow delete: if false;
+
+        // ActivityTracker stores the detailed five-minute segments below the
+        // authenticated employee's deterministic daily activity document.
+        match /sessions/{sessionId} {
+          allow read: if isAuthenticated() && belongsToHotel(hotelId) && (
+            isGM() || logId.matches('^' + request.auth.uid + '_.*')
+          );
+          allow create: if isAuthenticated()
+            && belongsToHotel(hotelId)
+            && logId.matches('^' + request.auth.uid + '_.*')
+            && request.resource.data.keys().hasOnly([
+              'start', 'end', 'duration_minutes'
+            ])
+            && request.resource.data.start is timestamp
+            && request.resource.data.end is timestamp
+            && request.resource.data.duration_minutes is number
+            && request.resource.data.duration_minutes >= 0;
+          allow update, delete: if false;
+        }
       }
 
       // ATTENDANCE - Personal timekeeping records. Staff can only create and
       // close their own record; GMs can inspect the hotel's full report.
       match /attendance/{attendanceId} {
-        allow read: if isAuthenticated() && belongsToHotel(hotelId) && (
+        // Clock-in uses a transaction get to prove that the deterministic
+        // record does not exist yet. A missing document has no resource.data,
+        // so own-ID gets must be authorized independently from list queries.
+        allow get: if isAuthenticated() && belongsToHotel(hotelId) && (
+          isGM()
+          || attendanceId.matches('^.*_' + request.auth.uid + '_[A-Za-z0-9-]+$')
+          || resource.data.staff_id == request.auth.uid
+        );
+        allow list: if isAuthenticated() && belongsToHotel(hotelId) && (
           isGM() || resource.data.staff_id == request.auth.uid
         );
         allow create: if isAuthenticated() && belongsToHotel(hotelId)
           && getUserRole() == 'receptionist'
+          && attendanceId.matches('^.*_' + request.auth.uid + '_[A-Za-z0-9-]+$')
           && request.resource.data.staff_id == request.auth.uid
           && request.resource.data.status == 'clocked_in'
           && request.resource.data.staff_name == getUserDoc().name
