@@ -34,8 +34,8 @@ export function ContactPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
                     <ContactCard
                         icon={Mail}
-                        color="text-blue-400"
-                        bg="bg-blue-400/10"
+                        color="text-primary"
+                        bg="bg-primary/10"
                         title={t('contact.email.title')}
                         desc={t('contact.email.desc')}
                         value="hamitfindik2@gmail.com"
@@ -44,8 +44,8 @@ export function ContactPage() {
                     />
                     <ContactCard
                         icon={Github}
-                        color="text-purple-400"
-                        bg="bg-purple-400/10"
+                        color="text-primary"
+                        bg="bg-primary/10"
                         title={t('contact.github.title')}
                         desc={t('contact.github.desc')}
                         value="@hamitcf1"

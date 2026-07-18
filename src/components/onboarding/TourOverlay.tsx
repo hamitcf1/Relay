@@ -161,7 +161,7 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
                         style={targetRect && step.position !== 'bottom' && step.position !== 'top' ? { top: Math.max(20, targetRect.top) } : {}}
                     >
                         <div className="flex justify-between items-start mb-2">
-                            <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                            <span className="text-xs font-bold text-primary uppercase tracking-wider">
                                 Step {currentStep + 1}/{steps.length}
                             </span>
                             <button onClick={onClose} className="text-zinc-500 hover:text-white">
@@ -188,7 +188,7 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
                             <Button
                                 size="sm"
                                 onClick={handleNext}
-                                className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                                className="bg-primary text-primary-foreground"
                             >
                                 {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
                                 {currentStep !== steps.length - 1 && <ChevronRight className="w-4 h-4 ml-1" />}

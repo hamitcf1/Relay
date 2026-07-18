@@ -4,9 +4,9 @@ import { PublicFooter } from './PublicFooter'
 
 export function PublicLayout() {
     return (
-        <div className="min-h-screen bg-black text-foreground font-sans selection:bg-primary/30 flex flex-col relative overflow-x-hidden">
+        <div className="public-shell relative flex min-h-screen flex-col overflow-x-hidden bg-background font-sans text-foreground selection:bg-primary/30">
             <PublicNavbar />
-            <div className="flex-grow pt-16 relative">
+            <div className="relative flex-grow pt-[84px]">
                 <Outlet />
             </div>
             <PublicFooter />

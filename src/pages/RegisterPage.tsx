@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Hotel, Mail, Lock, Eye, EyeOff, Loader2, User, ArrowLeft, ConciergeBell } from 'lucide-react'
+import { Hotel, Mail, Lock, Eye, EyeOff, Loader2, User, ArrowLeft } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
@@ -12,6 +12,7 @@ import { PasswordReveal } from '@/components/ui/PasswordReveal'
 import { cleanAuthError } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { UserRole } from '@/types'
+import { RelayMark } from '@/components/brand/RelayBrand'
 
 export function RegisterPage() {
     const navigate = useNavigate()
@@ -99,9 +100,9 @@ export function RegisterPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4 py-10 font-sans selection:bg-primary/30">
+        <div className="auth-shell flex items-center justify-center px-4 py-10 font-sans text-foreground selection:bg-primary/30">
             <motion.div
-                className="relative w-full max-w-[440px]"
+                className="auth-panel relative w-full max-w-[480px]"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
@@ -115,8 +116,8 @@ export function RegisterPage() {
                 </Link>
 
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                        <ConciergeBell className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                        <RelayMark className="h-5 w-5" />
                     </div>
                     <div>
                         <h1 className="text-xl font-bold tracking-tight leading-none">{t('auth.createAccount')}</h1>

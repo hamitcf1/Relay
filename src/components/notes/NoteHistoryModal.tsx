@@ -80,7 +80,7 @@ export function NoteHistoryModal({ isOpen, onClose, note, staff }: NoteHistoryMo
             >
                 <div className="p-6 border-b border-border/40 bg-muted/20 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                             <History className="w-5 h-5" />
                         </div>
                         <div>
@@ -131,7 +131,7 @@ export function NoteHistoryModal({ isOpen, onClose, note, staff }: NoteHistoryMo
                                     >
                                         {/* Timeline rail */}
                                         <span className="absolute left-3 top-3 bottom-0 w-px bg-border" aria-hidden />
-                                        <span className="absolute left-[7px] top-3 w-2 h-2 rounded-full bg-indigo-500 ring-4 ring-card" aria-hidden />
+                                        <span className="absolute left-[7px] top-3 w-2 h-2 rounded-full bg-primary ring-4 ring-card" aria-hidden />
 
                                         <div className="rounded-2xl border border-border bg-muted/30 p-4">
                                             <div className="flex items-center gap-2 flex-wrap mb-3">

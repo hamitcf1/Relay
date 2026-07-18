@@ -250,7 +250,7 @@ export function SalesPanel() {
                 </div>
             </CardHeader>
 
-            <CardContent className="space-y-4 flex-1 overflow-y-auto custom-scrollbar p-3">
+            <CardContent className="space-y-4 p-3">
                 {/* Add Sale Form */}
                 <AnimatePresence>
                     {isAdding && (

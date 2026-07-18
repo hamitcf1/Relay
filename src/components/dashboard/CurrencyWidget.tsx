@@ -22,7 +22,7 @@ export function CurrencyWidget() {
     const currencies = [
         { code: 'USD', icon: DollarSign, color: 'text-emerald-500', label: 'USD' },
         { code: 'EUR', icon: Euro, color: 'text-blue-500', label: 'EUR' },
-        { code: 'GBP', icon: PoundSterling, color: 'text-purple-500', label: 'GBP' }
+        { code: 'GBP', icon: PoundSterling, color: 'text-primary', label: 'GBP' }
     ]
 
     const [amount, setAmount] = useState<string>('')
@@ -223,4 +223,3 @@ export function CurrencyWidget() {
         </CollapsibleCard>
     )
 }
-

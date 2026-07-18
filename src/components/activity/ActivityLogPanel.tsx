@@ -160,7 +160,7 @@ export function ActivityLogPanel() {
                             <p className="text-sm">{t('report.noData')}</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-border/20 max-h-[calc(100vh-20rem)] overflow-y-auto scrollbar-thin">
+                        <div className="divide-y divide-border/20">
                             <AnimatePresence initial={false}>
                                 {filtered.map((log, idx) => {
                                     const meta = ACTION_META[log.action] || ACTION_META.login

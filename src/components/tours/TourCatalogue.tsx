@@ -133,7 +133,7 @@ export function TourCatalogue() {
                     <p className="text-muted-foreground text-sm">{t('tours.catalogue.desc')}</p>
                 </div>
                 {isGM && !isAdding && (
-                    <Button onClick={() => setIsAdding(true)} className="bg-indigo-600 hover:bg-indigo-500 gap-2">
+                    <Button onClick={() => setIsAdding(true)} className="gap-2">
                         <Plus className="w-4 h-4" />
                         {t('tours.add')}
                     </Button>
@@ -179,7 +179,7 @@ export function TourCatalogue() {
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div className="space-y-2">
                                             <label className="text-xs text-muted-foreground uppercase font-bold flex items-center gap-1">
-                                                <Euro className="w-3 h-3 text-indigo-400" /> {t('tours.form.basePrice')}
+                                                <Euro className="w-3 h-3 text-primary" /> {t('tours.form.basePrice')}
                                             </label>
                                             <Input
                                                 type="number"
@@ -243,7 +243,7 @@ export function TourCatalogue() {
                                     </div>
                                     <div className="flex justify-end gap-2 pt-2">
                                         <Button variant="ghost" onClick={() => { setIsAdding(false); setEditingId(null); }}>{t('common.cancel')}</Button>
-                                        <Button className="bg-indigo-600 hover:bg-indigo-500 px-8" onClick={handleSave}>
+                                        <Button className="px-8" onClick={handleSave}>
                                             <Save className="w-4 h-4 mr-2" />
                                             {editingId ? t('common.update') : t('common.save')}
                                         </Button>
@@ -261,7 +261,7 @@ export function TourCatalogue() {
                     <div className="col-span-full py-20 text-center bg-muted/20 rounded-3xl border border-dashed border-border">
                         <Map className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                         <p className="text-muted-foreground font-medium">{t('tours.noTours')}</p>
-                        {isGM && <Button variant="link" className="text-indigo-400 mt-2" onClick={() => setIsAdding(true)}>{t('tours.createFirst')}</Button>}
+                        {isGM && <Button variant="link" className="text-primary mt-2" onClick={() => setIsAdding(true)}>{t('tours.createFirst')}</Button>}
                     </div>
                 ) : (
                     [...tours].sort((a, b) => a.name.localeCompare(b.name)).map(tour => (
@@ -269,7 +269,7 @@ export function TourCatalogue() {
                             <Card className="bg-card border-border hover:border-primary/50 transition-all overflow-hidden flex flex-col h-full group">
                                 <CardHeader className="pb-2">
                                     <div className="flex items-center justify-between mb-1">
-                                        <Badge variant="outline" className="bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                                             {t('tours.local')}
                                         </Badge>
                                         {isGM && (
@@ -314,7 +314,7 @@ export function TourCatalogue() {
                                         >
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="text-[10px] text-muted-foreground uppercase font-bold">{t('tours.form.adultPrice')}</span>
-                                                <Calendar className="w-3 h-3 text-muted-foreground dark:text-muted-foreground/90 group-hover/price:text-primary dark:group-hover/price:text-indigo-300 opacity-0 group-hover/price:opacity-100 transition-all" />
+                                                <Calendar className="w-3 h-3 text-muted-foreground group-hover/price:text-primary opacity-0 group-hover/price:opacity-100 transition-all" />
                                             </div>
                                             <p className="text-lg font-bold text-foreground">
                                                 €{tour.adult_price.toLocaleString()}
@@ -396,8 +396,8 @@ export function TourCatalogue() {
                                     />
                                 </div>
                             </div>
-                            <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
-                                <p className="text-xs text-indigo-500 dark:text-indigo-300">
+                            <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                                <p className="text-xs text-primary">
                                     {t('tours.book.totalPrice')}: <span className="font-bold text-foreground">€{bookingTour ? (
                                         (bookingType === 'adult' ? bookingTour.adult_price :
                                             bookingType === 'child_3_7' ? bookingTour.child_3_7_price :
@@ -408,7 +408,7 @@ export function TourCatalogue() {
                         </div>
                         <DialogFooter>
                             <Button variant="ghost" onClick={() => setBookingTour(null)}>{t('common.cancel')}</Button>
-                            <Button className="bg-indigo-600 hover:bg-indigo-500" onClick={confirmBooking} disabled={!bookingForm.guest_name || !bookingForm.room_number}>
+                            <Button onClick={confirmBooking} disabled={!bookingForm.guest_name || !bookingForm.room_number}>
                                 <Check className="w-4 h-4 mr-1" /> {t('tours.book.confirm')}
                             </Button>
                         </DialogFooter>

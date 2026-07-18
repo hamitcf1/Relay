@@ -8,7 +8,6 @@ import {
     Users
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
-import { cn } from '@/lib/utils'
 
 interface OverviewGridProps {
     onSelect: (tabIs: string) => void
@@ -23,35 +22,30 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
             id: 'notes',
             label: t('module.shiftNotes'),
             icon: ClipboardList,
-            color: 'bg-blue-500/10 text-blue-500',
             desc: t('overview.notes.desc')
         },
         {
             id: 'hotel-info',
             label: t('module.hotelInfo'),
             icon: Hotel,
-            color: 'bg-purple-500/10 text-purple-500',
             desc: t('overview.hotel.desc')
         },
         {
             id: 'calendar',
             label: t('module.calendar'),
             icon: Calendar,
-            color: 'bg-emerald-500/10 text-emerald-500',
             desc: t('overview.calendar.desc')
         },
         {
             id: 'menu',
             label: t('menu.title'),
             icon: Utensils,
-            color: 'bg-orange-500/10 text-orange-500',
             desc: t('overview.menu.desc')
         },
         {
             id: 'currency',
             label: t('currency.title'),
             icon: DollarSign,
-            color: 'bg-green-500/10 text-green-500',
             desc: t('overview.currency.desc')
         },
     ]
@@ -62,7 +56,6 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
             id: 'roster',
             label: t('module.roster'),
             icon: Users,
-            color: 'bg-pink-500/10 text-pink-500',
             desc: t('overview.roster.desc')
         })
     }
@@ -83,14 +76,17 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
     }
 
     return (
-        <div className="p-4 lg:p-6 pb-32">
-            <h2 className="text-2xl font-bold mb-6 px-1">{t('module.overview')}</h2>
+        <section className="pb-2">
+            <div className="mb-5 px-1">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Relay workspace</p>
+                <h2 className="text-2xl font-semibold tracking-[-0.035em]">{t('module.overview')}</h2>
+            </div>
 
             <motion.div
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4"
+                className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
             >
                 {items.map((item) => (
                     <motion.button
@@ -98,16 +94,16 @@ export function OverviewGrid({ onSelect, userRole }: OverviewGridProps) {
                         variants={itemAnim}
                         onClick={() => onSelect(item.id)}
                         whileTap={{ scale: 0.97 }}
-                        className="group relative flex flex-col items-start p-4 rounded-xl card-modern text-left active:scale-[0.98]"
+                        className="group relative min-h-36 overflow-hidden rounded-[1.35rem] border-[5px] border-surface-deep bg-card p-4 text-left ring-1 ring-border/30 transition-[transform,border-color,background-color] duration-500 ease-premium hover:-translate-y-1 hover:border-primary/20 hover:bg-card/80 active:scale-[0.98]"
                     >
-                        <div className={cn("p-2.5 rounded-lg mb-3 transition-colors", item.color)}>
+                        <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-500 ease-premium group-hover:scale-105">
                             <item.icon className="w-5 h-5" />
                         </div>
-                        <span className="font-semibold text-sm tracking-tight mb-0.5">{item.label}</span>
-                        <span className="text-xs text-muted-foreground leading-snug">{item.desc}</span>
+                        <span className="mb-1 text-sm font-semibold tracking-tight">{item.label}</span>
+                        <span className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.desc}</span>
                     </motion.button>
                 ))}
             </motion.div>
-        </div>
+        </section>
     )
 }

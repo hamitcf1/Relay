@@ -34,13 +34,13 @@ export function MobileNav({ activeTab, setActiveTab, onOpenProfile }: MobileNavP
     ]
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 pointer-events-none">
+        <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-50 px-3 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-2 md:hidden">
             {/* 
                 Floating Glass Container 
                 pointer-events-auto is crucial because the parent is none to let clicks pass through to side areas if any 
             */}
             <div className="mx-auto max-w-sm pointer-events-none">
-                <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex items-center justify-between p-2 pointer-events-auto">
+                <div className="pointer-events-auto relative flex items-center justify-between rounded-[1.4rem] border-[5px] border-surface-deep bg-card/[0.88] p-1.5 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06),0_24px_65px_-30px_hsl(var(--foreground)/0.62)] backdrop-blur-xl">
 
                     {/* Active Tab Indicator (Optional animated background) */}
                     {/* Simplified implementation for now: plain buttons */}
@@ -52,18 +52,18 @@ export function MobileNav({ activeTab, setActiveTab, onOpenProfile }: MobileNavP
                                 key={tab.id}
                                 onClick={() => tab.action ? tab.action() : setActiveTab(tab.id)}
                                 className={cn(
-                                    "relative flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-all duration-300",
+                                    "relative flex min-h-14 flex-1 flex-col items-center justify-center gap-1 rounded-[1rem] py-2 transition-[transform,color] duration-500 ease-premium active:scale-95",
                                     isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
                                 {isActive && (
                                     <motion.div
                                         layoutId="mobile-nav-active"
-                                        className="absolute inset-0 bg-white/5 rounded-xl"
+                                        className="absolute inset-0 rounded-[0.9rem] bg-primary/10 ring-1 ring-primary/15"
                                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                     />
                                 )}
-                                <tab.icon className={cn("w-6 h-6 relative z-10", isActive && "drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]")} />
+                                <tab.icon className="relative z-10 h-5 w-5" strokeWidth={1.8} />
                                 <span className="text-[10px] font-medium relative z-10">{tab.label}</span>
                             </button>
                         )
@@ -72,9 +72,9 @@ export function MobileNav({ activeTab, setActiveTab, onOpenProfile }: MobileNavP
                     {/* Profile / Menu Trigger */}
                     <button
                         onClick={onOpenProfile}
-                        className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-muted-foreground hover:text-foreground transition-all active:scale-95"
+                        className="flex min-h-14 flex-1 flex-col items-center justify-center gap-1 rounded-[1rem] py-2 text-muted-foreground transition-[transform,color] duration-500 hover:text-foreground active:scale-95"
                     >
-                        <User className="w-6 h-6" />
+                        <User className="h-5 w-5" strokeWidth={1.8} />
                         <span className="text-[10px] font-medium">{t('common.profile')}</span>
                     </button>
                 </div>

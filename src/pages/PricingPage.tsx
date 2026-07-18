@@ -22,8 +22,8 @@ export function PricingPage() {
                 t('pricing.feature.support')
             ],
             icon: Zap,
-            color: "text-blue-400",
-            bg: "bg-blue-400/10",
+            color: "text-primary",
+            bg: "bg-primary/10",
             buttonText: t('pricing.button.getStarted'),
             variant: 'outline' as const
         },
@@ -41,8 +41,8 @@ export function PricingPage() {
                 t('pricing.feature.prioritySupport')
             ],
             icon: Star,
-            color: "text-indigo-400",
-            bg: "bg-indigo-400/10",
+            color: "text-primary",
+            bg: "bg-primary/10",
             buttonText: t('pricing.button.getStarted'),
             variant: 'default' as const
         },

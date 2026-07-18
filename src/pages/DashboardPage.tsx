@@ -48,6 +48,7 @@ import { useAttendanceStore } from '@/stores/attendanceStore'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { KpiBadges } from '@/components/dashboard/KpiBadges'
+import { RelayMark } from '@/components/brand/RelayBrand'
 
 
 // Lazy-loaded operations panels — each tab becomes its own chunk
@@ -196,7 +197,7 @@ export function DashboardPage() {
     const [showTutorial, setShowTutorial] = useState(false)
 
     return (
-        <div className="h-[100dvh] overflow-hidden bg-background text-foreground flex font-sans selection:bg-primary/30 relative">
+        <div className="relay-app h-[100dvh] overflow-hidden bg-background text-foreground flex font-sans selection:bg-primary/30 relative">
 
             <OnboardingWizard forceOpen={showTutorial} onClose={() => setShowTutorial(false)} />
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
@@ -217,13 +218,13 @@ export function DashboardPage() {
             />
 
             {/* Main Content Pane */}
-            <div className="flex flex-col flex-1 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-0 relative min-w-0 overflow-hidden">
+            <div className="flex flex-col flex-1 relative min-w-0 overflow-hidden">
                 {/* Header Navbar (Visible mostly for Mobile layout and utility items) */}
-                <header className="safe-header border-b border-border/40 bg-background flex items-center justify-between px-4 lg:px-6 shrink-0 z-40 relative h-16">
+                <header className="safe-header mx-3 mt-3 flex h-16 shrink-0 items-center justify-between rounded-[1.25rem] border-[5px] border-surface-deep bg-card/[0.86] px-4 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06),0_18px_55px_-38px_hsl(var(--foreground)/0.35)] backdrop-blur-xl lg:mx-5 lg:px-6 z-40 relative">
                     <div className="flex items-center md:hidden">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-                                <span className="font-bold text-primary-foreground text-sm">R</span>
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F2A51A] text-[#0B0D10] shadow-[0_9px_24px_-12px_hsl(38_89%_53%/0.8)]">
+                                <RelayMark className="h-5 w-5" />
                             </div>
                             <div>
                                 <h1 className="font-semibold text-base tracking-tight leading-none text-foreground">Relay</h1>
@@ -275,15 +276,16 @@ export function DashboardPage() {
                     </div>
                 </header>
 
-            <main className="flex-1 overflow-hidden p-4 lg:p-6 flex flex-col relative min-h-0">
+            <main className="relay-scroll-root flex-1 overflow-y-auto px-3 pb-28 pt-3 lg:px-5 lg:pb-8 lg:pt-5 relative min-h-0">
+                <div className="relay-page">
                 <AnnouncementBanner />
                 
-                <Tabs value={activeTab} className="flex-1 flex flex-col min-h-0 border-none p-0 bg-transparent shadow-none">
+                <Tabs value={activeTab} className="border-none p-0 bg-transparent shadow-none">
                     
                     {/* OVERVIEW VIEW */}
-                    <TabsContent value="overview" className="flex-1 min-h-0 m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-y-auto lg:overflow-hidden">
-                        {isMobile && overviewTab !== 'grid' && (
-                            <div className="flex-none flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20 mb-4 rounded-xl">
+                    <TabsContent value="overview" className="m-0 border-none p-0 outline-none">
+                        {overviewTab !== 'grid' && (
+                            <div className="sticky top-0 z-30 mb-5 flex items-center gap-2 rounded-[1.1rem] border border-border/50 bg-background/[0.82] px-3 py-2 backdrop-blur-xl">
                                 <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
                                     <ChevronLeft className="w-5 h-5" />
                                 </Button>
@@ -298,56 +300,46 @@ export function DashboardPage() {
                             </div>
                         )}
 
-                        {isMobile && overviewTab === 'grid' ? (
-                            <OverviewGrid onSelect={(id) => setOverviewTab(id)} userRole={user?.role} />
-                        ) : (
-                            <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 flex-1 min-h-0 h-auto md:h-full max-w-[1600px] mx-auto w-full", isMobile ? "p-0 pb-32" : "")}>
-                                    {/* Left Column */}
-                                    <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative lg:pr-2 custom-scrollbar",
-                                        isMobile && overviewTab !== 'notes' && overviewTab !== 'roster' && "hidden"
-                                    )}>
-                                        <div id="tour-logs" className={cn(isMobile && overviewTab !== 'notes' && "hidden")}>
-                                            <ShiftNotes hotelId={hotel?.id || ''} />
-                                        </div>
-                                        {(user?.role === 'gm' || user?.role === 'receptionist') && (
-                                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className={cn(isMobile && overviewTab !== 'roster' && "hidden")}>
-                                                <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                            </motion.div>
-                                        )}
-                                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className={cn(isMobile && overviewTab !== 'roster' && "hidden")}>
-                                            <BlacklistModule hotelId={hotel?.id || ''} />
-                                        </motion.div>
-                                        <ScrollToTopButton />
+                        {overviewTab === 'grid' ? (
+                            isMobile ? (
+                                <OverviewGrid onSelect={setOverviewTab} userRole={user?.role} />
+                            ) : (
+                                <div className="space-y-6">
+                                    <OverviewGrid onSelect={setOverviewTab} userRole={user?.role} />
+                                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.75fr)]">
+                                        <div id="tour-logs"><ShiftNotes hotelId={hotel?.id || ''} /></div>
+                                        <CalendarWidget hotelId={hotel?.id || ''} />
                                     </div>
-
-                                    {/* Right Column */}
-                                    <div className={cn("lg:col-span-1 h-auto lg:h-full flex flex-col min-h-0 gap-6 lg:overflow-y-auto relative lg:pr-2 custom-scrollbar pb-20 lg:pb-0",
-                                        isMobile && !['hotel-info', 'menu', 'currency', 'calendar'].includes(overviewTab) && "hidden lg:flex"
-                                    )}>
-                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={cn(isMobile && overviewTab !== 'hotel-info' && "hidden")}>
-                                            <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                        </motion.div>
-                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className={cn(isMobile && overviewTab !== 'currency' && "hidden")}>
-                                            <CurrencyWidget />
-                                        </motion.div>
-                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className={cn(isMobile && overviewTab !== 'menu' && "hidden")}>
-                                            <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                        </motion.div>
-                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className={cn(isMobile && overviewTab !== 'calendar' && "hidden")}>
-                                            <CalendarWidget hotelId={hotel?.id || ''} />
-                                        </motion.div>
-                                        <ScrollToTopButton />
-                                    </div>
+                                    {(user?.role === 'gm' || user?.role === 'receptionist') && (
+                                        <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                    )}
                                 </div>
-                            )}
+                            )
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
+                                className="mx-auto w-full max-w-6xl"
+                            >
+                                {overviewTab === 'notes' && <ShiftNotes hotelId={hotel?.id || ''} />}
+                                {overviewTab === 'roster' && (user?.role === 'gm' || user?.role === 'receptionist') && <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
+                                {overviewTab === 'hotel-info' && <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
+                                {overviewTab === 'currency' && <CurrencyWidget />}
+                                {overviewTab === 'menu' && <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
+                                {overviewTab === 'calendar' && <CalendarWidget hotelId={hotel?.id || ''} />}
+                                {overviewTab === 'blacklist' && <BlacklistModule hotelId={hotel?.id || ''} />}
+                            </motion.div>
+                        )}
+                        <ScrollToTopButton />
                         </TabsContent>
 
                         {/* OPERATIONS VIEW */}
-                        <TabsContent value="operations" className="h-full m-0 border-none p-0 outline-none data-[state=active]:flex flex-col overflow-hidden">
-                            <Tabs value={operationTab} onValueChange={setOperationTab} className="flex-1 flex flex-col min-h-0">
+                        <TabsContent value="operations" className="m-0 border-none p-0 outline-none">
+                            <Tabs value={operationTab} onValueChange={setOperationTab}>
                                 {/* Mobile Header for Sub-pages */}
                                 {isMobile && operationTab !== 'grid' && (
-                                    <div className="flex items-center gap-2 px-4 py-2 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-20 mb-4 rounded-xl">
+                                    <div className="sticky top-0 z-30 mb-4 flex items-center gap-2 rounded-[1.1rem] border border-border/50 bg-background/[0.82] px-3 py-2 backdrop-blur-xl">
                                         <Button variant="ghost" size="icon" onClick={() => setOperationTab('grid')} className="-ml-2">
                                             <ChevronLeft className="w-5 h-5" />
                                         </Button>
@@ -359,17 +351,17 @@ export function DashboardPage() {
                                     </div>
                                 )}
 
-                                <div className="flex-1 min-h-0">
+                                <div>
                                     {isMobile && operationTab === 'grid' && (
                                         <OperationsGrid onSelect={(id) => setOperationTab(id)} userRole={user?.role} />
                                     )}
 
-                                    <div className={cn("h-full", isMobile && operationTab === 'grid' ? "hidden" : "block")}>
+                                    <div className={cn(isMobile && operationTab === 'grid' ? "hidden" : "block")}>
                                         <Suspense fallback={<TabFallback />}>
-                                            <TabsContent value="messaging" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0">
+                                            <TabsContent value="messaging" className="m-0 min-h-[680px] p-0 outline-none">
                                                 <MessagingPanel />
                                             </TabsContent>
-                                            <TabsContent value="compliance" className="h-full m-0 p-6 outline-none pb-24 lg:pb-0 overflow-y-auto">
+                                            <TabsContent value="compliance" className="m-0 p-4 outline-none lg:p-6">
                                                 <div className="max-w-2xl mx-auto space-y-6">
                                                     <div className="space-y-1">
                                                         <h2 className="text-2xl font-bold tracking-tight">{t('module.compliance') || 'Compliance'}</h2>
@@ -378,45 +370,45 @@ export function DashboardPage() {
                                                     <CompliancePanel hotelId={hotel?.id || ''} className="p-2" />
                                                 </div>
                                             </TabsContent>
-                                            <TabsContent value="settings" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="settings" className="m-0 p-0 outline-none">
                                                 <HotelSettings />
                                             </TabsContent>
-                                            <TabsContent value="sales" className="h-full m-0 p-0 outline-none pb-24 lg:pb-0">
+                                            <TabsContent value="sales" className="m-0 p-0 outline-none">
                                                 <SalesPanel />
                                             </TabsContent>
-                                            <TabsContent value="feedback" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="feedback" className="m-0 p-0 outline-none">
                                                 <FeedbackSection />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="off-days" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="off-days" className="m-0 p-0 outline-none">
                                                 <OffDayScheduler />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="tours" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="tours" className="m-0 p-0 outline-none">
                                                 <TourCatalogue />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="rooms" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="rooms" className="m-0 p-0 outline-none">
                                                 <RoomManagementPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="cards-loans" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="cards-loans" className="m-0 p-0 outline-none">
                                                 <CardsAndLoansPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="pricing" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="pricing" className="m-0 p-0 outline-none">
                                                 <PricingPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="team" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="team" className="m-0 p-0 outline-none">
                                                 <LeaderboardPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="activity" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="activity" className="m-0 p-0 outline-none">
                                                 <ActivityLogPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="attendance" className="h-full m-0 p-0 outline-none overflow-y-auto relative custom-scrollbar pb-24 lg:pb-0">
+                                            <TabsContent value="attendance" className="m-0 p-0 outline-none">
                                                 <AttendanceReportPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
@@ -426,6 +418,7 @@ export function DashboardPage() {
                             </Tabs>
                         </TabsContent>
                     </Tabs>
+                </div>
                 </main>
             </div>
 

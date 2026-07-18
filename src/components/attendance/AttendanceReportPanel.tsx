@@ -98,7 +98,7 @@ export function AttendanceReportPanel() {
         { label: text.late, value: lateRecords.length, icon: TriangleAlert, color: 'text-amber-600 bg-amber-500/10' },
         { label: text.active, value: filtered.filter((record) => record.status === 'clocked_in').length, icon: Clock3, color: 'text-emerald-600 bg-emerald-500/10' },
         { label: text.avgLate, value: `${averageLate} ${text.minute}`, icon: TimerOff, color: 'text-rose-600 bg-rose-500/10' },
-        { label: text.pending, value: filtered.filter((record) => record.approval_status === 'pending').length, icon: ShieldQuestion, color: 'text-violet-600 bg-violet-500/10' },
+        { label: text.pending, value: filtered.filter((record) => record.approval_status === 'pending').length, icon: ShieldQuestion, color: 'text-primary bg-primary/10' },
     ]
 
     const submitReview = async () => {
@@ -153,7 +153,43 @@ export function AttendanceReportPanel() {
                 ) : !filtered.length ? (
                     <div className="flex h-48 items-center justify-center p-6 text-center text-sm text-muted-foreground">{text.empty}</div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                    <div className="space-y-3 p-3 md:hidden">
+                        {filtered.map((record) => (
+                            <article key={record.id} className="rounded-[1.15rem] bg-muted/25 p-4 ring-1 ring-border/60">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h3 className="font-semibold tracking-tight">{record.staff_name}</h3>
+                                        <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{record.staff_role} · {record.work_date}</p>
+                                    </div>
+                                    <Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : text.completed}</Badge>
+                                </div>
+                                <dl className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-background/40 p-3 text-xs">
+                                    <div><dt className="text-muted-foreground">{text.planned}</dt><dd className="mt-1 font-mono font-semibold">{format(record.scheduled_start, 'HH:mm')}–{format(record.scheduled_end, 'HH:mm')}</dd></div>
+                                    <div><dt className="text-muted-foreground">{text.duration}</dt><dd className="mt-1 font-semibold">{durationLabel(record.worked_minutes, t)}</dd></div>
+                                    <div><dt className="text-muted-foreground">{text.in}</dt><dd className="mt-1 font-mono font-semibold">{format(record.clock_in_at, 'HH:mm:ss')}</dd></div>
+                                    <div><dt className="text-muted-foreground">{text.out}</dt><dd className="mt-1 font-mono font-semibold">{record.clock_out_at ? format(record.clock_out_at, 'HH:mm:ss') : text.noExit}</dd></div>
+                                </dl>
+                                {record.late_minutes > 0 && (
+                                    <div className="mt-3 rounded-xl bg-amber-500/10 p-3 text-xs ring-1 ring-amber-500/20">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="font-semibold text-amber-600">+{record.late_minutes} {text.minute}</span>
+                                            <Badge variant="secondary">{record.approval_status === 'approved' ? text.approved : record.approval_status === 'rejected' ? text.rejected : text.approvalPending}</Badge>
+                                        </div>
+                                        <p className="mt-2 leading-relaxed text-muted-foreground">{record.late_excuse || '—'}</p>
+                                        <p className="mt-2 font-medium">{record.manager_permission_declared ? text.permissionYes : text.permissionNo}</p>
+                                        {record.approval_status === 'pending' && (
+                                            <div className="mt-3 grid grid-cols-2 gap-2">
+                                                <Button size="sm" onClick={() => { setReviewTarget({ record, decision: 'approved' }); setReviewNote('') }}><CheckCircle2 className="h-3.5 w-3.5" />{text.approve}</Button>
+                                                <Button size="sm" variant="destructive" onClick={() => { setReviewTarget({ record, decision: 'rejected' }); setReviewNote('') }}><XCircle className="h-3.5 w-3.5" />{text.reject}</Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                    <div className="relay-table-scroll hidden md:block">
                         <table className="w-full min-w-[1280px] text-left text-sm">
                             <thead className="bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
                                 <tr>{[text.employee, text.date, text.planned, text.in, text.out, text.duration, text.status, text.excuse, text.permission].map((label) => <th key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr>
@@ -200,6 +236,7 @@ export function AttendanceReportPanel() {
                             </tbody>
                         </table>
                     </div>
+                    </>
                 )}
             </Card>
 

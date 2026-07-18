@@ -19,7 +19,7 @@ export function LiveDemoPage() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30 flex flex-col">
+        <div className="auth-shell flex flex-col text-foreground selection:bg-primary/30">
             <div className="container mx-auto px-6 pt-12 mb-8">
                 <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors">
                     <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -41,7 +41,7 @@ export function LiveDemoPage() {
                     </motion.div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto w-full">
+                <div className="auth-panel grid w-full max-w-3xl grid-cols-1 gap-4 md:grid-cols-2 mx-auto">
                     <DemoCard
                         icon={Hotel}
                         title={t('demo.gm')}
@@ -58,7 +58,7 @@ export function LiveDemoPage() {
                         cta={t('demo.enter.staff')}
                         onClick={() => startDemo('receptionist')}
                         loading={isLoading}
-                        accent="text-blue-400 bg-blue-400/10"
+                        accent="text-primary bg-primary/10"
                     />
                 </div>
             </div>
@@ -76,7 +76,7 @@ function DemoCard({ icon: Icon, title, desc, cta, onClick, loading, accent }: {
     accent: string
 }) {
     return (
-        <div className="p-6 rounded-xl bg-zinc-900/50 border border-zinc-800 flex flex-col">
+        <div className="flex flex-col rounded-[1.35rem] bg-muted/30 p-6 ring-1 ring-border/60">
             <div className={`w-9 h-9 rounded-lg ${accent} flex items-center justify-center mb-4`}>
                 <Icon className="w-4 h-4" aria-hidden="true" />
             </div>

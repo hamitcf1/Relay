@@ -48,12 +48,12 @@ export function AnnouncementModal() {
                         <div className="relative p-8">
                             {/* Decorative Background Icon */}
                             <div className="absolute top-0 right-0 p-8 opacity-5">
-                                <Megaphone className="w-32 h-32 text-indigo-500" />
+                                <Megaphone className="w-32 h-32 text-primary" />
                             </div>
 
                             <div className="flex flex-col items-center text-center space-y-6 relative z-10">
-                                <div className="w-16 h-16 bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/30">
-                                    <Megaphone className="w-8 h-8 text-indigo-400" />
+                                <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30">
+                                    <Megaphone className="w-8 h-8 text-primary" />
                                 </div>
 
                                 <div className="space-y-2">
@@ -74,7 +74,7 @@ export function AnnouncementModal() {
 
                                 <Button
                                     onClick={handleDismiss}
-                                    className="w-full bg-indigo-600 hover:bg-indigo-500 h-12 rounded-xl font-bold group"
+                                    className="w-full h-12 font-semibold group"
                                 >
                                     Understood
                                     <X className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity" />

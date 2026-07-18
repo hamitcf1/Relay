@@ -58,12 +58,12 @@ export function DateTimeWidget({ className }: DateTimeWidgetProps) {
             )}
         >
             <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Calendar className="w-3 h-3 text-indigo-500 dark:text-indigo-300" />
+                <Calendar className="w-3 h-3 text-primary" />
                 <span className="text-[10px] uppercase font-bold tracking-wider">{formatDate(time)}</span>
             </div>
             <div className="w-[1px] h-3 bg-border" />
             <div className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-purple-500 dark:text-purple-300" />
+                <Clock className="w-3 h-3 text-primary" />
                 <span className="text-xs font-mono font-medium text-foreground tabular-nums">
                     {formatTime(time)}
                 </span>

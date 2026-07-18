@@ -37,7 +37,7 @@ export function SetupHotelPage() {
             } else {
                 setError(t('setup.error.joinFailed') || 'Invalid hotel code')
             }
-        } catch (err) {
+        } catch (_err) {
             setError(t('setup.error.joinFailed'))
         } finally {
             setLoading(false)
@@ -62,7 +62,7 @@ export function SetupHotelPage() {
             } else {
                 setError(t('setup.error.createFailed'))
             }
-        } catch (err) {
+        } catch (_err) {
             setError(t('setup.error.createFailed'))
         } finally {
             setLoading(false)
@@ -70,7 +70,7 @@ export function SetupHotelPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="auth-shell flex items-center justify-center p-4">
             <div className="w-full max-w-md space-y-8">
                 <div className="text-center space-y-2">
                     <div className="w-10 h-10 bg-primary rounded-lg mx-auto flex items-center justify-center">

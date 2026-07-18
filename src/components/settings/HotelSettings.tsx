@@ -48,8 +48,8 @@ export function HotelSettings() {
         if (hotel) {
             setName(hotel.info?.name || '')
             setShifts(hotel.settings?.shifts || [
-                { id: '1', name: 'Morning', code: 'A', startTime: '08:00', endTime: '16:00', color: 'bg-indigo-500' },
-                { id: '2', name: 'Evening', code: 'B', startTime: '16:00', endTime: '00:00', color: 'bg-purple-500' },
+                { id: '1', name: 'Morning', code: 'A', startTime: '08:00', endTime: '16:00', color: 'bg-primary' },
+                { id: '2', name: 'Evening', code: 'B', startTime: '16:00', endTime: '00:00', color: 'bg-amber-700' },
                 { id: '3', name: 'Night', code: 'C', startTime: '00:00', endTime: '08:00', color: 'bg-rose-500' },
                 { id: '4', name: 'Extra', code: 'E', startTime: '09:00', endTime: '18:00', color: 'bg-amber-500' }
             ])
@@ -72,7 +72,7 @@ export function HotelSettings() {
         try {
             await updateHotelInfo(hotel.id, { name })
             toast.success('Changes saved')
-        } catch (err) {
+        } catch (_err) {
             toast.error('Error saving changes')
         } finally {
             setSaving(false)
@@ -85,7 +85,7 @@ export function HotelSettings() {
         try {
             await updateHotelSettings(hotel.id, { shifts })
             toast.success(t('hotel.shifts.success'))
-        } catch (err) {
+        } catch (_err) {
             toast.error(t('hotel.shifts.error'))
         } finally {
             setSaving(false)
@@ -262,7 +262,7 @@ export function HotelSettings() {
                                 <Button 
                                     onClick={handleSaveShifts} 
                                     disabled={saving}
-                                    className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-500 text-white gap-2"
+                                    className="w-full gap-2 md:w-auto"
                                 >
                                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                                     {t('hotel.settings.saveShifts')}

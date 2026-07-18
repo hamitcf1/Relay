@@ -372,7 +372,7 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
                                                 <div className="flex gap-2 pt-1">
                                                     <Button
                                                         size="sm"
-                                                        className="flex-1 h-8 text-xs bg-indigo-600 hover:bg-indigo-500"
+                                                        className="flex-1 h-8 text-xs"
                                                         onClick={handleAddEvent}
                                                         disabled={!newEventTitle.trim()}
                                                     >

@@ -13,8 +13,8 @@ export function TermsPage() {
 
             {/* Background */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-blue-500/5 to-transparent" />
-                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[120px]" />
+                <div className="absolute top-0 left-0 w-full h-[50vh] bg-gradient-to-b from-primary/5 to-transparent" />
+                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px]" />
             </div>
 
             <div className="container mx-auto px-6 py-12 relative z-10 max-w-3xl">
@@ -63,7 +63,7 @@ export function TermsPage() {
                         <section>
                             <h2 className="text-2xl font-bold text-white mb-4">{t('terms.contact.title')}</h2>
                             <p>
-                                {t('terms.contact.desc')} <a href="mailto:hamitfindik2@gmail.com" className="text-blue-400 hover:underline">hamitfindik2@gmail.com</a>
+                                {t('terms.contact.desc')} <a href="mailto:hamitfindik2@gmail.com" className="text-primary hover:underline">hamitfindik2@gmail.com</a>
                             </p>
                         </section>
                     </div>

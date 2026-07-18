@@ -46,7 +46,7 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
             title: t('onboarding.welcome.title'),
             description: t('onboarding.welcome.desc'),
             icon: Layout,
-            color: "text-indigo-400"
+            color: "text-primary"
         },
         {
             title: t('onboarding.activity.title'),
@@ -64,7 +64,7 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
             title: t('onboarding.team.title'),
             description: t('onboarding.team.desc'),
             icon: Calendar, // Or CreditCard if we want to emphasize sales
-            color: "text-purple-400"
+            color: "text-primary"
         },
         {
             title: t('onboarding.localization.title'),
@@ -113,7 +113,7 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
                     {steps.map((_, i) => (
                         <div
                             key={i}
-                            className={`flex-1 transition-all duration-500 ${i <= currentStep ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]' : ''}`}
+                            className={`flex-1 transition-all duration-500 ${i <= currentStep ? 'bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]' : ''}`}
                         />
                     ))}
                 </div>
@@ -157,7 +157,7 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
 
                         <Button
                             onClick={handleNext}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20"
+                            className="bg-primary text-primary-foreground"
                         >
                             {currentStep === steps.length - 1 ? t('common.finish') : t('common.next')}
                             {currentStep < steps.length - 1 && <ChevronRight className="w-4 h-4 ml-1" />}
