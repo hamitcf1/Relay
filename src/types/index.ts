@@ -173,8 +173,10 @@ export interface AttendanceRecord {
     shift_type: ShiftType
     scheduled_start: Date
     scheduled_end: Date
-    clock_in_at: Date
-    clock_out_at: Date | null
+    declared_clock_in_at: Date
+    declared_clock_out_at: Date | null
+    actual_clock_in_at: Date | null
+    actual_clock_out_at: Date | null
     status: AttendanceStatus
     late_minutes: number
     late_excuse: string | null

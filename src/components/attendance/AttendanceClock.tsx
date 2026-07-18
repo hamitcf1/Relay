@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, Clock3, LogIn, LogOut, TimerReset, TriangleAlert, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock3, LogIn, LogOut, ShieldCheck, TimerReset, TriangleAlert, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
     Dialog,
@@ -19,6 +20,21 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { findRelevantAssignment, minutesLate } from '@/lib/attendance'
 import { cn } from '@/lib/utils'
 
+function declaredDateFromTime(time: string, reference: Date) {
+    const [hours, minutes] = time.split(':').map(Number)
+    if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        return new Date(Number.NaN)
+    }
+
+    const candidates = [-1, 0, 1].map((dayOffset) => {
+        const candidate = new Date(reference)
+        candidate.setDate(candidate.getDate() + dayOffset)
+        candidate.setHours(hours, minutes, 0, 0)
+        return candidate
+    })
+    return candidates.sort((a, b) => Math.abs(a.getTime() - reference.getTime()) - Math.abs(b.getTime() - reference.getTime()))[0]
+}
+
 export function AttendanceClock() {
     const user = useAuthStore((state) => state.user)
     const hotel = useHotelStore((state) => state.hotel)
@@ -30,6 +46,7 @@ export function AttendanceClock() {
     const t = useLanguageStore((state) => state.t)
     const [now, setNow] = useState(() => new Date())
     const [open, setOpen] = useState(false)
+    const [declaredTime, setDeclaredTime] = useState(() => format(new Date(), 'HH:mm'))
     const [excuse, setExcuse] = useState('')
     const [managerPermission, setManagerPermission] = useState<boolean | null>(null)
     const [saving, setSaving] = useState(false)
@@ -74,6 +91,7 @@ export function AttendanceClock() {
         const promptKey = `relay_attendance_prompt_${assignment.workDate}_${assignment.shiftType}_${promptType}`
         if (!sessionStorage.getItem(promptKey)) {
             sessionStorage.setItem(promptKey, 'shown')
+            setDeclaredTime(format(new Date(), 'HH:mm'))
             setOpen(true)
         }
     }, [activeRecord, assignment, existingRecord, loading, now, user])
@@ -83,19 +101,28 @@ export function AttendanceClock() {
 
     const handleSubmit = async () => {
         if (!activeRecord && lateMinutes > 0 && !excuse.trim()) return
+        const declaredAt = declaredDateFromTime(declaredTime, now)
+        if (Number.isNaN(declaredAt.getTime())) {
+            toast.error(t('attendance.clock.invalidDeclaredTime'))
+            return
+        }
         setSaving(true)
         try {
             if (activeRecord) {
-                await clockOut(hotel.id, user, activeRecord.id)
+                await clockOut(hotel.id, user, activeRecord.id, declaredAt)
             } else {
-                await clockIn(hotel.id, user, assignment, excuse, managerPermission ?? undefined)
+                await clockIn(hotel.id, user, assignment, declaredAt, excuse, managerPermission ?? undefined)
             }
             setOpen(false)
             setExcuse('')
             setManagerPermission(null)
         } catch (error) {
             const code = error instanceof Error ? error.message : ''
-            toast.error(code === 'ALREADY_CLOCKED_IN' ? t('attendance.clock.duplicate') : t('attendance.clock.failed'))
+            toast.error(code === 'ALREADY_CLOCKED_IN'
+                ? t('attendance.clock.duplicate')
+                : code === 'INVALID_DECLARED_TIME'
+                    ? t('attendance.clock.invalidDeclaredTime')
+                    : t('attendance.clock.failed'))
         } finally {
             setSaving(false)
         }
@@ -106,7 +133,10 @@ export function AttendanceClock() {
             <Button
                 size="sm"
                 variant={activeRecord ? 'outline' : 'default'}
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                    setDeclaredTime(format(new Date(), 'HH:mm'))
+                    setOpen(true)
+                }}
                 className={cn(
                     'h-8 gap-2 rounded-lg px-2.5 text-xs font-semibold',
                     activeRecord && 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15 dark:text-emerald-400',
@@ -137,6 +167,24 @@ export function AttendanceClock() {
                                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('attendance.clock.actual')}</p>
                                 <p className="mt-1 text-sm font-bold tabular-nums">{format(now, 'HH:mm')}</p>
                                 {!activeRecord && lateMinutes > 0 && <p className="mt-0.5 text-xs font-semibold text-amber-600">{lateMinutes} {t('attendance.unit.minute')} {t('attendance.clock.late')}</p>}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/[0.04] p-3.5">
+                            <label className="text-xs font-semibold" htmlFor="declared-attendance-time">
+                                {activeRecord ? t('attendance.clock.declaredOut') : t('attendance.clock.declaredIn')} *
+                            </label>
+                            <Input
+                                id="declared-attendance-time"
+                                type="time"
+                                value={declaredTime}
+                                onChange={(event) => setDeclaredTime(event.target.value)}
+                                className="h-11 bg-background font-mono text-base font-semibold tabular-nums"
+                                required
+                            />
+                            <div className="flex gap-2 text-[11px] leading-relaxed text-muted-foreground">
+                                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                                <p>{t('attendance.clock.auditHelp')}</p>
                             </div>
                         </div>
 
@@ -192,7 +240,7 @@ export function AttendanceClock() {
                                 className="flex-1 gap-2"
                                 variant={activeRecord ? 'destructive' : 'default'}
                                 onClick={handleSubmit}
-                                disabled={saving || (!activeRecord && lateMinutes > 0 && (!excuse.trim() || managerPermission === null))}
+                                disabled={saving || !declaredTime || (!activeRecord && lateMinutes > 0 && (!excuse.trim() || managerPermission === null))}
                             >
                                 {activeRecord ? <LogOut className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
                                 {activeRecord ? t('attendance.clock.confirmOut') : t('attendance.clock.confirmIn')}

@@ -177,10 +177,28 @@ service cloud.firestore {
         allow create: if isAuthenticated() && belongsToHotel(hotelId)
           && getUserRole() == 'receptionist'
           && attendanceId.matches('^.*_' + request.auth.uid + '_[A-Za-z0-9-]+$')
+          && request.resource.data.keys().hasOnly([
+            'hotel_id', 'staff_id', 'staff_name', 'staff_role', 'work_date',
+            'shift_type', 'scheduled_start', 'scheduled_end',
+            'declared_clock_in_at', 'clock_in_at', 'declared_clock_out_at',
+            'clock_out_at', 'status', 'late_minutes', 'late_excuse',
+            'manager_permission_declared', 'approval_status', 'reviewed_by',
+            'reviewed_by_name', 'reviewed_at', 'review_note', 'worked_minutes',
+            'created_at', 'updated_at'
+          ])
+          && request.resource.data.hotel_id == hotelId
           && request.resource.data.staff_id == request.auth.uid
           && request.resource.data.status == 'clocked_in'
           && request.resource.data.staff_name == getUserDoc().name
           && request.resource.data.staff_role == 'receptionist'
+          && request.resource.data.scheduled_start is timestamp
+          && request.resource.data.scheduled_end is timestamp
+          && request.resource.data.declared_clock_in_at is timestamp
+          && request.resource.data.clock_in_at == request.resource.data.declared_clock_in_at
+          && request.resource.data.declared_clock_out_at == null
+          && request.resource.data.clock_out_at == null
+          && request.resource.data.created_at is timestamp
+          && request.resource.data.updated_at is timestamp
           && request.resource.data.late_minutes >= 0
           && request.resource.data.reviewed_by == null
           && request.resource.data.reviewed_by_name == null
@@ -205,8 +223,14 @@ service cloud.firestore {
             && resource.data.status == 'clocked_in'
             && request.resource.data.status == 'clocked_out'
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-              'clock_out_at', 'status', 'worked_minutes', 'updated_at'
+              'declared_clock_out_at', 'clock_out_at', 'status',
+              'worked_minutes', 'updated_at'
             ])
+            && request.resource.data.declared_clock_out_at is timestamp
+            && request.resource.data.clock_out_at == request.resource.data.declared_clock_out_at
+            && request.resource.data.worked_minutes is number
+            && request.resource.data.worked_minutes >= 0
+            && request.resource.data.updated_at is timestamp
           ) || (
             isGM()
             && resource.data.late_minutes > 0
@@ -226,8 +250,23 @@ service cloud.firestore {
       match /attendance_events/{eventId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId) && isGM();
         allow create: if isAuthenticated() && belongsToHotel(hotelId) && (
-          (getUserRole() == 'receptionist' && request.resource.data.staff_id == request.auth.uid) ||
-          (isGM() && request.resource.data.event == 'manager_review' && request.resource.data.reviewed_by == request.auth.uid)
+          (
+            getUserRole() == 'receptionist'
+            && request.resource.data.staff_id == request.auth.uid
+            && request.resource.data.staff_name == getUserDoc().name
+            && request.resource.data.event in ['clock_in', 'clock_out']
+            && request.resource.data.record_id is string
+            && eventId == request.resource.data.record_id + '_' + request.resource.data.event
+            && request.resource.data.declared_at is timestamp
+            && request.resource.data.occurred_at == request.time
+            && existsAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id))
+            && getAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id)).data.staff_id == request.auth.uid
+          ) || (
+            isGM()
+            && request.resource.data.event == 'manager_review'
+            && request.resource.data.reviewed_by == request.auth.uid
+            && request.resource.data.occurred_at == request.time
+          )
         );
         allow update, delete: if false;
       }
