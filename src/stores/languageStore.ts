@@ -28,7 +28,10 @@ const persistedRaw = (() => {
         return null
     }
 })()
-const initialLang: Language = persistedRaw?.state?.language === 'en' ? 'en' : 'tr'
+const persistedLanguage = persistedRaw?.state?.language
+const initialLang: Language = persistedLanguage === 'en' || persistedLanguage === 'tr' || persistedLanguage === 'ru'
+    ? persistedLanguage
+    : 'tr'
 
 // Build a NEW t function reference each time we want subscribers to re-render.
 // zustand selectors only fire when the selected value changes; if t kept the

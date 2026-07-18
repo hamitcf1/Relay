@@ -1,6 +1,8 @@
 import type { Translations } from './types'
+import canonicalEn from './en'
 
 const en: Translations = {
+        ...canonicalEn,
         // Landing Page Navbar & Footer
         'landing.nav.features': 'Features',
         'landing.nav.pricing': 'Pricing',

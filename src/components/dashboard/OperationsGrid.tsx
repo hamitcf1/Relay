@@ -23,7 +23,7 @@ interface OperationsGridProps {
 }
 
 export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
-    const { t, language } = useLanguageStore()
+    const { t } = useLanguageStore()
 
     const items = [
         {
@@ -101,10 +101,10 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
     if (userRole === 'gm') {
         items.push({
             id: 'attendance',
-            label: language === 'tr' ? 'Mesai Raporları' : 'Attendance',
+            label: t('module.attendance'),
             icon: ClipboardCheck,
             color: 'bg-cyan-500/10 text-cyan-500',
-            desc: language === 'tr' ? 'Giriş, çıkış ve geç kalma kayıtları' : 'Clock-in, clock-out and late records',
+            desc: t('operations.attendance.desc'),
         })
         items.push({
             id: 'activity',

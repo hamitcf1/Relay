@@ -57,7 +57,7 @@ export interface User {
 }
 
 export interface UserSettings {
-    language?: 'en' | 'tr'
+    language?: 'en' | 'tr' | 'ru'
     onboarding_seen?: boolean
     dismissed_announcements?: string[]
     theme?: 'light' | 'sepia' | 'comfort' | 'dark' | 'midnight'

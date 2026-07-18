@@ -80,7 +80,7 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
     ]
 
     if (userRole === 'gm') {
-        opsNavItems.push({ id: 'attendance', icon: ClipboardCheck, label: language === 'tr' ? 'Mesai Raporları' : 'Attendance', subTab: 'attendance', createdAt: '2026-07-18' })
+        opsNavItems.push({ id: 'attendance', icon: ClipboardCheck, label: t('module.attendance'), subTab: 'attendance', createdAt: '2026-07-18' })
         opsNavItems.push({ id: 'activity', icon: Activity, label: t('module.activity') || 'Activity Log', subTab: 'activity' })
         opsNavItems.push({ id: 'settings', icon: Settings, label: t('module.setting') || 'Hotel Settings', subTab: 'settings' })
     }
@@ -288,6 +288,9 @@ export function AppSidebar({ activeTab, operationTab, onNavigate, userRole }: Ap
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-sm cursor-pointer">
                                             Türkçe {language === 'tr' && <Check className="ml-auto w-3.5 h-3.5" aria-hidden="true" />}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setLanguage('ru')} className="text-sm cursor-pointer">
+                                            Русский {language === 'ru' && <Check className="ml-auto w-3.5 h-3.5" aria-hidden="true" />}
                                         </DropdownMenuItem>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>

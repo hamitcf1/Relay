@@ -1,6 +1,8 @@
 import type { Translations } from './types'
+import canonicalTr from './tr'
 
 const tr: Translations = {
+        ...canonicalTr,
         'operations.compliance.desc': 'KBS ve Acente kontrolleri',
         'compliance.pulse.title': 'Uyumluluk Durumu',
         'compliance.pulse.compliant': 'Tüm kontroller tamamlandı.',
