@@ -6,7 +6,7 @@ import {
     ArrowRight, Check, X, ChevronDown, FileText, ShieldCheck, Layers, Sparkles, Bot, KeyRound, BedDouble, CalendarDays
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
-import { useLanguageStore } from '@/stores/languageStore'
+import { useLanguageStore, type Language } from '@/stores/languageStore'
 import { useEffect, useState } from 'react'
 
 const STAGGER = {
@@ -32,10 +32,68 @@ const STRUCTURED_DATA = {
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
 
+interface LandingMockCopy {
+    overview: string
+    active: string
+    today: string
+    handover: string
+    critical: string
+    paymentDueNote: string
+    paymentDueMeta: string
+    kbsCompleteNote: string
+    kbsCompleteMeta: string
+    laundryNote: string
+    laundryMeta: string
+    shiftLabel: string
+    cashDrawer: string
+    openIssues: string
+    pendingPayment: string
+    kbsCheck: string
+    activeIssues: string
+    aiSummary: string
+    agencyMessages: string
+    weekdays: string[]
+}
+
+const LANDING_MOCK_COPY: Record<Language, LandingMockCopy> = {
+    en: {
+        overview: 'Overview', active: 'Active', today: 'Today', handover: 'Handover', critical: 'Critical',
+        paymentDueNote: 'PAYMENT DUE TRY 4,000 — 406', paymentDueMeta: 'Sema Döner · 2 hours ago',
+        kbsCompleteNote: 'KBS check completed', kbsCompleteMeta: 'Hamit Can Fındık · 35 min ago',
+        laundryNote: 'LAUNDRY TRY 800 — 504', laundryMeta: 'Deniz Yılmaz · 6 hours ago',
+        shiftLabel: '14:00 Shift', cashDrawer: 'Cash drawer', openIssues: 'Open issues',
+        pendingPayment: 'Pending payment', kbsCheck: 'KBS check', activeIssues: '5 active',
+        aiSummary: 'Preparing AI summary…', agencyMessages: 'Agency messages',
+        weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    },
+    tr: {
+        overview: 'Genel bakış', active: 'Aktif', today: 'Bugün', handover: 'Devir Teslim', critical: 'Kritik',
+        paymentDueNote: 'ÖDEME ALINACAK 4.000 TL — 406', paymentDueMeta: 'Sema Döner · 2 saat önce',
+        kbsCompleteNote: 'KBS kontrolü tamamlandı', kbsCompleteMeta: 'Hamit Can Fındık · 35 dk önce',
+        laundryNote: 'ÇAMAŞIRHANE 800 TL — 504', laundryMeta: 'Deniz Yılmaz · 6 saat önce',
+        shiftLabel: '14:00 Vardiya', cashDrawer: 'Kasa devri', openIssues: 'Açık olaylar',
+        pendingPayment: 'Bekleyen ödeme', kbsCheck: 'KBS kontrolü', activeIssues: '5 aktif',
+        aiSummary: 'AI özeti hazırlanıyor…', agencyMessages: 'Acente mesajları',
+        weekdays: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts', 'Paz'],
+    },
+    ru: {
+        overview: 'Обзор', active: 'Активно', today: 'Сегодня', handover: 'Передача смены', critical: 'Критично',
+        paymentDueNote: 'ОПЛАТА 4 000 TRY — 406', paymentDueMeta: 'Sema Döner · 2 часа назад',
+        kbsCompleteNote: 'Проверка KBS завершена', kbsCompleteMeta: 'Hamit Can Fındık · 35 мин назад',
+        laundryNote: 'ПРАЧЕЧНАЯ 800 TRY — 504', laundryMeta: 'Deniz Yılmaz · 6 часов назад',
+        shiftLabel: '14:00 Смена', cashDrawer: 'Сверка кассы', openIssues: 'Открытые задачи',
+        pendingPayment: 'Ожидает оплаты', kbsCheck: 'Проверка KBS', activeIssues: '5 активно',
+        aiSummary: 'Подготовка AI-сводки…', agencyMessages: 'Сообщения агентств',
+        weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+    },
+}
+
 export function LandingPage() {
     const navigate = useNavigate()
     const user = useAuthStore(s => s.user)
     const t = useLanguageStore(s => s.t)
+    const language = useLanguageStore(s => s.language)
+    const mockCopy = LANDING_MOCK_COPY[language]
 
     useEffect(() => {
         if (user) navigate('/dashboard')
@@ -48,7 +106,7 @@ export function LandingPage() {
             </script>
 
             {/* Hero */}
-            <HeroSection t={t} navigate={navigate} />
+            <HeroSection t={t} navigate={navigate} mockCopy={mockCopy} />
 
             {/* Stats */}
             <StatsSection t={t} />
@@ -57,7 +115,7 @@ export function LandingPage() {
             <FeatureGrid t={t} />
 
             {/* Deep-dive Sections */}
-            <DeepDive t={t} />
+            <DeepDive t={t} mockCopy={mockCopy} />
 
             {/* Comparison */}
             <ComparisonSection t={t} />
@@ -75,7 +133,7 @@ export function LandingPage() {
 // HERO
 // ────────────────────────────────────────────────────────────────────────────
 
-function HeroSection({ t, navigate }: { t: any; navigate: any }) {
+function HeroSection({ t, navigate, mockCopy }: { t: any; navigate: any; mockCopy: LandingMockCopy }) {
     return (
         <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 px-4 overflow-hidden">
             {/* Animated gradient mesh background */}
@@ -158,14 +216,14 @@ function HeroSection({ t, navigate }: { t: any; navigate: any }) {
                     transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     className="relative max-w-5xl mx-auto"
                 >
-                    <ProductMockup t={t} />
+                    <ProductMockup copy={mockCopy} />
                 </motion.div>
             </div>
         </section>
     )
 }
 
-function ProductMockup({ t: _t }: { t: any }) {
+function ProductMockup({ copy }: { copy: LandingMockCopy }) {
     return (
         <div className="relative rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-md shadow-[0_30px_80px_-26px_hsl(var(--primary)/0.34)] overflow-hidden">
             {/* Browser chrome */}
@@ -184,7 +242,7 @@ function ProductMockup({ t: _t }: { t: any }) {
                 <div className="col-span-2 border-r border-white/10 p-3 space-y-1 hidden md:block bg-zinc-950/50">
                     <div className="h-7 px-2 flex items-center gap-2 rounded-md bg-primary/10 text-primary">
                         <FileText className="w-3.5 h-3.5" aria-hidden="true" />
-                        <span className="text-xs font-medium">Overview</span>
+                        <span className="text-xs font-medium">{copy.overview}</span>
                     </div>
                     {[Layers, MessageSquare, BedDouble, CalendarDays, BarChart3, Users, KeyRound].map((Icon, i) => (
                         <div key={i} className="h-7 px-2 flex items-center gap-2 rounded-md text-zinc-500">
@@ -201,11 +259,11 @@ function ProductMockup({ t: _t }: { t: any }) {
                         <div className="flex items-center gap-2">
                             <div className="px-2.5 py-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5">
                                 <FileText className="w-3 h-3" aria-hidden="true" />
-                                <span className="tabular-nums">5</span> Aktif
+                                <span className="tabular-nums">5</span> {copy.active}
                             </div>
                             <div className="px-2.5 py-1 rounded-md border border-white/10 bg-white/5 text-zinc-300 text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5">
                                 <BarChart3 className="w-3 h-3" aria-hidden="true" />
-                                <span className="tabular-nums">12</span> Bugün
+                                <span className="tabular-nums">12</span> {copy.today}
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -217,9 +275,9 @@ function ProductMockup({ t: _t }: { t: any }) {
 
                     {/* Notes preview */}
                     <div className="space-y-2">
-                        <MockNote tone="primary" pinned title="ÖDEME ALINACAK 4000TL — 406" sub="Sema Döner · 2 saat önce" critical />
-                        <MockNote tone="default" title="KBS kontrolü tamamlandı" sub="Hamit Can Fındık · 35 dk önce" />
-                        <MockNote tone="default" title="LAUNDRY 800TL — 504" sub="Deniz Yılmaz · 6 saat önce" />
+                        <MockNote copy={copy} tone="primary" pinned title={copy.paymentDueNote} sub={copy.paymentDueMeta} critical />
+                        <MockNote copy={copy} tone="default" title={copy.kbsCompleteNote} sub={copy.kbsCompleteMeta} />
+                        <MockNote copy={copy} tone="default" title={copy.laundryNote} sub={copy.laundryMeta} />
                     </div>
                 </div>
             </div>
@@ -230,19 +288,19 @@ function ProductMockup({ t: _t }: { t: any }) {
     )
 }
 
-function MockNote({ title, sub, pinned, critical }: { title: string; sub: string; tone?: 'primary' | 'default'; pinned?: boolean; critical?: boolean }) {
+function MockNote({ copy, title, sub, pinned, critical }: { copy: LandingMockCopy; title: string; sub: string; tone?: 'primary' | 'default'; pinned?: boolean; critical?: boolean }) {
     return (
         <div className={`p-2.5 rounded-md border ${pinned ? 'border-l-2 border-l-primary border-y-white/10 border-r-white/10 bg-primary/5' : 'border-white/10 bg-white/[0.02]'} text-left`}>
             <div className="flex items-center gap-1.5 mb-1">
                 <span className="inline-flex items-center gap-1 h-4 px-1.5 rounded text-[9px] font-medium uppercase tracking-wide border border-white/10 bg-white/5 text-zinc-300">
-                    <span className="w-1 h-1 rounded-full bg-primary" /> Devir Teslim
+                    <span className="w-1 h-1 rounded-full bg-primary" /> {copy.handover}
                 </span>
                 {critical && (
                     <span className="inline-flex items-center gap-1 h-4 px-1.5 rounded text-[9px] font-medium uppercase tracking-wide border border-rose-500/20 bg-rose-500/10 text-rose-400">
-                        <span className="w-1 h-1 rounded-full bg-rose-500" /> Kritik
+                        <span className="w-1 h-1 rounded-full bg-rose-500" /> {copy.critical}
                     </span>
                 )}
-                <span className="inline-flex items-center gap-1 h-4 px-1.5 rounded text-[9px] font-medium uppercase border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">Aktif</span>
+                <span className="inline-flex items-center gap-1 h-4 px-1.5 rounded text-[9px] font-medium uppercase border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">{copy.active}</span>
             </div>
             <p className="text-xs text-white truncate">{title}</p>
             <p className="text-[10px] text-zinc-500 mt-0.5">{sub}</p>
@@ -351,7 +409,7 @@ function FeatureGrid({ t }: { t: any }) {
 // DEEP-DIVE (alternating image+text sections)
 // ────────────────────────────────────────────────────────────────────────────
 
-function DeepDive({ t }: { t: any }) {
+function DeepDive({ t, mockCopy }: { t: any; mockCopy: LandingMockCopy }) {
     const sections = [
         {
             tag: t('landing.deepdive.section1.tag'),
@@ -362,7 +420,7 @@ function DeepDive({ t }: { t: any }) {
                 t('landing.deepdive.section1.bullet2'),
                 t('landing.deepdive.section1.bullet3'),
             ],
-            visual: <HandoverVisual />
+            visual: <HandoverVisual copy={mockCopy} />
         },
         {
             tag: t('landing.deepdive.section2.tag'),
@@ -373,7 +431,7 @@ function DeepDive({ t }: { t: any }) {
                 t('landing.deepdive.section2.bullet2'),
                 t('landing.deepdive.section2.bullet3'),
             ],
-            visual: <ComplianceVisual />
+            visual: <ComplianceVisual copy={mockCopy} />
         },
         {
             tag: t('landing.deepdive.section3.tag'),
@@ -384,7 +442,7 @@ function DeepDive({ t }: { t: any }) {
                 t('landing.deepdive.section3.bullet2'),
                 t('landing.deepdive.section3.bullet3'),
             ],
-            visual: <OperationsVisual />
+            visual: <OperationsVisual copy={mockCopy} />
         },
     ]
 
@@ -429,18 +487,18 @@ function DeepDive({ t }: { t: any }) {
     )
 }
 
-function HandoverVisual() {
+function HandoverVisual({ copy }: { copy: LandingMockCopy }) {
     return (
         <div className="relative aspect-[4/3] rounded-2xl border border-white/10 bg-zinc-950 overflow-hidden p-6">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
             <div className="relative h-full flex flex-col gap-2">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">14:00 Vardiya</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{copy.shiftLabel}</div>
                 <div className="space-y-1.5 flex-1">
                     {[
-                        { label: 'Kasa devri', value: '₺ 4.250 → 4.250', good: true },
-                        { label: 'Açık olaylar', value: '5 aktif', good: false },
-                        { label: 'Bekleyen ödeme', value: '₺ 4.000', good: false },
-                        { label: 'KBS kontrol', value: '✓', good: true },
+                        { label: copy.cashDrawer, value: '₺ 4.250 → 4.250', good: true },
+                        { label: copy.openIssues, value: copy.activeIssues, good: false },
+                        { label: copy.pendingPayment, value: '₺ 4.000', good: false },
+                        { label: copy.kbsCheck, value: '✓', good: true },
                     ].map((row, i) => (
                         <div key={i} className="flex items-center justify-between p-2 rounded-md bg-white/[0.03] border border-white/5">
                             <span className="text-xs text-zinc-400">{row.label}</span>
@@ -450,14 +508,14 @@ function HandoverVisual() {
                 </div>
                 <div className="flex items-center gap-2 pt-2 border-t border-white/5">
                     <Sparkles className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
-                    <span className="text-[10px] text-zinc-400">AI özet hazırlanıyor…</span>
+                    <span className="text-[10px] text-zinc-400">{copy.aiSummary}</span>
                 </div>
             </div>
         </div>
     )
 }
 
-function ComplianceVisual() {
+function ComplianceVisual({ copy }: { copy: LandingMockCopy }) {
     return (
         <div className="relative aspect-[4/3] rounded-2xl border border-white/10 bg-zinc-950 overflow-hidden p-6 flex items-center justify-center">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent" />
@@ -486,7 +544,7 @@ function ComplianceVisual() {
                         <Check className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
                     </div>
                     <div className="flex items-center justify-between p-2 rounded bg-rose-500/5 border border-rose-500/20">
-                        <span className="text-xs text-zinc-300">Acente Mesajları</span>
+                        <span className="text-xs text-zinc-300">{copy.agencyMessages}</span>
                         <X className="w-3.5 h-3.5 text-rose-500" aria-hidden="true" />
                     </div>
                 </div>
@@ -495,7 +553,7 @@ function ComplianceVisual() {
     )
 }
 
-function OperationsVisual() {
+function OperationsVisual({ copy }: { copy: LandingMockCopy }) {
     const cells = [
         ['A', 'A', 'B', 'OFF', 'C', 'C', 'OFF'],
         ['B', 'B', 'OFF', 'A', 'A', 'A', 'A'],
@@ -514,7 +572,7 @@ function OperationsVisual() {
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent" />
             <div className="relative h-full flex flex-col">
                 <div className="grid grid-cols-7 gap-1 mb-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
-                    {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts', 'Paz'].map(d => (
+                    {copy.weekdays.map(d => (
                         <div key={d} className="text-center">{d}</div>
                     ))}
                 </div>
