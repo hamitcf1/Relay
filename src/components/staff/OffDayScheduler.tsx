@@ -146,18 +146,18 @@ export function OffDayScheduler() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
+        <section className="mx-auto w-full max-w-[88rem] space-y-6">
+            <header className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-foreground">{t('offday.management.title')}</h2>
                     <p className="text-muted-foreground text-sm">{t('offday.management.desc')}</p>
                 </div>
-            </div>
+            </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(20rem,0.72fr)_minmax(0,1.55fr)]">
                 {/* Request Form (Staff only) */}
                 {!isGM && (
-                    <Card className="bg-card border-border backdrop-blur-sm">
+                    <Card className="border-border bg-card backdrop-blur-sm">
                         <CardHeader>
                             <CardTitle className="text-foreground flex items-center gap-2 text-base">
                                 <CalendarIcon className="w-5 h-5 text-primary" />
@@ -273,7 +273,7 @@ export function OffDayScheduler() {
                 )}
 
                 {/* Request List */}
-                <Card className={cn("bg-card border-border flex flex-col min-h-[500px]", !isGM ? "lg:col-span-2" : "lg:col-span-3")}>
+                <Card className={cn("flex min-h-[28rem] min-w-0 flex-col border-border bg-card", isGM && "xl:col-span-2")}>
                     <CardHeader className="border-b border-border">
                         <CardTitle className="text-foreground flex items-center gap-2 text-base">
                             <Clock className="w-5 h-5 text-amber-400" />
@@ -295,14 +295,14 @@ export function OffDayScheduler() {
                                         key={r.id}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="p-4 flex items-center justify-between group hover:bg-muted/50 transition-colors"
+                                        className="group flex flex-col items-start justify-between gap-3 p-4 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center"
                                     >
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex min-w-0 items-center gap-3">
                                             <div className="px-2 h-10 rounded-lg bg-muted flex flex-col items-center justify-center border border-border min-w-[80px]">
                                                 <span className="text-[10px] font-bold text-foreground font-mono">{formatDisplayDate(parseISO(r.date))}</span>
                                             </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
+                                            <div className="min-w-0">
+                                                <div className="flex flex-wrap items-center gap-2">
                                                     <p className="text-sm font-bold text-foreground">
                                                         {isGM ? r.staff_name :
                                                             (r.type === 'shift' ? 'Vardiya Değişikliği' : 'İzin Talebi')
@@ -332,7 +332,7 @@ export function OffDayScheduler() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                                             <div className="flex items-center gap-2">
                                                 {!isGM && r.status === 'pending' && (
                                                     <Button
@@ -440,6 +440,6 @@ export function OffDayScheduler() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </section>
     )
 }
