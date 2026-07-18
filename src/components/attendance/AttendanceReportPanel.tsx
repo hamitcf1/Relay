@@ -1,0 +1,248 @@
+import { useMemo, useState } from 'react'
+import { format, subDays } from 'date-fns'
+import { CheckCircle2, Clock3, Download, Loader2, Search, ShieldQuestion, TimerOff, TriangleAlert, Users, XCircle } from 'lucide-react'
+import { useAttendanceStore } from '@/stores/attendanceStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useLanguageStore } from '@/stores/languageStore'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import type { AttendanceRecord } from '@/types'
+
+const labels = {
+    tr: {
+        title: 'Mesai Raporları', desc: 'Resepsiyonist giriş, çıkış ve geç kalma denetim kayıtları.',
+        total: 'Toplam Kayıt', late: 'Geç Giriş', active: 'Mesaide', avgLate: 'Ort. Gecikme', minute: 'dk',
+        pending: 'İzin Onayı Bekleyen',
+        search: 'Personel ara…', export: 'CSV İndir', employee: 'Personel', date: 'Tarih / Vardiya',
+        planned: 'Planlanan', in: 'Giriş', out: 'Çıkış', duration: 'Süre', status: 'Durum', excuse: 'Mazeret', permission: 'Yönetici İzni',
+        onTime: 'Zamanında', working: 'Mesaide', completed: 'Tamamlandı', noExit: 'Henüz çıkış yok',
+        permissionYes: 'İzin alındı beyanı', permissionNo: 'İzin alınmadı', approvalPending: 'GM onayı bekliyor',
+        approved: 'Onaylandı', rejected: 'Reddedildi', approve: 'Onayla', reject: 'Reddet',
+        reviewTitleApprove: 'Geç kalma kaydını onayla', reviewTitleReject: 'Geç kalma kaydını reddet',
+        reviewDesc: 'Kararınız, adınız ve işlem zamanı denetim kaydına eklenecektir.',
+        reviewNote: 'Yönetici notu', reviewNotePlaceholder: 'Kararla ilgili açıklama…', rejectionRequired: 'Reddetme işleminde yönetici notu zorunludur.',
+        cancel: 'Vazgeç', saveDecision: 'Kararı Kaydet',
+        empty: 'Seçilen tarih aralığında mesai kaydı bulunamadı.', access: 'Bu raporu yalnızca GM kullanıcıları görüntüleyebilir.',
+    },
+    en: {
+        title: 'Attendance Reports', desc: 'Receptionist clock-in, clock-out and late-arrival audit records.',
+        total: 'Total Records', late: 'Late Arrivals', active: 'On Shift', avgLate: 'Avg. Delay', minute: 'min',
+        pending: 'Awaiting Approval',
+        search: 'Search employee…', export: 'Download CSV', employee: 'Employee', date: 'Date / Shift',
+        planned: 'Scheduled', in: 'Clock In', out: 'Clock Out', duration: 'Duration', status: 'Status', excuse: 'Excuse', permission: 'Manager Permission',
+        onTime: 'On time', working: 'On shift', completed: 'Completed', noExit: 'No clock-out yet',
+        permissionYes: 'Permission declared', permissionNo: 'No permission', approvalPending: 'Awaiting GM approval',
+        approved: 'Approved', rejected: 'Rejected', approve: 'Approve', reject: 'Reject',
+        reviewTitleApprove: 'Approve late arrival', reviewTitleReject: 'Reject late arrival',
+        reviewDesc: 'Your decision, name and action time will be added to the audit trail.',
+        reviewNote: 'Manager note', reviewNotePlaceholder: 'Explanation for the decision…', rejectionRequired: 'A manager note is required when rejecting.',
+        cancel: 'Cancel', saveDecision: 'Save Decision',
+        empty: 'No attendance records found in the selected date range.', access: 'Only GM users can view this report.',
+    },
+}
+
+function durationLabel(minutes: number | null) {
+    if (minutes == null) return '—'
+    return `${Math.floor(minutes / 60)}s ${minutes % 60}dk`
+}
+
+function csvCell(value: string | number) {
+    return `"${String(value).replace(/"/g, '""')}"`
+}
+
+export function AttendanceReportPanel() {
+    const user = useAuthStore((state) => state.user)
+    const records = useAttendanceStore((state) => state.records)
+    const loading = useAttendanceStore((state) => state.loading)
+    const reviewLateArrival = useAttendanceStore((state) => state.reviewLateArrival)
+    const language = useLanguageStore((state) => state.language)
+    const text = language === 'tr' ? labels.tr : labels.en
+    const [fromDate, setFromDate] = useState(format(subDays(new Date(), 29), 'yyyy-MM-dd'))
+    const [toDate, setToDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+    const [search, setSearch] = useState('')
+    const [reviewTarget, setReviewTarget] = useState<{ record: AttendanceRecord; decision: 'approved' | 'rejected' } | null>(null)
+    const [reviewNote, setReviewNote] = useState('')
+    const [reviewing, setReviewing] = useState(false)
+
+    const filtered = useMemo(() => records
+        .filter((record) => record.work_date >= fromDate && record.work_date <= toDate)
+        .filter((record) => record.staff_name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))
+        .sort((a, b) => b.clock_in_at.getTime() - a.clock_in_at.getTime()), [fromDate, records, search, toDate])
+
+    const lateRecords = filtered.filter((record) => record.late_minutes > 0)
+    const averageLate = lateRecords.length
+        ? Math.round(lateRecords.reduce((total, record) => total + record.late_minutes, 0) / lateRecords.length)
+        : 0
+
+    if (user?.role !== 'gm') {
+        return <div className="flex h-full items-center justify-center p-8 text-sm text-muted-foreground">{text.access}</div>
+    }
+
+    const exportCsv = () => {
+        const header = ['Personel', 'Tarih', 'Vardiya', 'Planlanan Giriş', 'Planlanan Çıkış', 'Gerçek Giriş', 'Gerçek Çıkış', 'Geç Dakika', 'Mazeret', 'Yönetici İzni Beyanı', 'GM Onay Durumu', 'Onaylayan GM', 'Onay Zamanı', 'Yönetici Notu', 'Çalışma Dakikası', 'Durum']
+        const rows = filtered.map((record) => [
+            record.staff_name, record.work_date, record.shift_type,
+            format(record.scheduled_start, 'yyyy-MM-dd HH:mm'), format(record.scheduled_end, 'yyyy-MM-dd HH:mm'),
+            format(record.clock_in_at, 'yyyy-MM-dd HH:mm:ss'), record.clock_out_at ? format(record.clock_out_at, 'yyyy-MM-dd HH:mm:ss') : '',
+            record.late_minutes, record.late_excuse || '',
+            record.manager_permission_declared == null ? '' : record.manager_permission_declared ? 'İzin alındı' : 'İzin alınmadı',
+            record.approval_status, record.reviewed_by_name || '', record.reviewed_at ? format(record.reviewed_at, 'yyyy-MM-dd HH:mm:ss') : '', record.review_note || '',
+            record.worked_minutes ?? '', record.status,
+        ])
+        const csv = `\uFEFF${[header, ...rows].map((row) => row.map(csvCell).join(';')).join('\n')}`
+        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
+        const anchor = document.createElement('a')
+        anchor.href = url
+        anchor.download = `mesai-raporu-${fromDate}-${toDate}.csv`
+        anchor.click()
+        URL.revokeObjectURL(url)
+    }
+
+    const stats = [
+        { label: text.total, value: filtered.length, icon: Users, color: 'text-primary bg-primary/10' },
+        { label: text.late, value: lateRecords.length, icon: TriangleAlert, color: 'text-amber-600 bg-amber-500/10' },
+        { label: text.active, value: filtered.filter((record) => record.status === 'clocked_in').length, icon: Clock3, color: 'text-emerald-600 bg-emerald-500/10' },
+        { label: text.avgLate, value: `${averageLate} ${text.minute}`, icon: TimerOff, color: 'text-rose-600 bg-rose-500/10' },
+        { label: text.pending, value: filtered.filter((record) => record.approval_status === 'pending').length, icon: ShieldQuestion, color: 'text-violet-600 bg-violet-500/10' },
+    ]
+
+    const submitReview = async () => {
+        if (!reviewTarget || !user) return
+        setReviewing(true)
+        try {
+            await reviewLateArrival(user.hotel_id || '', user, reviewTarget.record.id, reviewTarget.decision, reviewNote)
+            setReviewTarget(null)
+            setReviewNote('')
+        } finally {
+            setReviewing(false)
+        }
+    }
+
+    return (
+        <div className="mx-auto w-full max-w-[1500px] space-y-5 p-1 lg:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">{text.title}</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">{text.desc}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                    <Input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} className="h-9 w-auto" />
+                    <span className="text-muted-foreground">–</span>
+                    <Input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} className="h-9 w-auto" />
+                    <Button size="sm" variant="outline" onClick={exportCsv} disabled={!filtered.length} className="gap-2">
+                        <Download className="h-4 w-4" /> {text.export}
+                    </Button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+                {stats.map((stat) => (
+                    <Card key={stat.label} className="border-border/50 bg-card/60">
+                        <CardContent className="flex items-center gap-3 p-4">
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}><stat.icon className="h-5 w-5" /></div>
+                            <div><p className="text-xs text-muted-foreground">{stat.label}</p><p className="text-xl font-bold tabular-nums">{stat.value}</p></div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            <Card className="overflow-hidden border-border/50 bg-card/60">
+                <div className="border-b border-border/50 p-4">
+                    <div className="relative max-w-sm">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={text.search} className="pl-9" />
+                    </div>
+                </div>
+                {loading ? (
+                    <div className="flex h-48 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                ) : !filtered.length ? (
+                    <div className="flex h-48 items-center justify-center p-6 text-center text-sm text-muted-foreground">{text.empty}</div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[1280px] text-left text-sm">
+                            <thead className="bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
+                                <tr>{[text.employee, text.date, text.planned, text.in, text.out, text.duration, text.status, text.excuse, text.permission].map((label) => <th key={label} className="px-4 py-3 font-semibold">{label}</th>)}</tr>
+                            </thead>
+                            <tbody className="divide-y divide-border/40">
+                                {filtered.map((record) => (
+                                    <tr key={record.id} className="hover:bg-muted/20">
+                                        <td className="px-4 py-3 font-semibold">{record.staff_name}<div className="text-[10px] font-normal uppercase text-muted-foreground">{record.staff_role}</div></td>
+                                        <td className="px-4 py-3"><span className="font-medium">{record.work_date}</span><div className="text-xs text-muted-foreground">{record.shift_type} vardiyası</div></td>
+                                        <td className="px-4 py-3 font-mono text-xs">{format(record.scheduled_start, 'HH:mm')}–{format(record.scheduled_end, 'HH:mm')}</td>
+                                        <td className="px-4 py-3 font-mono text-xs">{format(record.clock_in_at, 'HH:mm:ss')}<div className={record.late_minutes > 0 ? 'text-amber-600' : 'text-emerald-600'}>{record.late_minutes > 0 ? `+${record.late_minutes} ${text.minute}` : text.onTime}</div></td>
+                                        <td className="px-4 py-3 font-mono text-xs">{record.clock_out_at ? format(record.clock_out_at, 'HH:mm:ss') : <span className="font-sans text-muted-foreground">{text.noExit}</span>}</td>
+                                        <td className="px-4 py-3 font-medium">{durationLabel(record.worked_minutes)}</td>
+                                        <td className="px-4 py-3"><Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : text.completed}</Badge></td>
+                                        <td className="max-w-[260px] px-4 py-3 text-xs text-muted-foreground"><span className="line-clamp-2" title={record.late_excuse || ''}>{record.late_excuse || '—'}</span></td>
+                                        <td className="min-w-[220px] px-4 py-3 text-xs">
+                                            {record.late_minutes <= 0 ? '—' : (
+                                                <div className="space-y-2">
+                                                    <div className={record.manager_permission_declared ? 'text-emerald-600' : 'text-rose-600'}>
+                                                        {record.manager_permission_declared ? text.permissionYes : text.permissionNo}
+                                                    </div>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={record.approval_status === 'approved' ? 'bg-emerald-500/10 text-emerald-600' : record.approval_status === 'rejected' ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600'}
+                                                    >
+                                                        {record.approval_status === 'approved' ? text.approved : record.approval_status === 'rejected' ? text.rejected : text.approvalPending}
+                                                    </Badge>
+                                                    {record.approval_status === 'pending' ? (
+                                                        <div className="flex gap-1.5">
+                                                            <Button size="sm" className="h-7 gap-1 px-2 text-[11px]" onClick={() => { setReviewTarget({ record, decision: 'approved' }); setReviewNote('') }}><CheckCircle2 className="h-3.5 w-3.5" />{text.approve}</Button>
+                                                            <Button size="sm" variant="destructive" className="h-7 gap-1 px-2 text-[11px]" onClick={() => { setReviewTarget({ record, decision: 'rejected' }); setReviewNote('') }}><XCircle className="h-3.5 w-3.5" />{text.reject}</Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-[10px] leading-relaxed text-muted-foreground" title={record.review_note || ''}>
+                                                            {record.reviewed_by_name}{record.reviewed_at ? ` · ${format(record.reviewed_at, 'dd.MM HH:mm')}` : ''}
+                                                            {record.review_note ? <div className="line-clamp-2">{record.review_note}</div> : null}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </Card>
+
+            <Dialog open={Boolean(reviewTarget)} onOpenChange={(open) => !open && setReviewTarget(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{reviewTarget?.decision === 'approved' ? text.reviewTitleApprove : text.reviewTitleReject}</DialogTitle>
+                        <DialogDescription>{text.reviewDesc}</DialogDescription>
+                    </DialogHeader>
+                    {reviewTarget && (
+                        <div className="rounded-xl border border-border/50 bg-muted/20 p-3 text-sm">
+                            <span className="font-semibold">{reviewTarget.record.staff_name}</span>
+                            <span className="text-muted-foreground"> · {reviewTarget.record.work_date} · +{reviewTarget.record.late_minutes} {text.minute}</span>
+                            <p className="mt-1 text-xs text-muted-foreground">{reviewTarget.record.late_excuse}</p>
+                        </div>
+                    )}
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold" htmlFor="review-note">{text.reviewNote}{reviewTarget?.decision === 'rejected' ? ' *' : ''}</label>
+                        <Textarea id="review-note" value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} placeholder={text.reviewNotePlaceholder} maxLength={500} className="min-h-24 resize-none" />
+                        {reviewTarget?.decision === 'rejected' && <p className="text-[11px] text-muted-foreground">{text.rejectionRequired}</p>}
+                    </div>
+                    <div className="flex gap-3">
+                        <Button variant="outline" className="flex-1" onClick={() => setReviewTarget(null)} disabled={reviewing}>{text.cancel}</Button>
+                        <Button
+                            className="flex-1"
+                            variant={reviewTarget?.decision === 'rejected' ? 'destructive' : 'default'}
+                            onClick={submitReview}
+                            disabled={reviewing || (reviewTarget?.decision === 'rejected' && !reviewNote.trim())}
+                        >
+                            {reviewing && <Loader2 className="h-4 w-4 animate-spin" />}{text.saveDecision}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </div>
+    )
+}

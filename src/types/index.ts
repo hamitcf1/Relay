@@ -29,6 +29,8 @@ export type VaultCategory = 'financial' | 'tours' | 'transfer'
 export type ActivityAction =
     | 'login' | 'logout'
     | 'shift_start' | 'shift_end'
+    | 'attendance_clock_in' | 'attendance_clock_out'
+    | 'attendance_review'
     | 'note_create' | 'note_edit' | 'note_delete'
     | 'message_send'
     | 'pricing_update' | 'roster_update'
@@ -156,6 +158,33 @@ export interface Shift {
     cash_end: number
     handover_note: string
     status: ShiftStatus
+}
+
+export type AttendanceStatus = 'clocked_in' | 'clocked_out'
+export type AttendanceApprovalStatus = 'not_required' | 'pending' | 'approved' | 'rejected'
+
+export interface AttendanceRecord {
+    id: string
+    hotel_id: string
+    staff_id: string
+    staff_name: string
+    staff_role: UserRole
+    work_date: string
+    shift_type: ShiftType
+    scheduled_start: Date
+    scheduled_end: Date
+    clock_in_at: Date
+    clock_out_at: Date | null
+    status: AttendanceStatus
+    late_minutes: number
+    late_excuse: string | null
+    manager_permission_declared: boolean | null
+    approval_status: AttendanceApprovalStatus
+    reviewed_by: string | null
+    reviewed_by_name: string | null
+    reviewed_at: Date | null
+    review_note: string | null
+    worked_minutes: number | null
 }
 
 export interface Incident {

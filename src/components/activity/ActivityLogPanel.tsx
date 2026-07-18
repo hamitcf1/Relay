@@ -34,6 +34,9 @@ const ACTION_META: Record<ActivityAction, { icon: typeof LogIn; label: string; c
     logout: { icon: LogOut, label: 'Çıkış', color: 'text-rose-400' },
     shift_start: { icon: Play, label: 'Vardiya Başlangıç', color: 'text-blue-400' },
     shift_end: { icon: Square, label: 'Vardiya Bitiş', color: 'text-amber-400' },
+    attendance_clock_in: { icon: LogIn, label: 'Mesai Girişi', color: 'text-cyan-400' },
+    attendance_clock_out: { icon: LogOut, label: 'Mesai Çıkışı', color: 'text-orange-400' },
+    attendance_review: { icon: ShieldCheck, label: 'Mesai İzin Onayı', color: 'text-violet-400' },
     note_create: { icon: StickyNote, label: 'Not Oluşturma', color: 'text-fuchsia-400' },
     note_edit: { icon: StickyNote, label: 'Not Düzenleme', color: 'text-violet-300' },
     note_delete: { icon: Trash2, label: 'Not Silme', color: 'text-rose-300' },
@@ -66,6 +69,9 @@ export function ActivityLogPanel() {
             logout: 'activity.action.logout',
             shift_start: 'activity.action.shift_start',
             shift_end: 'activity.action.shift_end',
+            attendance_clock_in: 'activity.action.attendance_clock_in',
+            attendance_clock_out: 'activity.action.attendance_clock_out',
+            attendance_review: 'activity.action.attendance_review',
             note_create: 'activity.action.note_create',
             note_edit: 'activity.action.note_edit',
             note_delete: 'activity.action.note_delete',
@@ -77,7 +83,9 @@ export function ActivityLogPanel() {
             sale_update: 'activity.action.sale_update',
             feedback_create: 'activity.action.feedback_create'
         }
-        return (t(keyMap[action] as any) || ACTION_META[action].label) as string
+        const key = keyMap[action]
+        const translated = t(key as any)
+        return translated === key ? ACTION_META[action].label : translated
     }
 
     useEffect(() => {
