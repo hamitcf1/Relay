@@ -10,7 +10,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                sans: ['Geist', 'Avenir Next', 'Avenir', ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 // Cyber-Concierge Theme Colors

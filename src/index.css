@@ -18,7 +18,7 @@
     --card-foreground: 222 25% 18%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 25% 18%;
-    --primary: 239 84% 67%;
+    --primary: 38 89% 53%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 14% 94%;
     --secondary-foreground: 222 25% 22%;
@@ -32,7 +32,7 @@
     --success-foreground: 0 0% 100%;
     --border: 220 13% 88%;
     --input: 220 13% 88%;
-    --ring: 239 84% 67%;
+    --ring: 38 89% 53%;
     --radius: 0.75rem;
 
     /* Safe Area Variables */
@@ -53,7 +53,7 @@
     --card-foreground: 28 30% 16%;
     --popover: 36 40% 97%;
     --popover-foreground: 28 30% 16%;
-    --primary: 24 75% 50%;
+    --primary: 38 89% 49%;
     --primary-foreground: 0 0% 100%;
     --secondary: 36 30% 88%;
     --secondary-foreground: 28 30% 22%;
@@ -67,7 +67,7 @@
     --success-foreground: 0 0% 100%;
     --border: 36 25% 80%;
     --input: 36 25% 80%;
-    --ring: 24 75% 50%;
+    --ring: 38 89% 49%;
   }
 
   /* Comfort — slate-warm dark, less harsh than full dark */
@@ -81,8 +81,8 @@
     --card-foreground: 240 5% 90%;
     --popover: 240 6% 16%;
     --popover-foreground: 240 5% 90%;
-    --primary: 239 84% 72%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 38 89% 53%;
+    --primary-foreground: 216 19% 5%;
     --secondary: 240 6% 20%;
     --secondary-foreground: 240 5% 90%;
     --muted: 240 6% 20%;
@@ -95,7 +95,7 @@
     --success-foreground: 0 0% 9%;
     --border: 240 6% 25%;
     --input: 240 6% 25%;
-    --ring: 239 84% 72%;
+    --ring: 38 89% 53%;
   }
 
   /* Dark — neutral dark */
@@ -109,8 +109,8 @@
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 239 84% 72%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 38 89% 53%;
+    --primary-foreground: 216 19% 5%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
@@ -123,22 +123,22 @@
     --success-foreground: 0 0% 9%;
     --border: 240 3.7% 20%;
     --input: 240 3.7% 20%;
-    --ring: 239 84% 72%;
+    --ring: 38 89% 53%;
   }
 
   /* Midnight — true black, OLED-friendly */
   .midnight {
     color-scheme: dark;
-    --background: 0 0% 0%;
+    --background: 216 19% 5%;
     --foreground: 0 0% 95%;
-    --surface-deep: 0 0% 0%;
+    --surface-deep: 216 19% 4%;
     --surface-elevated: 240 6% 6%;
     --card: 240 8% 4%;
     --card-foreground: 0 0% 95%;
     --popover: 240 8% 4%;
     --popover-foreground: 0 0% 95%;
-    --primary: 239 90% 75%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 38 89% 53%;
+    --primary-foreground: 216 19% 5%;
     --secondary: 240 6% 10%;
     --secondary-foreground: 0 0% 95%;
     --muted: 240 6% 10%;
@@ -151,7 +151,7 @@
     --success-foreground: 0 0% 9%;
     --border: 240 6% 14%;
     --input: 240 6% 14%;
-    --ring: 239 90% 75%;
+    --ring: 38 89% 53%;
   }
 
   * {

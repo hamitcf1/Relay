@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Hotel, Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft, ConciergeBell } from 'lucide-react'
+import { Hotel, Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { PasswordReveal } from '@/components/ui/PasswordReveal'
+import { RelayMark } from '@/components/brand/RelayBrand'
 
 export function LoginPage() {
     const navigate = useNavigate()
@@ -85,9 +86,7 @@ export function LoginPage() {
                 </Link>
 
                 <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                        <ConciergeBell className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
-                    </div>
+                    <RelayMark className="h-10 w-10 text-primary" />
                     <div>
                         <h1 className="text-xl font-bold tracking-tight leading-none">Aetherius Relay</h1>
                         <p className="text-xs text-zinc-400 mt-1">{t('auth.login')}</p>

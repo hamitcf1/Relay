@@ -1,6 +1,7 @@
-import { Github, Twitter, Youtube, ConciergeBell } from 'lucide-react'
+import { Github, Twitter, Youtube } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLanguageStore } from '@/stores/languageStore'
+import { RelayBrand } from '@/components/brand/RelayBrand'
 
 export function PublicFooter() {
     const { t } = useLanguageStore()
@@ -13,10 +14,7 @@ export function PublicFooter() {
                     {/* Column 1: Brand & Socials */}
                     <div className="col-span-2 md:col-span-1">
                         <Link to="/" className="flex items-center gap-2.5 mb-4 w-fit">
-                            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                                <ConciergeBell className="w-3.5 h-3.5 text-primary-foreground" aria-hidden="true" />
-                            </div>
-                            <span className="font-semibold text-white text-sm">Aetherius Relay</span>
+                            <RelayBrand markClassName="h-7 w-7" wordmarkClassName="text-sm text-white" />
                         </Link>
                         <p className="text-sm text-zinc-500 leading-relaxed mb-6 pr-4">
                             {t('app.description')}
