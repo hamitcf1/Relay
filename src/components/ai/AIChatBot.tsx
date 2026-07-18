@@ -663,7 +663,6 @@ export function AIChatBot() {
                                                         { icon: Zap, label: t('ai.chat.expertise.compliance') },
                                                         { icon: FileText, label: t('ai.chat.expertise.report') },
                                                         { icon: Settings2, label: t('ai.chat.expertise.pricing') },
-                                                        { icon: Home, label: t('ai.chat.expertise.rooms') },
                                                         { icon: Sparkles, label: t('ai.chat.expertise.sales') }
                                                     ].map((cap, idx) => (
                                                         <div key={idx} className="flex flex-col items-center gap-1 p-2 rounded-lg bg-background/40 border border-border/10">

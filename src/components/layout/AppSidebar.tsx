@@ -8,7 +8,6 @@ import {
     ShieldAlert, 
     CalendarDays, 
     Map as MapIcon, 
-    BedDouble,
     CreditCard,
     DollarSign,
     Users,
@@ -65,8 +64,9 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
     const isOverview = activeTab === 'overview'
 
     const overviewNavItems = [
-        { id: 'overview', icon: LayoutDashboard, label: t('module.overview') || 'Overview', tab: 'overview' },
-        { id: 'notes', icon: ArrowLeftRight, label: t('module.shiftNotes') || 'Shift notes', tab: 'overview', subTab: 'notes' },
+        { id: 'overview', icon: LayoutDashboard, label: language === 'tr' ? 'Operasyon özeti' : language === 'ru' ? 'Сводка операций' : 'Operations overview', tab: 'overview' },
+        { id: 'notes', icon: ArrowLeftRight, label: language === 'tr' ? 'Vardiya devri' : language === 'ru' ? 'Передача смены' : 'Shift handover', tab: 'overview', subTab: 'notes' },
+        { id: 'roster', icon: CalendarDays, label: language === 'tr' ? 'Haftalık vardiya' : language === 'ru' ? 'График на неделю' : 'Weekly roster', tab: 'overview', subTab: 'roster' },
     ]
 
     const operationNavItems = [
@@ -76,7 +76,6 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
     ]
 
     const assetNavItems = [
-        { id: 'rooms', icon: BedDouble, label: t('dashboard.rooms') || 'Rooms', subTab: 'rooms' },
         { id: 'cards-loans', icon: KeyRound, label: t('module.cards-loans') || 'Cards & Loans', subTab: 'cards-loans', createdAt: '2026-05-14' },
         { id: 'pricing', icon: DollarSign, label: t('module.pricing_label') || 'Pricing', subTab: 'pricing' },
         { id: 'tours', icon: MapIcon, label: t('module.tours') || 'Tours', subTab: 'tours' },

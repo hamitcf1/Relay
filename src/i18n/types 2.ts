@@ -123,7 +123,6 @@ export type Translations = {
     'dashboard.startShift': string
     'dashboard.endShift': string
     'dashboard.actions': string
-    'dashboard.rooms': string
     'dashboard.newLog': string
     'dashboard.weeklySchedule': string
     'dashboard.activeHotelShift': string
@@ -1108,7 +1107,6 @@ export type Translations = {
     'operations.feedback.desc': string
     'operations.offdays.desc': string
     'operations.tours.desc': string
-    'operations.rooms.desc': string
     'operations.sales.desc': string
     'operations.pricing.desc': string
     'operations.team.desc': string
@@ -1199,7 +1197,6 @@ export type Translations = {
     'ai.chat.expertise.compliance': string
     'ai.chat.expertise.report': string
     'ai.chat.expertise.pricing': string
-    'ai.chat.expertise.rooms': string
     'ai.chat.expertise.sales': string
     'ai.chat.task.general': string
     'ai.chat.task.email': string

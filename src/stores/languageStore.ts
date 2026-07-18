@@ -17,7 +17,7 @@ const cache: Partial<Record<Language, Translations>> = {}
 interface LanguageState {
     language: Language
     ready: boolean
-    setLanguage: (lang: Language) => void
+    setLanguage: (lang: Language, syncRemote?: boolean) => Promise<void>
     t: TFn
 }
 
@@ -58,13 +58,13 @@ export const useLanguageStore = create<LanguageState>()(
             language: initialLang,
             ready: false,
             t: buildT(initialLang),
-            setLanguage: async (lang) => {
+            setLanguage: async (lang, syncRemote = true) => {
                 if (!cache[lang]) {
                     cache[lang] = await loaders[lang]()
                 }
                 set({ language: lang, ready: true, t: buildT(lang) })
                 const authStore = (window as any).useAuthStore
-                if (authStore) {
+                if (syncRemote && authStore) {
                     const { user, updateSettings } = authStore.getState()
                     if (user) updateSettings({ language: lang })
                 }

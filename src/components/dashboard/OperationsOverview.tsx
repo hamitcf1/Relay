@@ -3,7 +3,6 @@ import { format } from 'date-fns'
 import {
     AlertTriangle,
     ArrowRight,
-    BedDouble,
     CalendarDays,
     CheckCircle2,
     ChevronRight,
@@ -11,7 +10,6 @@ import {
     DoorOpen,
     Info,
     LogIn,
-    LogOut,
     Plus,
     RefreshCw,
     Users,
@@ -19,48 +17,46 @@ import {
 import { useNotesStore } from '@/stores/notesStore'
 import { useAttendanceStore } from '@/stores/attendanceStore'
 import { useRosterStore } from '@/stores/rosterStore'
-import { useRoomStore } from '@/stores/roomStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import type { NotePriority, ShiftNote } from '@/types'
 
 interface OperationsOverviewProps {
     onOpenNotes: () => void
     onOpenAttendance: () => void
-    onOpenRooms: () => void
+    onOpenRoster: () => void
     onNewRecord: () => void
 }
 
 const priorityRank: Record<NotePriority, number> = { critical: 0, high: 1, medium: 2, low: 3 }
 
-export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRooms, onNewRecord }: OperationsOverviewProps) {
+export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRoster, onNewRecord }: OperationsOverviewProps) {
     const notes = useNotesStore((state) => state.notes)
     const attendance = useAttendanceStore((state) => state.records)
     const schedule = useRosterStore((state) => state.schedule)
     const staff = useRosterStore((state) => state.activeStaff)
-    const rooms = useRoomStore((state) => state.rooms)
     const language = useLanguageStore((state) => state.language)
 
     const copy = language === 'tr' ? {
         title: 'Operasyon özeti', mobileTitle: 'Operasyon', newRecord: 'Yeni kayıt', handover: 'Vardiya devri',
-        handoverSub: 'Önceki vardiyadan devralınanlar', viewAll: 'Tümünü gör', today: 'Bugün', attendance: 'Mesai',
-        scheduled: 'Vardiyada', arrived: 'Geldi', late: 'Geç kalan', off: 'İzinli', occupied: 'Dolu', clean: 'Temiz',
-        openRequests: 'Açık talepler', critical: 'Kritik işler', priority: 'Öncelik', task: 'Başlık', location: 'Konum',
+        handoverSub: 'Önceki vardiyadan devralınanlar', viewAll: 'Devri aç', today: 'Bugün', attendance: 'Mesai', roster: 'Haftalık vardiya',
+        scheduled: 'Vardiyada', arrived: 'Geldi', late: 'Geç kalan', off: 'İzinli', created: 'Yeni kayıt', resolved: 'Tamamlanan',
+        openRequests: 'Açık kayıt', critical: 'Kritik işler', priority: 'Öncelik', task: 'Başlık', location: 'Konum',
         assigned: 'Atanan', updated: 'Son güncelleme', status: 'Durum', inProgress: 'Devam ediyor', waiting: 'Bekliyor',
         planned: 'Planlandı', empty: 'Aktif operasyon kaydı yok', room: 'Oda', reception: 'Ön büro', team: 'Ekip',
         priority_low: 'Düşük', priority_medium: 'Orta', priority_high: 'Yüksek', priority_critical: 'Acil',
     } : language === 'ru' ? {
         title: 'Сводка операций', mobileTitle: 'Операции', newRecord: 'Новая запись', handover: 'Передача смены',
-        handoverSub: 'Передано с предыдущей смены', viewAll: 'Смотреть все', today: 'Сегодня', attendance: 'Посещаемость',
-        scheduled: 'В смене', arrived: 'Пришли', late: 'Опоздали', off: 'Выходной', occupied: 'Занято', clean: 'Готово',
-        openRequests: 'Открытые запросы', critical: 'Критические задачи', priority: 'Приоритет', task: 'Задача', location: 'Место',
+        handoverSub: 'Передано с предыдущей смены', viewAll: 'Открыть передачу', today: 'Сегодня', attendance: 'Посещаемость', roster: 'График на неделю',
+        scheduled: 'В смене', arrived: 'Пришли', late: 'Опоздали', off: 'Выходной', created: 'Новые записи', resolved: 'Завершено',
+        openRequests: 'Открытые записи', critical: 'Критические задачи', priority: 'Приоритет', task: 'Задача', location: 'Место',
         assigned: 'Ответственный', updated: 'Обновлено', status: 'Статус', inProgress: 'В работе', waiting: 'Ожидает',
         planned: 'Запланировано', empty: 'Нет активных записей', room: 'Номер', reception: 'Ресепшен', team: 'Команда',
         priority_low: 'Низкий', priority_medium: 'Средний', priority_high: 'Высокий', priority_critical: 'Срочно',
     } : {
         title: 'Operations overview', mobileTitle: 'Operations', newRecord: 'New record', handover: 'Shift handover',
-        handoverSub: 'Carried over from the previous shift', viewAll: 'View all', today: 'Today', attendance: 'Attendance',
-        scheduled: 'Scheduled', arrived: 'Arrived', late: 'Late', off: 'Off', occupied: 'Occupied', clean: 'Clean',
-        openRequests: 'Open requests', critical: 'Critical tasks', priority: 'Priority', task: 'Task', location: 'Location',
+        handoverSub: 'Carried over from the previous shift', viewAll: 'Open handover', today: 'Today', attendance: 'Attendance', roster: 'Weekly roster',
+        scheduled: 'Scheduled', arrived: 'Arrived', late: 'Late', off: 'Off', created: 'New records', resolved: 'Completed',
+        openRequests: 'Open records', critical: 'Critical tasks', priority: 'Priority', task: 'Task', location: 'Location',
         assigned: 'Assigned', updated: 'Last update', status: 'Status', inProgress: 'In progress', waiting: 'Waiting',
         planned: 'Planned', empty: 'No active operational records', room: 'Room', reception: 'Front desk', team: 'Team',
         priority_low: 'Low', priority_medium: 'Medium', priority_high: 'High', priority_critical: 'Critical',
@@ -78,10 +74,9 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRooms,
     const late = todayRecords.filter((record) => record.late_minutes > 0).length
     const scheduled = staff.filter((member) => schedule[member.uid]?.[todayKey] && schedule[member.uid][todayKey] !== 'OFF').length
     const off = staff.filter((member) => schedule[member.uid]?.[todayKey] === 'OFF').length
-    const occupied = rooms.filter((room) => room.occupancy === 'occupied').length
-    const clean = rooms.filter((room) => room.status === 'clean').length
-    const occupancy = rooms.length ? Math.round((occupied / rooms.length) * 100) : 0
-    const cleanliness = rooms.length ? Math.round((clean / rooms.length) * 100) : 0
+    const createdToday = notes.filter((note) => format(note.created_at, 'yyyy-MM-dd') === todayKey).length
+    const resolvedToday = notes.filter((note) => note.resolved_at && format(note.resolved_at, 'yyyy-MM-dd') === todayKey).length
+    const criticalOpen = activeNotes.filter((note) => note.priority === 'critical').length
 
     return (
         <section className="ops-overview">
@@ -90,7 +85,7 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRooms,
                     <p className="ops-overview__eyebrow">Relay / live operations</p>
                     <h1><span className="hidden sm:inline">{copy.title}</span><span className="sm:hidden">{copy.mobileTitle}</span></h1>
                 </div>
-                <button className="ops-primary-action" onClick={onNewRecord}>
+                <button className="ops-primary-action ops-primary-action--desktop" onClick={onNewRecord}>
                     <span>{copy.newRecord}</span><span className="ops-primary-action__icon"><Plus /></span>
                 </button>
             </header>
@@ -103,13 +98,13 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRooms,
                     </div>
                 </OverviewPanel>
 
-                <OverviewPanel className="ops-today" title={copy.today} icon={CalendarDays} action={copy.viewAll} onAction={onOpenRooms}>
+                <OverviewPanel className="ops-today" title={copy.today} icon={CalendarDays}>
                     <div className="ops-today-list">
-                        <MetricRow icon={LogIn} label={copy.arrived} value={arrived} detail={`${copy.scheduled} ${scheduled}`} />
-                        <MetricRow icon={LogOut} label={copy.off} value={off} detail={copy.planned} tone="copper" />
-                        <MetricRow icon={BedDouble} label={copy.occupied} value={`${occupancy}%`} detail={`${occupied} / ${rooms.length || '—'}`} />
-                        <MetricRow icon={CheckCircle2} label={copy.clean} value={`${cleanliness}%`} detail={`${clean} / ${rooms.length || '—'}`} tone="success" />
-                        <MetricRow icon={AlertTriangle} label={copy.openRequests} value={activeNotes.length} detail={copy.reception} tone="warning" />
+                        <MetricRow icon={LogIn} label={copy.created} value={createdToday} detail={copy.today} />
+                        <MetricRow icon={CheckCircle2} label={copy.resolved} value={resolvedToday} detail={copy.today} tone="success" />
+                        <MetricRow icon={AlertTriangle} label={copy.critical} value={criticalOpen} detail={copy.openRequests} tone="warning" />
+                        <MetricRow icon={Users} label={copy.scheduled} value={scheduled} detail={`${arrived} ${copy.arrived}`} />
+                        <MetricRow icon={Clock3} label={copy.late} value={late} detail={`${off} ${copy.off}`} tone="copper" />
                     </div>
                 </OverviewPanel>
             </div>
@@ -124,10 +119,10 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRooms,
                     <AttendanceMetric value={late} label={copy.late} tone="warning" icon={Clock3} />
                     <AttendanceMetric value={off} label={copy.off} tone="muted" icon={DoorOpen} />
                 </div>
-                <button className="ops-view-link ops-attendance__link" onClick={onOpenAttendance}>{copy.viewAll}<ArrowRight /></button>
+                <button className="ops-view-link ops-attendance__link" onClick={onOpenRoster}>{copy.roster}<ArrowRight /></button>
             </section>
 
-            <OverviewPanel className="ops-critical" title={copy.critical} icon={AlertTriangle} action={copy.viewAll} onAction={onOpenNotes}>
+            <OverviewPanel className="ops-critical" title={copy.critical} icon={AlertTriangle}>
                 <div className="ops-critical__desktop">
                     <table>
                         <thead><tr><th>{copy.priority}</th><th>{copy.task}</th><th>{copy.location}</th><th>{copy.assigned}</th><th>{copy.updated}</th><th>{copy.status}</th></tr></thead>
@@ -145,13 +140,13 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRooms,
 }
 
 function OverviewPanel({ title, subtitle, icon: Icon, action, onAction, className = '', children }: {
-    title: string; subtitle?: string; icon: typeof Clock3; action: string; onAction: () => void; className?: string; children: React.ReactNode
+    title: string; subtitle?: string; icon: typeof Clock3; action?: string; onAction?: () => void; className?: string; children: React.ReactNode
 }) {
     return <section className={`ops-panel ${className}`}>
         <div className="ops-panel__inner">
             <header className="ops-panel__header">
                 <div className="ops-panel__title"><span className="ops-section-icon"><Icon /></span><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div></div>
-                <button className="ops-view-link" onClick={onAction}>{action}<ChevronRight /></button>
+                {action && onAction && <button className="ops-view-link" onClick={onAction}>{action}<ChevronRight /></button>}
             </header>
             {children}
         </div>

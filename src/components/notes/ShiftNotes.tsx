@@ -1,9 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Plus } from 'lucide-react'
+import { format } from 'date-fns'
+import { AlertTriangle, ArrowLeftRight, CheckCircle2, Clock3, Pin, Plus } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { CardTitle } from '@/components/ui/card'
-import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { useNotesStore, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useRosterStore } from '@/stores/rosterStore'
@@ -20,17 +18,14 @@ interface ShiftNotesProps {
 }
 
 export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = false }: ShiftNotesProps) {
-    const { notes } = useNotesStore()
-    const { t } = useLanguageStore()
+    const notes = useNotesStore((state) => state.notes)
+    const language = useLanguageStore((state) => state.language)
     const { activeStaff, subscribeToRoster } = useRosterStore()
-    const { hotel } = useHotelStore()
+    const hotel = useHotelStore((state) => state.hotel)
 
-    // Ensure we have staff list
     useEffect(() => {
-        if (hotelId) {
-            const unsub = subscribeToRoster(hotelId)
-            return () => unsub()
-        }
+        if (!hotelId) return
+        return subscribeToRoster(hotelId)
     }, [hotelId, subscribeToRoster])
 
     const [isAdding, setIsAdding] = useState(initialAddOpen)
@@ -38,108 +33,100 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     const [filter, setFilter] = useState<NoteCategory | 'all'>('all')
     const [searchQuery, setSearchQuery] = useState('')
 
-    // Filter notes
-    const { filteredNotes, pinnedNotes } = useMemo(() => {
+    const copy = language === 'tr'
+        ? { title: 'Vardiya devri', subtitle: 'Açık işleri devral, güncelle ve sonraki vardiyaya aktar.', add: 'Devir kaydı ekle', active: 'Açık', critical: 'Acil', pinned: 'Sabit', completed: 'Bugün tamamlandı' }
+        : language === 'ru'
+            ? { title: 'Передача смены', subtitle: 'Примите открытые задачи, обновите их и передайте следующей смене.', add: 'Добавить запись', active: 'Открыто', critical: 'Срочно', pinned: 'Закреплено', completed: 'Завершено сегодня' }
+            : { title: 'Shift handover', subtitle: 'Take over open work, update it, and pass it to the next shift.', add: 'Add handover record', active: 'Open', critical: 'Critical', pinned: 'Pinned', completed: 'Completed today' }
+
+    const { visibleNotes, counts, metrics } = useMemo(() => {
+        const searchLower = searchQuery.trim().toLowerCase()
         const matches = notes.filter((note) => {
             const matchesCategory = filter === 'all' || note.category === filter
             const matchesStatus = statusFilter === 'all' || note.status === statusFilter
-            const searchLower = searchQuery.toLowerCase()
-            const matchesSearch = !searchQuery ||
-                note.content.toLowerCase().includes(searchLower) ||
-                (note.guest_name && note.guest_name.toLowerCase().includes(searchLower)) ||
-                (note.room_number && note.room_number.toLowerCase().includes(searchLower)) ||
-                (note.assigned_staff_name && note.assigned_staff_name.toLowerCase().includes(searchLower))
-
+            const matchesSearch = !searchLower
+                || note.content.toLowerCase().includes(searchLower)
+                || note.guest_name?.toLowerCase().includes(searchLower)
+                || note.room_number?.toLowerCase().includes(searchLower)
+                || note.assigned_staff_name?.toLowerCase().includes(searchLower)
             return matchesCategory && matchesStatus && matchesSearch
         })
-
-        return {
-            pinnedNotes: matches.filter(n => n.is_pinned).sort((a, b) => b.created_at.getTime() - a.created_at.getTime()),
-            filteredNotes: matches.filter(n => !n.is_pinned).sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
-        }
-    }, [notes, filter, statusFilter, searchQuery])
-
-    // Calculate unread counts per category and status
-    const counts = useMemo(() => {
-        const c: Record<string, number> = { all: 0 }
-        notes.forEach(note => {
-            c[note.category] = (c[note.category] || 0) + 1
-            c[note.status] = (c[note.status] || 0) + 1
-            c.all++
+        const sorted = [...matches].sort((a, b) => {
+            if (Boolean(a.is_pinned) !== Boolean(b.is_pinned)) return a.is_pinned ? -1 : 1
+            return b.created_at.getTime() - a.created_at.getTime()
         })
-        return c
-    }, [notes])
+        const noteCounts: Record<string, number> = { all: 0 }
+        notes.forEach((note) => {
+            noteCounts[note.category] = (noteCounts[note.category] || 0) + 1
+            noteCounts[note.status] = (noteCounts[note.status] || 0) + 1
+            noteCounts.all++
+        })
+        const today = format(new Date(), 'yyyy-MM-dd')
+        return {
+            visibleNotes: sorted,
+            counts: noteCounts,
+            metrics: {
+                active: notes.filter((note) => note.status === 'active').length,
+                critical: notes.filter((note) => note.status === 'active' && note.priority === 'critical').length,
+                pinned: notes.filter((note) => note.status === 'active' && note.is_pinned).length,
+                completed: notes.filter((note) => note.resolved_at && format(note.resolved_at, 'yyyy-MM-dd') === today).length,
+            },
+        }
+    }, [filter, notes, searchQuery, statusFilter])
 
     return (
-        <CollapsibleCard
-            id="shift-notes"
-            title={
-                <CardTitle className="text-sm font-semibold text-foreground">
-                    {t('module.shiftNotes') as string}
-                </CardTitle>
-            }
-            headerActions={
-                showAddButton && (
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            setIsAdding(!isAdding)
-                        }}
-                        className="hover:bg-primary/10 hover:text-primary h-8 w-8 p-0"
-                    >
-                        <Plus className="w-4 h-4" />
-                    </Button>
-                )
-            }
-            className="border-border/50"
-        >
-            <NoteFilters
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-                filter={filter}
-                setFilter={setFilter}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                counts={counts}
-            />
+        <section className="handover-workspace">
+            <header className="handover-workspace__header">
+                <div className="handover-workspace__identity">
+                    <span className="handover-workspace__mark"><ArrowLeftRight /></span>
+                    <div><h2>{copy.title}</h2><p>{copy.subtitle}</p></div>
+                </div>
+                {showAddButton && (
+                    <button className="handover-workspace__add" onClick={() => setIsAdding((open) => !open)} aria-expanded={isAdding}>
+                        <Plus /><span>{copy.add}</span>
+                    </button>
+                )}
+            </header>
 
-            <div className="space-y-4 pt-4">
-                <AnimatePresence>
-                    {isAdding && (
-                        <NoteForm
-                            hotelId={hotelId}
-                            hotel={hotel}
-                            staff={activeStaff}
-                            onCancel={() => setIsAdding(false)}
-                        />
-                    )}
-                </AnimatePresence>
+            <div className="handover-workspace__metrics">
+                <HandoverMetric icon={Clock3} value={metrics.active} label={copy.active} />
+                <HandoverMetric icon={AlertTriangle} value={metrics.critical} label={copy.critical} tone="critical" />
+                <HandoverMetric icon={Pin} value={metrics.pinned} label={copy.pinned} tone="amber" />
+                <HandoverMetric icon={CheckCircle2} value={metrics.completed} label={copy.completed} tone="success" />
+            </div>
 
-                {/* Sticky Board (Pinned Notes) */}
-                {pinnedNotes.length > 0 && (
-                    <div className="space-y-2 pb-4 border-b border-border/40">
-                        <div className="flex items-center gap-2 px-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Pinned</span>
-                        </div>
-                        <NoteList
-                            notes={pinnedNotes}
-                            hotelId={hotelId}
-                            hotel={hotel}
-                            staff={activeStaff}
-                        />
+            <AnimatePresence>
+                {isAdding && (
+                    <div className="handover-workspace__compose">
+                        <NoteForm hotelId={hotelId} hotel={hotel} staff={activeStaff} onCancel={() => setIsAdding(false)} />
                     </div>
                 )}
+            </AnimatePresence>
 
-                <NoteList
-                    notes={filteredNotes}
-                    hotelId={hotelId}
-                    hotel={hotel}
-                    staff={activeStaff}
+            <div className="handover-workspace__toolbar">
+                <NoteFilters
+                    statusFilter={statusFilter}
+                    setStatusFilter={setStatusFilter}
+                    filter={filter}
+                    setFilter={setFilter}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    counts={counts}
                 />
             </div>
-        </CollapsibleCard>
+
+            <div className="handover-workspace__board">
+                <NoteList notes={visibleNotes} hotelId={hotelId} hotel={hotel} staff={activeStaff} />
+            </div>
+        </section>
     )
+}
+
+function HandoverMetric({ icon: Icon, value, label, tone = 'neutral' }: {
+    icon: typeof Clock3
+    value: number
+    label: string
+    tone?: 'neutral' | 'critical' | 'amber' | 'success'
+}) {
+    return <div className={`handover-metric handover-metric--${tone}`}><span><Icon /></span><strong>{value}</strong><small>{label}</small></div>
 }

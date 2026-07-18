@@ -22,7 +22,7 @@ export function NoteList({ notes, hotelId, hotel, staff }: NoteListProps) {
     }
 
     return (
-        <div className="space-y-2 md:max-h-[500px] md:overflow-y-auto custom-scrollbar relative">
+        <div className="handover-list custom-scrollbar relative">
             {notes.map((note) => (
                 <NoteItem
                     key={note.id}
