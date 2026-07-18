@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Loader2 } from 'lucide-react'
+import { Clock as ClockIcon, ChevronLeft, EyeOff, Loader2, MoonStar, Search, SunMedium } from 'lucide-react'
 
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
@@ -31,15 +31,14 @@ import { useSalesStore } from '@/stores/salesStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useStaffMealStore } from '@/stores/staffMealStore'
 import { useBlacklistStore } from '@/stores/blacklistStore'
+import { useRoomStore } from '@/stores/roomStore'
 
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
-import { Clock as ClockIcon, EyeOff } from 'lucide-react'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { OperationsGrid } from '@/components/dashboard/OperationsGrid'
-import { OverviewGrid } from '@/components/dashboard/OverviewGrid'
-import { ChevronLeft } from 'lucide-react'
+import { OperationsOverview } from '@/components/dashboard/OperationsOverview'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { ShiftTimer } from '@/components/layout/ShiftTimer'
@@ -47,7 +46,6 @@ import { AttendanceClock } from '@/components/attendance/AttendanceClock'
 import { useAttendanceStore } from '@/stores/attendanceStore'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
-import { KpiBadges } from '@/components/dashboard/KpiBadges'
 import { RelayMark } from '@/components/brand/RelayBrand'
 
 
@@ -86,12 +84,14 @@ export function DashboardPage() {
     const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
     const subscribeToAttendance = useAttendanceStore((state) => state.subscribeToAttendance)
-    const { t } = useLanguageStore()
+    const subscribeToRooms = useRoomStore((state) => state.subscribeToRooms)
+    const { t, language } = useLanguageStore()
 
     const [showTour, setShowTour] = useState(false)
     const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
     const [operationTab, setOperationTab] = useState('messaging')
     const [overviewTab, setOverviewTab] = useState('grid')
+    const [openNewNote, setOpenNewNote] = useState(false)
 
     // Mobile Detection
     const isMobile = useIsMobile()
@@ -173,6 +173,7 @@ export function DashboardPage() {
         const unsubAttendance = (user?.role === 'gm' || user?.role === 'receptionist')
             ? subscribeToAttendance(userHotelId, user.role === 'gm' ? undefined : user.uid)
             : () => undefined
+        const unsubRooms = subscribeToRooms(userHotelId)
         const subscribeToBlacklist = useBlacklistStore.getState().subscribeToBlacklist
         const unsubBlacklist = subscribeToBlacklist(userHotelId)
 
@@ -183,9 +184,10 @@ export function DashboardPage() {
             unsubRoster()
             unsubMenu()
             unsubAttendance()
+            unsubRooms()
             unsubBlacklist()
         }
-    }, [userHotelId, user?.role, user?.uid, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu, subscribeToAttendance])
+    }, [userHotelId, user?.role, user?.uid, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu, subscribeToAttendance, subscribeToRooms])
 
 
 
@@ -195,6 +197,20 @@ export function DashboardPage() {
 
 
     const [showTutorial, setShowTutorial] = useState(false)
+
+    const rosterShift = user ? schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] : undefined
+    const inferredShift = new Date().getHours() >= 16 ? 'B' : new Date().getHours() < 8 ? 'C' : 'A'
+    const activeShiftCode = currentShift?.type || (rosterShift && rosterShift !== 'OFF' ? rosterShift : inferredShift)
+    const configuredShift = hotel?.settings?.shifts?.find((shift) => shift.code === activeShiftCode)
+    const fallbackShiftTimes: Record<string, [string, string]> = { A: ['08:00', '16:00'], B: ['16:00', '00:00'], C: ['00:00', '08:00'], E: ['10:00', '18:00'] }
+    const shiftTimes = fallbackShiftTimes[activeShiftCode] || fallbackShiftTimes.A
+    const shiftName = configuredShift?.name || (language === 'tr'
+        ? ({ A: 'Gündüz', B: 'Akşam', C: 'Gece', E: 'Ara vardiya' }[activeShiftCode] || 'Vardiya')
+        : language === 'ru'
+            ? ({ A: 'День', B: 'Вечер', C: 'Ночь', E: 'Средняя смена' }[activeShiftCode] || 'Смена')
+            : ({ A: 'Day shift', B: 'Evening', C: 'Night', E: 'Mid shift' }[activeShiftCode] || 'Shift'))
+    const shiftStart = configuredShift?.startTime || shiftTimes[0]
+    const shiftEnd = configuredShift?.endTime || shiftTimes[1]
 
     return (
         <div className="relay-app h-[100dvh] overflow-hidden bg-background text-foreground flex font-sans selection:bg-primary/30 relative">
@@ -206,41 +222,36 @@ export function DashboardPage() {
             <AppSidebar
                 activeTab={activeTab}
                 operationTab={operationTab}
+                overviewTab={overviewTab}
                 userRole={user?.role}
                 onNavigate={(tab, subTab) => {
                     setActiveTab(tab)
                     if (tab === 'operations' && subTab) {
                         setOperationTab(subTab)
                     } else if (tab === 'overview') {
-                        setOverviewTab('grid')
+                        if (subTab === 'notes') setOpenNewNote(false)
+                        setOverviewTab(subTab || 'grid')
                     }
                 }}
             />
 
             {/* Main Content Pane */}
             <div className="flex flex-col flex-1 relative min-w-0 overflow-hidden">
-                {/* Header Navbar (Visible mostly for Mobile layout and utility items) */}
-                <header className="safe-header mx-3 mt-3 flex h-16 shrink-0 items-center justify-between rounded-[1.25rem] border-[5px] border-surface-deep bg-card/[0.86] px-4 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06),0_18px_55px_-38px_hsl(var(--foreground)/0.35)] backdrop-blur-xl lg:mx-5 lg:px-6 z-40 relative">
+                <header className="relay-commandbar safe-header relative z-40 flex h-[84px] shrink-0 items-center justify-between border-b border-border/70 bg-[#080b0e]/95 px-5 backdrop-blur-xl md:px-7">
                     <div className="flex items-center md:hidden">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F2A51A] text-[#0B0D10] shadow-[0_9px_24px_-12px_hsl(38_89%_53%/0.8)]">
-                                <RelayMark className="h-5 w-5" />
-                            </div>
-                            <div>
-                                <h1 className="font-semibold text-base tracking-tight leading-none text-foreground">Relay</h1>
-                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium max-w-[150px] truncate mt-0.5">{hotel?.info.name}</p>
-                            </div>
-                        </div>
+                        <RelayMark className="h-10 w-10 text-primary" />
                     </div>
 
-                    <div className="hidden md:flex items-center pl-2">
-                        <KpiBadges onNavigate={(tab, subTab) => {
-                            setActiveTab(tab)
-                            if (tab === 'operations' && subTab) setOperationTab(subTab)
-                        }} />
+                    <div className="relay-mobile-shift md:hidden">
+                        {activeShiftCode === 'C' || activeShiftCode === 'B' ? <MoonStar /> : <SunMedium />}
+                        <span><strong>{shiftName}</strong><small>{shiftStart}–{shiftEnd}</small></span>
                     </div>
 
-                    <div className="flex-1" />
+                    <label className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-white/[0.025] px-4 text-muted-foreground md:flex">
+                        <Search className="h-4 w-4" />
+                        <input aria-label={t('common.search') as string} placeholder={t('common.search') as string} className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+                        <kbd className="rounded border border-border/80 px-1.5 py-0.5 text-[10px] text-muted-foreground">⌘K</kbd>
+                    </label>
 
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-2 mr-1 sm:mr-2 scale-90 sm:scale-100 origin-right">
@@ -248,10 +259,10 @@ export function DashboardPage() {
                                 <CompliancePulse 
                                     agencyChecked={currentShift?.compliance.agency_msg_checked_count ? currentShift.compliance.agency_msg_checked_count > 0 : false}
                                     kbsChecked={currentShift?.compliance.kbs_checked || false}
-                                    className="mr-2"
+                                    className="hidden md:flex md:mr-2"
                                 />
                             )}
-                            <ShiftTimer />
+                            <div className="hidden md:block"><ShiftTimer /></div>
                             <AttendanceClock />
                         </div>
                         <AnimatePresence>
@@ -270,13 +281,13 @@ export function DashboardPage() {
                         >
                             {showDateTime ? <EyeOff className="w-3.5 h-3.5" /> : <ClockIcon className="w-3.5 h-3.5" />}
                         </Button>
-                        <div id="tour-notifications" className="mr-2">
+                        <div id="tour-notifications">
                             <NotificationDropdown />
                         </div>
                     </div>
                 </header>
 
-            <main className="relay-scroll-root flex-1 overflow-y-auto px-3 pb-28 pt-3 lg:px-5 lg:pb-8 lg:pt-5 relative min-h-0">
+            <main className="relay-scroll-root relative min-h-0 flex-1 overflow-y-auto pb-28 md:pb-8">
                 <div className="relay-page">
                 <AnnouncementBanner />
                 
@@ -301,28 +312,32 @@ export function DashboardPage() {
                         )}
 
                         {overviewTab === 'grid' ? (
-                            isMobile ? (
-                                <OverviewGrid onSelect={setOverviewTab} userRole={user?.role} />
-                            ) : (
-                                <div className="space-y-6">
-                                    <OverviewGrid onSelect={setOverviewTab} userRole={user?.role} />
-                                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.75fr)]">
-                                        <div id="tour-logs"><ShiftNotes hotelId={hotel?.id || ''} /></div>
-                                        <CalendarWidget hotelId={hotel?.id || ''} />
-                                    </div>
-                                    {(user?.role === 'gm' || user?.role === 'receptionist') && (
-                                        <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
-                                    )}
-                                </div>
-                            )
+                            <OperationsOverview
+                                onOpenNotes={() => {
+                                    setOpenNewNote(false)
+                                    setOverviewTab('notes')
+                                }}
+                                onNewRecord={() => {
+                                    setOpenNewNote(true)
+                                    setOverviewTab('notes')
+                                }}
+                                onOpenAttendance={() => {
+                                    setActiveTab('operations')
+                                    setOperationTab('attendance')
+                                }}
+                                onOpenRooms={() => {
+                                    setActiveTab('operations')
+                                    setOperationTab('rooms')
+                                }}
+                            />
                         ) : (
                             <motion.div
                                 initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
-                                className="mx-auto w-full max-w-6xl"
+                                className="mx-auto w-full max-w-6xl px-3 py-5 lg:px-6"
                             >
-                                {overviewTab === 'notes' && <ShiftNotes hotelId={hotel?.id || ''} />}
+                                {overviewTab === 'notes' && <ShiftNotes hotelId={hotel?.id || ''} initialAddOpen={openNewNote} />}
                                 {overviewTab === 'roster' && (user?.role === 'gm' || user?.role === 'receptionist') && <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
                                 {overviewTab === 'hotel-info' && <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
                                 {overviewTab === 'currency' && <CurrencyWidget />}
@@ -425,10 +440,29 @@ export function DashboardPage() {
             {/* Mobile Bottom Navigation Layout stays consistent */}
             <MobileNav
                 activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                onOpenProfile={() => {
-                    const trigger = document.querySelector('[data-radix-collection-item]') as HTMLElement;
-                    if (trigger) trigger.click();
+                overviewTab={overviewTab}
+                operationTab={operationTab}
+                setActiveTab={(tab) => {
+                    setActiveTab(tab)
+                    if (tab === 'overview') setOverviewTab('grid')
+                }}
+                onOpenNotes={() => {
+                    setActiveTab('overview')
+                    setOpenNewNote(false)
+                    setOverviewTab('notes')
+                }}
+                onNewRecord={() => {
+                    setActiveTab('overview')
+                    setOpenNewNote(true)
+                    setOverviewTab('notes')
+                }}
+                onOpenMessages={() => {
+                    setActiveTab('operations')
+                    setOperationTab('messaging')
+                }}
+                onOpenMenu={() => {
+                    setActiveTab('operations')
+                    setOperationTab('grid')
                 }}
             />
             <AnnouncementModal />
