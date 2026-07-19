@@ -11,6 +11,10 @@ import {
     ScrollText,
     KeyRound,
     ClipboardCheck,
+    CircleDollarSign,
+    Info,
+    Utensils,
+    UserX,
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
@@ -43,6 +47,36 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             label: t('module.compliance') || 'Compliance',
             icon: ShieldCheck,
             desc: t('operations.compliance.desc') || 'KBS & Agency check-ins',
+        },
+        {
+            id: 'hotel-info',
+            label: t('module.cashInfo'),
+            icon: Info,
+            desc: t('overview.hotel.desc'),
+        },
+        {
+            id: 'currency',
+            label: t('module.currencyConverter'),
+            icon: CircleDollarSign,
+            desc: t('overview.currency.desc'),
+        },
+        {
+            id: 'calendar',
+            label: t('module.calendar'),
+            icon: CalendarDays,
+            desc: t('overview.calendar.desc'),
+        },
+        {
+            id: 'menu',
+            label: t('menu.title'),
+            icon: Utensils,
+            desc: t('overview.menu.desc'),
+        },
+        {
+            id: 'blacklist',
+            label: t('blacklist.title'),
+            icon: UserX,
+            desc: language === 'tr' ? 'Riskli misafir kayıtları' : language === 'ru' ? 'Записи о нежелательных гостях' : 'Restricted guest records',
         },
         {
             id: 'feedback',

@@ -21,6 +21,10 @@ import {
     Settings,
     KeyRound,
     ClipboardCheck,
+    CircleDollarSign,
+    Info,
+    Utensils,
+    UserX,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useLayoutStore } from '@/stores/layoutStore'
@@ -73,6 +77,14 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
         { id: 'messaging', icon: MessageCircle, label: t('module.messaging') || 'Messaging', subTab: 'messaging' },
         { id: 'compliance', icon: Check, label: t('module.compliance') || 'Compliance', subTab: 'compliance', createdAt: '2026-05-05' },
         { id: 'feedback', icon: ShieldAlert, label: t('module.complaints') || 'Complaints', subTab: 'feedback' },
+    ]
+
+    const toolsNavItems = [
+        { id: 'hotel-info', icon: Info, label: t('module.cashInfo'), tab: 'overview', subTab: 'hotel-info' },
+        { id: 'currency', icon: CircleDollarSign, label: t('module.currencyConverter'), tab: 'overview', subTab: 'currency' },
+        { id: 'calendar', icon: CalendarDays, label: t('module.calendar'), tab: 'overview', subTab: 'calendar' },
+        { id: 'menu', icon: Utensils, label: t('menu.title'), tab: 'overview', subTab: 'menu' },
+        { id: 'blacklist', icon: UserX, label: t('blacklist.title'), tab: 'overview', subTab: 'blacklist' },
     ]
 
     const assetNavItems = [
@@ -216,13 +228,17 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
                     </div>
 
                     {[
+                        { label: language === 'tr' ? 'Araçlar' : language === 'ru' ? 'Инструменты' : 'Tools', items: toolsNavItems },
                         { label: language === 'tr' ? 'Varlık' : language === 'ru' ? 'Активы' : 'Assets', items: assetNavItems },
                         { label: language === 'tr' ? 'Ekibim' : language === 'ru' ? 'Команда' : 'My team', items: teamNavItems },
                         { label: language === 'tr' ? 'Sistem' : language === 'ru' ? 'Система' : 'System', items: systemNavItems },
                     ].filter(group => group.items.length).map(group => (
                         <div key={group.label} className="space-y-1 border-t border-border/60 pt-4">
                             {!sidebarCollapsed && <h4 className="mb-2 px-3 text-[10px] font-medium tracking-wide text-muted-foreground">{group.label}</h4>}
-                            {group.items.map(item => <NavItem key={item.id} item={item} active={isActive('operations', item.subTab)} onClick={() => onNavigate('operations', item.subTab)} />)}
+                            {group.items.map(item => {
+                                const targetTab = 'tab' in item && item.tab === 'overview' ? 'overview' : 'operations'
+                                return <NavItem key={item.id} item={item} active={isActive(targetTab, item.subTab)} onClick={() => onNavigate(targetTab, item.subTab)} />
+                            })}
                         </div>
                     ))}
 

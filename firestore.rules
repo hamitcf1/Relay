@@ -184,7 +184,7 @@ service cloud.firestore {
             'clock_out_at', 'status', 'late_minutes', 'late_excuse',
             'manager_permission_declared', 'approval_status', 'reviewed_by',
             'reviewed_by_name', 'reviewed_at', 'review_note', 'worked_minutes',
-            'created_at', 'updated_at'
+            'auto_clocked_out', 'auto_clock_out_at', 'created_at', 'updated_at'
           ])
           && request.resource.data.hotel_id == hotelId
           && request.resource.data.staff_id == request.auth.uid
@@ -197,6 +197,8 @@ service cloud.firestore {
           && request.resource.data.clock_in_at == request.resource.data.declared_clock_in_at
           && request.resource.data.declared_clock_out_at == null
           && request.resource.data.clock_out_at == null
+          && request.resource.data.auto_clocked_out == false
+          && request.resource.data.auto_clock_out_at == null
           && request.resource.data.created_at is timestamp
           && request.resource.data.updated_at is timestamp
           && request.resource.data.late_minutes >= 0
@@ -232,6 +234,20 @@ service cloud.firestore {
             && request.resource.data.worked_minutes >= 0
             && request.resource.data.updated_at is timestamp
           ) || (
+            (isGM() || resource.data.staff_id == request.auth.uid)
+            && resource.data.status == 'clocked_in'
+            && request.time >= resource.data.scheduled_end
+            && request.resource.data.status == 'clocked_out'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'status', 'worked_minutes', 'auto_clocked_out',
+              'auto_clock_out_at', 'updated_at'
+            ])
+            && request.resource.data.auto_clocked_out == true
+            && request.resource.data.auto_clock_out_at == resource.data.scheduled_end
+            && request.resource.data.worked_minutes is number
+            && request.resource.data.worked_minutes >= 0
+            && request.resource.data.updated_at == request.time
+          ) || (
             isGM()
             && resource.data.late_minutes > 0
             && resource.data.approval_status == 'pending'
@@ -261,6 +277,19 @@ service cloud.firestore {
             && request.resource.data.occurred_at == request.time
             && existsAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id))
             && getAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id)).data.staff_id == request.auth.uid
+          ) || (
+            (isGM() || (getUserRole() == 'receptionist' && request.resource.data.staff_id == request.auth.uid))
+            && request.resource.data.event == 'auto_clock_out'
+            && request.resource.data.record_id is string
+            && eventId == request.resource.data.record_id + '_auto_clock_out'
+            && request.resource.data.actor_id == request.auth.uid
+            && request.resource.data.automatic == true
+            && request.resource.data.occurred_at is timestamp
+            && request.resource.data.processed_at == request.time
+            && existsAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id))
+            && getAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id)).data.staff_id == request.resource.data.staff_id
+            && getAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id)).data.auto_clocked_out == true
+            && request.resource.data.occurred_at == getAfter(/databases/$(database)/documents/hotels/$(hotelId)/attendance/$(request.resource.data.record_id)).data.auto_clock_out_at
           ) || (
             isGM()
             && request.resource.data.event == 'manager_review'
