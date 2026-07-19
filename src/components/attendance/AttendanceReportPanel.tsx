@@ -39,7 +39,7 @@ export function AttendanceReportPanel() {
         gmAuditNote: t('attendance.report.gmAuditNote'),
         duration: t('attendance.report.duration'), status: t('attendance.report.status'), excuse: t('attendance.report.excuse'),
         permission: t('attendance.report.permission'), onTime: t('attendance.report.onTime'), working: t('attendance.report.working'),
-        completed: t('attendance.report.completed'), noExit: t('attendance.report.noExit'), permissionYes: t('attendance.report.permissionYes'),
+        completed: t('attendance.report.completed'), autoCompleted: t('attendance.report.autoCompleted'), noExit: t('attendance.report.noExit'), permissionYes: t('attendance.report.permissionYes'),
         permissionNo: t('attendance.report.permissionNo'), approvalPending: t('attendance.report.approvalPending'),
         approved: t('attendance.report.approved'), rejected: t('attendance.report.rejected'), approve: t('attendance.report.approve'),
         reject: t('attendance.report.reject'), reviewTitleApprove: t('attendance.report.reviewTitleApprove'),
@@ -89,7 +89,7 @@ export function AttendanceReportPanel() {
             record.manager_permission_declared == null ? '' : record.manager_permission_declared ? text.permissionYes : text.permissionNo,
             record.approval_status === 'approved' ? text.approved : record.approval_status === 'rejected' ? text.rejected : text.approvalPending,
             record.reviewed_by_name || '', record.reviewed_at ? format(record.reviewed_at, 'yyyy-MM-dd HH:mm:ss') : '', record.review_note || '',
-            record.worked_minutes ?? '', record.status === 'clocked_in' ? text.working : text.completed,
+            record.worked_minutes ?? '', record.status === 'clocked_in' ? text.working : record.auto_clocked_out ? text.autoCompleted : text.completed,
         ])
         const csv = `\uFEFF${[header, ...rows].map((row) => row.map(csvCell).join(';')).join('\n')}`
         const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
@@ -173,7 +173,7 @@ export function AttendanceReportPanel() {
                                         <h3 className="font-semibold tracking-tight">{record.staff_name}</h3>
                                         <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{record.staff_role} · {record.work_date}</p>
                                     </div>
-                                    <Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : text.completed}</Badge>
+                                    <Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : record.auto_clocked_out ? text.autoCompleted : text.completed}</Badge>
                                 </div>
                                 <dl className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-background/40 p-3 text-xs">
                                     <div><dt className="text-muted-foreground">{text.planned}</dt><dd className="mt-1 font-mono font-semibold">{format(record.scheduled_start, 'HH:mm')}–{format(record.scheduled_end, 'HH:mm')}</dd></div>
@@ -181,7 +181,7 @@ export function AttendanceReportPanel() {
                                     <div><dt className="text-muted-foreground">{text.declaredIn}</dt><dd className="mt-1 font-mono font-semibold">{format(record.declared_clock_in_at, 'HH:mm:ss')}</dd></div>
                                     <div><dt className="text-primary">{text.actualIn}</dt><dd className="mt-1 font-mono font-semibold">{record.actual_clock_in_at ? format(record.actual_clock_in_at, 'HH:mm:ss') : '—'}</dd></div>
                                     <div><dt className="text-muted-foreground">{text.declaredOut}</dt><dd className="mt-1 font-mono font-semibold">{record.declared_clock_out_at ? format(record.declared_clock_out_at, 'HH:mm:ss') : text.noExit}</dd></div>
-                                    <div><dt className="text-primary">{text.actualOut}</dt><dd className="mt-1 font-mono font-semibold">{record.actual_clock_out_at ? format(record.actual_clock_out_at, 'HH:mm:ss') : text.noExit}</dd></div>
+                                    <div><dt className="text-primary">{text.actualOut}</dt><dd className="mt-1 font-mono font-semibold">{record.actual_clock_out_at ? format(record.actual_clock_out_at, 'HH:mm:ss') : text.noExit}{record.auto_clocked_out ? <span className="mt-0.5 block font-sans text-[10px] font-medium text-muted-foreground">{text.autoCompleted}</span> : null}</dd></div>
                                 </dl>
                                 {record.late_minutes > 0 && (
                                     <div className="mt-3 rounded-xl bg-amber-500/10 p-3 text-xs ring-1 ring-amber-500/20">
@@ -216,9 +216,9 @@ export function AttendanceReportPanel() {
                                         <td className="px-4 py-3 font-mono text-xs">{format(record.declared_clock_in_at, 'HH:mm:ss')}<div className={record.late_minutes > 0 ? 'text-amber-600' : 'text-emerald-600'}>{record.late_minutes > 0 ? `+${record.late_minutes} ${text.minute}` : text.onTime}</div></td>
                                         <td className="px-4 py-3 font-mono text-xs font-semibold text-primary">{record.actual_clock_in_at ? format(record.actual_clock_in_at, 'HH:mm:ss') : '—'}</td>
                                         <td className="px-4 py-3 font-mono text-xs">{record.declared_clock_out_at ? format(record.declared_clock_out_at, 'HH:mm:ss') : <span className="font-sans text-muted-foreground">{text.noExit}</span>}</td>
-                                        <td className="px-4 py-3 font-mono text-xs font-semibold text-primary">{record.actual_clock_out_at ? format(record.actual_clock_out_at, 'HH:mm:ss') : <span className="font-sans font-normal text-muted-foreground">{text.noExit}</span>}</td>
+                                        <td className="px-4 py-3 font-mono text-xs font-semibold text-primary">{record.actual_clock_out_at ? format(record.actual_clock_out_at, 'HH:mm:ss') : <span className="font-sans font-normal text-muted-foreground">{text.noExit}</span>}{record.auto_clocked_out ? <div className="font-sans text-[10px] font-medium text-muted-foreground">{text.autoCompleted}</div> : null}</td>
                                         <td className="px-4 py-3 font-medium">{durationLabel(record.worked_minutes, t)}</td>
-                                        <td className="px-4 py-3"><Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : text.completed}</Badge></td>
+                                        <td className="px-4 py-3"><Badge variant={record.status === 'clocked_in' ? 'default' : 'secondary'}>{record.status === 'clocked_in' ? text.working : record.auto_clocked_out ? text.autoCompleted : text.completed}</Badge></td>
                                         <td className="max-w-[260px] px-4 py-3 text-xs text-muted-foreground"><span className="line-clamp-2" title={record.late_excuse || ''}>{record.late_excuse || '—'}</span></td>
                                         <td className="min-w-[220px] px-4 py-3 text-xs">
                                             {record.late_minutes <= 0 ? '—' : (

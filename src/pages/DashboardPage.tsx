@@ -18,6 +18,7 @@ import { CalendarWidget } from '@/components/calendar/CalendarWidget'
 import { StaffMealCard } from '@/components/hotel/StaffMealCard'
 import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
+import { useAttendanceAutomator } from '@/hooks/useAttendanceAutomator'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 import { TourOverlay } from '@/components/onboarding/TourOverlay'
 import { CurrencyWidget } from '@/components/dashboard/CurrencyWidget'
@@ -128,6 +129,7 @@ export function DashboardPage() {
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
+    useAttendanceAutomator(hotel?.id || null)
 
     // Due payment notifications
     useDuePaymentNotifier()
@@ -290,7 +292,7 @@ export function DashboardPage() {
                     
                     {/* OVERVIEW VIEW */}
                     <TabsContent value="overview" className="m-0 border-none p-0 outline-none">
-                        {overviewTab !== 'grid' && !isMobile && (
+                        {overviewTab !== 'grid' && (
                             <div className="sticky top-0 z-30 mb-5 flex items-center gap-2 rounded-[1.1rem] border border-border/50 bg-background/[0.82] px-3 py-2 backdrop-blur-xl">
                                 <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
                                     <ChevronLeft className="w-5 h-5" />
@@ -367,6 +369,11 @@ export function DashboardPage() {
                                                 if (id === 'overview') {
                                                     setActiveTab('overview')
                                                     setOverviewTab('grid')
+                                                    return
+                                                }
+                                                if (['hotel-info', 'currency', 'calendar', 'menu', 'blacklist'].includes(id)) {
+                                                    setActiveTab('overview')
+                                                    setOverviewTab(id)
                                                     return
                                                 }
                                                 setOperationTab(id)

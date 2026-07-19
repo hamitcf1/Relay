@@ -183,6 +183,8 @@ export type Translations = {
     'module.compliance': string
     'module.shiftNotes': string
     'module.hotelInfo': string
+    'module.cashInfo': string
+    'module.currencyConverter': string
     'module.roster': string
     'module.calendar': string
     'module.maintenance': string
@@ -1367,6 +1369,7 @@ export type Translations = {
     'attendance.report.onTime': string
     'attendance.report.working': string
     'attendance.report.completed': string
+    'attendance.report.autoCompleted': string
     'attendance.report.noExit': string
     'attendance.report.permissionYes': string
     'attendance.report.permissionNo': string

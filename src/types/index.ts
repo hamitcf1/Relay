@@ -177,6 +177,8 @@ export interface AttendanceRecord {
     declared_clock_out_at: Date | null
     actual_clock_in_at: Date | null
     actual_clock_out_at: Date | null
+    auto_clocked_out: boolean
+    auto_clock_out_at: Date | null
     status: AttendanceStatus
     late_minutes: number
     late_excuse: string | null

@@ -25,6 +25,7 @@ interface AttendanceState {
     subscribeToAttendance: (hotelId: string, staffId?: string) => () => void
     clockIn: (hotelId: string, user: User, assignment: AttendanceAssignment, declaredAt: Date, excuse?: string, managerPermission?: boolean) => Promise<void>
     clockOut: (hotelId: string, user: User, recordId: string, declaredAt: Date) => Promise<void>
+    autoClockOut: (hotelId: string, actor: User, record: AttendanceRecord) => Promise<void>
     reviewLateArrival: (hotelId: string, gm: User, recordId: string, decision: 'approved' | 'rejected', note?: string) => Promise<void>
 }
 
@@ -51,6 +52,8 @@ function mapRecord(id: string, data: Record<string, unknown>): AttendanceRecord 
         declared_clock_out_at: declaredClockOut ? toDate(declaredClockOut) : null,
         actual_clock_in_at: null,
         actual_clock_out_at: null,
+        auto_clocked_out: Boolean(data.auto_clocked_out),
+        auto_clock_out_at: data.auto_clock_out_at ? toDate(data.auto_clock_out_at) : null,
         status: data.status as AttendanceRecord['status'],
         late_minutes: Number(data.late_minutes || 0),
         late_excuse: data.late_excuse ? String(data.late_excuse) : null,
@@ -98,6 +101,8 @@ function demoRecords(): AttendanceRecord[] {
         declared_clock_out_at: null,
         actual_clock_in_at: new Date(clockIn.getTime() + 2 * 60_000),
         actual_clock_out_at: null,
+        auto_clocked_out: false,
+        auto_clock_out_at: null,
         status: 'clocked_in',
         late_minutes: 12,
         late_excuse: 'Toplu taşıma gecikmesi',
@@ -160,10 +165,10 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
                 const data = item.data()
                 const recordId = String(data.record_id || '')
                 const event = String(data.event || '')
-                if (!recordId || !data.occurred_at || (event !== 'clock_in' && event !== 'clock_out')) return
+                if (!recordId || !data.occurred_at || !['clock_in', 'clock_out', 'auto_clock_out'].includes(event)) return
                 const current = nextAuditTimes[recordId] || { clockIn: null, clockOut: null }
                 if (event === 'clock_in' && !current.clockIn) current.clockIn = toDate(data.occurred_at)
-                if (event === 'clock_out' && !current.clockOut) current.clockOut = toDate(data.occurred_at)
+                if ((event === 'clock_out' || event === 'auto_clock_out') && !current.clockOut) current.clockOut = toDate(data.occurred_at)
                 nextAuditTimes[recordId] = current
             })
             auditTimes = nextAuditTimes
@@ -212,6 +217,8 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
                 declared_clock_out_at: null,
                 actual_clock_in_at: now,
                 actual_clock_out_at: null,
+                auto_clocked_out: false,
+                auto_clock_out_at: null,
                 status: 'clocked_in',
                 late_minutes: lateMinutes,
                 late_excuse: cleanExcuse || null,
@@ -257,6 +264,8 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
                 reviewed_at: null,
                 review_note: null,
                 worked_minutes: null,
+                auto_clocked_out: false,
+                auto_clock_out_at: null,
                 created_at: Timestamp.fromDate(declaredAt),
                 updated_at: Timestamp.fromDate(declaredAt),
             })
@@ -328,6 +337,60 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
             `${Math.floor(workedMinutes / 60)} ${t('attendance.unit.hour')} ${workedMinutes % 60} ${t('attendance.unit.minute')}`,
         )
         toast.success(t('attendance.toast.clockOut'))
+    },
+
+    autoClockOut: async (hotelId, actor, record) => {
+        const now = new Date()
+        if (record.status !== 'clocked_in' || now < record.scheduled_end) return
+        if (actor.role !== 'gm' && actor.uid !== record.staff_id) return
+
+        const scheduledEnd = record.scheduled_end
+        const workedMinutes = Math.max(0, Math.floor((scheduledEnd.getTime() - record.declared_clock_in_at.getTime()) / 60_000))
+
+        if (hotelId === 'demo-hotel-id') {
+            set({ records: get().records.map((item) => item.id === record.id ? {
+                ...item,
+                status: 'clocked_out',
+                actual_clock_out_at: scheduledEnd,
+                auto_clocked_out: true,
+                auto_clock_out_at: scheduledEnd,
+                worked_minutes: workedMinutes,
+            } : item) })
+            return
+        }
+
+        const recordRef = doc(db, 'hotels', hotelId, 'attendance', record.id)
+        const eventRef = doc(db, 'hotels', hotelId, 'attendance_events', `${record.id}_auto_clock_out`)
+        await runTransaction(db, async (transaction) => {
+            const recordSnapshot = await transaction.get(recordRef)
+            if (!recordSnapshot.exists()) return
+            const data = recordSnapshot.data()
+            if (data.status !== 'clocked_in') return
+            const storedScheduledEnd = toDate(data.scheduled_end)
+            if (new Date() < storedScheduledEnd) return
+            const declaredClockIn = toDate(data.declared_clock_in_at || data.clock_in_at)
+            const storedWorkedMinutes = Math.max(0, Math.floor((storedScheduledEnd.getTime() - declaredClockIn.getTime()) / 60_000))
+
+            transaction.update(recordRef, {
+                status: 'clocked_out',
+                worked_minutes: storedWorkedMinutes,
+                auto_clocked_out: true,
+                auto_clock_out_at: Timestamp.fromDate(storedScheduledEnd),
+                updated_at: serverTimestamp(),
+            })
+            transaction.set(eventRef, {
+                record_id: record.id,
+                staff_id: data.staff_id,
+                staff_name: data.staff_name,
+                event: 'auto_clock_out',
+                occurred_at: Timestamp.fromDate(storedScheduledEnd),
+                processed_at: serverTimestamp(),
+                automatic: true,
+                actor_id: actor.uid,
+                actor_name: actor.name,
+                actor_role: actor.role,
+            })
+        })
     },
 
     reviewLateArrival: async (hotelId, gm, recordId, decision, note = '') => {
