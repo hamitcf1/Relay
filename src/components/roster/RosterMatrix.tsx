@@ -64,7 +64,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [exporting, setExporting] = useState(false)
-    const [selectedDayIndex, setSelectedDayIndex] = useState(() => (new Date().getDay() + 6) % 7)
 
     const isGM = user?.role === 'gm'
 
@@ -164,10 +163,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         })
     }, [weekStart])
 
-    useEffect(() => {
-        setSelectedDayIndex(weekOffset === 0 ? (new Date().getDay() + 6) % 7 : 0)
-    }, [weekOffset])
-
     // Sorted staff based on hotel settings AND visibility
     const sortedStaff = useMemo(() => {
         let currentStaff = [...staff]
@@ -210,12 +205,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         if (shift === 'E') return t('shift.extra')
         if (shift === 'OFF') return t('shift.off')
         return shift
-    }
-
-    const getShiftTime = (shift: string) => {
-        const shiftInfo = hotel?.settings?.shifts?.find((item: any) => item.code === shift)
-        if (shiftInfo?.startTime && shiftInfo?.endTime) return `${shiftInfo.startTime}–${shiftInfo.endTime}`
-        return ({ A: '08:00–16:00', B: '16:00–00:00', C: '00:00–08:00', E: '10:00–18:00' } as Record<string, string>)[shift] || ''
     }
 
     const handleReorder = async (newOrder: StaffMember[]) => {
@@ -411,82 +400,74 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             <div className="pt-2">
                 {staff.length > 0 && (
                     <div className="space-y-3 md:hidden">
-                        <div className="grid grid-cols-7 gap-1" role="tablist" aria-label={t('roster.title')}>
-                            {weekDates.map(({ day, dateStr, isToday }, index) => (
-                                <button
-                                    key={day}
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={selectedDayIndex === index}
-                                    onClick={() => setSelectedDayIndex(index)}
-                                    className={cn(
-                                        'flex min-w-0 flex-col items-center rounded-xl border px-0.5 py-2 transition-colors',
-                                        selectedDayIndex === index
-                                            ? 'border-primary/45 bg-primary/10 text-primary'
-                                            : 'border-border/60 bg-card/45 text-muted-foreground',
-                                        isToday && selectedDayIndex !== index && 'border-primary/20'
-                                    )}
-                                >
-                                    <span className="text-[9px] font-semibold uppercase">{t(`day.${day.toLowerCase()}` as any).slice(0, 2)}</span>
-                                    <span className="mt-1 font-mono text-[10px]">{dateStr.slice(0, 2)}</span>
-                                    {isToday && <span className="mt-1 h-1 w-1 rounded-full bg-primary" />}
-                                </button>
-                            ))}
-                        </div>
-
                         <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/45">
-                            <div className="flex items-center justify-between border-b border-border/60 px-3.5 py-3">
-                                <div>
-                                    <p className="text-sm font-semibold text-foreground">{t(`day.${DAYS[selectedDayIndex].toLowerCase()}` as any)}</p>
-                                    <p className="mt-0.5 text-[11px] text-muted-foreground">{weekDates[selectedDayIndex].dateStr}</p>
-                                </div>
-                                {canEdit && <span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary">{t('common.edit')}</span>}
+                            <div className="grid grid-cols-[minmax(4.75rem,1.35fr)_repeat(7,minmax(0,1fr))] items-end border-b border-border/60 bg-muted/20 px-2 py-2.5">
+                                <span className="truncate pr-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                    {t('common.staff')}
+                                </span>
+                                {weekDates.map(({ day, dateStr, isToday }) => (
+                                    <div
+                                        key={day}
+                                        className={cn(
+                                            'flex min-w-0 flex-col items-center gap-0.5 text-muted-foreground',
+                                            isToday && 'text-primary'
+                                        )}
+                                    >
+                                        <span className="text-[9px] font-semibold uppercase">{t(`day.${day.toLowerCase()}` as any).slice(0, 2)}</span>
+                                        <span className="font-mono text-[9px] tabular-nums">{dateStr.slice(0, 2)}</span>
+                                        <span className={cn('h-0.5 w-3 rounded-full bg-transparent', isToday && 'bg-primary')} />
+                                    </div>
+                                ))}
                             </div>
 
                             <div className="divide-y divide-border/55">
                                 {mobileStaff.map((member) => {
-                                    const shift = schedule[member.uid]?.[DAYS[selectedDayIndex]]
                                     const isCurrentUser = user?.uid === member.uid
                                     return (
-                                        <button
+                                        <div
                                             key={member.uid}
-                                            type="button"
-                                            disabled={!canEdit}
-                                            onClick={() => cycleShift(member.uid, DAYS[selectedDayIndex], 'forward')}
                                             className={cn(
-                                                'flex min-h-[4.5rem] w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors',
-                                                canEdit ? 'active:bg-muted/60' : 'cursor-default',
+                                                'grid min-h-14 grid-cols-[minmax(4.75rem,1.35fr)_repeat(7,minmax(0,1fr))] items-center px-2 py-2',
                                                 isCurrentUser && 'bg-primary/[0.045]'
                                             )}
                                         >
-                                            <span className={cn(
-                                                'grid h-9 w-9 shrink-0 place-items-center rounded-full border text-xs font-semibold',
-                                                isCurrentUser ? 'border-primary/35 bg-primary/10 text-primary' : 'border-border bg-muted/60 text-muted-foreground'
-                                            )}>
-                                                {member.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()}
+                                            <span className="min-w-0 pr-1.5">
+                                                <span className={cn('block truncate text-[11px] font-semibold leading-tight text-foreground', member.is_hidden_in_roster && 'opacity-50 line-through')}>{member.name}</span>
+                                                {isCurrentUser && <span className="mt-0.5 block text-[9px] font-medium text-primary">{language === 'tr' ? 'Siz' : language === 'ru' ? 'Вы' : 'You'}</span>}
                                             </span>
-                                            <span className="min-w-0 flex-1">
-                                                <span className={cn('block truncate text-sm font-medium text-foreground', member.is_hidden_in_roster && 'opacity-50 line-through')}>{member.name}</span>
-                                                <span className="mt-0.5 block text-[11px] text-muted-foreground">{isCurrentUser ? (language === 'tr' ? 'Siz' : language === 'ru' ? 'Вы' : 'You') : t('common.staff')}</span>
-                                            </span>
-                                            <span className={cn(
-                                                'flex min-w-[6.6rem] flex-col items-end rounded-xl px-2.5 py-1.5',
-                                                shift ? shiftColors[shift] : 'border border-border/50 bg-muted/20 text-muted-foreground'
-                                            )}>
-                                                <span className="text-xs font-bold">{shift ? `${shift} · ${getShiftLabel(shift)}` : '—'}</span>
-                                                {shift && shift !== 'OFF' && <span className="mt-0.5 text-[10px] opacity-75">{getShiftTime(shift)}</span>}
-                                            </span>
-                                        </button>
+                                            {DAYS.map((day, dayIndex) => {
+                                                const shift = schedule[member.uid]?.[day]
+                                                const isToday = weekDates[dayIndex]?.isToday
+                                                return (
+                                                    <motion.button
+                                                        key={day}
+                                                        type="button"
+                                                        disabled={!canEdit}
+                                                        onClick={() => cycleShift(member.uid, day, 'forward')}
+                                                        aria-label={`${member.name}, ${t(`day.${day.toLowerCase()}` as any)}: ${shift ? getShiftLabel(shift) : '—'}`}
+                                                        className={cn(
+                                                            'mx-auto grid h-8 w-[calc(100%-0.2rem)] min-w-0 place-items-center rounded-md text-[9px] font-bold transition-colors',
+                                                            shift ? shiftColors[shift] : 'border border-border/40 bg-muted/20 text-muted-foreground/60',
+                                                            isToday && 'ring-1 ring-primary/50 ring-offset-1 ring-offset-background',
+                                                            canEdit ? 'active:opacity-70' : 'cursor-default'
+                                                        )}
+                                                        whileTap={canEdit ? { scale: 0.9 } : undefined}
+                                                    >
+                                                        {shift || '—'}
+                                                    </motion.button>
+                                                )
+                                            })}
+                                        </div>
                                     )
                                 })}
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-wrap gap-x-3 gap-y-2 border-t border-border/60 pt-3">
                             {shifts.map((shift) => (
-                                <div key={shift} className={cn('rounded-xl px-2.5 py-2', shiftColors[shift])}>
-                                    <div className="text-xs font-bold">{shift} · {getShiftLabel(shift)}</div>
-                                    {shift !== 'OFF' && <div className="mt-0.5 text-[10px] opacity-75">{getShiftTime(shift)}</div>}
+                                <div key={shift} className="flex min-w-0 items-center gap-1.5">
+                                    <span className={cn('grid h-5 min-w-5 place-items-center rounded px-1 text-[9px] font-bold', shiftColors[shift])}>{shift}</span>
+                                    <span className="truncate text-[10px] text-muted-foreground">{getShiftLabel(shift)}</span>
                                 </div>
                             ))}
                         </div>
