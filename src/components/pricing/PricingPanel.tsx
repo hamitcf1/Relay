@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { format, addDays as addDaysFns } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -966,6 +966,13 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
     const [editingOverride, setEditingOverride] = useState<AgencyOverride | null>(null)
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
+    const editorRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (isAdding || editingOverride) {
+            editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+    }, [isAdding, editingOverride])
 
     const sortedOverrides = [...agency.overrides].sort((a, b) => {
         return sortOrder === 'desc'
@@ -1025,6 +1032,8 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
             <AnimatePresence>
                 {(isAdding || editingOverride) && (
                     <motion.div
+                        ref={editorRef}
+                        key={editingOverride?.id ?? 'add'}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
