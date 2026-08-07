@@ -632,11 +632,13 @@ export function SalesPanel() {
                                     onClick={() => setSelectedSaleId(sale.id)}
                                     className={cn(
                                         'group p-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]',
-                                        sale.payment_status === 'paid'
-                                            ? 'bg-emerald-500/5 border-emerald-500/10 hover:border-emerald-500/30'
-                                            : sale.payment_status === 'partial'
-                                                ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/30'
-                                                : 'bg-card border-border hover:border-primary/50 hover:bg-accent/40'
+                                        sale.status === 'cancelled' || sale.payment_status === 'cancelled' || sale.payment_status === 'refunded'
+                                            ? 'bg-rose-500/5 border-rose-500/10 hover:border-rose-500/30'
+                                            : sale.payment_status === 'paid'
+                                                ? 'bg-emerald-500/5 border-emerald-500/10 hover:border-emerald-500/30'
+                                                : sale.payment_status === 'partial'
+                                                    ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/30'
+                                                    : 'bg-card border-border hover:border-primary/50 hover:bg-accent/40'
                                     )}
                                 >
                                     <div className="flex items-start justify-between gap-3">
@@ -644,7 +646,7 @@ export function SalesPanel() {
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-lg group-hover:scale-110 transition-transform">{saleTypeInfo[sale.type].icon}</span>
                                                 <span className="font-semibold text-foreground truncate">{sale.name}</span>
-                                                {remaining > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+                                                {sale.status !== 'cancelled' && remaining > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
                                                 
                                                 <Button 
                                                     variant="ghost" 

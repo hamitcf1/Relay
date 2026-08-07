@@ -252,7 +252,9 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                         <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider", 
                                             sale.payment_status === 'paid' 
                                                 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-100 text-emerald-700") 
-                                                : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
+                                                : sale.payment_status === 'cancelled' || sale.payment_status === 'refunded'
+                                                    ? (isDark ? "bg-zinc-500/20 text-zinc-300" : "bg-zinc-200 text-zinc-600")
+                                                    : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
                                         )}>
                                             {sale.payment_status}
                                         </span>

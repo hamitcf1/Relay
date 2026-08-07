@@ -427,7 +427,7 @@ export interface DailyMenu {
 // ============================================
 
 export type SaleType = 'tour' | 'transfer' | 'laundry' | 'other'
-export type PaymentStatus = 'pending' | 'partial' | 'paid'
+export type PaymentStatus = 'pending' | 'partial' | 'paid' | 'cancelled' | 'refunded'
 export type Currency = 'EUR' | 'TRY' | 'USD' | 'GBP'
 
 export interface PaymentEntry {
