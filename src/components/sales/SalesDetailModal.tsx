@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
     Calendar, Users, MapPin,
-    MessageSquare, Edit3, Check, Trash2, Clock, Ticket
+    MessageSquare, Edit3, Check, Trash2, Clock, Ticket, RotateCcw, XCircle
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,7 @@ interface SalesDetailModalProps {
 export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
-    const { sales, updateSale, deleteSale, collectPayment } = useSalesStore()
+    const { sales, updateSale, deleteSale, collectPayment, markPaymentCancelled, refundPayment } = useSalesStore()
     const confirm = useConfirm()
 
     const [isEditing, setIsEditing] = useState(false)
@@ -134,6 +134,34 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
             onClose()
         }
     }
+
+    const handleMarkNotReceived = async () => {
+        if (!hotel?.id || !saleId) return
+        try {
+            await markPaymentCancelled(hotel.id, saleId)
+        } catch (error) {
+            console.error("Failed to mark payment as cancelled:", error)
+        }
+    }
+
+    const handleRefund = async () => {
+        if (!hotel?.id || !saleId) return
+        const confirmed = await confirm({
+            title: t('sales.details.refundConfirmTitle'),
+            description: `${sale.name} - ${getCurrencySymbol(sale.currency)}${sale.collected_amount}`,
+            variant: 'destructive',
+            confirmLabel: t('sales.details.refund'),
+        })
+        if (confirmed) {
+            try {
+                await refundPayment(hotel.id, saleId)
+            } catch (error) {
+                console.error("Failed to refund payment:", error)
+            }
+        }
+    }
+
+    const isCancelled = sale.status === 'cancelled'
 
     const remaining = sale.total_price - sale.collected_amount
     const dateLocale = getDateLocale()
@@ -327,7 +355,39 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                         </span>
                                     </div>
 
-                                    {remaining > 0 && (
+                                    {isCancelled ? (
+                                        <div className="pt-3 border-t border-border space-y-2">
+                                            <p className="text-xs text-muted-foreground">{t('sales.details.cancelledInfo')}</p>
+                                            {sale.collected_amount > 0 && sale.payment_status !== 'refunded' ? (
+                                                <>
+                                                    <p className="text-[11px] text-muted-foreground">{t('sales.details.paymentTaken')}</p>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        onClick={handleRefund}
+                                                        className="w-full h-8 mt-1"
+                                                    >
+                                                        <RotateCcw className="w-3.5 h-3.5 mr-1" /> {t('sales.details.refund')}
+                                                    </Button>
+                                                </>
+                                            ) : sale.collected_amount === 0 && sale.payment_status !== 'cancelled' ? (
+                                                <>
+                                                    <p className="text-[11px] text-muted-foreground">{t('sales.details.paymentNotTaken')}</p>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={handleMarkNotReceived}
+                                                        className="w-full h-8 mt-1"
+                                                    >
+                                                        <XCircle className="w-3.5 h-3.5 mr-1" /> {t('sales.details.markNotReceived')}
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <p className="text-[11px] font-medium text-muted-foreground">
+                                                    {t(paymentStatusInfo[sale.payment_status].label as any)}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ) : remaining > 0 && (
                                         <div className="pt-3 border-t border-border space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <div className="flex-1 relative">

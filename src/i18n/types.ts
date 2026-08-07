@@ -767,6 +767,13 @@ export type Translations = {
     'sales.details.persons': string
     'sales.details.notSet': string
     'sales.details.none': string
+    'sales.details.cancelledInfo': string
+    'sales.details.paymentNotTaken': string
+    'sales.details.paymentTaken': string
+    'sales.details.markNotReceived': string
+    'sales.details.refund': string
+    'sales.details.refundConfirmTitle': string
+    'sales.details.refundConfirmDesc': string
 
     'sales.status.waiting': string
     'sales.status.confirmed': string
@@ -777,6 +784,8 @@ export type Translations = {
     'sales.payment.pending': string
     'sales.payment.partial': string
     'sales.payment.paid': string
+    'sales.payment.cancelled': string
+    'sales.payment.refunded': string
     'sales.type.tour': string
     'sales.type.transfer': string
     'sales.type.laundry': string

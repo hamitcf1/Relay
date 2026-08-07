@@ -37,7 +37,9 @@ export const saleStatusInfo: Record<SaleStatus, { label: string; color: string }
 export const paymentStatusInfo: Record<PaymentStatus, { label: string; color: string }> = {
     pending: { label: 'sales.payment.pending', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
     partial: { label: 'sales.payment.partial', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    paid: { label: 'sales.payment.paid', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' }
+    paid: { label: 'sales.payment.paid', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+    cancelled: { label: 'sales.payment.cancelled', color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' },
+    refunded: { label: 'sales.payment.refunded', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' }
 }
 
 interface SalesState {
@@ -52,6 +54,8 @@ interface SalesActions {
     updateSale: (hotelId: string, saleId: string, updates: Partial<Sale>) => Promise<void>
     deleteSale: (hotelId: string, saleId: string) => Promise<void>
     collectPayment: (hotelId: string, saleId: string, amount: number, currency?: Currency, targetAmount?: number) => Promise<void>
+    markPaymentCancelled: (hotelId: string, saleId: string) => Promise<void>
+    refundPayment: (hotelId: string, saleId: string) => Promise<void>
     getDueSales: () => Sale[]
     getSalesByType: (type: SaleType) => Sale[]
 }
@@ -179,6 +183,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     updateSale: async (hotelId, saleId, updates) => {
         const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
         const updateData: any = { ...updates }
+        const currentSale = get().sales.find(s => s.id === saleId)
 
         if (updates.date) {
             updateData.date = Timestamp.fromDate(updates.date)
@@ -186,7 +191,6 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 
         // Recalculate payment status if amounts changed
         if (updates.total_price !== undefined) {
-            const currentSale = get().sales.find(s => s.id === saleId)
             if (currentSale) {
                 const collected = currentSale.collected_amount
                 const total = updates.total_price
@@ -196,12 +200,30 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             }
         }
 
+        // Cancellation handling: a cancelled sale must not expect payment
+        if (updates.status === 'cancelled' && currentSale) {
+            // No money was taken -> mark the payment as cancelled (not received)
+            if (currentSale.collected_amount === 0 && !(currentSale.payments || []).length) {
+                updateData.payment_status = 'cancelled'
+            }
+            // If money was already collected, keep payment_status as-is so the
+            // user can decide to refund it or keep it as received.
+        }
+
+        // Re-activation: sale is no longer cancelled -> recompute payment status
+        if (updates.status && updates.status !== 'cancelled' && currentSale?.status === 'cancelled') {
+            const total = updates.total_price ?? currentSale.total_price
+            const collected = currentSale.collected_amount
+            updateData.payment_status =
+                collected >= total ? 'paid' :
+                    collected > 0 ? 'partial' : 'pending'
+        }
+
         updateData.updated_at = serverTimestamp()
         await updateDoc(saleRef, updateData)
         toast.success('Sale updated')
 
         // Sync to calendar if critical fields changed
-        const currentSale = get().sales.find(s => s.id === saleId)
         if (currentSale?.calendar_event_id) {
             const syncUpdates: any = {}
             if (updates.date) syncUpdates.date = Timestamp.fromDate(updates.date)
@@ -309,8 +331,48 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         }
     },
 
+    markPaymentCancelled: async (hotelId: string, saleId: string) => {
+        const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
+        await updateDoc(saleRef, {
+            payment_status: 'cancelled',
+            updated_at: serverTimestamp()
+        })
+        toast.success('Payment cancelled')
+    },
+
+    refundPayment: async (hotelId: string, saleId: string) => {
+        const sale = get().sales.find(s => s.id === saleId)
+        if (!sale) return
+
+        const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
+        await updateDoc(saleRef, {
+            payment_status: 'refunded',
+            collected_amount: 0,
+            updated_at: serverTimestamp()
+        })
+        toast.success('Payment refunded')
+
+        // Sync to calendar
+        if (sale.calendar_event_id) {
+            try {
+                const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
+                await updateDoc(eventRef, {
+                    collected_amount: 0,
+                    updated_at: serverTimestamp()
+                })
+            } catch (error) {
+                console.error('Error updating calendar event for refund:', error)
+            }
+        }
+    },
+
     getDueSales: () => {
-        return get().sales.filter(sale => sale.payment_status !== 'paid')
+        return get().sales.filter(sale =>
+            sale.status !== 'cancelled' &&
+            sale.payment_status !== 'paid' &&
+            sale.payment_status !== 'cancelled' &&
+            sale.payment_status !== 'refunded'
+        )
     },
 
     getSalesByType: (type) => {
