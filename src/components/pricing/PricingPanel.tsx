@@ -17,7 +17,8 @@ import {
     Sparkles,
     ArrowUpDown,
     Table,
-    List
+    List,
+    Pencil
 } from 'lucide-react'
 import { usePricingStore } from '@/stores/pricingStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -570,10 +571,11 @@ function BulkRateEditor({ hotelId }: { hotelId: string }) {
 
 function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides: BaseOverride[], isGM: boolean, hotelId: string }) {
     const { t } = useLanguageStore()
-    const { removeBaseOverride } = usePricingStore()
+    const { removeBaseOverride, setBaseOverride } = usePricingStore()
     const confirm = useConfirm()
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
+    const [editingOverride, setEditingOverride] = useState<BaseOverride | null>(null)
 
     const sortedOverrides = [...baseOverrides].sort((a, b) => {
         return sortOrder === 'desc'
@@ -629,6 +631,24 @@ function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides
                 </div>
             </CardHeader>
             <CardContent className="p-0 relative z-10">
+                {editingOverride && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="border-b border-border/30 bg-primary/5 p-6 relative overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent pointer-events-none" />
+                        <OverrideEditor
+                            initial={editingOverride}
+                            onSave={async (override) => {
+                                await setBaseOverride(hotelId, override)
+                                setEditingOverride(null)
+                            }}
+                            onCancel={() => setEditingOverride(null)}
+                        />
+                    </motion.div>
+                )}
                 <div className="divide-y divide-border/30">
                     {sortedOverrides.length === 0 ? (
                         <div className="p-12 text-center text-muted-foreground text-sm italic">
@@ -668,24 +688,35 @@ function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides
                                             ))}
                                         </div>
                                     </div>
-                                    {isGM && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="opacity-0 group-hover/item:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 h-8 w-8 ml-4 shrink-0"
-                                            onClick={async () => {
-                                                const confirmed = await confirm({
-                                                    title: t('common.deleteConfirm'),
-                                                    variant: 'destructive',
-                                                    confirmLabel: t('common.delete'),
-                                                })
-                                                if (confirmed) {
-                                                    removeBaseOverride(hotelId, override.id)
-                                                }
-                                            }}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                    {isGM && !editingOverride && (
+                                        <div className="flex items-center gap-1 ml-4 shrink-0">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="opacity-0 group-hover/item:opacity-100 transition-opacity hover:bg-primary/10 h-8 w-8"
+                                                onClick={() => setEditingOverride(override)}
+                                                title={t('pricing.overrides.edit')}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="opacity-0 group-hover/item:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 h-8 w-8"
+                                                onClick={async () => {
+                                                    const confirmed = await confirm({
+                                                        title: t('common.deleteConfirm'),
+                                                        variant: 'destructive',
+                                                        confirmLabel: t('common.delete'),
+                                                    })
+                                                    if (confirmed) {
+                                                        removeBaseOverride(hotelId, override.id)
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     )}
                                 </motion.div>
                             ))}
@@ -732,23 +763,36 @@ function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides
                                                 ))}
                                                 {isGM && (
                                                     <td className="p-3 text-right">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-7 w-7 text-destructive hover:bg-destructive/10 opacity-0 group-row:hover:opacity-100 transition-opacity"
-                                                            onClick={async () => {
-                                                                const confirmed = await confirm({
-                                                                    title: t('common.deleteConfirm'),
-                                                                    variant: 'destructive',
-                                                                    confirmLabel: t('common.delete'),
-                                                                })
-                                                                if (confirmed) {
-                                                                    removeBaseOverride(hotelId, override.id)
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </Button>
+                                                        {!editingOverride && (
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 hover:bg-primary/10 opacity-0 group-hover/row:opacity-100 transition-opacity"
+                                                                    onClick={() => setEditingOverride(override)}
+                                                                    title={t('pricing.overrides.edit')}
+                                                                >
+                                                                    <Pencil className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 text-destructive hover:bg-destructive/10 opacity-0 group-hover/row:opacity-100 transition-opacity"
+                                                                    onClick={async () => {
+                                                                        const confirmed = await confirm({
+                                                                            title: t('common.deleteConfirm'),
+                                                                            variant: 'destructive',
+                                                                            confirmLabel: t('common.delete'),
+                                                                        })
+                                                                        if (confirmed) {
+                                                                            removeBaseOverride(hotelId, override.id)
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 )}
                                             </motion.tr>
@@ -919,6 +963,7 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
     const { setAgencyOverride, removeAgencyOverride } = usePricingStore()
     const confirm = useConfirm()
     const [isAdding, setIsAdding] = useState(false)
+    const [editingOverride, setEditingOverride] = useState<AgencyOverride | null>(null)
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
 
@@ -968,7 +1013,7 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
                         <ArrowUpDown className="w-3.5 h-3.5" />
                         {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
                     </Button>
-                    {isGM && !isAdding && (
+                    {isGM && !isAdding && !editingOverride && (
                         <Button size="sm" onClick={() => setIsAdding(true)} className="gap-2 h-8">
                             <Plus className="w-4 h-4" />
                             {t('pricing.overrides.add')}
@@ -978,7 +1023,7 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
             </div>
 
             <AnimatePresence>
-                {isAdding && (
+                {(isAdding || editingOverride) && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -987,11 +1032,16 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
                         <OverrideEditor
+                            initial={editingOverride || undefined}
                             onSave={async (override) => {
                                 await setAgencyOverride(hotelId, agency.id, override)
                                 setIsAdding(false)
+                                setEditingOverride(null)
                             }}
-                            onCancel={() => setIsAdding(false)}
+                            onCancel={() => {
+                                setIsAdding(false)
+                                setEditingOverride(null)
+                            }}
                         />
                     </motion.div>
                 )}
@@ -1026,24 +1076,35 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
                                                 {formatDisplayDate(override.end_date)}
                                             </div>
                                         </div>
-                                        {isGM && (
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-destructive opacity-0 group-hover/card:opacity-100 transition-all hover:bg-destructive/10 hover:scale-110"
-                                                onClick={async () => {
-                                                    const confirmed = await confirm({
-                                                        title: t('common.deleteConfirm'),
-                                                        variant: 'destructive',
-                                                        confirmLabel: t('common.delete'),
-                                                    })
-                                                    if (confirmed) {
-                                                        removeAgencyOverride(hotelId, agency.id, override.id)
-                                                    }
-                                                }}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                                        {isGM && !editingOverride && (
+                                            <div className="flex items-center gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-all hover:bg-primary/10 hover:scale-110"
+                                                    onClick={() => setEditingOverride(override)}
+                                                    title={t('pricing.overrides.edit')}
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-destructive opacity-0 group-hover/card:opacity-100 transition-all hover:bg-destructive/10 hover:scale-110"
+                                                    onClick={async () => {
+                                                        const confirmed = await confirm({
+                                                            title: t('common.deleteConfirm'),
+                                                            variant: 'destructive',
+                                                            confirmLabel: t('common.delete'),
+                                                        })
+                                                        if (confirmed) {
+                                                            removeAgencyOverride(hotelId, agency.id, override.id)
+                                                        }
+                                                    }}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         )}
                                     </div>
                                 </CardHeader>
@@ -1109,23 +1170,36 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
                                                 ))}
                                                 {isGM && (
                                                     <td className="p-3 text-right pr-6">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-destructive hover:bg-destructive/10 opacity-0 group-hover/row:opacity-100 transition-all hover:scale-110"
-                                                            onClick={async () => {
-                                                                const confirmed = await confirm({
-                                                                    title: t('common.deleteConfirm'),
-                                                                    variant: 'destructive',
-                                                                    confirmLabel: t('common.delete'),
-                                                                })
-                                                                if (confirmed) {
-                                                                    removeAgencyOverride(hotelId, agency.id, override.id)
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </Button>
+                                                        {!editingOverride && (
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 opacity-0 group-hover/row:opacity-100 transition-all hover:bg-primary/10 hover:scale-110"
+                                                                    onClick={() => setEditingOverride(override)}
+                                                                    title={t('pricing.overrides.edit')}
+                                                                >
+                                                                    <Pencil className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10 opacity-0 group-hover/row:opacity-100 transition-all hover:scale-110"
+                                                                    onClick={async () => {
+                                                                        const confirmed = await confirm({
+                                                                            title: t('common.deleteConfirm'),
+                                                                            variant: 'destructive',
+                                                                            confirmLabel: t('common.delete'),
+                                                                        })
+                                                                        if (confirmed) {
+                                                                            removeAgencyOverride(hotelId, agency.id, override.id)
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 )}
                                             </motion.tr>
@@ -1398,11 +1472,11 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
     )
 }
 
-function OverrideEditor({ onSave, onCancel }: { onSave: (o: AgencyOverride) => Promise<void>, onCancel: () => void }) {
+function OverrideEditor({ onSave, onCancel, initial }: { onSave: (o: AgencyOverride) => Promise<void>, onCancel: () => void, initial?: AgencyOverride }) {
     const { t } = useLanguageStore()
-    const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
-    const [endDate, setEndDate] = useState(format(addDaysFns(new Date(), 7), 'yyyy-MM-dd'))
-    const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>({})
+    const [startDate, setStartDate] = useState(initial?.start_date || format(new Date(), 'yyyy-MM-dd'))
+    const [endDate, setEndDate] = useState(initial?.end_date || format(addDaysFns(new Date(), 7), 'yyyy-MM-dd'))
+    const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>(initial ? { ...initial.prices } : {})
     const [isSaving, setIsSaving] = useState(false)
 
     const handleSave = async () => {
@@ -1410,7 +1484,7 @@ function OverrideEditor({ onSave, onCancel }: { onSave: (o: AgencyOverride) => P
         setIsSaving(true)
         try {
             await onSave({
-                id: `override_${Date.now()}`,
+                id: initial?.id || `override_${Date.now()}`,
                 start_date: startDate,
                 end_date: endDate,
                 prices
