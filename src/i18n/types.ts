@@ -241,6 +241,7 @@ export type Translations = {
     'pricing.agencies.empty': string
     'pricing.overrides.title': string
     'pricing.overrides.add': string
+    'pricing.overrides.edit': string
     'pricing.overrides.empty': string
     'pricing.lookup.title': string
     'pricing.lookup.desc': string

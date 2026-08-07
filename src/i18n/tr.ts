@@ -187,6 +187,7 @@ const tr: Translations = {
         'pricing.agencies.empty': 'Henüz acente eklenmedi.',
         'pricing.overrides.title': 'Özel Tarih Aralıkları',
         'pricing.overrides.add': 'Yeni Aralık Ekle',
+        'pricing.overrides.edit': 'Aralığı Düzenle',
         'pricing.overrides.empty': 'Bu acente için özel tarih aralığı bulunmuyor.',
         'pricing.lookup.title': 'Fiyat Sorgulama',
         'pricing.lookup.desc': 'Herhangi bir tarih ve acente için geçerli fiyatı hızlıca kontrol edin.',

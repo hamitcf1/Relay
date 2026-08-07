@@ -244,6 +244,7 @@ const en: Translations = {
         'pricing.agencies.empty': 'No agencies added yet.',
         'pricing.overrides.title': 'Special Date Ranges',
         'pricing.overrides.add': 'Add New Range',
+        'pricing.overrides.edit': 'Edit Range',
         'pricing.overrides.empty': 'No special date ranges for this agency.',
         'pricing.lookup.title': 'Price Lookup',
         'pricing.lookup.desc': 'Quickly check the effective price for any date and agency.',
