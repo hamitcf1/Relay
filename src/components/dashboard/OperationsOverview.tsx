@@ -2,51 +2,40 @@ import { useMemo } from 'react'
 import { format } from 'date-fns'
 import {
     AlertTriangle,
-    ArrowRight,
     Banknote,
     Bus,
     CalendarDays,
     CheckCircle2,
     ChevronRight,
     Clock3,
-    DoorOpen,
     Info,
     MapPinned,
     Pin,
     Plus,
     RefreshCw,
     Shirt,
-    Users,
 } from 'lucide-react'
 import { useNotesStore } from '@/stores/notesStore'
-import { useAttendanceStore } from '@/stores/attendanceStore'
-import { useRosterStore } from '@/stores/rosterStore'
 import { useSalesStore } from '@/stores/salesStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import type { NotePriority, ShiftNote } from '@/types'
 
 interface OperationsOverviewProps {
     onOpenNotes: () => void
-    onOpenAttendance: () => void
-    onOpenRoster: () => void
     onOpenSales: () => void
     onNewRecord: () => void
 }
 
 const priorityRank: Record<NotePriority, number> = { critical: 0, high: 1, medium: 2, low: 3 }
 
-export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRoster, onOpenSales, onNewRecord }: OperationsOverviewProps) {
+export function OperationsOverview({ onOpenNotes, onOpenSales, onNewRecord }: OperationsOverviewProps) {
     const notes = useNotesStore((state) => state.notes)
     const sales = useSalesStore((state) => state.sales)
-    const attendance = useAttendanceStore((state) => state.records)
-    const schedule = useRosterStore((state) => state.schedule)
-    const staff = useRosterStore((state) => state.activeStaff)
     const language = useLanguageStore((state) => state.language)
 
     const copy = language === 'tr' ? {
         title: 'Operasyon özeti', mobileTitle: 'Operasyon', newRecord: 'Yeni kayıt', handover: 'Vardiya devri',
-        handoverSub: 'Önceki vardiyadan devralınanlar', viewAll: 'Devri aç', today: 'Bugün', attendance: 'Mesai', roster: 'Haftalık vardiya',
-        scheduled: 'Vardiyada', arrived: 'Geldi', late: 'Geç kalan', off: 'İzinli', todaySales: 'Bugünkü satışlar', paid: 'tahsil edildi',
+        handoverSub: 'Önceki vardiyadan devralınanlar', viewAll: 'Devri aç', today: 'Bugün', todaySales: 'Bugünkü satışlar', paid: 'tahsil edildi',
         transferDue: 'Transfer ödemesi', tourDue: 'Tur ödemesi', laundryDue: 'Çamaşırhane ödemesi', paymentDue: 'Ödeme gerekli', awaiting: 'tahsilat bekliyor', openSales: 'Satışları aç',
         openRequests: 'Açık kayıt', critical: 'Kritik işler', priority: 'Öncelik', task: 'Başlık', location: 'Konum',
         assigned: 'Atanan', updated: 'Son güncelleme', status: 'Durum', inProgress: 'Devam ediyor', waiting: 'Bekliyor',
@@ -54,8 +43,7 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRoster
         priority_low: 'Düşük', priority_medium: 'Orta', priority_high: 'Yüksek', priority_critical: 'Acil', pinned: 'Sabit',
     } : language === 'ru' ? {
         title: 'Сводка операций', mobileTitle: 'Операции', newRecord: 'Новая запись', handover: 'Передача смены',
-        handoverSub: 'Передано с предыдущей смены', viewAll: 'Открыть передачу', today: 'Сегодня', attendance: 'Посещаемость', roster: 'График на неделю',
-        scheduled: 'В смене', arrived: 'Пришли', late: 'Опоздали', off: 'Выходной', todaySales: 'Продажи сегодня', paid: 'оплачено',
+        handoverSub: 'Передано с предыдущей смены', viewAll: 'Открыть передачу', today: 'Сегодня', todaySales: 'Продажи сегодня', paid: 'оплачено',
         transferDue: 'Оплата трансфера', tourDue: 'Оплата тура', laundryDue: 'Оплата прачечной', paymentDue: 'Требуется оплата', awaiting: 'ожидает оплаты', openSales: 'Открыть продажи',
         openRequests: 'Открытые записи', critical: 'Критические задачи', priority: 'Приоритет', task: 'Задача', location: 'Место',
         assigned: 'Ответственный', updated: 'Обновлено', status: 'Статус', inProgress: 'В работе', waiting: 'Ожидает',
@@ -63,8 +51,7 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRoster
         priority_low: 'Низкий', priority_medium: 'Средний', priority_high: 'Высокий', priority_critical: 'Срочно', pinned: 'Закреплено',
     } : {
         title: 'Operations overview', mobileTitle: 'Operations', newRecord: 'New record', handover: 'Shift handover',
-        handoverSub: 'Carried over from the previous shift', viewAll: 'Open handover', today: 'Today', attendance: 'Attendance', roster: 'Weekly roster',
-        scheduled: 'Scheduled', arrived: 'Arrived', late: 'Late', off: 'Off', todaySales: 'Sales today', paid: 'collected',
+        handoverSub: 'Carried over from the previous shift', viewAll: 'Open handover', today: 'Today', todaySales: 'Sales today', paid: 'collected',
         transferDue: 'Transfer payment', tourDue: 'Tour payment', laundryDue: 'Laundry payment', paymentDue: 'Payment required', awaiting: 'awaiting payment', openSales: 'Open sales',
         openRequests: 'Open records', critical: 'Critical tasks', priority: 'Priority', task: 'Task', location: 'Location',
         assigned: 'Assigned', updated: 'Last update', status: 'Status', inProgress: 'In progress', waiting: 'Waiting',
@@ -82,11 +69,6 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRoster
     const criticalNotes = useMemo(() => activeNotes
         .filter((note) => note.priority === 'critical' || note.priority === 'high' || note.is_pinned)
         .sort((a, b) => Number(Boolean(b.is_pinned)) - Number(Boolean(a.is_pinned)) || priorityRank[a.priority || 'low'] - priorityRank[b.priority || 'low'] || b.created_at.getTime() - a.created_at.getTime()), [activeNotes])
-    const todayRecords = attendance.filter((record) => record.work_date === todayKey)
-    const arrived = new Set(todayRecords.map((record) => record.staff_id)).size
-    const late = todayRecords.filter((record) => record.late_minutes > 0).length
-    const scheduled = staff.filter((member) => schedule[member.uid]?.[todayKey] && schedule[member.uid][todayKey] !== 'OFF').length
-    const off = staff.filter((member) => schedule[member.uid]?.[todayKey] === 'OFF').length
     const todaySales = sales.filter((sale) => format(sale.created_at, 'yyyy-MM-dd') === todayKey && sale.status !== 'cancelled')
     const paidToday = todaySales.filter((sale) => sale.payment_status === 'paid').length
     const unpaidSales = sales.filter((sale) => sale.status !== 'cancelled' && sale.payment_status !== 'paid' && sale.total_price > sale.collected_amount)
@@ -125,19 +107,6 @@ export function OperationsOverview({ onOpenNotes, onOpenAttendance, onOpenRoster
                     </div>
                 </OverviewPanel>
             </div>
-
-            <section className="ops-attendance" aria-label={copy.attendance}>
-                <button className="ops-attendance__heading" onClick={onOpenAttendance}>
-                    <span className="ops-section-icon"><Clock3 /></span><strong>{copy.attendance}</strong>
-                </button>
-                <div className="ops-attendance__metrics">
-                    <AttendanceMetric value={scheduled} label={copy.scheduled} tone="neutral" icon={Users} />
-                    <AttendanceMetric value={arrived} label={copy.arrived} tone="success" icon={CheckCircle2} />
-                    <AttendanceMetric value={late} label={copy.late} tone="warning" icon={Clock3} />
-                    <AttendanceMetric value={off} label={copy.off} tone="muted" icon={DoorOpen} />
-                </div>
-                <button className="ops-view-link ops-attendance__link" onClick={onOpenRoster}>{copy.roster}<ArrowRight /></button>
-            </section>
 
             <OverviewPanel className="ops-critical" title={copy.critical} icon={AlertTriangle}>
                 <div className="ops-critical__desktop">
@@ -197,10 +166,6 @@ function PriorityBadge({ priority, label }: { priority: NotePriority; label: str
 
 function MetricRow({ icon: Icon, label, value, detail, tone = 'neutral' }: { icon: typeof Clock3; label: string; value: string | number; detail: string; tone?: string }) {
     return <div className="ops-metric-row"><span className={`ops-metric-row__icon ops-metric-row__icon--${tone}`}><Icon /></span><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>
-}
-
-function AttendanceMetric({ value, label, tone, icon: Icon }: { value: number; label: string; tone: string; icon: typeof Clock3 }) {
-    return <div className={`ops-attendance-metric ops-attendance-metric--${tone}`}><span><Icon /></span><strong>{value}</strong><small>{label}</small></div>
 }
 
 function EmptyState({ label }: { label: string }) {

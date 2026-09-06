@@ -20,7 +20,6 @@ import {
     Check,
     Settings,
     KeyRound,
-    ClipboardCheck,
     CircleDollarSign,
     Info,
     Utensils,
@@ -80,7 +79,7 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
     ]
 
     const toolsNavItems = [
-        { id: 'hotel-info', icon: Info, label: t('module.cashInfo'), tab: 'overview', subTab: 'hotel-info' },
+        { id: 'hotel-info', icon: Info, label: t('module.hotelInfo'), tab: 'overview', subTab: 'hotel-info' },
         { id: 'currency', icon: CircleDollarSign, label: t('module.currencyConverter'), tab: 'overview', subTab: 'currency' },
         { id: 'calendar', icon: CalendarDays, label: t('module.calendar'), tab: 'overview', subTab: 'calendar' },
         { id: 'menu', icon: Utensils, label: t('menu.title'), tab: 'overview', subTab: 'menu' },
@@ -102,7 +101,6 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
     const systemNavItems: Array<Record<string, any>> = []
 
     if (userRole === 'gm') {
-        operationNavItems.push({ id: 'attendance', icon: ClipboardCheck, label: t('module.attendance'), subTab: 'attendance', createdAt: '2026-07-18' })
         systemNavItems.push({ id: 'activity', icon: Activity, label: t('module.activity') || 'Activity Log', subTab: 'activity' })
         systemNavItems.push({ id: 'settings', icon: Settings, label: t('module.setting') || 'Hotel Settings', subTab: 'settings' })
     }

@@ -15,7 +15,6 @@ import { useShiftStore } from './shiftStore'
 import { useActivityStore } from './activityStore'
 import { cleanAuthError } from '@/lib/utils'
 import { useLanguageStore } from './languageStore'
-import { useAttendanceStore } from './attendanceStore'
 
 interface AuthState {
     user: User | null
@@ -191,7 +190,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
             useHotelStore.setState({ hotel: null, error: null, loading: true })
             useNotificationStore.setState({ notifications: [], unreadCount: 0, error: null, loading: true })
             useShiftStore.setState({ currentShift: null, loading: true, error: null })
-            useAttendanceStore.setState({ records: [], loading: true, error: null })
 
             // Clear localStorage to prevent stale data on next login
             localStorage.clear()

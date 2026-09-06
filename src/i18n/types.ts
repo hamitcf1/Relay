@@ -183,7 +183,6 @@ export type Translations = {
     'module.compliance': string
     'module.shiftNotes': string
     'module.hotelInfo': string
-    'module.cashInfo': string
     'module.currencyConverter': string
     'module.roster': string
     'module.calendar': string
@@ -203,8 +202,6 @@ export type Translations = {
     'module.activity': string
     'module.setting': string
     'module.reports': string
-    'module.attendance': string
-    'operations.attendance.desc': string
     'module.games': string
     'games.desc': string
     'games.reactionTimer': string
@@ -326,22 +323,15 @@ export type Translations = {
     // Handover Wizard
     'handover.title': string
     'handover.step.tickets': string
-    'handover.step.cash': string
     'handover.step.notes': string
     'handover.step.confirm': string
     'handover.tickets.desc': string
-    'handover.cash.desc': string
     'handover.notes.desc': string
     'handover.confirm.desc': string
-    'handover.cash.started': string
-    'handover.cash.difference': string
     'handover.complete': string
     'handover.wizard': string
     'handover.noOpenTickets': string
     'handover.allClear': string
-    'handover.cashEnd': string
-    'handover.enterCash': string
-    'handover.countCash': string
     'handover.notesDesc': string
     'handover.readyToComplete': string
     'handover.reviewSummary': string
@@ -466,7 +456,6 @@ export type Translations = {
     'shift.none': string
     'shift.welcome': string
     'shift.selectType': string
-    'shift.startingCash': string
     'shift.proceed': string
     'shift.timeLeft': string
     'shift.loggedAs': string
@@ -476,7 +465,6 @@ export type Translations = {
     'app.description': string
     'app.activeShift': string
     'app.openTickets': string
-    'app.cashBalance': string
     'app.systemTitle': string
     'common.add': string
     'common.cancel': string
@@ -836,9 +824,6 @@ export type Translations = {
     // Shift Management
     'shift.management': string
     'shift.type': string
-    'shift.cashCount': string
-    'shift.enterCash': string
-    'shift.startCash': string
     'shift.handoverNote': string
     'shift.notePlaceholder': string
     'shift.endAction': string
@@ -1326,94 +1311,4 @@ export type Translations = {
     'blacklist.addedBy': string
     'blacklist.reasonLabel': string
 
-    // Attendance
-    'attendance.clock.clockIn': string
-    'attendance.clock.working': string
-    'attendance.clock.titleIn': string
-    'attendance.clock.titleOut': string
-    'attendance.clock.planned': string
-    'attendance.clock.actual': string
-    'attendance.clock.declaredIn': string
-    'attendance.clock.declaredOut': string
-    'attendance.clock.auditHelp': string
-    'attendance.clock.invalidDeclaredTime': string
-    'attendance.clock.late': string
-    'attendance.clock.excuseLabel': string
-    'attendance.clock.excusePlaceholder': string
-    'attendance.clock.excuseHelp': string
-    'attendance.clock.permissionLabel': string
-    'attendance.clock.permissionYes': string
-    'attendance.clock.permissionNo': string
-    'attendance.clock.permissionHelp': string
-    'attendance.clock.disciplinaryWarning': string
-    'attendance.clock.inDesc': string
-    'attendance.clock.outDesc': string
-    'attendance.clock.confirmIn': string
-    'attendance.clock.confirmOut': string
-    'attendance.clock.cancel': string
-    'attendance.clock.failed': string
-    'attendance.clock.duplicate': string
-    'attendance.report.title': string
-    'attendance.report.desc': string
-    'attendance.report.total': string
-    'attendance.report.late': string
-    'attendance.report.active': string
-    'attendance.report.avgLate': string
-    'attendance.report.pending': string
-    'attendance.report.search': string
-    'attendance.report.export': string
-    'attendance.report.employee': string
-    'attendance.report.date': string
-    'attendance.report.planned': string
-    'attendance.report.clockIn': string
-    'attendance.report.clockOut': string
-    'attendance.report.declaredClockIn': string
-    'attendance.report.actualClockIn': string
-    'attendance.report.declaredClockOut': string
-    'attendance.report.actualClockOut': string
-    'attendance.report.gmAuditNote': string
-    'attendance.report.duration': string
-    'attendance.report.status': string
-    'attendance.report.excuse': string
-    'attendance.report.permission': string
-    'attendance.report.onTime': string
-    'attendance.report.working': string
-    'attendance.report.completed': string
-    'attendance.report.autoCompleted': string
-    'attendance.report.noExit': string
-    'attendance.report.permissionYes': string
-    'attendance.report.permissionNo': string
-    'attendance.report.approvalPending': string
-    'attendance.report.approved': string
-    'attendance.report.rejected': string
-    'attendance.report.approve': string
-    'attendance.report.reject': string
-    'attendance.report.reviewTitleApprove': string
-    'attendance.report.reviewTitleReject': string
-    'attendance.report.reviewDesc': string
-    'attendance.report.reviewNote': string
-    'attendance.report.reviewNotePlaceholder': string
-    'attendance.report.rejectionRequired': string
-    'attendance.report.saveDecision': string
-    'attendance.report.empty': string
-    'attendance.report.access': string
-    'attendance.report.shift': string
-    'attendance.report.shiftLabel': string
-    'attendance.report.scheduledIn': string
-    'attendance.report.scheduledOut': string
-    'attendance.report.lateMinutes': string
-    'attendance.report.permissionDeclaration': string
-    'attendance.report.approvalStatus': string
-    'attendance.report.reviewedBy': string
-    'attendance.report.reviewedAt': string
-    'attendance.report.workedMinutes': string
-    'attendance.unit.hour': string
-    'attendance.unit.minute': string
-    'attendance.toast.clockIn': string
-    'attendance.toast.clockOut': string
-    'attendance.toast.approved': string
-    'attendance.toast.rejected': string
-    'activity.action.attendance_clock_in': string
-    'activity.action.attendance_clock_out': string
-    'activity.action.attendance_review': string
 }

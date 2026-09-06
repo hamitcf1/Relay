@@ -10,7 +10,6 @@ import {
     Users,
     ScrollText,
     KeyRound,
-    ClipboardCheck,
     CircleDollarSign,
     Info,
     Utensils,
@@ -50,7 +49,7 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
         },
         {
             id: 'hotel-info',
-            label: t('module.cashInfo'),
+            label: t('module.hotelInfo'),
             icon: Info,
             desc: t('overview.hotel.desc'),
         },
@@ -123,12 +122,6 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
     ]
 
     if (userRole === 'gm') {
-        items.push({
-            id: 'attendance',
-            label: t('module.attendance'),
-            icon: ClipboardCheck,
-            desc: t('operations.attendance.desc'),
-        })
         items.push({
             id: 'activity',
             label: t('module.activity'),

@@ -13,7 +13,7 @@ const SHIFT_TIMES = {
 
 export function useShiftAutomator(hotelId: string | null) {
     const { getShiftsForDate, subscribeToRoster } = useRosterStore()
-    const { currentShift, startShift, endShift, getLastClosedShift } = useShiftStore()
+    const { currentShift, startShift, endShift } = useShiftStore()
     const lastCheckRef = useRef<string | null>(null)
 
     // Ensure Roster is subscribed for the automator to work
@@ -54,7 +54,7 @@ export function useShiftAutomator(hotelId: string | null) {
 
                     // If current time is past the end time of the active shift, close it
                     if (now >= end) {
-                        await endShift(hotelId, currentShift.cash_start, 'Automatically closed by system roster.')
+                        await endShift(hotelId, 'Automatically closed by system roster.')
                         return
                     }
                 }
@@ -89,11 +89,7 @@ export function useShiftAutomator(hotelId: string | null) {
 
                         if (staffIds.length === 0) continue
 
-                        // Attempt to carry over cash from last closed shift
-                        const lastShift = await getLastClosedShift(hotelId)
-                        const carryCash = lastShift?.cash_end || 0
-
-                        await startShift(hotelId, staffIds, shiftInfo.shift as ShiftType, carryCash, dateStr)
+                        await startShift(hotelId, staffIds, shiftInfo.shift as ShiftType, dateStr)
                         break
                     }
                 }
@@ -105,5 +101,5 @@ export function useShiftAutomator(hotelId: string | null) {
         checkShift() // Initial check
 
         return () => clearInterval(timer)
-    }, [hotelId, currentShift, getShiftsForDate, startShift, endShift, getLastClosedShift, subscribeToRoster])
+    }, [hotelId, currentShift, getShiftsForDate, startShift, endShift, subscribeToRoster])
 }
