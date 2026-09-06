@@ -26,7 +26,6 @@ Aetherius Relay isn't just a tool; it's a design-forward platform. Adhering to a
 
 ### 🔄 Shift Handover Wizard
 *   **Automated Summaries:** A step-by-step wizard to ensure no open ticket is forgotten during shift change.
-*   **Cash Reconciliation:** Integrated financial tracking with automatic difference calculation between shift start and end.
 *   **Shift Compliance:** Tracks KBS (Identity Reporting) and Agency Message checks with a visual "Pulse" ring.
 
 ### 📅 Advanced Scheduling & Roster

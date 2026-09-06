@@ -18,7 +18,6 @@ import { CalendarWidget } from '@/components/calendar/CalendarWidget'
 import { StaffMealCard } from '@/components/hotel/StaffMealCard'
 import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
-import { useAttendanceAutomator } from '@/hooks/useAttendanceAutomator'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 import { TourOverlay } from '@/components/onboarding/TourOverlay'
 import { CurrencyWidget } from '@/components/dashboard/CurrencyWidget'
@@ -42,8 +41,6 @@ import { OperationsOverview } from '@/components/dashboard/OperationsOverview'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { ShiftTimer } from '@/components/layout/ShiftTimer'
-import { AttendanceClock } from '@/components/attendance/AttendanceClock'
-import { useAttendanceStore } from '@/stores/attendanceStore'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { RelayMark } from '@/components/brand/RelayBrand'
@@ -60,7 +57,6 @@ const LeaderboardPanel = lazy(() => import('@/components/team/LeaderboardPanel')
 const ActivityLogPanel = lazy(() => import('@/components/activity/ActivityLogPanel').then(m => ({ default: m.ActivityLogPanel })))
 const HotelSettings = lazy(() => import('@/components/settings/HotelSettings').then(m => ({ default: m.HotelSettings })))
 const CardsAndLoansPanel = lazy(() => import('@/components/loans/CardsAndLoansPanel').then(m => ({ default: m.CardsAndLoansPanel })))
-const AttendanceReportPanel = lazy(() => import('@/components/attendance/AttendanceReportPanel').then(m => ({ default: m.AttendanceReportPanel })))
 
 function TabFallback() {
     return (
@@ -82,7 +78,6 @@ export function DashboardPage() {
     const subscribeToRoster = useRosterStore((state) => state.subscribeToRoster)
     const subscribeToNotes = useNotesStore((state) => state.subscribeToNotes)
     const subscribeToTodayMenu = useStaffMealStore((state) => state.subscribeToTodayMenu)
-    const subscribeToAttendance = useAttendanceStore((state) => state.subscribeToAttendance)
     const { t, language } = useLanguageStore()
 
     const [showTour, setShowTour] = useState(false)
@@ -129,7 +124,6 @@ export function DashboardPage() {
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
-    useAttendanceAutomator(hotel?.id || null)
 
     // Due payment notifications
     useDuePaymentNotifier()
@@ -169,9 +163,6 @@ export function DashboardPage() {
         const unsubNotes = subscribeToNotes(userHotelId)
         const unsubRoster = subscribeToRoster(userHotelId)
         const unsubMenu = subscribeToTodayMenu(userHotelId)
-        const unsubAttendance = (user?.role === 'gm' || user?.role === 'receptionist')
-            ? subscribeToAttendance(userHotelId, user.role === 'gm' ? undefined : user.uid)
-            : () => undefined
         const subscribeToBlacklist = useBlacklistStore.getState().subscribeToBlacklist
         const unsubBlacklist = subscribeToBlacklist(userHotelId)
 
@@ -181,10 +172,9 @@ export function DashboardPage() {
             unsubNotes()
             unsubRoster()
             unsubMenu()
-            unsubAttendance()
             unsubBlacklist()
         }
-    }, [userHotelId, user?.role, user?.uid, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu, subscribeToAttendance])
+    }, [userHotelId, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu])
 
 
 
@@ -260,7 +250,6 @@ export function DashboardPage() {
                                 />
                             )}
                             <div className="hidden md:block"><ShiftTimer /></div>
-                            <AttendanceClock />
                         </div>
                         <AnimatePresence>
                             {showDateTime && (
@@ -313,14 +302,6 @@ export function DashboardPage() {
                                     setOpenNewNote(true)
                                     setOverviewTab('notes')
                                 }}
-                                onOpenAttendance={() => {
-                                    setActiveTab('operations')
-                                    setOperationTab('attendance')
-                                }}
-                                onOpenRoster={() => {
-                                    setOpenNewNote(false)
-                                    setOverviewTab('roster')
-                                }}
                                 onOpenSales={() => {
                                     setActiveTab('operations')
                                     setOperationTab('sales')
@@ -355,9 +336,7 @@ export function DashboardPage() {
                                             <ChevronLeft className="w-5 h-5" />
                                         </Button>
                                         <span className="font-semibold text-lg capitalize">
-                                            {operationTab === 'attendance'
-                                                ? t('module.attendance')
-                                                : ((t(`module.${operationTab}` as any) as string) || operationTab)}
+                                            {(t(`module.${operationTab}` as any) as string) || operationTab}
                                         </span>
                                     </div>
                                 )}
@@ -428,10 +407,6 @@ export function DashboardPage() {
                                             </TabsContent>
                                             <TabsContent value="activity" className="m-0 p-0 outline-none">
                                                 <ActivityLogPanel />
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                            <TabsContent value="attendance" className="m-0 p-0 outline-none">
-                                                <AttendanceReportPanel />
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                         </Suspense>

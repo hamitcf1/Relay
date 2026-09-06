@@ -61,7 +61,7 @@ const ROOM_TYPES: RoomType[] = ['standard', 'corner', 'corner_jacuzzi', 'triple'
 const RELAY_APP_INFO = `
 Relay (Aetherius Relay), modern oteller için tasarlanmış kapsamlı bir "Dijital Devir" ve operasyon yönetim platformudur.
 Temel Özellikler ve Modüller:
-1. Vardiya Devri (Shift Handover): Kağıt logbook'ların yerini alan modül. Kasa sayımı, personel takibi ve AI destekli devir notları içerir.
+1. Vardiya Devri (Shift Handover): Kağıt logbook'ların yerini alan modül. Açık işler, öncelikler ve AI destekli devir notlarını içerir.
 2. Aktif Log (Active Log): Arıza, misafir isteği ve şikayetlerin gerçek zamanlı takibi. #OdaNo (örn: #204) yazılarak odalara hızlı erişim sağlar.
 3. Sabit Pano (Sticky Board): Önemli ve acil notların en üstte "glass" bir container içinde sabitlenmesi.
 4. Uyum Nabzı (Compliance Pulse): KBS bildirimi ve Acente mesaj kontrolü gibi yasal zorunlulukların takibi. %100 uyum hedeflenir.
@@ -96,7 +96,7 @@ function buildContext(): string {
     // ── SHIFT ─────────────────────────────────
     const shift = useShiftStore.getState().currentShift
     if (shift) {
-        parts.push(`[CURRENT SHIFT] Type: ${shift.type}, Status: ${shift.status}, Date: ${shift.date}, Staff: ${shift.staff_ids.length} people, Cash Start: ${shift.cash_start} TRY`)
+        parts.push(`[CURRENT SHIFT] Type: ${shift.type}, Status: ${shift.status}, Date: ${shift.date}, Staff: ${shift.staff_ids.length} people`)
         parts.push(`[COMPLIANCE PULSE] KBS Checked: ${shift.compliance.kbs_checked ? 'YES' : 'NO'}, Agency Messages: ${shift.compliance.agency_msg_checked_count} checks performed.`)
         if (shift.handover_note) parts.push(`Handover Note: ${shift.handover_note}`)
     } else {

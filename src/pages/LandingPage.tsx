@@ -45,7 +45,6 @@ interface LandingMockCopy {
     laundryNote: string
     laundryMeta: string
     shiftLabel: string
-    cashDrawer: string
     openIssues: string
     pendingPayment: string
     kbsCheck: string
@@ -61,7 +60,7 @@ const LANDING_MOCK_COPY: Record<Language, LandingMockCopy> = {
         paymentDueNote: 'PAYMENT DUE TRY 4,000 — 406', paymentDueMeta: 'Sema Döner · 2 hours ago',
         kbsCompleteNote: 'KBS check completed', kbsCompleteMeta: 'Hamit Can Fındık · 35 min ago',
         laundryNote: 'LAUNDRY TRY 800 — 504', laundryMeta: 'Deniz Yılmaz · 6 hours ago',
-        shiftLabel: '14:00 Shift', cashDrawer: 'Cash drawer', openIssues: 'Open issues',
+        shiftLabel: '14:00 Shift', openIssues: 'Open issues',
         pendingPayment: 'Pending payment', kbsCheck: 'KBS check', activeIssues: '5 active',
         aiSummary: 'Preparing AI summary…', agencyMessages: 'Agency messages',
         weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -71,7 +70,7 @@ const LANDING_MOCK_COPY: Record<Language, LandingMockCopy> = {
         paymentDueNote: 'ÖDEME ALINACAK 4.000 TL — 406', paymentDueMeta: 'Sema Döner · 2 saat önce',
         kbsCompleteNote: 'KBS kontrolü tamamlandı', kbsCompleteMeta: 'Hamit Can Fındık · 35 dk önce',
         laundryNote: 'ÇAMAŞIRHANE 800 TL — 504', laundryMeta: 'Deniz Yılmaz · 6 saat önce',
-        shiftLabel: '14:00 Vardiya', cashDrawer: 'Kasa devri', openIssues: 'Açık olaylar',
+        shiftLabel: '14:00 Vardiya', openIssues: 'Açık olaylar',
         pendingPayment: 'Bekleyen ödeme', kbsCheck: 'KBS kontrolü', activeIssues: '5 aktif',
         aiSummary: 'AI özeti hazırlanıyor…', agencyMessages: 'Acente mesajları',
         weekdays: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts', 'Paz'],
@@ -81,7 +80,7 @@ const LANDING_MOCK_COPY: Record<Language, LandingMockCopy> = {
         paymentDueNote: 'ОПЛАТА 4 000 TRY — 406', paymentDueMeta: 'Sema Döner · 2 часа назад',
         kbsCompleteNote: 'Проверка KBS завершена', kbsCompleteMeta: 'Hamit Can Fındık · 35 мин назад',
         laundryNote: 'ПРАЧЕЧНАЯ 800 TRY — 504', laundryMeta: 'Deniz Yılmaz · 6 часов назад',
-        shiftLabel: '14:00 Смена', cashDrawer: 'Сверка кассы', openIssues: 'Открытые задачи',
+        shiftLabel: '14:00 Смена', openIssues: 'Открытые задачи',
         pendingPayment: 'Ожидает оплаты', kbsCheck: 'Проверка KBS', activeIssues: '5 активно',
         aiSummary: 'Подготовка AI-сводки…', agencyMessages: 'Сообщения агентств',
         weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
@@ -495,7 +494,6 @@ function HandoverVisual({ copy }: { copy: LandingMockCopy }) {
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{copy.shiftLabel}</div>
                 <div className="space-y-1.5 flex-1">
                     {[
-                        { label: copy.cashDrawer, value: '₺ 4.250 → 4.250', good: true },
                         { label: copy.openIssues, value: copy.activeIssues, good: false },
                         { label: copy.pendingPayment, value: '₺ 4.000', good: false },
                         { label: copy.kbsCheck, value: '✓', good: true },
