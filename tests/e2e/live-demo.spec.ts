@@ -97,6 +97,8 @@ test.describe('Live Demo & Simulation', () => {
     await expect(priority).toBeVisible();
     await expect(handover).toBeVisible();
     expect(await priority.evaluate((node) => Boolean(node.compareDocumentPosition(document.querySelector('#handover-title')!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBeTruthy();
+    await page.getByRole('button', { name: /Airport transfer/i }).click();
+    await expect(page.getByText(/Satış Takibi|Sales Tracker/i).first()).toBeVisible();
   });
 
   test('weekly roster autosaves a shared draft before publishing', async ({ page, isMobile }) => {
@@ -110,6 +112,10 @@ test.describe('Live Demo & Simulation', () => {
     await page.getByRole('button', { name: /Demo Manager, Pazartesi|Demo Manager, Monday/i }).click();
     const selector = page.getByRole('dialog');
     await expect(selector).toBeVisible();
+    await expect(selector.getByRole('button', { name: /Boş|Empty/i })).toContainText('Boş');
+    await page.keyboard.press('Escape');
+    await expect(selector).toBeHidden();
+    await page.getByRole('button', { name: /Demo Manager, Pazartesi|Demo Manager, Monday/i }).click();
     await selector.getByRole('button', { name: /^B\b/ }).click();
     await expect(page.getByText(/Ortak taslak kaydedildi|Shared draft saved/i)).toBeVisible();
     const publish = page.getByRole('button', { name: /Yayınla|Publish/i });

@@ -78,6 +78,19 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     subscribeToSales: (hotelId) => {
         set({ loading: true, error: null })
 
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                sales: [{
+                    id: 'demo-sale-transfer', hotel_id: hotelId, type: 'transfer', name: 'Airport transfer', customer_name: 'Demo Guest', room_number: '305', pax: 2,
+                    date: new Date(), pickup_time: '06:30', total_price: 45, collected_amount: 0, currency: 'EUR', payment_status: 'pending', status: 'confirmed',
+                    created_by: 'demo-user-staff', created_by_name: 'Receptionist', created_at: new Date(Date.now() - 3600000), payments: [],
+                }],
+                loading: false,
+                error: null,
+            })
+            return () => {}
+        }
+
         const salesRef = collection(db, 'hotels', hotelId, 'sales')
         const q = query(salesRef, orderBy('date', 'desc'))
 

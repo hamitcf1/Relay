@@ -32,7 +32,7 @@ export function OperationsOverview({ onOpenNotes, onOpenSales, onNewRecord }: Op
 
     return <PageFrame eyebrow={copy.eyebrow} title={copy.title} description={copy.description} action={<Button onClick={onNewRecord}><Plus />{copy.newRecord}</Button>} contentClassName="space-y-5">
         <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(19rem,0.75fr)]">
-            <PriorityQueue items={queue} copy={copy} onOpen={onOpenNotes} />
+            <PriorityQueue items={queue} copy={copy} onOpenNotes={onOpenNotes} onOpenSales={onOpenSales} />
             <DailySummary activeCount={activeNotes.length} saleCount={todaySales.length} collectedCount={todaySales.filter((sale) => sale.payment_status === 'paid').length} awaitingCount={unpaidSales.length} copy={copy} onOpenSales={onOpenSales} />
         </div>
         <HandoverSummary notes={activeNotes} copy={copy} onOpen={onOpenNotes} />

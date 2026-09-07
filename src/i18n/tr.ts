@@ -1258,7 +1258,7 @@ const tr: Translations = {
         'demo.gm': 'Genel Müdür',
         'demo.gm.desc': 'Tüm ayarlara, analizlere, personel yönetimine ve otel yapılandırmasına tam erişim.',
         'demo.staff': 'Personel',
-        'demo.staff.desc': 'Günlük operasyonlar, vardiya kayıtları, mesajlaşma ve görev tamamlama için odaklanmış görünüm.',
+        'demo.staff.desc': 'Günlük operasyonlar, haftalık vardiya planı, mesajlaşma ve görev tamamlama için odaklanmış görünüm.',
         'demo.enter.gm': 'Yönetici Olarak Gir',
         'demo.enter.staff': 'Resepsiyonist Olarak Gir',
         'demo.back': 'Ana Sayfaya Dön',
