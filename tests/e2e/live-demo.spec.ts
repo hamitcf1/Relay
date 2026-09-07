@@ -29,8 +29,8 @@ test.describe('Live Demo & Simulation', () => {
   test('TC-DEMO-002: Clicking demo login button authenticates demo session and navigates into /dashboard', async ({ page }) => {
     await page.goto('/live-demo');
 
-    // Click the first demo role button (e.g. GM or Staff Demo)
-    const demoLoginBtn = page.locator('button').first();
+    // Click the manager demo role button.
+    const demoLoginBtn = page.getByRole('button', { name: /Enter as Manager|Yönetici/i });
     await expect(demoLoginBtn).toBeVisible({ timeout: 10000 });
     await demoLoginBtn.click();
 

@@ -36,6 +36,9 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { MobileNav } from '@/components/layout/MobileNav'
+import { AllTabsDirectory } from '@/components/layout/AllTabsDirectory'
+import { QuickActionMenu } from '@/components/layout/QuickActionMenu'
+import type { ModuleDefinition } from '@/config/moduleRegistry'
 import { OperationsGrid } from '@/components/dashboard/OperationsGrid'
 import { OperationsOverview } from '@/components/dashboard/OperationsOverview'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
@@ -117,7 +120,7 @@ export function DashboardPage() {
             if (tabParam) {
                 setOverviewTab(tabParam)
             } else {
-                setOverviewTab(window.matchMedia('(max-width: 767px)').matches ? 'notes' : 'grid')
+                setOverviewTab('grid')
             }
         }
     }, [location.pathname, location.search])
@@ -184,6 +187,32 @@ export function DashboardPage() {
 
 
     const [showTutorial, setShowTutorial] = useState(false)
+
+    const handleModuleSelect = (item: ModuleDefinition) => {
+        setActiveTab(item.area)
+        if (item.area === 'overview') {
+            setOpenNewNote(false)
+            setOverviewTab(item.subTab || 'grid')
+        } else {
+            setOperationTab(item.subTab || 'messaging')
+        }
+    }
+
+    const handleQuickAction = (id: 'notes' | 'feedback' | 'sales' | 'messaging' | 'calendar') => {
+        if (id === 'notes') {
+            setActiveTab('overview')
+            setOpenNewNote(true)
+            setOverviewTab('notes')
+            return
+        }
+        if (id === 'calendar') {
+            setActiveTab('overview')
+            setOverviewTab('calendar')
+            return
+        }
+        setActiveTab('operations')
+        setOperationTab(id)
+    }
 
     const rosterShift = user ? schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] : undefined
     const inferredShift = new Date().getHours() >= 16 ? 'B' : new Date().getHours() < 8 ? 'C' : 'A'
@@ -424,30 +453,11 @@ export function DashboardPage() {
                 activeTab={activeTab}
                 overviewTab={overviewTab}
                 operationTab={operationTab}
-                onOpenNotes={() => {
-                    setActiveTab('overview')
-                    setOpenNewNote(false)
-                    setOverviewTab('notes')
-                }}
-                onOpenRoster={() => {
-                    setActiveTab('overview')
-                    setOpenNewNote(false)
-                    setOverviewTab('roster')
-                }}
-                onNewRecord={() => {
-                    setActiveTab('overview')
-                    setOpenNewNote(true)
-                    setOverviewTab('notes')
-                }}
-                onOpenMessages={() => {
-                    setActiveTab('operations')
-                    setOperationTab('messaging')
-                }}
-                onOpenMenu={() => {
-                    setActiveTab('operations')
-                    setOperationTab('grid')
-                }}
+                userRole={user?.role}
+                onSelect={handleModuleSelect}
             />
+            <AllTabsDirectory role={user?.role} onSelect={handleModuleSelect} />
+            <QuickActionMenu onAction={handleQuickAction} />
             <AnnouncementModal />
 
         </div>

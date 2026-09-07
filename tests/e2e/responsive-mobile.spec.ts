@@ -21,4 +21,19 @@ test.describe('Responsive Mobile Experience', () => {
     expect(isOverflowing).toBe(false);
   });
 
+  test('mobile dashboard exposes quick actions and searchable all tabs', async ({ page }) => {
+    await page.goto('/live-demo');
+    await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 });
+
+    await expect(page.getByRole('button', { name: /Quick action|Hızlı kayıt/i })).toBeVisible();
+    await page.getByRole('button', { name: /^(All|Tümü)$/i }).click();
+    await expect(page.getByRole('heading', { name: /All tabs|Tüm sekmeler/i })).toBeVisible();
+
+    await page.getByPlaceholder(/Search tabs|Sekme ara/i).fill('Takvim');
+    await page.getByRole('button', { name: /Takvim|Calendar/i }).click();
+    await expect(page.getByRole('heading', { name: /All tabs|Tüm sekmeler/i })).toBeHidden();
+  });
+
 });
