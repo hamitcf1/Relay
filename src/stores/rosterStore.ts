@@ -1,9 +1,10 @@
 import { create } from 'zustand'
-import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore'
+import { collection, onSnapshot, query, where, doc, updateDoc, runTransaction, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { format, addDays, parseISO } from 'date-fns'
 
-import { type StaffMember } from '@/types'
+import { type StaffMember, type RosterCellEdit, type RosterDraft, type RosterDraftCell, type RosterShiftValue } from '@/types'
+import { useAuthStore } from './authStore'
 
 export type ShiftType = 'A' | 'B' | 'C' | 'E' | 'OFF'
 
@@ -13,12 +14,18 @@ interface RosterState {
     schedule: Record<string, Record<string, ShiftType>> // [uid][yyyy-MM-dd] -> Shift
     loading: boolean
     error: string | null
+    draft: RosterDraft | null
+    draftSaving: boolean
+    draftConflict: string | null
 }
 
 interface RosterActions {
     subscribeToRoster: (hotelId: string) => () => void
     getShiftsForDate: (date: Date) => Array<{ name: string; shift: ShiftType; uid: string }>
     toggleStaffVisibility: (hotelId: string, userId: string, isHidden: boolean) => Promise<void>
+    subscribeToDraft: (hotelId: string, weekId: string) => () => void
+    updateDraftCell: (hotelId: string, weekId: string, edit: RosterCellEdit) => Promise<'saved' | 'conflict'>
+    publishRoster: (hotelId: string, weekId: string, expectedDraftVersion: number) => Promise<'published' | 'conflict'>
 }
 
 type RosterStore = RosterState & RosterActions
@@ -33,6 +40,9 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
     schedule: {},
     loading: true,
     error: null,
+    draft: null,
+    draftSaving: false,
+    draftConflict: null,
 
     subscribeToRoster: (hotelId: string) => {
         set({ loading: true, error: null })
@@ -165,6 +175,72 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             const priorityB = SHIFT_PRIORITY[b.shift] || 99
             return priorityA - priorityB
         })
+    },
+
+    subscribeToDraft: (hotelId, weekId) => {
+        if (hotelId === 'demo-hotel-id') {
+            set({ draft: { weekId, version: 0, cells: {}, updatedBy: '', updatedByName: '', updatedAt: new Date() } })
+            return () => {}
+        }
+        return onSnapshot(doc(db, 'hotels', hotelId, 'roster_drafts', weekId), (snapshot) => {
+            if (!snapshot.exists()) return set({ draft: { weekId, version: 0, cells: {}, updatedBy: '', updatedByName: '', updatedAt: new Date() } })
+            const data = snapshot.data()
+            const cells = Object.fromEntries(Object.entries(data.cells || {}).map(([key, raw]) => {
+                const cell = raw as any
+                return [key, { ...cell, updatedAt: cell.updatedAt instanceof Timestamp ? cell.updatedAt.toDate() : new Date() }]
+            })) as Record<string, RosterDraftCell>
+            set({ draft: { weekId, version: data.version || 0, cells, updatedBy: data.updatedBy || '', updatedByName: data.updatedByName || '', updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date() }, draftConflict: null })
+        })
+    },
+
+    updateDraftCell: async (hotelId, weekId, edit) => {
+        const actor = useAuthStore.getState().user
+        if (!actor) return 'conflict'
+        set({ draftSaving: true, draftConflict: null })
+        if (hotelId === 'demo-hotel-id') {
+            const current = get().draft || { weekId, version: 0, cells: {}, updatedBy: '', updatedByName: '', updatedAt: new Date() }
+            const key = `${edit.staffId}:${edit.day}`
+            const actual = current.cells[key]?.version || 0
+            if (actual !== edit.expectedCellVersion) { set({ draftSaving: false, draftConflict: key }); return 'conflict' }
+            set({ draft: { ...current, version: current.version + 1, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: new Date(), cells: { ...current.cells, [key]: { value: edit.value, version: actual + 1, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: new Date() } } }, draftSaving: false })
+            return 'saved'
+        }
+        try {
+            const draftRef = doc(db, 'hotels', hotelId, 'roster_drafts', weekId)
+            const result = await runTransaction(db, async (transaction) => {
+                const snapshot = await transaction.get(draftRef)
+                const data = snapshot.data() || { version: 0, cells: {} }
+                const key = `${edit.staffId}:${edit.day}`
+                const actual = data.cells?.[key]?.version || 0
+                if (actual !== edit.expectedCellVersion) return 'conflict' as const
+                transaction.set(draftRef, { weekId, version: (data.version || 0) + 1, cells: { ...(data.cells || {}), [key]: { value: edit.value, version: actual + 1, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: serverTimestamp() } }, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: serverTimestamp() })
+                return 'saved' as const
+            })
+            set({ draftSaving: false, draftConflict: result === 'conflict' ? `${edit.staffId}:${edit.day}` : null })
+            return result
+        } catch (error) { set({ draftSaving: false }); throw error }
+    },
+
+    publishRoster: async (hotelId, weekId, expectedDraftVersion) => {
+        const actor = useAuthStore.getState().user
+        const current = get().draft
+        if (!actor || !current || current.version !== expectedDraftVersion) return 'conflict'
+        const schedule: Record<string, Record<string, RosterShiftValue>> = {}
+        Object.entries(current.cells).forEach(([key, cell]) => { const split = key.lastIndexOf(':'); const uid = key.slice(0, split); const day = key.slice(split + 1); schedule[uid] ||= {}; schedule[uid][day] = cell.value })
+        if (hotelId === 'demo-hotel-id') { set({ draft: { ...current, cells: {}, version: current.version + 1, updatedAt: new Date() } }); return 'published' }
+        const result = await runTransaction(db, async (transaction) => {
+            const draftRef = doc(db, 'hotels', hotelId, 'roster_drafts', weekId)
+            const rosterRef = doc(db, 'hotels', hotelId, 'roster', weekId)
+            const snapshot = await transaction.get(draftRef)
+            const rosterSnapshot = await transaction.get(rosterRef)
+            if ((snapshot.data()?.version || 0) !== expectedDraftVersion) return 'conflict' as const
+            const mergedSchedule = { ...(rosterSnapshot.data()?.schedule || {}) }
+            Object.entries(schedule).forEach(([uid, days]) => { mergedSchedule[uid] = { ...(mergedSchedule[uid] || {}), ...days } })
+            transaction.set(rosterRef, { week_start: weekId, version: expectedDraftVersion, schedule: mergedSchedule, publishedBy: actor.uid, publishedByName: actor.name, publishedAt: serverTimestamp() }, { merge: true })
+            transaction.set(draftRef, { ...snapshot.data(), version: expectedDraftVersion + 1, cells: {}, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: serverTimestamp() })
+            return 'published' as const
+        })
+        return result
     },
 
     toggleStaffVisibility: async (_hotelId: string, userId: string, isHidden: boolean) => {

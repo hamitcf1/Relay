@@ -99,4 +99,23 @@ test.describe('Live Demo & Simulation', () => {
     expect(await priority.evaluate((node) => Boolean(node.compareDocumentPosition(document.querySelector('#handover-title')!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBeTruthy();
   });
 
+  test('weekly roster autosaves a shared draft before publishing', async ({ page, isMobile }) => {
+    test.skip(Boolean(isMobile), 'Desktop roster publication is covered here; mobile views have a focused test.');
+    await page.goto('/live-demo');
+    await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 });
+    await page.getByRole('button', { name: /Haftalık vardiya|Weekly roster/i }).click();
+
+    await page.getByRole('button', { name: /Demo Manager, Pazartesi|Demo Manager, Monday/i }).click();
+    const selector = page.getByRole('dialog');
+    await expect(selector).toBeVisible();
+    await selector.getByRole('button', { name: /^B\b/ }).click();
+    await expect(page.getByText(/Ortak taslak kaydedildi|Shared draft saved/i)).toBeVisible();
+    const publish = page.getByRole('button', { name: /Yayınla|Publish/i });
+    await expect(publish).toBeEnabled();
+    await publish.click();
+    await expect(page.getByText(/Vardiya yayınlandı|Roster published/i)).toBeVisible();
+  });
+
 });

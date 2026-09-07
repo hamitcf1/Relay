@@ -388,6 +388,41 @@ export interface OffDayRequest {
     shift_name?: string // e.g. 'morning', 'evening', 'night'
 }
 
+export type RosterShiftValue = ShiftType | 'OFF' | null
+
+export interface RosterCellEdit {
+    staffId: string
+    day: string
+    value: RosterShiftValue
+    expectedCellVersion: number
+}
+
+export interface RosterDraftCell {
+    value: RosterShiftValue
+    version: number
+    updatedBy: string
+    updatedByName: string
+    updatedAt: Date
+}
+
+export interface RosterDraft {
+    weekId: string
+    version: number
+    cells: Record<string, RosterDraftCell>
+    updatedBy: string
+    updatedByName: string
+    updatedAt: Date
+}
+
+export interface PublishedRosterVersion {
+    weekId: string
+    version: number
+    schedule: Record<string, Record<string, RosterShiftValue>>
+    publishedBy: string
+    publishedByName: string
+    publishedAt: Date
+}
+
 // Tour
 export interface Tour {
     id: string

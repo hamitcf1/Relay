@@ -106,7 +106,12 @@ service cloud.firestore {
       // ROSTER - Weekly schedules (GM can edit, all can read)
       match /roster/{weekId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow write: if isGM() && belongsToHotel(hotelId);
+      }
+
+      // Shared planning drafts are visible only to roster administrators.
+      match /roster_drafts/{weekId} {
+        allow read, write: if isGM() && belongsToHotel(hotelId);
       }
       
       // INCIDENTS - Incident reports
