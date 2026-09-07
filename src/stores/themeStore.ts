@@ -2,9 +2,10 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useAuthStore } from './authStore'
 
-export type Theme = 'light' | 'sepia' | 'comfort' | 'dark' | 'midnight'
+export type Theme = 'light' | 'dark'
 
-const ALL_THEMES: Theme[] = ['light', 'sepia', 'comfort', 'dark', 'midnight']
+const ALL_THEMES: Theme[] = ['light', 'dark']
+const LEGACY_DARK_THEMES = ['comfort', 'midnight']
 
 export interface AccentColor {
     key: string
@@ -12,12 +13,11 @@ export interface AccentColor {
 }
 
 export const ACCENT_COLORS: AccentColor[] = [
-    { key: 'indigo', value: '239 84% 67%' },
-    { key: 'sky', value: '199 89% 48%' },
-    { key: 'emerald', value: '158 64% 52%' },
-    { key: 'rose', value: '346 87% 57%' },
-    { key: 'amber', value: '38 92% 50%' },
-    { key: 'violet', value: '262 83% 58%' },
+    { key: 'slateBlue', value: '207 42% 45%' },
+    { key: 'amber', value: '38 72% 46%' },
+    { key: 'teal', value: '166 42% 38%' },
+    { key: 'violet', value: '263 36% 50%' },
+    { key: 'rose', value: '350 48% 48%' },
 ]
 
 interface ThemeState {
@@ -37,17 +37,14 @@ type ThemeStore = ThemeState & ThemeActions
 
 const META_THEME_COLOR: Record<Theme, string> = {
     light: '#f7f8fa',
-    sepia: '#f5efe2',
-    comfort: '#1d1d22',
     dark: '#09090b',
-    midnight: '#000000',
 }
 
 export const useThemeStore = create<ThemeStore>()(
     persist(
         (set, get) => ({
             theme: 'dark',
-            accentColor: '239 84% 67%',
+            accentColor: ACCENT_COLORS[0].value,
 
             setTheme: (theme) => {
                 set({ theme })
@@ -69,8 +66,7 @@ export const useThemeStore = create<ThemeStore>()(
 
             toggleTheme: () => {
                 const { theme } = get()
-                const idx = ALL_THEMES.indexOf(theme)
-                const next = ALL_THEMES[(idx + 1) % ALL_THEMES.length]
+                const next = theme === 'dark' ? 'light' : 'dark'
                 set({ theme: next })
                 get().applyTheme()
             },
@@ -83,7 +79,7 @@ export const useThemeStore = create<ThemeStore>()(
                 root.classList.add(theme)
 
                 root.style.setProperty('--primary', accentColor)
-                root.style.setProperty('--primary-foreground', '216 19% 4%')
+                root.style.setProperty('--primary-foreground', theme === 'dark' ? '216 24% 7%' : '0 0% 100%')
                 root.style.setProperty('--ring', accentColor)
 
                 const metaThemeColor = window.document.querySelector('meta[name="theme-color"]')
@@ -99,8 +95,14 @@ export const useThemeStore = create<ThemeStore>()(
                 const { theme, accent_color } = user.settings
                 const updates: Partial<ThemeState> = {}
 
-                if (theme && (ALL_THEMES as string[]).includes(theme)) updates.theme = theme as Theme
-                if (accent_color) updates.accentColor = accent_color
+                if (theme) {
+                    updates.theme = LEGACY_DARK_THEMES.includes(theme) || theme === 'dark' ? 'dark' : 'light'
+                }
+                if (accent_color) {
+                    updates.accentColor = ACCENT_COLORS.some((color) => color.value === accent_color)
+                        ? accent_color
+                        : ACCENT_COLORS[0].value
+                }
 
                 if (Object.keys(updates).length > 0) {
                     set(updates)
@@ -118,12 +120,16 @@ useAuthStore.subscribe((state) => {
     const settings = state.user?.settings
     if (settings) {
         const store = useThemeStore.getState()
-        if (settings.theme && (ALL_THEMES as string[]).includes(settings.theme) && settings.theme !== store.theme) {
-            useThemeStore.setState({ theme: settings.theme as Theme })
+        if (settings.theme) {
+            const normalizedTheme: Theme = LEGACY_DARK_THEMES.includes(settings.theme) || settings.theme === 'dark' ? 'dark' : 'light'
+            if (normalizedTheme !== store.theme) useThemeStore.setState({ theme: normalizedTheme })
             store.applyTheme()
         }
         if (settings.accent_color && settings.accent_color !== store.accentColor) {
-            useThemeStore.setState({ accentColor: settings.accent_color })
+            const normalizedAccent = ACCENT_COLORS.some((color) => color.value === settings.accent_color)
+                ? settings.accent_color
+                : ACCENT_COLORS[0].value
+            useThemeStore.setState({ accentColor: normalizedAccent })
             store.applyTheme()
         }
     }

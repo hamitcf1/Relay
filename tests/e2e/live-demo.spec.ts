@@ -42,4 +42,30 @@ test.describe('Live Demo & Simulation', () => {
     await expect(dashboardBody).toBeVisible();
   });
 
+  test('theme and accent choices stay focused and accessible', async ({ page }) => {
+    await page.goto('/live-demo');
+    await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    const onboardingClose = page.locator('div.fixed.inset-0 button').first();
+    await onboardingClose.click({ timeout: 15000 });
+
+    await page.getByRole('button', { name: /Demo Manager/i }).click();
+    const appearanceItem = page.getByText(/Appearance|Görünüm/i).last();
+    await appearanceItem.hover();
+
+    const themeGroup = page.getByTestId('theme-options');
+    await expect(themeGroup.getByRole('button')).toHaveCount(2);
+    await expect(themeGroup).toContainText(/Light|Aydınlık/i);
+    await expect(themeGroup).toContainText(/Dark|Karanlık/i);
+
+    const accentGroup = page.getByTestId('accent-options');
+    const accents = accentGroup.getByRole('button');
+    await expect(accents).toHaveCount(5);
+
+    for (let index = 0; index < await accents.count(); index += 1) {
+      await accents.nth(index).click();
+      await expect(accents.nth(index)).toHaveAttribute('aria-pressed', 'true');
+    }
+  });
+
 });
