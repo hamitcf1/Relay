@@ -21,7 +21,8 @@ test.describe('Responsive Mobile Experience', () => {
     expect(isOverflowing).toBe(false);
   });
 
-  test('mobile dashboard exposes quick actions and searchable all tabs', async ({ page }) => {
+  test('mobile dashboard exposes quick actions and searchable all tabs', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Mobile navigation is hidden at desktop breakpoints');
     await page.goto('/live-demo');
     await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });

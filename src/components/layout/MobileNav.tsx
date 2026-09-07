@@ -5,6 +5,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { resolveNavigation, getModuleLabel } from '@/lib/navigation'
 import type { ModuleDefinition } from '@/config/moduleRegistry'
+import { useHotelStore } from '@/stores/hotelStore'
 
 interface MobileNavProps {
     activeTab: string
@@ -17,7 +18,8 @@ interface MobileNavProps {
 export function MobileNav({ activeTab, overviewTab, operationTab, userRole, onSelect }: MobileNavProps) {
     const { language } = useLanguageStore()
     const { openAllTabs, openQuickActions, allTabsOpen } = useNavigationStore()
-    const primary = resolveNavigation(userRole).primary.slice(0, 3)
+    const navigationConfig = useHotelStore((state) => state.hotel?.settings.navigation)
+    const primary = resolveNavigation(userRole, navigationConfig).mobile
     const allTabsLabel = language === 'tr' ? 'Tümü' : language === 'ru' ? 'Все' : 'All'
     const addLabel = language === 'tr' ? 'Hızlı kayıt' : language === 'ru' ? 'Быстрое действие' : 'Quick action'
     const isActive = (item: ModuleDefinition) => item.area === 'overview'

@@ -12,6 +12,7 @@ import {
     ShieldCheck,
     BarChart3,
     Loader2
+    ,PanelLeft
 } from 'lucide-react'
 import { ManagementReportPanel } from '@/components/admin/ManagementReportPanel'
 import { StaffManagement } from './StaffManagement'
@@ -26,10 +27,11 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { NavigationEditor } from './navigation/NavigationEditor'
 
 export function HotelSettings() {
     const { hotel, updateHotelSettings, updateHotelInfo } = useHotelStore()
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const { user } = useAuthStore()
     const subscribeToRoster = useRosterStore(state => state.subscribeToRoster)
     
@@ -126,6 +128,10 @@ export function HotelSettings() {
                     <TabsTrigger value="shifts" className="gap-2">
                         <Clock className="w-4 h-4" />
                         {t('module.roster')}
+                    </TabsTrigger>
+                    <TabsTrigger value="navigation" className="gap-2">
+                        <PanelLeft className="w-4 h-4" />
+                        {language === 'tr' ? 'Navigasyon' : language === 'ru' ? 'Навигация' : 'Navigation'}
                     </TabsTrigger>
                     <TabsTrigger value="roles" className="gap-2">
                         <Users className="w-4 h-4" />
@@ -270,6 +276,10 @@ export function HotelSettings() {
                             </div>
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                <TabsContent value="navigation" className="space-y-6">
+                    <NavigationEditor />
                 </TabsContent>
 
                 <TabsContent value="roles" className="space-y-6">

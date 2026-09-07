@@ -42,7 +42,8 @@ test.describe('Live Demo & Simulation', () => {
     await expect(dashboardBody).toBeVisible();
   });
 
-  test('theme and accent choices stay focused and accessible', async ({ page }) => {
+  test('theme and accent choices stay focused and accessible', async ({ page, isMobile }) => {
+    test.skip(Boolean(isMobile), 'Appearance menu is covered by the desktop shell scenario');
     await page.goto('/live-demo');
     await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
@@ -66,6 +67,23 @@ test.describe('Live Demo & Simulation', () => {
       await accents.nth(index).click();
       await expect(accents.nth(index)).toHaveAttribute('aria-pressed', 'true');
     }
+  });
+
+  test('navigation editor publishes hotel-wide layout changes', async ({ page, isMobile }) => {
+    test.skip(Boolean(isMobile), 'Navigation editor desktop workflow is covered separately from mobile navigation');
+    await page.goto('/live-demo');
+    await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 });
+
+    await page.getByRole('button', { name: /^Ayarlar$/i }).click();
+    await page.getByRole('tab', { name: /Navigasyon|Navigation/i }).click();
+    const editor = page.getByTestId('navigation-editor');
+    await expect(editor).toBeVisible();
+
+    await editor.getByLabel('Section name').nth(1).fill('Ön Büro');
+    await editor.getByRole('button', { name: /Herkes için yayınla|Publish for everyone/i }).click();
+    await expect(page.getByText('Ön Büro', { exact: true })).toBeVisible();
   });
 
 });

@@ -5,6 +5,7 @@ import type { ModuleDefinition } from '@/config/moduleRegistry'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { cn } from '@/lib/utils'
+import { useHotelStore } from '@/stores/hotelStore'
 
 interface AllTabsDirectoryProps {
     role?: string
@@ -15,7 +16,8 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
     const { allTabsOpen, closeAllTabs } = useNavigationStore()
     const { language } = useLanguageStore()
     const [query, setQuery] = useState('')
-    const navigation = useMemo(() => resolveNavigation(role), [role])
+    const navigationConfig = useHotelStore((state) => state.hotel?.settings.navigation)
+    const navigation = useMemo(() => resolveNavigation(role, navigationConfig), [role, navigationConfig])
     const copy = language === 'tr'
         ? { title: 'Tüm sekmeler', search: 'Sekme ara…', empty: 'Eşleşen sekme yok', groups: { today: 'Bugün', operations: 'Operasyon', tools: 'Araçlar', management: 'Yönetim' } }
         : language === 'ru'
@@ -51,7 +53,7 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
             <div className="flex-1 overflow-y-auto px-4 pb-28 pt-5">
                 {sections.map((section) => (
                     <section key={section.id} className="mb-7">
-                        <h3 className="mb-2 text-xs font-semibold text-muted-foreground">{copy.groups[section.id]}</h3>
+                        <h3 className="mb-2 text-xs font-semibold text-muted-foreground">{section.name || copy.groups[section.id as keyof typeof copy.groups] || section.id}</h3>
                         <div className="grid grid-cols-2 gap-2">
                             {section.items.map((item) => {
                                 const Icon = item.icon

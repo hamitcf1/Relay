@@ -5,6 +5,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLayoutStore } from '@/stores/layoutStore'
 import { useChatStore } from '@/stores/chatStore'
+import { useHotelStore } from '@/stores/hotelStore'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
@@ -30,7 +31,8 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
     const { user, signOut } = useAuthStore()
     const { sidebarCollapsed, toggleSidebar } = useLayoutStore()
     const toggleChat = useChatStore((state) => state.toggleOpen)
-    const navigation = resolveNavigation(userRole)
+    const navigationConfig = useHotelStore((state) => state.hotel?.settings.navigation)
+    const navigation = resolveNavigation(userRole, navigationConfig)
     const labels = language === 'tr'
         ? { primary: 'Çalışma alanı', all: 'Tüm araçlar', assistant: 'AI Asistan' }
         : language === 'ru'
@@ -71,7 +73,7 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
                             <div className="mt-2 space-y-4">
                                 {navigation.sections.map((section) => (
                                     <section key={section.id}>
-                                        <p className="mb-1 px-3 text-[10px] font-medium text-muted-foreground/75">{section.id === 'operations' ? (language === 'tr' ? 'Operasyon' : 'Operations') : section.id === 'tools' ? (language === 'tr' ? 'Araçlar' : 'Tools') : (language === 'tr' ? 'Yönetim' : 'Management')}</p>
+                                        <p className="mb-1 px-3 text-[10px] font-medium text-muted-foreground/75">{section.name || section.id}</p>
                                         <div className="space-y-1">{section.items.map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language)} active={isActive(item)} collapsed={false} onClick={() => navigate(item)} />)}</div>
                                     </section>
                                 ))}

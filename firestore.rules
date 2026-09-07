@@ -76,7 +76,7 @@ service cloud.firestore {
       
       // Only GM or hotel creator can update hotel
       allow update: if isAuthenticated() && (
-        isGM() ||
+        (isGM() && belongsToHotel(hotelId)) ||
         resource.data.created_by == request.auth.uid
       );
       

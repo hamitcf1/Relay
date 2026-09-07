@@ -1,7 +1,8 @@
 import { create } from 'zustand'
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
+import { doc, getDoc, setDoc, onSnapshot, runTransaction, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { Hotel, HotelInfo, HotelSettings } from '@/types'
+import type { Hotel, HotelInfo, HotelNavigationConfig, HotelSettings } from '@/types'
+import { DEFAULT_NAVIGATION_CONFIG } from '@/lib/navigationDefaults'
 
 interface HotelState {
     hotel: Hotel | null
@@ -15,6 +16,7 @@ interface HotelActions {
     createHotelIfNotExists: (hotelId: string, info: HotelInfo) => Promise<void>
     updateHotelSettings: (hotelId: string, settings: Partial<HotelSettings>) => Promise<void>
     updateHotelInfo: (hotelId: string, info: Partial<HotelInfo>) => Promise<void>
+    publishNavigation: (hotelId: string, navigation: HotelNavigationConfig, expectedVersion: number, editor: { uid: string; name: string }) => Promise<{ ok: true; version: number } | { ok: false; current: HotelNavigationConfig }>
     joinHotelByCode: (code: string, user: any) => Promise<boolean>
     validateHotelCode: (code: string) => Promise<string | null>
     createNewHotel: (info: HotelInfo, user: any) => Promise<string | null>
@@ -30,10 +32,11 @@ const defaultSettings: HotelSettings = {
         { id: '1', name: 'Morning', code: 'A', startTime: '08:00', endTime: '16:00', color: 'blue' },
         { id: '2', name: 'Evening', code: 'B', startTime: '16:00', endTime: '00:00', color: 'indigo' },
         { id: '3', name: 'Night', code: 'C', startTime: '00:00', endTime: '08:00', color: 'violet' },
-    ]
+    ],
+    navigation: DEFAULT_NAVIGATION_CONFIG,
 }
 
-export const useHotelStore = create<HotelStore>((set) => ({
+export const useHotelStore = create<HotelStore>((set, get) => ({
     // State
     hotel: null,
     loading: true,
@@ -54,6 +57,7 @@ export const useHotelStore = create<HotelStore>((set) => ({
                         kbs_time: '23:00',
                         check_agency_intervals: [9, 12, 15, 18, 21],
                         staff_order: ['demo-user-gm', 'demo-user-staff'],
+                        navigation: DEFAULT_NAVIGATION_CONFIG,
                     },
                 },
                 loading: false
@@ -107,6 +111,7 @@ export const useHotelStore = create<HotelStore>((set) => ({
                         kbs_time: '23:00',
                         check_agency_intervals: [9, 12, 15, 18, 21],
                         staff_order: ['demo-user-gm', 'demo-user-staff'],
+                        navigation: DEFAULT_NAVIGATION_CONFIG,
                     },
                 },
                 loading: false,
@@ -171,6 +176,10 @@ export const useHotelStore = create<HotelStore>((set) => ({
         }
     },
     updateHotelSettings: async (hotelId: string, settings: Partial<HotelSettings>) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => state.hotel ? { hotel: { ...state.hotel, settings: { ...state.hotel.settings, ...settings } } } : state)
+            return
+        }
         try {
             const hotelRef = doc(db, 'hotels', hotelId)
             // Use updateDoc for specific fields to avoid overwriting the settings map if safe,
@@ -192,6 +201,37 @@ export const useHotelStore = create<HotelStore>((set) => ({
             console.error('Error updating hotel settings:', error)
             throw error
         }
+    },
+    publishNavigation: async (hotelId, navigation, expectedVersion, editor) => {
+        const nextVersion = expectedVersion + 1
+        const nextNavigation: HotelNavigationConfig = {
+            ...navigation,
+            version: nextVersion,
+            updatedBy: editor.uid,
+            updatedByName: editor.name,
+            updatedAt: new Date().toISOString(),
+        }
+
+        if (hotelId === 'demo-hotel-id') {
+            const current: HotelNavigationConfig = get().hotel?.settings.navigation || DEFAULT_NAVIGATION_CONFIG
+            if (current.version !== expectedVersion) return { ok: false, current }
+            set((state) => state.hotel ? { hotel: { ...state.hotel, settings: { ...state.hotel.settings, navigation: nextNavigation } } } : state)
+            return { ok: true, version: nextVersion }
+        }
+
+        const hotelRef = doc(db, 'hotels', hotelId)
+        return runTransaction(db, async (transaction) => {
+            const snapshot = await transaction.get(hotelRef)
+            const current = snapshot.data()?.settings?.navigation as HotelNavigationConfig | undefined
+            const currentVersion = current?.version || 1
+            if (currentVersion !== expectedVersion) return { ok: false as const, current: current || DEFAULT_NAVIGATION_CONFIG }
+            transaction.set(hotelRef, {
+                settings: {
+                    navigation: { ...nextNavigation, updatedAt: serverTimestamp() },
+                },
+            }, { merge: true })
+            return { ok: true as const, version: nextVersion }
+        })
     },
 
     updateHotelInfo: async (hotelId: string, info: Partial<HotelInfo>) => {

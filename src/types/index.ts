@@ -83,10 +83,35 @@ export interface HotelInfo {
     address: string
 }
 
+export interface NavigationSectionConfig {
+    id: string
+    name: string
+    moduleIds: string[]
+}
+
+export interface NavigationRoleOverlay {
+    hiddenModuleIds?: string[]
+    moduleOrder?: string[]
+    sectionByModule?: Record<string, string>
+}
+
+export interface HotelNavigationConfig {
+    version: number
+    sections: NavigationSectionConfig[]
+    primaryModuleIds: string[]
+    mobileModuleIds: string[]
+    quickActionIds: string[]
+    roleOverlays?: Record<string, NavigationRoleOverlay>
+    updatedBy?: string
+    updatedByName?: string
+    updatedAt?: unknown
+}
+
 export interface HotelSettings {
     kbs_time: string
     check_agency_intervals: number[]
     staff_order?: string[]
+    navigation?: HotelNavigationConfig
     safe_password?: string
     knowledge_base?: string // AI Knowledge Base context
     shifts?: Array<{
