@@ -86,4 +86,17 @@ test.describe('Live Demo & Simulation', () => {
     await expect(page.getByText('Ön Büro', { exact: true })).toBeVisible();
   });
 
+  test('operations overview leads with work that needs attention', async ({ page }) => {
+    await page.goto('/live-demo');
+    await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 });
+
+    const priority = page.getByRole('heading', { name: /Öncelikli işler|Priority work/i });
+    const handover = page.getByRole('heading', { name: /Vardiya devri|Shift handover/i });
+    await expect(priority).toBeVisible();
+    await expect(handover).toBeVisible();
+    expect(await priority.evaluate((node) => Boolean(node.compareDocumentPosition(document.querySelector('#handover-title')!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBeTruthy();
+  });
+
 });
