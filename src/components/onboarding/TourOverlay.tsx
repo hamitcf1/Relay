@@ -69,6 +69,9 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
     useEffect(() => {
         if (!isOpen) return
 
+        const handleKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
+        document.addEventListener('keydown', handleKeyDown)
+
         const updateRect = () => {
             const step = steps[currentStep]
             // If it's the first welcome step (no specific target or center), we handle it differently
@@ -92,6 +95,7 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
         return () => {
             window.removeEventListener('resize', updateRect)
             clearInterval(interval)
+            document.removeEventListener('keydown', handleKeyDown)
         }
     }, [isOpen, currentStep])
 
@@ -139,6 +143,10 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                 <AnimatePresence mode="wait">
                     <motion.div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="product-tour-title"
+                        aria-describedby="product-tour-description"
                         key={currentStep}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{
@@ -155,7 +163,7 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
                         }}
                         exit={{ opacity: 0, y: -10 }}
                         className={cn(
-                            "bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-2xl w-80 pointer-events-auto bg-opacity-95 backdrop-blur-xl",
+                            "bg-card border border-border p-6 rounded-2xl shadow-2xl w-80 pointer-events-auto backdrop-blur-xl",
                             targetRect ? "" : "relative"
                         )}
                         style={targetRect && step.position !== 'bottom' && step.position !== 'top' ? { top: Math.max(20, targetRect.top) } : {}}
@@ -164,13 +172,13 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
                             <span className="text-xs font-bold text-primary uppercase tracking-wider">
                                 Step {currentStep + 1}/{steps.length}
                             </span>
-                            <button onClick={onClose} className="text-zinc-500 hover:text-white">
+                            <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground hover:text-foreground">
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
 
-                        <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
-                        <p className="text-sm text-zinc-400 leading-relaxed mb-6">
+                        <h3 id="product-tour-title" className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
+                        <p id="product-tour-description" className="text-sm text-muted-foreground leading-relaxed mb-6">
                             {step.content}
                         </p>
 
@@ -180,17 +188,17 @@ export function TourOverlay({ isOpen, onClose }: TourOverlayProps) {
                                 size="sm"
                                 onClick={handlePrev}
                                 disabled={currentStep === 0}
-                                className="text-zinc-500 hover:text-zinc-300"
+                                className="text-muted-foreground hover:text-foreground"
                             >
                                 <ChevronLeft className="w-4 h-4 mr-1" />
-                                Prev
+                                {t('common.back')}
                             </Button>
                             <Button
                                 size="sm"
                                 onClick={handleNext}
                                 className="bg-primary text-primary-foreground"
                             >
-                                {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                {currentStep === steps.length - 1 ? t('common.finish') : t('common.next')}
                                 {currentStep !== steps.length - 1 && <ChevronRight className="w-4 h-4 ml-1" />}
                             </Button>
                         </div>
