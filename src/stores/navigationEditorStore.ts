@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { HotelNavigationConfig } from '@/types'
 import { normalizeNavigationConfig } from '@/lib/navigationDefaults'
+import { normalizeCompactLayout } from '@/lib/workspace'
 
 type EditorRole = 'base' | 'receptionist' | 'housekeeping'
 
@@ -16,6 +17,7 @@ interface NavigationEditorState {
     togglePrimary: (moduleId: string) => void
     toggleMobile: (moduleId: string) => void
     toggleQuickAction: (actionId: string) => void
+    moveCompactModule: (moduleId: string, column: 'left' | 'right', index: number) => void
     markPublished: (version: number) => void
 }
 
@@ -79,6 +81,17 @@ export const useNavigationEditorStore = create<NavigationEditorState>((set, get)
         if (!state.draft) return state
         const ids = state.draft.quickActionIds.includes(actionId) ? state.draft.quickActionIds.filter((id) => id !== actionId) : [...state.draft.quickActionIds, actionId]
         return { draft: { ...state.draft, quickActionIds: ids }, dirty: true }
+    }),
+    moveCompactModule: (moduleId, column, index) => set((state) => {
+        if (!state.draft) return state
+        const layout = normalizeCompactLayout(state.draft.compactLayout)
+        const next = {
+            left: layout.left.filter((id) => id !== moduleId),
+            right: layout.right.filter((id) => id !== moduleId),
+        }
+        const target = next[column]
+        target.splice(Math.max(0, Math.min(index, target.length)), 0, moduleId)
+        return { draft: { ...state.draft, compactLayout: next }, dirty: true }
     }),
     markPublished: (version) => {
         const draft = get().draft

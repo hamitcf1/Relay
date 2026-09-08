@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { NavigationPreview } from './NavigationPreview'
 import { cn } from '@/lib/utils'
 import { DEFAULT_NAVIGATION_CONFIG } from '@/lib/navigationDefaults'
+import { CompactLayoutEditor } from './CompactLayoutEditor'
 
 export function NavigationEditor() {
     const hotel = useHotelStore((state) => state.hotel)
@@ -86,6 +87,8 @@ export function NavigationEditor() {
                     </section>
                 ))}
             </div>
+
+            {editor.selectedRole === 'base' && <CompactLayoutEditor layout={editor.draft.compactLayout} language={language} onMove={editor.moveCompactModule} />}
 
             <section className="rounded-xl border border-border bg-card p-4">
                 <h3 className="mb-3 text-sm font-semibold">{copy.quick}</h3>

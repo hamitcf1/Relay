@@ -32,7 +32,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { cn } from '@/lib/utils'
 
-export function UserNav() {
+export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile-nav' }) {
     const { user, signOut } = useAuthStore()
     const { t, language, setLanguage } = useLanguageStore()
     const isMobile = useIsMobile()
@@ -43,9 +43,10 @@ export function UserNav() {
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-2 h-9 rounded-lg border border-border/50 bg-card/40 hover:bg-card/70 hover:border-border transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                    <button aria-label={variant === 'mobile-nav' ? (language === 'tr' ? 'Profil' : language === 'ru' ? 'Профиль' : 'Profile') : undefined} className={cn("flex items-center gap-2 px-2 h-9 rounded-lg border border-border/50 bg-card/40 hover:bg-card/70 hover:border-border transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background", variant === 'mobile-nav' && 'h-16 w-full flex-col justify-center gap-1 border-0 bg-transparent p-0 text-muted-foreground')}>
                         <UserAvatar user={user} size="sm" className="shadow-none" />
-                        <div className="hidden sm:flex flex-col items-start leading-tight">
+                        {variant === 'mobile-nav' && <span className="text-[10px] font-medium">{language === 'tr' ? 'Profil' : language === 'ru' ? 'Профиль' : 'Profile'}</span>}
+                        <div className={cn("hidden sm:flex flex-col items-start leading-tight", variant === 'mobile-nav' && 'hidden')}>
                             <span className="text-xs font-semibold text-foreground">
                                 {user?.name?.split(' ')[0]} {user?.name?.split(' ').slice(1).map(n => n[0]).join('.')}.
                             </span>
@@ -53,7 +54,7 @@ export function UserNav() {
                                 {user?.role}
                             </span>
                         </div>
-                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
+                        {variant !== 'mobile-nav' && <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />}
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-card border-border p-1">

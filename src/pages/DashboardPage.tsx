@@ -49,6 +49,8 @@ import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { RelayMark } from '@/components/brand/RelayBrand'
 import { ModulePageSurface } from '@/components/layout/ModulePageSurface'
 import { CompactShift } from '@/components/workspace/CompactShift'
+import { CompactNavigation, type CompactArea } from '@/components/workspace/CompactNavigation'
+import { CompactOperations } from '@/components/workspace/CompactOperations'
 
 
 // Lazy-loaded operations panels — each tab becomes its own chunk
@@ -91,6 +93,8 @@ export function DashboardPage() {
     const [overviewTab, setOverviewTab] = useState('grid')
     const [openNewNote, setOpenNewNote] = useState(false)
     const workspaceMode = user?.settings?.workspace_mode || 'modern'
+    const [compactArea, setCompactArea] = useState<CompactArea>('shift')
+    const [compactOperationTab, setCompactOperationTab] = useState(user?.settings?.compact_operation_tab || 'overview')
 
     // Mobile Detection
     const isMobile = useIsMobile()
@@ -202,6 +206,15 @@ export function DashboardPage() {
     }
 
     const handleQuickAction = (id: 'notes' | 'feedback' | 'sales' | 'messaging' | 'calendar') => {
+        if (workspaceMode === 'compact') {
+            if (id === 'notes' || id === 'calendar') {
+                setCompactArea('shift')
+                return
+            }
+            setCompactArea('operations')
+            setCompactOperationTab(id)
+            return
+        }
         if (id === 'notes') {
             setActiveTab('overview')
             setOpenNewNote(true)
@@ -238,7 +251,7 @@ export function DashboardPage() {
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
 
             {/* Application Sidebar (Desktop only) */}
-            <AppSidebar
+            {workspaceMode === 'compact' ? <CompactNavigation area={compactArea} onAreaChange={setCompactArea} /> : <AppSidebar
                 activeTab={activeTab}
                 operationTab={operationTab}
                 overviewTab={overviewTab}
@@ -252,7 +265,7 @@ export function DashboardPage() {
                         setOverviewTab(subTab || 'grid')
                     }
                 }}
-            />
+            />}
 
             {/* Main Content Pane */}
             <div className="flex flex-col flex-1 relative min-w-0 overflow-hidden">
@@ -306,7 +319,7 @@ export function DashboardPage() {
                 </header>
 
             <main className={cn('relay-scroll-root relative min-h-0 flex-1', workspaceMode === 'compact' ? 'overflow-hidden' : 'overflow-y-auto pb-28 md:pb-8')}>
-                {workspaceMode === 'compact' ? <CompactShift /> : (
+                {workspaceMode === 'compact' ? (compactArea === 'shift' ? <CompactShift /> : <CompactOperations activeModule={compactOperationTab} onModuleChange={(id) => { setCompactOperationTab(id); void useAuthStore.getState().updateSettings({ compact_operation_tab: id }) }} onOpenShiftModule={() => setCompactArea('shift')} />) : (
                 <div className="relay-page">
                 <AnnouncementBanner />
                 
@@ -456,14 +469,14 @@ export function DashboardPage() {
             </div>
 
             {/* Mobile Bottom Navigation Layout stays consistent */}
-            <MobileNav
+            {workspaceMode === 'modern' && <MobileNav
                 activeTab={activeTab}
                 overviewTab={overviewTab}
                 operationTab={operationTab}
                 userRole={user?.role}
                 onSelect={handleModuleSelect}
-            />
-            <AllTabsDirectory role={user?.role} onSelect={handleModuleSelect} />
+            />}
+            {workspaceMode === 'modern' && <AllTabsDirectory role={user?.role} onSelect={handleModuleSelect} />}
             <QuickActionMenu onAction={handleQuickAction} />
             <AnnouncementModal />
 
