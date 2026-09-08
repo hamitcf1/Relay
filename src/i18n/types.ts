@@ -491,14 +491,10 @@ export type Translations = {
     'appearance.avatar.choose_emoji': string
     'appearance.theme.title': string
     'appearance.theme.light': string
-    'appearance.theme.sepia': string
-    'appearance.theme.comfort': string
     'appearance.theme.dark': string
-    'appearance.theme.midnight': string
     'appearance.accent.title': string
-    'appearance.accent.indigo': string
-    'appearance.accent.sky': string
-    'appearance.accent.emerald': string
+    'appearance.accent.slateBlue': string
+    'appearance.accent.teal': string
     'appearance.accent.rose': string
     'appearance.accent.amber': string
     'appearance.accent.violet': string

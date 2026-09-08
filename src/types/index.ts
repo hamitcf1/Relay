@@ -58,7 +58,7 @@ export interface UserSettings {
     language?: 'en' | 'tr' | 'ru'
     onboarding_seen?: boolean
     dismissed_announcements?: string[]
-    theme?: 'light' | 'sepia' | 'comfort' | 'dark' | 'midnight'
+    theme?: 'light' | 'dark' | 'sepia' | 'comfort' | 'midnight'
     accent_color?: string
     notifications?: boolean
     show_datetime?: boolean
@@ -83,10 +83,35 @@ export interface HotelInfo {
     address: string
 }
 
+export interface NavigationSectionConfig {
+    id: string
+    name: string
+    moduleIds: string[]
+}
+
+export interface NavigationRoleOverlay {
+    hiddenModuleIds?: string[]
+    moduleOrder?: string[]
+    sectionByModule?: Record<string, string>
+}
+
+export interface HotelNavigationConfig {
+    version: number
+    sections: NavigationSectionConfig[]
+    primaryModuleIds: string[]
+    mobileModuleIds: string[]
+    quickActionIds: string[]
+    roleOverlays?: Record<string, NavigationRoleOverlay>
+    updatedBy?: string
+    updatedByName?: string
+    updatedAt?: unknown
+}
+
 export interface HotelSettings {
     kbs_time: string
     check_agency_intervals: number[]
     staff_order?: string[]
+    navigation?: HotelNavigationConfig
     safe_password?: string
     knowledge_base?: string // AI Knowledge Base context
     shifts?: Array<{
@@ -361,6 +386,41 @@ export interface OffDayRequest {
     // New fields for Shift Requests
     type?: 'off_day' | 'shift'
     shift_name?: string // e.g. 'morning', 'evening', 'night'
+}
+
+export type RosterShiftValue = ShiftType | 'OFF' | null
+
+export interface RosterCellEdit {
+    staffId: string
+    day: string
+    value: RosterShiftValue
+    expectedCellVersion: number
+}
+
+export interface RosterDraftCell {
+    value: RosterShiftValue
+    version: number
+    updatedBy: string
+    updatedByName: string
+    updatedAt: Date
+}
+
+export interface RosterDraft {
+    weekId: string
+    version: number
+    cells: Record<string, RosterDraftCell>
+    updatedBy: string
+    updatedByName: string
+    updatedAt: Date
+}
+
+export interface PublishedRosterVersion {
+    weekId: string
+    version: number
+    schedule: Record<string, Record<string, RosterShiftValue>>
+    publishedBy: string
+    publishedByName: string
+    publishedAt: Date
 }
 
 // Tour

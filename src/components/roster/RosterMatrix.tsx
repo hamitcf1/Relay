@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, Reorder } from 'framer-motion'
-import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical, Eye, EyeOff, FileSpreadsheet } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Loader2, GripVertical, FileSpreadsheet } from 'lucide-react'
 import { toast } from 'sonner'
 import {
     doc,
@@ -18,6 +18,11 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
+import { ShiftSelector } from './ShiftSelector'
+import { RosterViewSwitcher, type RosterView } from './RosterViewSwitcher'
+import { MobileRosterDayView } from './MobileRosterDayView'
+import { MobileRosterEmployeeView } from './MobileRosterEmployeeView'
+import { MobileRosterMatrix } from './MobileRosterMatrix'
 
 interface RosterMatrixProps {
     hotelId: string
@@ -56,7 +61,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const { t, language } = useLanguageStore()
     const { hotel, updateHotelSettings } = useHotelStore()
     const { user } = useAuthStore()
-    const { toggleStaffVisibility } = useRosterStore()
+    const { subscribeToDraft, updateDraftCell, publishRoster, draft, draftSaving, draftConflict } = useRosterStore()
     const { activeStaff: storeStaff } = useRosterStore()
     const [staff, setStaff] = useState<StaffMember[]>([])
     const [schedule, setSchedule] = useState<Record<string, Record<string, ShiftValue>>>({})
@@ -64,6 +69,10 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [exporting, setExporting] = useState(false)
+    const [mobileView, setMobileView] = useState<RosterView>(() => (localStorage.getItem('relay-roster-view') as RosterView) || 'day')
+    const [selectedDay, setSelectedDay] = useState(DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1])
+    const [selectedStaff, setSelectedStaff] = useState(user?.uid || '')
+    const [selectedCell, setSelectedCell] = useState<{ uid: string; day: string } | null>(null)
 
     const isGM = user?.role === 'gm'
 
@@ -145,6 +154,25 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
     const weekStart = getWeekStart(weekOffset)
 
+    useEffect(() => {
+        if (!isGM) return
+        return subscribeToDraft(hotelId, weekStart)
+    }, [hotelId, isGM, subscribeToDraft, weekStart])
+
+    useEffect(() => {
+        if (!isGM || !draft || draft.weekId !== weekStart) return
+        setSchedule((previous) => {
+            const next = { ...previous }
+            Object.entries(draft.cells).forEach(([key, cell]) => {
+                const split = key.lastIndexOf(':')
+                const uid = key.slice(0, split)
+                const day = key.slice(split + 1)
+                next[uid] = { ...next[uid], [day]: cell.value }
+            })
+            return next
+        })
+    }, [draft, isGM, weekStart])
+
     // Calculate dates for the header
     const weekDates = useMemo(() => {
         const start = new Date(weekStart)
@@ -165,12 +193,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
     // Sorted staff based on hotel settings AND visibility
     const sortedStaff = useMemo(() => {
-        let currentStaff = [...staff]
-
-        // Filter out hidden staff for non-GMs
-        if (user?.role !== 'gm') {
-            currentStaff = currentStaff.filter(s => !s.is_hidden_in_roster)
-        }
+        const currentStaff = [...staff]
 
         if (!hotel?.settings?.staff_order || currentStaff.length === 0) return currentStaff;
 
@@ -226,6 +249,21 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             setLoading(true)
 
             try {
+                if (hotelId === 'demo-hotel-id') {
+                    const demoSchedule = useRosterStore.getState().schedule
+                    const weeklySchedule: Record<string, Record<string, ShiftValue>> = {}
+                    staff.forEach((member) => {
+                        weeklySchedule[member.uid] = {}
+                        DAYS.forEach((day, index) => {
+                            const date = new Date(`${weekStart}T00:00:00`)
+                            date.setDate(date.getDate() + index)
+                            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+                            weeklySchedule[member.uid][day] = demoSchedule[member.uid]?.[dateKey] || null
+                        })
+                    })
+                    setSchedule(weeklySchedule)
+                    return
+                }
                 // Fetch roster for this week
                 const rosterRef = doc(db, 'hotels', hotelId, 'roster', weekStart)
                 const rosterSnap = await getDoc(rosterRef)
@@ -253,23 +291,8 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         fetchData()
     }, [hotelId, weekStart, staff.length === 0]) // Re-run if staff list was initially empty
 
-    // Cycle shift value
-    const cycleShift = async (userId: string, day: string, direction: 'forward' | 'backward' = 'forward') => {
+    const setShift = async (userId: string, day: string, nextValue: ShiftValue) => {
         if (!canEdit) return
-
-        const currentValue = schedule[userId]?.[day] || null
-        const currentIndex = currentValue ? shifts.indexOf(currentValue as ShiftType | 'OFF') : -1
-
-        let nextIndex: number
-        if (direction === 'forward') {
-            nextIndex = (currentIndex + 1) % shifts.length
-        } else {
-            nextIndex = (currentIndex - 1 + shifts.length) % shifts.length
-        }
-
-        const nextValue = shifts[nextIndex]
-
-        // Update local state
         setSchedule((prev) => ({
             ...prev,
             [userId]: {
@@ -277,6 +300,13 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                 [day]: nextValue,
             },
         }))
+
+        if (isGM) {
+            const key = `${userId}:${day}`
+            const result = await updateDraftCell(hotelId, weekStart, { staffId: userId, day, value: nextValue, expectedCellVersion: draft?.cells[key]?.version || 0 })
+            if (result === 'conflict') toast.error(language === 'tr' ? 'Bu hücre başka bir yönetici tarafından değiştirildi.' : 'This cell was changed by another manager.')
+            return
+        }
 
         // Save to Firestore
         setSaving(true)
@@ -308,7 +338,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
 
                 const user = staff.find(s => s.uid === userId)
                 if (user) {
-                    await syncRosterToCalendar(hotelId, userId, user.name, dateStr, nextValue)
+                    await syncRosterToCalendar(hotelId, userId, user.name, dateStr, nextValue || '')
                 }
             }
         } catch (error) {
@@ -316,6 +346,12 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
         } finally {
             setSaving(false)
         }
+    }
+
+    const openShiftSelector = (uid: string, day: string) => canEdit && setSelectedCell({ uid, day })
+    const changeMobileView = (view: RosterView) => {
+        setMobileView(view)
+        localStorage.setItem('relay-roster-view', view)
     }
 
     if (loading) {
@@ -343,6 +379,11 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             }
             headerActions={
                 <div className="flex items-center gap-0.5 sm:gap-2">
+                    {isGM && (
+                        <Button variant="outline" size="sm" className="h-8" disabled={!draft || draftSaving || Object.keys(draft.cells).length === 0} onClick={async (event) => { event.stopPropagation(); if (!draft) return; const result = await publishRoster(hotelId, weekStart, draft.version); if (result === 'published') toast.success(language === 'tr' ? 'Vardiya yayınlandı' : 'Roster published'); else toast.error(language === 'tr' ? 'Taslak güncellendi, tekrar deneyin.' : 'Draft changed. Try again.') }}>
+                            {language === 'tr' ? 'Yayınla' : 'Publish'}
+                        </Button>
+                    )}
                     {isGM && (
                         <Button
                             variant="ghost"
@@ -398,79 +439,45 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             }
         >
             <div className="pt-2">
+                {isGM && <div className="mb-3 flex min-h-9 items-center justify-between rounded-xl border border-border/60 bg-muted/30 px-3 text-xs text-muted-foreground"><span>{draftSaving ? (language === 'tr' ? 'Taslak kaydediliyor…' : 'Saving draft…') : draftConflict ? (language === 'tr' ? 'Hücre çakışması' : 'Cell conflict') : Object.keys(draft?.cells || {}).length ? (language === 'tr' ? 'Ortak taslak kaydedildi' : 'Shared draft saved') : (language === 'tr' ? 'Yayınlanmış vardiya' : 'Published roster')}</span>{draft?.updatedByName && <span>{draft.updatedByName}</span>}</div>}
                 {staff.length > 0 && (
                     <div className="space-y-3 md:hidden">
-                        <div className="overflow-hidden rounded-2xl border border-border/70 bg-card/45">
-                            <div className="grid grid-cols-[minmax(4.75rem,1.35fr)_repeat(7,minmax(0,1fr))] items-end border-b border-border/60 bg-muted/20 px-2 py-2.5">
-                                <span className="truncate pr-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                    {t('common.staff')}
-                                </span>
-                                {weekDates.map(({ day, dateStr, isToday }) => (
-                                    <div
-                                        key={day}
-                                        className={cn(
-                                            'flex min-w-0 flex-col items-center gap-0.5 text-muted-foreground',
-                                            isToday && 'text-primary'
-                                        )}
-                                    >
-                                        <span className="text-[9px] font-semibold uppercase">{t(`day.${day.toLowerCase()}` as any).slice(0, 2)}</span>
-                                        <span className="font-mono text-[9px] tabular-nums">{dateStr.slice(0, 2)}</span>
-                                        <span className={cn('h-0.5 w-3 rounded-full bg-transparent', isToday && 'bg-primary')} />
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="divide-y divide-border/55">
-                                {mobileStaff.map((member) => {
-                                    const isCurrentUser = user?.uid === member.uid
-                                    return (
-                                        <div
-                                            key={member.uid}
-                                            className={cn(
-                                                'grid min-h-14 grid-cols-[minmax(4.75rem,1.35fr)_repeat(7,minmax(0,1fr))] items-center px-2 py-2',
-                                                isCurrentUser && 'bg-primary/[0.045]'
-                                            )}
-                                        >
-                                            <span className="min-w-0 pr-1.5">
-                                                <span className={cn('block truncate text-[11px] font-semibold leading-tight text-foreground', member.is_hidden_in_roster && 'opacity-50 line-through')}>{member.name}</span>
-                                                {isCurrentUser && <span className="mt-0.5 block text-[9px] font-medium text-primary">{language === 'tr' ? 'Siz' : language === 'ru' ? 'Вы' : 'You'}</span>}
-                                            </span>
-                                            {DAYS.map((day, dayIndex) => {
-                                                const shift = schedule[member.uid]?.[day]
-                                                const isToday = weekDates[dayIndex]?.isToday
-                                                return (
-                                                    <motion.button
-                                                        key={day}
-                                                        type="button"
-                                                        disabled={!canEdit}
-                                                        onClick={() => cycleShift(member.uid, day, 'forward')}
-                                                        aria-label={`${member.name}, ${t(`day.${day.toLowerCase()}` as any)}: ${shift ? getShiftLabel(shift) : '—'}`}
-                                                        className={cn(
-                                                            'mx-auto grid h-8 w-[calc(100%-0.2rem)] min-w-0 place-items-center rounded-md text-[9px] font-bold transition-colors',
-                                                            shift ? shiftColors[shift] : 'border border-border/40 bg-muted/20 text-muted-foreground/60',
-                                                            isToday && 'ring-1 ring-primary/50 ring-offset-1 ring-offset-background',
-                                                            canEdit ? 'active:opacity-70' : 'cursor-default'
-                                                        )}
-                                                        whileTap={canEdit ? { scale: 0.9 } : undefined}
-                                                    >
-                                                        {shift || '—'}
-                                                    </motion.button>
-                                                )
-                                            })}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-x-3 gap-y-2 border-t border-border/60 pt-3">
-                            {shifts.map((shift) => (
-                                <div key={shift} className="flex min-w-0 items-center gap-1.5">
-                                    <span className={cn('grid h-5 min-w-5 place-items-center rounded px-1 text-[9px] font-bold', shiftColors[shift])}>{shift}</span>
-                                    <span className="truncate text-[10px] text-muted-foreground">{getShiftLabel(shift)}</span>
-                                </div>
-                            ))}
-                        </div>
+                        <RosterViewSwitcher
+                            value={mobileView}
+                            onChange={changeMobileView}
+                            labels={{ day: language === 'tr' ? 'Gün' : 'Day', employee: language === 'tr' ? 'Çalışan' : 'Employee', matrix: language === 'tr' ? 'Matris' : 'Matrix' }}
+                        />
+                        {mobileView === 'day' && <MobileRosterDayView
+                            staff={mobileStaff}
+                            days={weekDates.map((item) => ({ ...item, label: t(`day.${item.day.toLowerCase()}` as any), date: item.dateStr }))}
+                            selectedDay={selectedDay}
+                            onDayChange={setSelectedDay}
+                            schedule={schedule}
+                            canEdit={canEdit}
+                            onCell={openShiftSelector}
+                            getLabel={getShiftLabel}
+                            getTone={(shift) => shiftColors[shift]}
+                        />}
+                        {mobileView === 'employee' && <MobileRosterEmployeeView
+                            staff={mobileStaff}
+                            selectedStaff={selectedStaff || mobileStaff[0]?.uid}
+                            onStaffChange={setSelectedStaff}
+                            days={weekDates.map((item) => ({ ...item, label: t(`day.${item.day.toLowerCase()}` as any), date: item.dateStr }))}
+                            schedule={schedule}
+                            canEdit={canEdit}
+                            onCell={openShiftSelector}
+                            getLabel={getShiftLabel}
+                            getTone={(shift) => shiftColors[shift]}
+                        />}
+                        {mobileView === 'matrix' && <MobileRosterMatrix
+                            staff={mobileStaff}
+                            days={weekDates.map((item) => ({ ...item, label: t(`day.${item.day.toLowerCase()}` as any), date: item.dateStr }))}
+                            schedule={schedule}
+                            canEdit={canEdit}
+                            onCell={openShiftSelector}
+                            getTone={(shift) => shiftColors[shift]}
+                            staffLabel={t('common.staff')}
+                        />}
                     </div>
                 )}
                 {staff.length === 0 ? (
@@ -532,27 +539,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                         )}
                                         <td className="py-2 px-1 sm:px-2 text-foreground text-xs sm:text-sm">
                                             <div className="flex items-center gap-1 sm:gap-2">
-                                                <span className={cn("truncate min-w-0 flex-1", member.is_hidden_in_roster && "opacity-50 line-through decoration-muted-foreground")}>
-                                                    {member.name}
-                                                </span>
-                                                {user?.role === 'gm' && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            if (hotelId) {
-                                                                toggleStaffVisibility(hotelId, member.uid, !member.is_hidden_in_roster)
-                                                                    .then(() => {
-                                                                        // Update local state to reflect change immediately
-                                                                        setStaff(prev => prev.map(s => s.uid === member.uid ? { ...s, is_hidden_in_roster: !member.is_hidden_in_roster } : s))
-                                                                    })
-                                                            }
-                                                        }}
-                                                        className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                                                        title={member.is_hidden_in_roster ? t('roster.show') : t('roster.hide')}
-                                                    >
-                                                        {member.is_hidden_in_roster ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                                                    </button>
-                                                )}
+                                                <span className="min-w-0 flex-1 truncate">{member.name}</span>
                                             </div>
                                         </td>
                                         {DAYS.map((day, dayIdx) => {
@@ -564,11 +551,8 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                                                     isToday && "bg-primary/5 rounded-md"
                                                 )}>
                                                     <motion.button
-                                                        onClick={() => cycleShift(member.uid, day, 'forward')}
-                                                        onContextMenu={(e) => {
-                                                            e.preventDefault();
-                                                            cycleShift(member.uid, day, 'backward');
-                                                        }}
+                                                        onClick={() => openShiftSelector(member.uid, day)}
+                                                        aria-label={`${member.name}, ${t(`day.${day.toLowerCase()}` as any)}: ${shift ? getShiftLabel(shift) : '—'}`}
                                                         disabled={!canEdit}
                                                         className={cn(
                                                             'w-full max-w-[36px] sm:max-w-[48px] h-7 sm:h-9 mx-auto rounded text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center',
@@ -616,6 +600,18 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                     })}
                 </div>
             </div>
+            {selectedCell && <ShiftSelector
+                staffName={staff.find((member) => member.uid === selectedCell.uid)?.name || ''}
+                dayLabel={t(`day.${selectedCell.day.toLowerCase()}` as any)}
+                value={schedule[selectedCell.uid]?.[selectedCell.day] || null}
+                shifts={shifts}
+                getLabel={getShiftLabel}
+                getTone={(shift) => shiftColors[shift]}
+                emptyLabel={language === 'tr' ? 'Boş' : language === 'ru' ? 'Пусто' : 'Empty'}
+                closeLabel={language === 'tr' ? 'Kapat' : language === 'ru' ? 'Закрыть' : 'Close'}
+                onSelect={(value) => { setSelectedCell(null); void setShift(selectedCell.uid, selectedCell.day, value as ShiftValue) }}
+                onClose={() => setSelectedCell(null)}
+            />}
         </CollapsibleCard>
     )
 }

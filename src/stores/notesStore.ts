@@ -76,7 +76,11 @@ export const useNotesStore = create<NotesStore>((set) => ({
                     shift_id: 'DEMO_SHIFT_A',
                     resolved_at: null,
                     resolved_by: null,
-                    is_anonymous: false
+                    is_anonymous: false,
+                    priority: 'critical',
+                    is_pinned: true,
+                    assigned_staff_name: 'Night team',
+                    updated_at: new Date(Date.now() - 1800000)
                 },
                 {
                     id: 'note-2',
@@ -93,7 +97,10 @@ export const useNotesStore = create<NotesStore>((set) => ({
                     shift_id: 'DEMO_SHIFT_A',
                     resolved_at: null,
                     resolved_by: null,
-                    is_anonymous: false
+                    is_anonymous: false,
+                    priority: 'high',
+                    assigned_staff_name: 'Receptionist',
+                    updated_at: new Date(Date.now() - 7200000)
                 }
             ]
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sun, Moon, BookOpen, Sparkles, Smile, User, Type, MoonStar } from 'lucide-react'
+import { Sun, Moon, Smile, User, Type } from 'lucide-react'
 import { useThemeStore, ACCENT_COLORS, type Theme } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -54,16 +54,12 @@ export function AppearanceOptions() {
 
     const themes: { id: Theme; icon: typeof Sun; label: string }[] = [
         { id: 'light', icon: Sun, label: t('appearance.theme.light') },
-        { id: 'sepia', icon: BookOpen, label: t('appearance.theme.sepia') },
-        { id: 'comfort', icon: Sparkles, label: t('appearance.theme.comfort') },
         { id: 'dark', icon: Moon, label: t('appearance.theme.dark') },
-        { id: 'midnight', icon: MoonStar, label: t('appearance.theme.midnight') },
     ]
 
     const accentLabels: Record<string, string> = {
-        indigo: t('appearance.accent.indigo'),
-        sky: t('appearance.accent.sky'),
-        emerald: t('appearance.accent.emerald'),
+        slateBlue: t('appearance.accent.slateBlue'),
+        teal: t('appearance.accent.teal'),
         rose: t('appearance.accent.rose'),
         amber: t('appearance.accent.amber'),
         violet: t('appearance.accent.violet'),
@@ -82,7 +78,7 @@ export function AppearanceOptions() {
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
                     {t('appearance.theme.title')}
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div data-testid="theme-options" className="grid grid-cols-2 gap-2">
                     {themes.map(({ id, icon: Icon, label }) => (
                         <button
                             key={id}
@@ -107,7 +103,7 @@ export function AppearanceOptions() {
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
                     {t('appearance.accent.title')}
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div data-testid="accent-options" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {ACCENT_COLORS.map((color) => (
                         <button
                             key={color.key}
@@ -192,7 +188,7 @@ export function AppearanceOptions() {
                         {showEmojiPicker && (
                             <div className="bg-card border border-border rounded-lg overflow-hidden">
                                 <EmojiPicker
-                                    theme={(theme === 'dark' || theme === 'midnight' || theme === 'comfort') ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                                    theme={theme === 'dark' ? EmojiTheme.DARK : EmojiTheme.LIGHT}
                                     onEmojiClick={(emojiData) => {
                                         updateSettings({ avatar_emoji: emojiData.emoji })
                                         setShowEmojiPicker(false)
