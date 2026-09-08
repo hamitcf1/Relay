@@ -19,10 +19,10 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
     const navigationConfig = useHotelStore((state) => state.hotel?.settings.navigation)
     const navigation = useMemo(() => resolveNavigation(role, navigationConfig), [role, navigationConfig])
     const copy = language === 'tr'
-        ? { title: 'Tüm sekmeler', search: 'Sekme ara…', empty: 'Eşleşen sekme yok', groups: { today: 'Bugün', operations: 'Operasyon', tools: 'Araçlar', management: 'Yönetim' } }
+        ? { title: 'Tüm sekmeler', search: 'Sekme ara…', empty: 'Eşleşen sekme yok', close: 'Kapat', groups: { today: 'Bugün', operations: 'Operasyon', tools: 'Araçlar', management: 'Yönetim' } }
         : language === 'ru'
-            ? { title: 'Все разделы', search: 'Поиск…', empty: 'Ничего не найдено', groups: { today: 'Сегодня', operations: 'Операции', tools: 'Инструменты', management: 'Управление' } }
-            : { title: 'All tabs', search: 'Search tabs…', empty: 'No matching tabs', groups: { today: 'Today', operations: 'Operations', tools: 'Tools', management: 'Management' } }
+            ? { title: 'Все разделы', search: 'Поиск…', empty: 'Ничего не найдено', close: 'Закрыть', groups: { today: 'Сегодня', operations: 'Операции', tools: 'Инструменты', management: 'Управление' } }
+            : { title: 'All tabs', search: 'Search tabs…', empty: 'No matching tabs', close: 'Close', groups: { today: 'Today', operations: 'Operations', tools: 'Tools', management: 'Management' } }
     const normalized = query.trim().toLocaleLowerCase(language)
     const sections = navigation.sections
         .map((section) => ({
@@ -40,7 +40,7 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
                     <p className="text-xs font-medium text-muted-foreground">Relay</p>
                     <h2 className="text-xl font-semibold tracking-tight">{copy.title}</h2>
                 </div>
-                <button onClick={closeAllTabs} aria-label="Close" className="grid h-11 w-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
+                <button onClick={closeAllTabs} aria-label={copy.close} className="grid h-11 w-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
                     <X className="h-5 w-5" />
                 </button>
             </header>

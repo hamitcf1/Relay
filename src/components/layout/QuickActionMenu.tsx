@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { CalendarPlus, MessageCircle, ReceiptText, ShieldAlert, X, ArrowLeftRight } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useNavigationStore } from '@/stores/navigationStore'
@@ -12,13 +13,21 @@ export function QuickActionMenu({ onAction }: QuickActionMenuProps) {
     const { quickActionsOpen, closeQuickActions } = useNavigationStore()
     const { language } = useLanguageStore()
     const navigationConfig = useHotelStore((state) => state.hotel?.settings.navigation)
+    const closeRef = useRef<HTMLButtonElement>(null)
+    useEffect(() => {
+        if (!quickActionsOpen) return
+        closeRef.current?.focus()
+        const onKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && closeQuickActions()
+        document.addEventListener('keydown', onKeyDown)
+        return () => document.removeEventListener('keydown', onKeyDown)
+    }, [closeQuickActions, quickActionsOpen])
     if (!quickActionsOpen) return null
 
     const labels = language === 'tr'
-        ? { title: 'Hızlı kayıt', notes: 'Vardiya notu', feedback: 'Şikâyet', sales: 'Satış', messaging: 'Mesaj', calendar: 'Takvim kaydı' }
+        ? { title: 'Hızlı kayıt', close: 'Kapat', notes: 'Vardiya notu', feedback: 'Şikâyet', sales: 'Satış', messaging: 'Mesaj', calendar: 'Takvim kaydı' }
         : language === 'ru'
-            ? { title: 'Быстрое действие', notes: 'Запись смены', feedback: 'Жалоба', sales: 'Продажа', messaging: 'Сообщение', calendar: 'Календарь' }
-            : { title: 'Quick action', notes: 'Shift note', feedback: 'Complaint', sales: 'Sale', messaging: 'Message', calendar: 'Calendar entry' }
+            ? { title: 'Быстрое действие', close: 'Закрыть', notes: 'Запись смены', feedback: 'Жалоба', sales: 'Продажа', messaging: 'Сообщение', calendar: 'Календарь' }
+            : { title: 'Quick action', close: 'Close', notes: 'Shift note', feedback: 'Complaint', sales: 'Sale', messaging: 'Message', calendar: 'Calendar entry' }
     const allowed = new Set(normalizeNavigationConfig(navigationConfig).quickActionIds)
     const actions = [
         { id: 'notes' as const, icon: ArrowLeftRight, label: labels.notes },
@@ -29,10 +38,10 @@ export function QuickActionMenu({ onAction }: QuickActionMenuProps) {
     ].filter((action) => allowed.has(action.id))
     return (
         <div className="fixed inset-0 z-[85] flex items-end bg-black/40 p-3 backdrop-blur-[2px] md:items-center md:justify-center" onClick={closeQuickActions}>
-            <section className="w-full rounded-2xl border border-border bg-card p-4 shadow-2xl md:max-w-md" onClick={(event) => event.stopPropagation()} aria-label={labels.title}>
+            <section role="dialog" aria-modal="true" className="w-full rounded-2xl border border-border bg-card p-4 shadow-2xl md:max-w-md" onClick={(event) => event.stopPropagation()} aria-label={labels.title}>
                 <header className="mb-4 flex items-center justify-between">
                     <h2 className="text-lg font-semibold">{labels.title}</h2>
-                    <button onClick={closeQuickActions} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground hover:bg-muted"><X className="h-4 w-4" /></button>
+                    <button ref={closeRef} onClick={closeQuickActions} aria-label={labels.close} className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground hover:bg-muted"><X className="h-4 w-4" /></button>
                 </header>
                 <div className="grid grid-cols-2 gap-2">
                     {actions.map(({ id, icon: Icon, label }) => (

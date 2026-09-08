@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import {
     X,
@@ -31,6 +31,12 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
     const { t } = useLanguageStore()
     const [isOpen, setIsOpen] = useState(false)
     const [currentStep, setCurrentStep] = useState(0)
+    const closeRef = useRef<HTMLButtonElement>(null)
+    const handleComplete = useCallback(async () => {
+        if (user && !forceOpen) await updateSettings({ onboarding_seen: true })
+        setIsOpen(false)
+        onClose?.()
+    }, [forceOpen, onClose, updateSettings, user])
 
     useEffect(() => {
         if (forceOpen) {
@@ -40,6 +46,14 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
             setIsOpen(true)
         }
     }, [user, forceOpen])
+
+    useEffect(() => {
+        if (!isOpen) return
+        closeRef.current?.focus()
+        const handleKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && handleComplete()
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [handleComplete, isOpen])
 
     const steps: Step[] = [
         {
@@ -88,28 +102,24 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
         }
     }
 
-    const handleComplete = async () => {
-        if (user && !forceOpen) {
-            await updateSettings({ onboarding_seen: true })
-        }
-        setIsOpen(false)
-        if (onClose) onClose()
-    }
-
     if (!isOpen) return null
 
     const step = steps[currentStep]
     const Icon = step.icon
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
             <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="onboarding-title"
+                aria-describedby="onboarding-description"
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="w-full max-w-sm glass rounded-3xl overflow-hidden shadow-2xl border-white/10"
+                className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card text-card-foreground shadow-2xl"
             >
                 {/* Progress Bar */}
-                <div className="flex h-1 bg-white/5">
+                <div className="flex h-1 bg-muted">
                     {steps.map((_, i) => (
                         <div
                             key={i}
@@ -120,8 +130,10 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
 
                 <div className="p-8 text-center space-y-6">
                     <button
+                        ref={closeRef}
+                        aria-label={t('common.close')}
                         onClick={handleComplete}
-                        className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
+                        className="absolute right-4 top-4 z-10 grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -132,13 +144,13 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
-                        <div className={`w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mx-auto border border-white/10 ${step.color}`}>
+                        <div className={`w-20 h-20 rounded-2xl bg-muted flex items-center justify-center mx-auto border border-border ${step.color}`}>
                             <Icon className="w-10 h-10" />
                         </div>
 
                         <div className="space-y-2">
-                            <h2 className="text-xl font-bold text-white tracking-tight">{step.title}</h2>
-                            <p className="text-zinc-400 text-sm leading-relaxed">
+                            <h2 id="onboarding-title" className="text-xl font-bold text-foreground tracking-tight">{step.title}</h2>
+                            <p id="onboarding-description" className="text-muted-foreground text-sm leading-relaxed">
                                 {step.description}
                             </p>
                         </div>
@@ -149,7 +161,7 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
                             variant="ghost"
                             onClick={handlePrev}
                             disabled={currentStep === 0}
-                            className="text-zinc-500 hover:text-white"
+                            className="text-muted-foreground hover:text-foreground"
                         >
                             <ChevronLeft className="w-4 h-4 mr-1" />
                             {t('common.back')}
@@ -165,8 +177,8 @@ export function OnboardingWizard({ forceOpen, onClose }: OnboardingWizardProps) 
                     </div>
                 </div>
 
-                <div className="bg-white/5 p-4 text-center">
-                    <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest">
+                <div className="bg-muted/55 p-4 text-center">
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
                         {t('onboarding.stepOf')
                             .replace('{current}', (currentStep + 1).toString())
                             .replace('{total}', steps.length.toString())}

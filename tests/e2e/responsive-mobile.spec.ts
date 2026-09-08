@@ -29,6 +29,10 @@ test.describe('Responsive Mobile Experience', () => {
     await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 });
 
     await expect(page.getByRole('button', { name: /Quick action|Hızlı kayıt/i })).toBeVisible();
+    await page.getByRole('button', { name: /Quick action|Hızlı kayıt/i }).click();
+    await expect(page.getByRole('dialog', { name: /Quick action|Hızlı kayıt/i })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: /Quick action|Hızlı kayıt/i })).toBeHidden();
     await page.getByRole('button', { name: /^(All|Tümü)$/i }).click();
     await expect(page.getByRole('heading', { name: /All tabs|Tüm sekmeler/i })).toBeVisible();
 
@@ -53,7 +57,7 @@ test.describe('Responsive Mobile Experience', () => {
     await page.getByRole('button', { name: /Demo Manager/i }).last().click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('dialog').getByRole('button', { name: /OFF/i })).toBeVisible();
-    await expect(page.getByRole('dialog').getByRole('button', { name: /Empty/i })).toBeVisible();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /Boş|Empty/i })).toBeVisible();
   });
 
 });
