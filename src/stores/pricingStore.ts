@@ -39,6 +39,10 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
 
     subscribeToBasePrices: (hotelId: string) => {
         set({ loading: true })
+        if (hotelId === 'demo-hotel-id') {
+            set({ basePrices: { prices: {}, updated_at: new Date(), updated_by: 'demo' }, loading: false, error: null })
+            return () => {}
+        }
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config')
         const unsubscribe = onSnapshot(docRef, (snapshot) => {
             if (snapshot.exists()) {
@@ -62,6 +66,7 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
     },
 
     subscribeToBaseOverrides: (hotelId: string) => {
+        if (hotelId === 'demo-hotel-id') { set({ baseOverrides: [] }); return () => {} }
         const colRef = collection(db, 'hotels', hotelId, 'pricing', 'config', 'base_overrides')
         const unsubscribe = onSnapshot(colRef, (snapshot) => {
             const baseOverrides: BaseOverride[] = []
@@ -82,6 +87,7 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
     },
 
     subscribeToAgencies: (hotelId: string) => {
+        if (hotelId === 'demo-hotel-id') { set({ agencies: [], error: null }); return () => {} }
         const colRef = collection(db, 'hotels', hotelId, 'pricing', 'config', 'agencies')
         const unsubscribe = onSnapshot(colRef, (snapshot) => {
             const agencies: Agency[] = []

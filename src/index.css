@@ -669,8 +669,18 @@ body.disable-animations *::after {
   box-shadow: 0 0 0 3px hsl(var(--primary) / 0.14) !important;
 }
 
-/* Relay keeps its obsidian surfaces while inheriting the user's accent color. */
+/* Relay follows the selected theme while keeping the same operational surface hierarchy. */
 .relay-app {
+  background:
+    radial-gradient(circle at 72% 0%, hsl(var(--primary) / 0.055), transparent 34rem),
+    hsl(var(--background));
+  font-size: 1rem;
+  line-height: 1.5;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+.dark .relay-app {
   color-scheme: dark;
   --background: 216 19% 4%;
   --foreground: 40 14% 92%;
@@ -688,13 +698,6 @@ body.disable-animations *::after {
   --accent-foreground: 40 12% 92%;
   --border: 216 8% 23%;
   --input: 216 8% 24%;
-  background:
-    radial-gradient(circle at 72% 0%, hsl(var(--primary) / 0.055), transparent 34rem),
-    hsl(var(--background));
-  font-size: 1rem;
-  line-height: 1.5;
-  text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
 }
 
 /* App readability contract — operational text must stay legible at a glance. */
@@ -721,8 +724,8 @@ body.disable-animations *::after {
   border-radius: 0.8rem;
   padding: 0.48rem 0.72rem;
   color: hsl(var(--foreground));
-  background: linear-gradient(145deg, hsl(216 11% 10% / 0.9), hsl(216 18% 5% / 0.92));
-  box-shadow: inset 0 1px 0 hsl(40 30% 95% / 0.04);
+  background: linear-gradient(145deg, hsl(var(--card) / 0.94), hsl(var(--background) / 0.96));
+  box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.04);
 }
 
 .relay-mobile-shift > svg { width: 1.35rem; height: 1.35rem; flex: 0 0 auto; color: hsl(var(--primary)); stroke-width: 1.7; }
@@ -735,8 +738,8 @@ body.disable-animations *::after {
   overflow: hidden;
   border: 1px solid hsl(var(--border) / 0.9);
   border-radius: 1rem;
-  background: linear-gradient(150deg, hsl(216 11% 9% / 0.92), hsl(216 18% 5% / 0.96));
-  box-shadow: inset 0 1px 0 hsl(40 30% 95% / 0.04);
+  background: linear-gradient(150deg, hsl(var(--card) / 0.94), hsl(var(--background) / 0.98));
+  box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.04);
 }
 
 .handover-workspace__header {
@@ -759,7 +762,7 @@ body.disable-animations *::after {
 .handover-workspace__add:active { transform: scale(0.98); }
 .handover-workspace__add svg { width: 0.95rem; height: 0.95rem; }
 
-.handover-workspace__metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid hsl(var(--border) / 0.62); background: hsl(216 14% 5% / 0.42); }
+.handover-workspace__metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid hsl(var(--border) / 0.62); background: hsl(var(--muted) / 0.42); }
 .handover-metric { display: grid; min-height: 3.7rem; grid-template-columns: 2rem auto 1fr; align-items: center; gap: 0.65rem; border-right: 1px solid hsl(var(--border) / 0.55); padding: 0.6rem 1rem; }
 .handover-metric:last-child { border-right: 0; }
 .handover-metric > span { display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 0.5rem; color: hsl(var(--muted-foreground)); background: hsl(var(--muted) / 0.72); }
@@ -771,7 +774,7 @@ body.disable-animations *::after {
 .handover-metric--success > span { color: hsl(103 48% 58%); background: hsl(103 48% 24% / 0.15); }
 
 .handover-workspace__compose { border-bottom: 1px solid hsl(var(--border) / 0.64); padding: 0.85rem 1rem; background: hsl(var(--primary) / 0.025); }
-.handover-workspace__compose .handover-compose { border-color: hsl(var(--primary) / 0.2); background: hsl(216 14% 6% / 0.92); }
+.handover-workspace__compose .handover-compose { border-color: hsl(var(--primary) / 0.2); background: hsl(var(--card) / 0.92); }
 .handover-compose__categories { overflow-x: auto; padding-bottom: 0.25rem; scrollbar-width: thin; }
 .handover-compose__categories > button { flex: 0 0 auto; }
 
@@ -791,8 +794,8 @@ body.disable-animations *::after {
 
 .handover-workspace__board { padding: 0.7rem; }
 .handover-list { display: flex; max-height: min(61dvh, 42rem); flex-direction: column; gap: 0.4rem; overflow-y: auto; padding-right: 0.25rem; }
-.handover-note { border-color: hsl(var(--border) / 0.62) !important; border-radius: 0.65rem !important; background: hsl(216 11% 9% / 0.7) !important; box-shadow: inset 0 1px 0 hsl(40 30% 95% / 0.025); }
-.handover-note:hover { border-color: hsl(var(--primary) / 0.26) !important; background: hsl(216 10% 10% / 0.92) !important; }
+.handover-note { border-color: hsl(var(--border) / 0.62) !important; border-radius: 0.65rem !important; background: hsl(var(--card) / 0.76) !important; box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.025); }
+.handover-note:hover { border-color: hsl(var(--primary) / 0.26) !important; background: hsl(var(--card) / 0.96) !important; }
 
 @media (max-width: 767px) {
   .handover-workspace { border-inline: 0; border-radius: 0; }

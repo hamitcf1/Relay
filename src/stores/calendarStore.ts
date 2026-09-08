@@ -73,6 +73,10 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
 
     subscribeToEvents: (hotelId: string, startDate: Date, endDate: Date) => {
         set({ loading: true, error: null })
+        if (hotelId === 'demo-hotel-id') {
+            set({ events: [], loading: false, error: null })
+            return () => { }
+        }
 
         const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
         const eventsQuery = query(

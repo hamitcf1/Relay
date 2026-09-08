@@ -21,6 +21,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { cn } from '@/lib/utils'
 import type { LoanItemPreset, Room } from '@/types'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 const LOAN_ITEMS: LoanItemPreset[] = [
     'charger',
@@ -56,6 +57,8 @@ export function CardsAndLoansPanel() {
     // Per-room inline-add form draft state — keyed by room id
     const [drafts, setDrafts] = useState<Record<string, { item: LoanItemPreset; qty: number; label: string }>>({})
     const [busyRoomId, setBusyRoomId] = useState<string | null>(null)
+    const hasDraft = Object.values(drafts).some((draft) => draft.item !== 'charger' || draft.qty !== 1 || Boolean(draft.label.trim()))
+    useWorkspaceDirty('cards-and-loans', hasDraft)
 
     useEffect(() => {
         if (hotelId) return subscribeToRooms(hotelId)

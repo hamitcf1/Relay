@@ -36,6 +36,10 @@ export const useLeaderboardStore = create<LeaderboardStore>((set, get) => ({
 
     loadLeaderboard: async (hotelId) => {
         set({ loading: true, error: null })
+        if (hotelId === 'demo-hotel-id') {
+            set({ entries: [], loading: false, error: null })
+            return
+        }
         const { timeRange } = get()
 
         try {

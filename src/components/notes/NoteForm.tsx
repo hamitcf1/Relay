@@ -13,6 +13,7 @@ import { useFormatting } from '@/hooks/useFormatting'
 import { FormattingContextMenu } from '@/components/ui/FormattingContextMenu'
 import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
 import type { Hotel, StaffMember } from '@/types'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 const CURRENCY_SYMBOLS: Record<string, string> = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }
 
@@ -45,6 +46,7 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
 
     const [selectedFixtures, setSelectedFixtures] = useState<Record<string, number>>({})
     const [selectedMinibar, setSelectedMinibar] = useState<Record<string, number>>({})
+    useWorkspaceDirty('handover-note', Boolean(newContent || newRoom || newAmount || newTime || newGuest || newAssignedStaff || Object.keys(selectedFixtures).length || Object.keys(selectedMinibar).length || newCategory !== 'handover' || newPriority !== 'low'))
 
     const isFinancialCategory = (cat: string) => ['damage', 'upgrade', 'payment_needed', 'restaurant', 'minibar'].includes(cat)
 

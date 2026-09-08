@@ -38,6 +38,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { toast } from 'sonner'
 import type { RoomType, PricingCurrency, RoomPriceEntry, Agency, AgencyOverride, BaseOverride } from '@/types'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 const ROOM_TYPES: RoomType[] = ['standard', 'corner', 'corner_jacuzzi', 'triple', 'teras_suite']
 
@@ -199,7 +200,7 @@ export function PricingPanel() {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {isGM && !selectedAgencyId && (
-                                            <AddAgencyDialog onAdd={async (name) => {
+                                            <AddAgencyDialog dirtyId="pricing-new-special-agency" onAdd={async (name) => {
                                                 if (hotelId) await addAgency(hotelId, name)
                                             }} />
                                         )}
@@ -290,6 +291,7 @@ function AIPricingAgent({ hotelId }: { hotelId: string }) {
     const [input, setInput] = useState('')
     const [isProcessing, setIsProcessing] = useState(false)
     const [status, setStatus] = useState<string | null>(null)
+    useWorkspaceDirty('pricing-ai-instructions', Boolean(input.trim()))
 
     const parseAndApply = async () => {
         if (!input.trim()) return
@@ -459,6 +461,7 @@ function BulkRateEditor({ hotelId }: { hotelId: string }) {
     const [endDate, setEndDate] = useState(format(addDaysFns(new Date(), 7), 'yyyy-MM-dd'))
     const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>({})
     const [isSaving, setIsSaving] = useState(false)
+    useWorkspaceDirty('pricing-bulk-rates', Object.keys(prices).length > 0)
 
     const handleApply = async () => {
         if (!startDate || !endDate) return
@@ -576,6 +579,7 @@ function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
     const [editingOverride, setEditingOverride] = useState<BaseOverride | null>(null)
+    useWorkspaceDirty('pricing-global-override', Boolean(editingOverride))
 
     const sortedOverrides = [...baseOverrides].sort((a, b) => {
         return sortOrder === 'desc'
@@ -967,6 +971,7 @@ function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
     const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
     const editorRef = useRef<HTMLDivElement>(null)
+    useWorkspaceDirty(`pricing-agency-override-${agency.id}`, isAdding || Boolean(editingOverride))
 
     useEffect(() => {
         if (isAdding || editingOverride) {
@@ -1236,6 +1241,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
     const [editingId, setEditingId] = useState<string | null>(null) // 'global' or agency id
     const [editPrices, setEditPrices] = useState<Record<string, RoomPriceEntry>>({})
     const [isSaving, setIsSaving] = useState(false)
+    useWorkspaceDirty('pricing-base-table', Boolean(editingId))
 
     const startEditing = (id: string, prices: Record<string, RoomPriceEntry>) => {
         setEditingId(id)
@@ -1278,7 +1284,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                     </div>
                     <div className="flex items-center gap-2">
                         {isGM && (
-                            <AddAgencyDialog onAdd={onAddAgency} />
+                            <AddAgencyDialog dirtyId="pricing-new-base-agency" onAdd={onAddAgency} />
                         )}
                     </div>
                 </div>
@@ -1555,10 +1561,11 @@ function OverrideEditor({ onSave, onCancel, initial }: { onSave: (o: AgencyOverr
     )
 }
 
-function AddAgencyDialog({ onAdd }: { onAdd: (name: string) => Promise<void> }) {
+function AddAgencyDialog({ onAdd, dirtyId }: { onAdd: (name: string) => Promise<void>; dirtyId: string }) {
     const { t } = useLanguageStore()
     const [name, setName] = useState('')
     const [isOpen, setIsOpen] = useState(false)
+    useWorkspaceDirty(dirtyId, isOpen && Boolean(name.trim()))
 
     if (!isOpen) {
         return (

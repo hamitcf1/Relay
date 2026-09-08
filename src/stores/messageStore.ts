@@ -39,6 +39,10 @@ export const useMessageStore = create<MessageStore>((set) => ({
 
     subscribeToMessages: (hotelId, userId) => {
         set({ loading: true, error: null })
+        if (hotelId === 'demo-hotel-id') {
+            set({ messages: [], loading: false, error: null })
+            return () => { }
+        }
 
         const messagesRef = collection(db, 'hotels', hotelId, 'messages')
 

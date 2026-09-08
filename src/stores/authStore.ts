@@ -6,7 +6,7 @@ import {
     onAuthStateChanged,
     type User as FirebaseUser
 } from 'firebase/auth'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, type DocumentData, type UpdateData } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import type { User, UserRole } from '@/types'
 import { useHotelStore } from './hotelStore'
@@ -15,6 +15,7 @@ import { useShiftStore } from './shiftStore'
 import { useActivityStore } from './activityStore'
 import { cleanAuthError } from '@/lib/utils'
 import { useLanguageStore } from './languageStore'
+import { buildUserSettingsPatch } from '@/lib/workspace'
 
 interface AuthState {
     user: User | null
@@ -300,18 +301,23 @@ export const useAuthStore = create<AuthStore>((set) => ({
         if (!user) return
 
         try {
-            const userRef = doc(db, 'users', user.uid)
             const newSettings = { ...user.settings, ...settings }
-            await updateDoc(userRef, { settings: newSettings })
+            if (user.is_demo) {
+                set({ user: { ...user, settings: newSettings } })
+                return
+            }
+            const userRef = doc(db, 'users', user.uid)
+            await updateDoc(userRef, buildUserSettingsPatch(settings) as UpdateData<DocumentData>)
 
-            set({
+            set((state) => state.user?.uid === user.uid ? {
                 user: {
-                    ...user,
-                    settings: newSettings
-                }
-            })
+                    ...state.user,
+                    settings: { ...state.user.settings, ...settings },
+                },
+            } : state)
         } catch (error) {
             console.error("Error updating user settings:", error)
+            throw error
         }
     },
     setBooted: (val) => set({ isBooted: val })

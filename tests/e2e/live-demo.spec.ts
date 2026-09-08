@@ -68,6 +68,12 @@ test.describe('Live Demo & Simulation', () => {
     await expect(themeGroup.getByRole('button')).toHaveCount(2);
     await expect(themeGroup).toContainText(/Light|Aydınlık/i);
     await expect(themeGroup).toContainText(/Dark|Karanlık/i);
+    await themeGroup.getByRole('button', { name: /Light|Aydınlık/i }).click();
+    const themeSurfaces = await page.evaluate(() => ({
+      root: getComputedStyle(document.documentElement).getPropertyValue('--background').trim(),
+      app: getComputedStyle(document.querySelector('.relay-app')!).getPropertyValue('--background').trim(),
+    }));
+    expect(themeSurfaces.app).toBe(themeSurfaces.root);
 
     const accentGroup = page.getByTestId('accent-options');
     const accents = accentGroup.getByRole('button');

@@ -45,6 +45,7 @@ export const useActivityStore = create<ActivityStore>((set) => ({
     loading: true,
 
     logActivity: async (hotelId, userId, userName, userRole, action, details) => {
+        if (hotelId === 'demo-hotel-id') return
         try {
             const colRef = collection(db, 'hotels', hotelId, 'activity_logs')
             await addDoc(colRef, {
@@ -62,6 +63,10 @@ export const useActivityStore = create<ActivityStore>((set) => ({
 
     subscribeToActivityLogs: (hotelId) => {
         set({ loading: true })
+        if (hotelId === 'demo-hotel-id') {
+            set({ logs: [], loading: false })
+            return () => {}
+        }
         const colRef = collection(db, 'hotels', hotelId, 'activity_logs')
         const q = query(colRef, orderBy('timestamp', 'desc'), limit(200))
 

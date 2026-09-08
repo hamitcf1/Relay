@@ -28,6 +28,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { NavigationEditor } from './navigation/NavigationEditor'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
+import { useNavigationEditorStore } from '@/stores/navigationEditorStore'
 
 export function HotelSettings() {
     const { hotel, updateHotelSettings, updateHotelInfo } = useHotelStore()
@@ -38,6 +40,10 @@ export function HotelSettings() {
     const [name, setName] = useState('')
     const [saving, setSaving] = useState(false)
     const [shifts, setShifts] = useState<{ id: string, name: string, code: string, startTime: string, endTime: string, color?: string }[]>([])
+    const [savedShifts, setSavedShifts] = useState('[]')
+    const navigationDirty = useNavigationEditorStore((state) => state.dirty)
+    const settingsDirty = Boolean(hotel && (name !== (hotel.info?.name || '') || JSON.stringify(shifts) !== savedShifts)) || navigationDirty
+    useWorkspaceDirty('hotel-settings', settingsDirty)
 
     useEffect(() => {
         if (hotel?.id) {
@@ -49,12 +55,14 @@ export function HotelSettings() {
     useEffect(() => {
         if (hotel) {
             setName(hotel.info?.name || '')
-            setShifts(hotel.settings?.shifts || [
+            const nextShifts = hotel.settings?.shifts || [
                 { id: '1', name: 'Morning', code: 'A', startTime: '08:00', endTime: '16:00', color: 'bg-primary' },
                 { id: '2', name: 'Evening', code: 'B', startTime: '16:00', endTime: '00:00', color: 'bg-amber-700' },
                 { id: '3', name: 'Night', code: 'C', startTime: '00:00', endTime: '08:00', color: 'bg-rose-500' },
                 { id: '4', name: 'Extra', code: 'E', startTime: '09:00', endTime: '18:00', color: 'bg-amber-500' }
-            ])
+            ]
+            setShifts(nextShifts)
+            setSavedShifts(JSON.stringify(nextShifts))
         }
     }, [hotel])
 
@@ -86,6 +94,7 @@ export function HotelSettings() {
         setSaving(true)
         try {
             await updateHotelSettings(hotel.id, { shifts })
+            setSavedShifts(JSON.stringify(shifts))
             toast.success(t('hotel.shifts.success'))
         } catch (_err) {
             toast.error(t('hotel.shifts.error'))

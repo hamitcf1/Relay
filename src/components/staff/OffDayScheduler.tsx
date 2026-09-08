@@ -17,6 +17,7 @@ import { cn, formatDisplayDate } from '@/lib/utils'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { toast } from 'sonner'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 export function OffDayScheduler() {
     const { user } = useAuthStore()
@@ -33,6 +34,7 @@ export function OffDayScheduler() {
     const [submitting, setSubmitting] = useState(false)
 
     const isGM = user?.role === 'gm'
+    useWorkspaceDirty('off-day-request', !isGM && Boolean(editingId || dates.some((date) => date.trim()) || reason.trim() || requestType !== 'off_day' || shiftName !== 'morning'))
 
     useEffect(() => {
         if (hotel?.id) {
