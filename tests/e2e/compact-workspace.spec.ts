@@ -69,6 +69,19 @@ test.describe('Compact workspace', () => {
     await expect(operations.getByRole('button', { name: /Mesajlar|Messages/i })).toHaveAttribute('aria-current', 'page')
   })
 
+  test('opens the handover composer from the compact operations overview', async ({ page, isMobile }) => {
+    test.skip(Boolean(isMobile), 'Desktop overview action is covered here')
+    await enterManagerDemo(page)
+    await page.evaluate(() => (window as any).useAuthStore.getState().updateSettings({ workspace_mode: 'compact' }))
+    await page.getByTestId('compact-desktop-nav').getByRole('button', { name: /Operasyon|Operations/i }).click()
+
+    await page.getByTestId('compact-operations').getByRole('button', { name: /Yeni kayıt|New record/i }).click()
+
+    const notes = page.getByTestId('compact-card-notes')
+    await expect(notes).toBeInViewport()
+    await expect(notes.locator('textarea').last()).toBeVisible()
+  })
+
   test('does not open real-time Firebase subscriptions in the demo workspace', async ({ page, isMobile }) => {
     test.skip(Boolean(isMobile), 'The shared demo subscription path is covered once')
     const permissionErrors: string[] = []
@@ -78,8 +91,30 @@ test.describe('Compact workspace', () => {
     await enterManagerDemo(page)
     await page.evaluate(() => (window as any).useAuthStore.getState().updateSettings({ workspace_mode: 'compact' }))
     await page.getByTestId('compact-desktop-nav').getByRole('button', { name: /Operasyon|Operations/i }).click()
-    await page.getByTestId('compact-operations').getByRole('button', { name: /Mesajlar|Messages/i }).click()
-    await page.waitForTimeout(500)
+    const operations = page.getByTestId('compact-operations')
+    const moduleButtons = operations.locator('aside button[title]')
+    for (let index = 0; index < await moduleButtons.count(); index++) {
+      await moduleButtons.nth(index).click()
+      await page.waitForTimeout(150)
+    }
+    await page.waitForTimeout(300)
+    expect(permissionErrors).toEqual([])
+  })
+
+  test('creates a handover note locally in demo mode', async ({ page, isMobile }) => {
+    test.skip(Boolean(isMobile), 'Desktop demo write boundary is covered here')
+    const permissionErrors: string[] = []
+    page.on('console', (message) => {
+      if (message.type() === 'error' && /permission|insufficient/i.test(message.text())) permissionErrors.push(message.text())
+    })
+    await enterManagerDemo(page)
+    await page.evaluate(() => (window as any).useAuthStore.getState().updateSettings({ workspace_mode: 'compact' }))
+    const notes = page.getByTestId('compact-card-notes')
+    await notes.getByRole('button', { name: /Devir kaydı ekle|Add handover/i }).click()
+    await notes.locator('textarea').last().fill('Demo boundary note')
+    await notes.getByRole('button', { name: /Kaydet|Save/i }).click()
+
+    await expect(notes.getByRole('paragraph').filter({ hasText: 'Demo boundary note' })).toBeVisible()
     expect(permissionErrors).toEqual([])
   })
 
@@ -168,5 +203,19 @@ test.describe('Compact workspace', () => {
     const rosterToggle = page.getByTestId('compact-card-roster').getByRole('button').first()
     await expect(rosterToggle).toHaveAttribute('aria-expanded', 'true')
     await expect(page.getByTestId('compact-card-roster')).toBeInViewport()
+  })
+
+  test('maps an old operations roster link back to the compact shift card', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Mobile direct-link routing is covered here')
+    await enterManagerDemo(page)
+    await page.evaluate(() => (window as any).useAuthStore.getState().updateSettings({ workspace_mode: 'compact', compact_collapsed_mobile: { roster: true } }))
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/operations?tab=roster')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+
+    const roster = page.getByTestId('compact-card-roster')
+    await expect(roster.getByRole('button').first()).toHaveAttribute('aria-expanded', 'true')
+    await expect(roster).toBeInViewport()
   })
 })

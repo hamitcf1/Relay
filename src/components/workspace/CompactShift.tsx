@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -11,11 +12,12 @@ import { ModuleContent } from './ModuleContent'
 
 interface CompactShiftProps {
     focusModule?: string | null
+    initialAddOpen?: boolean
     onFocusHandled?: () => void
     onModuleFocus?: (id: string) => void
 }
 
-export function CompactShift({ focusModule, onFocusHandled, onModuleFocus }: CompactShiftProps) {
+export function CompactShift({ focusModule, initialAddOpen, onFocusHandled, onModuleFocus }: CompactShiftProps) {
     const user = useAuthStore((state) => state.user)
     const updateSettings = useAuthStore((state) => state.updateSettings)
     const hotel = useHotelStore((state) => state.hotel)
@@ -26,18 +28,26 @@ export function CompactShift({ focusModule, onFocusHandled, onModuleFocus }: Com
     const settingKey = isMobile ? 'compact_collapsed_mobile' as const : 'compact_collapsed_desktop' as const
     const collapsed = user?.settings?.[settingKey] || {}
     const columns = isMobile ? [{ id: 'mobile', ids: [...layout.left, ...layout.right] }] : [{ id: 'left', ids: layout.left }, { id: 'right', ids: layout.right }]
+    const settingsQueue = useRef(Promise.resolve())
+    const preferenceError = language === 'tr' ? 'Kart görünümü kaydedilemedi' : language === 'ru' ? 'Не удалось сохранить вид карточки' : 'Could not save card preference'
 
     const isCollapsed = (id: string) => collapsed[id] ?? (isMobile ? id !== 'notes' : false)
-    const setExpanded = (id: string, expanded: boolean) => {
-        void updateSettings({ [settingKey]: { ...collapsed, [id]: !expanded } })
-    }
+    const saveExpanded = useCallback((id: string, expanded: boolean) => {
+        settingsQueue.current = settingsQueue.current
+            .then(async () => {
+                const latest = useAuthStore.getState().user?.settings?.[settingKey] || {}
+                await updateSettings({ [settingKey]: { ...latest, [id]: !expanded } })
+            })
+            .catch(() => { toast.error(preferenceError) })
+        return settingsQueue.current
+    }, [preferenceError, settingKey, updateSettings])
 
     useEffect(() => {
         if (!focusModule || !allowed.has(focusModule as ModuleId)) return
         let cancelled = false
         const focus = async () => {
             if (isCollapsed(focusModule)) {
-                await updateSettings({ [settingKey]: { ...collapsed, [focusModule]: false } })
+                await saveExpanded(focusModule, true)
             }
             if (cancelled) return
             window.requestAnimationFrame(() => {
@@ -47,7 +57,7 @@ export function CompactShift({ focusModule, onFocusHandled, onModuleFocus }: Com
         }
         void focus()
         return () => { cancelled = true }
-    }, [allowed, collapsed, focusModule, onFocusHandled, settingKey, updateSettings])
+    }, [allowed, collapsed, focusModule, onFocusHandled, saveExpanded])
 
     return (
         <div data-testid="compact-workspace" className="h-full min-h-0">
@@ -59,8 +69,8 @@ export function CompactShift({ focusModule, onFocusHandled, onModuleFocus }: Com
                             if (!module) return null
                             const expanded = !isCollapsed(id)
                             return (
-                                <CompactModuleCard key={id} id={id} label={getModuleLabel(module, language)} expanded={expanded} onExpandedChange={(next) => setExpanded(id, next)} onInteract={() => onModuleFocus?.(id)}>
-                                    <ModuleContent moduleId={module.id} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                <CompactModuleCard key={id} id={id} label={getModuleLabel(module, language)} expanded={expanded} onExpandedChange={(next) => { void saveExpanded(id, next) }} onInteract={() => onModuleFocus?.(id)}>
+                                    <ModuleContent moduleId={module.id} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} initialAddOpen={module.id === 'notes' ? initialAddOpen : undefined} />
                                 </CompactModuleCard>
                             )
                         })}

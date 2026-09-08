@@ -33,6 +33,10 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     const [filter, setFilter] = useState<NoteCategory | 'all'>('all')
     const [searchQuery, setSearchQuery] = useState('')
 
+    useEffect(() => {
+        if (initialAddOpen) setIsAdding(true)
+    }, [initialAddOpen])
+
     const copy = language === 'tr'
         ? { title: 'Vardiya devri', subtitle: 'Açık işleri devral, güncelle ve sonraki vardiyaya aktar.', add: 'Devir kaydı ekle', active: 'Açık', critical: 'Acil', pinned: 'Sabit', completed: 'Bugün tamamlandı' }
         : language === 'ru'

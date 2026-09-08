@@ -161,6 +161,19 @@ export const useNotesStore = create<NotesStore>((set) => ({
     },
 
     addNote: async (hotelId, noteData) => {
+        if (hotelId === 'demo-hotel-id') {
+            const note: ShiftNote = {
+                id: `demo-note-${Date.now()}`,
+                ...noteData,
+                status: 'active',
+                created_at: new Date(),
+                resolved_at: null,
+                resolved_by: null,
+            }
+            set((state) => ({ notes: [note, ...state.notes] }))
+            toast.success('Note added')
+            return
+        }
         try {
             const notesRef = collection(db, 'hotels', hotelId, 'shift_notes')
 

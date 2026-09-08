@@ -32,6 +32,7 @@ import { CollapsibleCard } from '@/components/dashboard/CollapsibleCard'
 import { FIXTURE_ITEMS, MINIBAR_ITEMS } from '@/lib/constants'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { toast } from 'sonner'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 interface HotelInfoData {
     iban: string
@@ -76,6 +77,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     const { hotel, updateHotelSettings } = useHotelStore()
     const confirm = useConfirm()
     const isGM = user?.role === 'gm'
+    useWorkspaceDirty('hotel-information', isEditing && JSON.stringify(editInfo) !== JSON.stringify(info))
 
     // Fetch hotel info
     useEffect(() => {

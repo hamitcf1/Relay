@@ -48,6 +48,7 @@ import { UserNav } from '@/components/layout/UserNav'
 import { ModuleContent } from '@/components/workspace/ModuleContent'
 import type { ModuleId } from '@/config/moduleRegistry'
 import { useWorkspaceEditStore } from '@/stores/workspaceEditStore'
+import { toast } from 'sonner'
 export function DashboardPage() {
     const location = useLocation()
     const user = useAuthStore((state) => state.user)
@@ -71,6 +72,7 @@ export function DashboardPage() {
     const [compactArea, setCompactArea] = useState<CompactArea>('shift')
     const [compactOperationTab, setCompactOperationTab] = useState(user?.settings?.compact_operation_tab || 'overview')
     const [compactShiftTarget, setCompactShiftTarget] = useState<string | null>(null)
+    const [compactNoteComposerOpen, setCompactNoteComposerOpen] = useState(false)
     const [lastCompactShiftModule, setLastCompactShiftModule] = useState('overview')
     const previousWorkspaceMode = useRef(workspaceMode)
     const previousUserId = useRef(user?.uid)
@@ -96,10 +98,7 @@ export function DashboardPage() {
         const chatParam = searchParams.get('chat')
 
         if (workspaceMode === 'compact') {
-            if (location.pathname === '/operations') {
-                setCompactArea('operations')
-                setCompactOperationTab(tabParam || (chatParam ? 'messaging' : 'overview'))
-            } else if (tabParam) {
+            if (tabParam) {
                 const target = resolveWorkspaceTarget(tabParam, 'compact')
                 setCompactArea(target.area)
                 if (target.area === 'shift') {
@@ -107,6 +106,9 @@ export function DashboardPage() {
                     setLastCompactShiftModule(target.moduleId)
                 }
                 else setCompactOperationTab(target.moduleId)
+            } else if (location.pathname === '/operations') {
+                setCompactArea('operations')
+                setCompactOperationTab(chatParam ? 'messaging' : 'overview')
             } else {
                 setCompactArea('shift')
             }
@@ -251,6 +253,7 @@ export function DashboardPage() {
                 setCompactArea('shift')
                 setCompactShiftTarget(id)
                 setLastCompactShiftModule(id)
+                if (id === 'notes') setCompactNoteComposerOpen(true)
                 return
             }
             setCompactArea('operations')
@@ -270,6 +273,22 @@ export function DashboardPage() {
         }
         setActiveTab('operations')
         setOperationTab(id)
+    }
+
+    const openCompactShiftModule = (id: string, add = false) => {
+        setCompactArea('shift')
+        setCompactShiftTarget(id)
+        setLastCompactShiftModule(id)
+        if (id === 'notes' && add) setCompactNoteComposerOpen(true)
+    }
+
+    const selectCompactOperation = async (id: string) => {
+        setCompactOperationTab(id)
+        try {
+            await useAuthStore.getState().updateSettings({ compact_operation_tab: id })
+        } catch {
+            toast.error(language === 'tr' ? 'Operasyon tercihi kaydedilemedi' : language === 'ru' ? 'Не удалось сохранить выбор операции' : 'Could not save operations preference')
+        }
     }
 
     const rosterShift = user ? schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] : undefined
@@ -362,7 +381,7 @@ export function DashboardPage() {
                 </header>
 
             <main className={cn('relay-scroll-root relative min-h-0 flex-1', workspaceMode === 'compact' ? 'overflow-hidden' : 'overflow-y-auto pb-28 md:pb-8')}>
-                {workspaceMode === 'compact' ? (compactArea === 'shift' ? <CompactShift focusModule={compactShiftTarget} onFocusHandled={() => setCompactShiftTarget(null)} onModuleFocus={setLastCompactShiftModule} /> : <CompactOperations activeModule={compactOperationTab} onModuleChange={(id) => { setCompactOperationTab(id); void useAuthStore.getState().updateSettings({ compact_operation_tab: id }) }} onOpenShiftModule={(id) => { setCompactArea('shift'); setCompactShiftTarget(id); setLastCompactShiftModule(id) }} />) : (
+                {workspaceMode === 'compact' ? (compactArea === 'shift' ? <CompactShift focusModule={compactShiftTarget} initialAddOpen={compactNoteComposerOpen} onFocusHandled={() => { setCompactShiftTarget(null); setCompactNoteComposerOpen(false) }} onModuleFocus={setLastCompactShiftModule} /> : <CompactOperations activeModule={compactOperationTab} onModuleChange={(id) => { void selectCompactOperation(id) }} onOpenShiftModule={openCompactShiftModule} />) : (
                 <div className="relay-page">
                 <AnnouncementBanner />
                 

@@ -15,7 +15,6 @@ export function WorkspaceModeOptions() {
     const { language } = useLanguageStore()
     const mode = normalizeWorkspaceMode(user?.settings?.workspace_mode)
     const dirtyIds = useWorkspaceEditStore((state) => state.dirtyIds)
-    const clearDirty = useWorkspaceEditStore((state) => state.clear)
     const [pendingMode, setPendingMode] = useState<WorkspaceMode | null>(null)
     const copy = language === 'tr'
         ? { title: 'Çalışma alanı', modern: 'Modern', modernDesc: 'Modüller ayrı sayfalarda', compact: 'Kompakt', compactDesc: 'Vardiya kartları bir arada', error: 'Görünüm kaydedilemedi', warning: 'Kaydedilmemiş değişiklikler var', warningDesc: 'Görünümü değiştirirseniz açık formdaki değişiklikler silinecek.', stay: 'Kal ve düzenlemeye devam et', discard: 'Değişiklikleri sil ve geç' }
@@ -60,7 +59,7 @@ export function WorkspaceModeOptions() {
                     <AlertDialogHeader><AlertDialogTitle>{copy.warning}</AlertDialogTitle><AlertDialogDescription>{copy.warningDesc}</AlertDialogDescription></AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setPendingMode(null)}>{copy.stay}</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => { const next = pendingMode; setPendingMode(null); clearDirty(); if (next) void save(next) }}>{copy.discard}</AlertDialogAction>
+                        <AlertDialogAction onClick={() => { const next = pendingMode; setPendingMode(null); if (next) void save(next) }}>{copy.discard}</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

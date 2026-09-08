@@ -18,14 +18,14 @@ export function useShiftAutomator(hotelId: string | null) {
 
     // Ensure Roster is subscribed for the automator to work
     useEffect(() => {
-        if (hotelId) {
+        if (hotelId && hotelId !== 'demo-hotel-id') {
             const unsub = subscribeToRoster(hotelId)
             return () => unsub()
         }
     }, [hotelId, subscribeToRoster])
 
     useEffect(() => {
-        if (!hotelId) return
+        if (!hotelId || hotelId === 'demo-hotel-id') return
 
         const checkShift = async () => {
             const now = new Date()

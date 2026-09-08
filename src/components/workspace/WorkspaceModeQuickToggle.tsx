@@ -13,7 +13,6 @@ export function WorkspaceModeQuickToggle() {
     const user = useAuthStore((state) => state.user)
     const updateSettings = useAuthStore((state) => state.updateSettings)
     const dirtyIds = useWorkspaceEditStore((state) => state.dirtyIds)
-    const clearDirty = useWorkspaceEditStore((state) => state.clear)
     const { language } = useLanguageStore()
     const current = normalizeWorkspaceMode(user?.settings?.workspace_mode)
     const [confirmationOpen, setConfirmationOpen] = useState(false)
@@ -54,7 +53,7 @@ export function WorkspaceModeQuickToggle() {
                     <AlertDialogHeader><AlertDialogTitle>{copy.warning}</AlertDialogTitle><AlertDialogDescription>{copy.warningDesc}</AlertDialogDescription></AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>{copy.stay}</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => { clearDirty(); void save() }}>{copy.discard}</AlertDialogAction>
+                        <AlertDialogAction onClick={() => { setConfirmationOpen(false); void save() }}>{copy.discard}</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
