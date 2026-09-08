@@ -294,7 +294,7 @@ export function DashboardPage() {
 
             {/* Main Content Pane */}
             <div className="flex flex-col flex-1 relative min-w-0 overflow-hidden">
-                <header className="relay-commandbar safe-header relative z-40 flex h-[84px] shrink-0 items-center justify-between border-b border-border/70 bg-[#080b0e]/95 px-5 backdrop-blur-xl md:px-7">
+                <header className="relay-commandbar safe-header relative z-40 flex h-[84px] shrink-0 items-center justify-between border-b border-border/70 bg-background/95 px-5 backdrop-blur-xl md:px-7">
                     <div className="flex items-center md:hidden">
                         <RelayMark className="h-10 w-10 text-primary" />
                     </div>
@@ -304,7 +304,7 @@ export function DashboardPage() {
                         <span><strong>{shiftName}</strong><small>{shiftStart}–{shiftEnd}</small></span>
                     </div>
 
-                    <label className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-white/[0.025] px-4 text-muted-foreground md:flex">
+                    <label className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-card/55 px-4 text-muted-foreground md:flex">
                         <Search className="h-4 w-4" />
                         <input aria-label={t('common.search') as string} placeholder={t('common.search') as string} className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
                         <kbd className="rounded border border-border/80 px-1.5 py-0.5 text-[10px] text-muted-foreground">⌘K</kbd>

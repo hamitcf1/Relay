@@ -69,6 +69,20 @@ test.describe('Compact workspace', () => {
     await expect(operations.getByRole('button', { name: /Mesajlar|Messages/i })).toHaveAttribute('aria-current', 'page')
   })
 
+  test('does not open real-time Firebase subscriptions in the demo workspace', async ({ page, isMobile }) => {
+    test.skip(Boolean(isMobile), 'The shared demo subscription path is covered once')
+    const permissionErrors: string[] = []
+    page.on('console', (message) => {
+      if (message.type() === 'error' && /permission|insufficient/i.test(message.text())) permissionErrors.push(message.text())
+    })
+    await enterManagerDemo(page)
+    await page.evaluate(() => (window as any).useAuthStore.getState().updateSettings({ workspace_mode: 'compact' }))
+    await page.getByTestId('compact-desktop-nav').getByRole('button', { name: /Operasyon|Operations/i }).click()
+    await page.getByTestId('compact-operations').getByRole('button', { name: /Mesajlar|Messages/i }).click()
+    await page.waitForTimeout(500)
+    expect(permissionErrors).toEqual([])
+  })
+
   test('publishes the administrator compact column layout', async ({ page, isMobile }) => {
     test.skip(Boolean(isMobile), 'Desktop navigation editor workflow is covered here')
     await enterManagerDemo(page)

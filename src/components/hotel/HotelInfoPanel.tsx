@@ -80,6 +80,11 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     // Fetch hotel info
     useEffect(() => {
         if (!hotelId) return
+        if (user?.is_demo) {
+            setInfo(defaultInfo)
+            setLoading(false)
+            return
+        }
 
         const fetchInfo = async () => {
             setLoading(true)
@@ -98,7 +103,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
         }
 
         fetchInfo()
-    }, [hotelId])
+    }, [hotelId, user?.is_demo])
 
     const handleEdit = () => {
         setEditInfo(info)
