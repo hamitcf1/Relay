@@ -45,7 +45,7 @@ function Toggle({ label, value, onChange, description }: ToggleProps) {
 export function AppearanceOptions() {
     const { theme, setTheme, accentColor, setAccentColor } = useThemeStore()
     const { user, updateSettings } = useAuthStore()
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
     const avatar_style = user?.settings?.avatar_style || 'initials'
@@ -136,7 +136,9 @@ export function AppearanceOptions() {
                 </label>
                 <Toggle
                     label={animationsEnabled ? t('common.enabled') : t('common.disabled')}
-                    description={t('appearance.animations.desc')}
+                    description={animationsEnabled
+                        ? (language === 'tr' ? 'Arayüz hareketleri açık.' : language === 'ru' ? 'Анимация интерфейса включена.' : 'Interface motion is enabled.')
+                        : (language === 'tr' ? 'Arayüz hareketleri azaltıldı.' : language === 'ru' ? 'Анимация интерфейса уменьшена.' : 'Interface motion is reduced.')}
                     value={animationsEnabled}
                     onChange={() => updateSettings({ disable_animations: animationsEnabled })}
                 />

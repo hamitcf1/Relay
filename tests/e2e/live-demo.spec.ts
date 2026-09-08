@@ -42,6 +42,16 @@ test.describe('Live Demo & Simulation', () => {
     await expect(dashboardBody).toBeVisible();
   });
 
+  test('onboarding opens as a keyboard-dismissible dialog', async ({ page }) => {
+    await page.goto('/live-demo');
+    await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
+    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+  });
+
   test('theme and accent choices stay focused and accessible', async ({ page, isMobile }) => {
     test.skip(Boolean(isMobile), 'Appearance menu is covered by the desktop shell scenario');
     await page.goto('/live-demo');

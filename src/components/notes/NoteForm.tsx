@@ -38,6 +38,7 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
     const [newCurrency, setNewCurrency] = useState<'TRY' | 'USD' | 'EUR' | 'GBP'>('TRY')
     const [newPriority, setNewPriority] = useState<NotePriority>('low')
     const [loading, setLoading] = useState(false)
+    const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
 
     const newContentRef = useRef<HTMLTextAreaElement>(null)
     const newFormatting = useFormatting(newContent, setNewContent, newContentRef)
@@ -149,6 +150,7 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                     <button
                         key={cat}
                         onClick={() => setNewCategory(cat)}
+                        aria-pressed={newCategory === cat}
                         className={cn(
                             'text-xs h-7 px-2.5 rounded-full flex items-center gap-1.5 transition-colors border',
                             newCategory === cat
@@ -201,6 +203,7 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                 />
                 <Input
                     type="time"
+                    aria-label={t('common.time' as any) as string || 'Time'}
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
                     className="w-24 text-sm bg-muted/50"
@@ -219,25 +222,26 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                         <div className="relative">
                             <button
                                 type="button"
-                                onClick={(e) => {
-                                    const menu = e.currentTarget.nextElementSibling as HTMLElement
-                                    if (menu) menu.classList.toggle('hidden')
-                                }}
+                                onClick={() => setCurrencyMenuOpen((open) => !open)}
+                                aria-label={(t('common.currency' as any) as string) || 'Currency'}
+                                aria-expanded={currencyMenuOpen}
+                                aria-haspopup="listbox"
                                 className="h-9 px-3 flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 text-sm text-foreground hover:bg-muted transition-colors min-w-[80px]"
                             >
                                 <span className="font-medium">{CURRENCY_SYMBOLS[newCurrency]}</span>
                                 <span>{newCurrency}</span>
                                 <svg className="w-3 h-3 ml-1 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                             </button>
-                            <div className="hidden absolute top-full left-0 mt-1 z-50 min-w-[100px] rounded-lg border border-border bg-card shadow-xl py-1">
+                            <div role="listbox" aria-label={(t('common.currency' as any) as string) || 'Currency'} className={cn('absolute top-full left-0 mt-1 z-50 min-w-[100px] rounded-lg border border-border bg-card shadow-xl py-1', !currencyMenuOpen && 'hidden')}>
                                 {(['TRY', 'USD', 'EUR', 'GBP'] as const).map(cur => (
                                     <button
                                         key={cur}
                                         type="button"
-                                        onClick={(e) => {
+                                        role="option"
+                                        aria-selected={newCurrency === cur}
+                                        onClick={() => {
                                             setNewCurrency(cur)
-                                            const menu = e.currentTarget.parentElement as HTMLElement
-                                            if (menu) menu.classList.add('hidden')
+                                            setCurrencyMenuOpen(false)
                                         }}
                                         className={cn(
                                             'w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 hover:bg-muted transition-colors',
@@ -253,6 +257,7 @@ export function NoteForm({ hotelId, hotel, staff, onCancel }: NoteFormProps) {
                         <Input
                             placeholder={t('common.amount') as string}
                             type="number"
+                            min="0"
                             value={newAmount}
                             onChange={(e) => setNewAmount(e.target.value)}
                             className="w-28 text-sm bg-muted/50"

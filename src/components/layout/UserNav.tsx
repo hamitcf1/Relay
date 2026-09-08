@@ -112,6 +112,9 @@ export function UserNav() {
                                     <DropdownMenuItem onClick={() => setLanguage('tr')} className="text-sm cursor-pointer">
                                         Türkçe {language === 'tr' && <Check className="ml-auto w-3.5 h-3.5" aria-hidden="true" />}
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setLanguage('ru')} className="text-sm cursor-pointer">
+                                        Русский {language === 'ru' && <Check className="ml-auto w-3.5 h-3.5" aria-hidden="true" />}
+                                    </DropdownMenuItem>
                                 </DropdownMenuSubContent>
                             </DropdownMenuPortal>
                         </DropdownMenuSub>
@@ -159,6 +162,16 @@ export function UserNav() {
                         >
                             <span className="text-sm font-medium">English</span>
                             {language === 'en' && <Check className="w-4 h-4 text-primary" aria-hidden="true" />}
+                        </button>
+                        <button
+                            onClick={() => { setLanguage('ru'); setShowLanguageDialog(false); }}
+                            className={cn(
+                                "w-full flex items-center justify-between p-3 rounded-lg border transition-colors active:scale-[0.98]",
+                                language === 'ru' ? "bg-primary/10 border-primary/50 text-foreground" : "bg-card border-border hover:bg-muted/50"
+                            )}
+                        >
+                            <span className="text-sm font-medium">Русский</span>
+                            {language === 'ru' && <Check className="w-4 h-4 text-primary" aria-hidden="true" />}
                         </button>
                         <button
                             onClick={() => { setLanguage('tr'); setShowLanguageDialog(false); }}
