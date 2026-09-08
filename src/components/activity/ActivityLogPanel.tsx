@@ -17,6 +17,7 @@ import {
     Filter,
     User as UserIcon,
     ScrollText,
+    CircleHelp,
 } from 'lucide-react'
 import { useActivityStore } from '@/stores/activityStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -28,6 +29,7 @@ import type { ActivityAction } from '@/types'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { useLanguageStore } from '@/stores/languageStore'
+import { humanizeActivityAction } from '@/lib/activity'
 
 const ACTION_META: Record<ActivityAction, { icon: typeof LogIn; label: string; color: string }> = {
     login: { icon: LogIn, label: 'Giriş', color: 'text-emerald-400' },
@@ -46,6 +48,8 @@ const ACTION_META: Record<ActivityAction, { icon: typeof LogIn; label: string; c
     feedback_create: { icon: Send, label: 'Geri Bildirim', color: 'text-purple-400' },
 }
 
+const UNKNOWN_ACTION_META = { icon: CircleHelp, label: '', color: 'text-muted-foreground' }
+
 function formatTimestamp(ts: any): string {
     if (!ts) return ''
     const date = ts.toDate ? ts.toDate() : new Date(ts)
@@ -60,7 +64,7 @@ export function ActivityLogPanel() {
     const [filterUser, setFilterUser] = useState('')
     const [filterAction, setFilterAction] = useState<string>('all')
 
-    const getActionLabel = (action: ActivityAction) => {
+    const getActionLabel = (action: string) => {
         const keyMap: Record<ActivityAction, string> = {
             login: 'activity.action.login',
             logout: 'activity.action.logout',
@@ -77,9 +81,10 @@ export function ActivityLogPanel() {
             sale_update: 'activity.action.sale_update',
             feedback_create: 'activity.action.feedback_create'
         }
-        const key = keyMap[action]
+        const key = keyMap[action as ActivityAction]
+        if (!key) return humanizeActivityAction(action) || t('module.activity')
         const translated = t(key as any)
-        return translated === key ? ACTION_META[action].label : translated
+        return translated === key ? ACTION_META[action as ActivityAction]?.label || humanizeActivityAction(action) : translated
     }
 
     useEffect(() => {
@@ -157,7 +162,7 @@ export function ActivityLogPanel() {
                         <div className="divide-y divide-border/20">
                             <AnimatePresence initial={false}>
                                 {filtered.map((log, idx) => {
-                                    const meta = ACTION_META[log.action] || ACTION_META.login
+                                    const meta = ACTION_META[log.action as ActivityAction] || UNKNOWN_ACTION_META
                                     const Icon = meta.icon
 
                                     return (

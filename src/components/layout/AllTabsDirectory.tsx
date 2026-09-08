@@ -24,7 +24,11 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
             ? { title: 'Все разделы', search: 'Поиск…', empty: 'Ничего не найдено', close: 'Закрыть', groups: { today: 'Сегодня', operations: 'Операции', tools: 'Инструменты', management: 'Управление' } }
             : { title: 'All tabs', search: 'Search tabs…', empty: 'No matching tabs', close: 'Close', groups: { today: 'Today', operations: 'Operations', tools: 'Tools', management: 'Management' } }
     const normalized = query.trim().toLocaleLowerCase(language)
-    const sections = navigation.sections
+    const primaryIds = new Set(navigation.primary.map(item => item.id))
+    const sections = [
+        { id: 'today', name: copy.groups.today, items: navigation.primary },
+        ...navigation.sections.map(section => ({ ...section, items: section.items.filter(item => !primaryIds.has(item.id)) })),
+    ]
         .map((section) => ({
             ...section,
             items: section.items.filter((item) => getModuleLabel(item, language).toLocaleLowerCase(language).includes(normalized)),
@@ -34,7 +38,7 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
     if (!allTabsOpen) return null
 
     return (
-        <section className="fixed inset-0 z-[80] flex flex-col bg-background md:hidden" aria-label={copy.title}>
+        <section role="dialog" aria-modal="true" className="fixed inset-0 z-[80] flex flex-col bg-background md:hidden" aria-label={copy.title}>
             <header className="safe-header flex items-center justify-between border-b border-border px-4">
                 <div>
                     <p className="text-xs font-medium text-muted-foreground">Relay</p>

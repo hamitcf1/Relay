@@ -366,8 +366,11 @@ export interface PrivateMessage {
     id: string
     sender_id: string
     sender_name: string
-    receiver_id: string // 'gm' or specific uid
+    receiver_id: string // 'gm', 'all', 'selected', or a specific uid
     content: string
+    title?: string
+    recipient_ids?: string[]
+    recipient_names?: string[]
     timestamp: Date
     is_read: boolean
 }

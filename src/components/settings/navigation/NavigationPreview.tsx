@@ -20,11 +20,11 @@ export function NavigationPreview({ config, role }: { config: HotelNavigationCon
             </div>
             <div className="rounded-xl border border-border bg-background p-3">
                 <p className="mb-3 text-xs font-semibold text-muted-foreground">Mobile</p>
-                <div className="flex h-16 items-center justify-around rounded-lg border border-border bg-card px-1">
-                    {config.mobileModuleIds.slice(0, 2).map((id) => { const item = findModule(id as ModuleId); return <span key={id} className="text-[9px]">{item ? getModuleLabel(item, language) : id}</span> })}
-                    <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">+</span>
-                    {config.mobileModuleIds.slice(2, 3).map((id) => { const item = findModule(id as ModuleId); return <span key={id} className="text-[9px]">{item ? getModuleLabel(item, language) : id}</span> })}
-                    <span className="text-[9px]">Tümü</span>
+                <div data-testid="navigation-mobile-preview" className="grid min-h-16 grid-cols-5 items-center gap-1 rounded-lg border border-border bg-card px-1 py-2">
+                    {config.mobileModuleIds.slice(0, 2).map((id) => { const item = findModule(id as ModuleId); return <span data-preview-item key={id} className="min-w-0 text-center text-[9px] leading-tight [overflow-wrap:anywhere] line-clamp-2">{item ? getModuleLabel(item, language) : id}</span> })}
+                    <span data-preview-item className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground">+</span>
+                    {config.mobileModuleIds.slice(2, 3).map((id) => { const item = findModule(id as ModuleId); return <span data-preview-item key={id} className="min-w-0 text-center text-[9px] leading-tight [overflow-wrap:anywhere] line-clamp-2">{item ? getModuleLabel(item, language) : id}</span> })}
+                    <span data-preview-item className="min-w-0 text-center text-[9px] leading-tight">{language === 'tr' ? 'Tümü' : language === 'ru' ? 'Все' : 'All'}</span>
                 </div>
             </div>
         </div>
