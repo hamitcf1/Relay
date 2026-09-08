@@ -10,6 +10,7 @@ import type { ModuleId } from '@/config/moduleRegistry'
 import { Button } from '@/components/ui/button'
 import { NavigationPreview } from './NavigationPreview'
 import { cn } from '@/lib/utils'
+import { DEFAULT_NAVIGATION_CONFIG } from '@/lib/navigationDefaults'
 
 export function NavigationEditor() {
     const hotel = useHotelStore((state) => state.hotel)
@@ -17,14 +18,19 @@ export function NavigationEditor() {
     const user = useAuthStore((state) => state.user)
     const { language } = useLanguageStore()
     const editor = useNavigationEditorStore()
+    const navigationConfig = hotel?.settings.navigation
+    const draftVersion = editor.draft?.version
+    const incomingVersion = navigationConfig?.version ?? DEFAULT_NAVIGATION_CONFIG.version
     const [publishing, setPublishing] = useState(false)
     const copy = language === 'tr'
         ? { title: 'Navigasyon ve hızlı işlemler', desc: 'Otel genelindeki masaüstü ve mobil menüleri düzenleyin.', base: 'Ortak düzen', reception: 'Resepsiyon', housekeeping: 'Kat hizmetleri', primary: 'Yan menüde göster', mobile: 'Mobil alt çubuk', publish: 'Herkes için yayınla', conflict: 'Düzen başka bir yönetici tarafından güncellendi. Güncel sürüm yüklendi.', quick: 'Hızlı işlem menüsü' }
         : { title: 'Navigation and quick actions', desc: 'Arrange hotel-wide desktop and mobile navigation.', base: 'Shared layout', reception: 'Reception', housekeeping: 'Housekeeping', primary: 'Show in sidebar', mobile: 'Mobile bottom bar', publish: 'Publish for everyone', conflict: 'Another administrator updated this layout. The current version was loaded.', quick: 'Quick action menu' }
 
     useEffect(() => {
-        if (!editor.draft || (!editor.dirty && editor.draft.version !== hotel?.settings.navigation?.version)) editor.load(hotel?.settings.navigation)
-    }, [hotel?.settings.navigation, editor])
+        if (draftVersion === undefined || (!editor.dirty && draftVersion !== incomingVersion)) {
+            editor.load(navigationConfig)
+        }
+    }, [draftVersion, editor.dirty, editor.load, incomingVersion, navigationConfig])
 
     if (!editor.draft || !hotel || !user) return null
     const role = editor.selectedRole === 'base' ? undefined : editor.selectedRole
