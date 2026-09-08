@@ -52,6 +52,11 @@ export const useOffDayStore = create<OffDayStore>((set, get) => ({
     subscribeToRequests: (hotelId, staffId) => {
         set({ loading: true, error: null })
 
+        if (hotelId === 'demo-hotel-id') {
+            set({ requests: [], loading: false, error: null })
+            return () => {}
+        }
+
         const requestsRef = collection(db, 'hotels', hotelId, 'off_day_requests')
         let q = query(requestsRef, orderBy('created_at', 'desc'), limit(100))
 
@@ -94,6 +99,10 @@ export const useOffDayStore = create<OffDayStore>((set, get) => ({
     },
 
     submitRequest: async (hotelId, requestData) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ requests: [{ ...requestData, id: `demo-request-${Date.now()}`, status: 'pending', created_at: new Date() }, ...state.requests] }))
+            return
+        }
         try {
             const requestsRef = collection(db, 'hotels', hotelId, 'off_day_requests')
             await addDoc(requestsRef, cleanObject({

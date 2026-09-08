@@ -27,6 +27,7 @@ import { useCurrencyStore } from '@/stores/currencyStore'
 import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { SaleType, Currency, SaleStatus } from '@/types'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 export function SalesPanel() {
     const { t } = useLanguageStore()
@@ -71,6 +72,7 @@ export function SalesPanel() {
 
     const [hotelInfo, setHotelInfo] = useState<any>(null)
     const [shouldAddToNotes, setShouldAddToNotes] = useState(true)
+    useWorkspaceDirty('sale', isAdding)
     const { addNote } = useNotesStore()
 
     useEffect(() => {
@@ -79,9 +81,11 @@ export function SalesPanel() {
         const unsubTours = subscribeToTours(hotel.id)
 
         // Fetch prices
-        getDoc(doc(db, 'hotels', hotel.id, 'settings', 'info')).then(snap => {
-            if (snap.exists()) setHotelInfo(snap.data())
-        })
+        if (!user?.is_demo) {
+            getDoc(doc(db, 'hotels', hotel.id, 'settings', 'info')).then(snap => {
+                if (snap.exists()) setHotelInfo(snap.data())
+            })
+        }
 
         fetchRates()
 
@@ -89,7 +93,7 @@ export function SalesPanel() {
             unsubSales()
             unsubTours()
         }
-    }, [hotel?.id, subscribeToSales, subscribeToTours, fetchRates])
+    }, [hotel?.id, subscribeToSales, subscribeToTours, fetchRates, user?.is_demo])
 
     // Auto-calculate Laundry Price
     useEffect(() => {

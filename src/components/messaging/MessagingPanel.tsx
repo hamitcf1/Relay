@@ -22,6 +22,7 @@ import { TextFormatter } from '@/components/ui/TextFormatter'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
@@ -36,6 +37,7 @@ export function MessagingPanel() {
     const [activeConversation, setActiveConversation] = useState<string>('all') // 'all' or user uid
     const [newMessage, setNewMessage] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
+    useWorkspaceDirty('message', Boolean(newMessage.trim()))
     const messageInputRef = useRef<HTMLTextAreaElement>(null)
     const formatting = useFormatting(newMessage, setNewMessage, messageInputRef)
     const scrollRef = useRef<HTMLDivElement>(null)

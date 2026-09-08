@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { cn } from '@/lib/utils'
 import type { Tour } from '@/types'
 import { format } from 'date-fns'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 const DAYS_OF_WEEK = ['day.mon', 'day.tue', 'day.wed', 'day.thu', 'day.fri', 'day.sat', 'day.sun'] as const
 
@@ -49,6 +50,8 @@ export function TourCatalogue() {
     })
 
     const isGM = user?.role === 'gm'
+    const bookingDirty = Boolean(bookingTour && (bookingForm.guest_name.trim() || bookingForm.room_number.trim() || bookingForm.pickup_time || bookingForm.pax !== 1))
+    useWorkspaceDirty('tour-catalogue', Boolean(isAdding || editingId) || bookingDirty)
 
     useEffect(() => {
         if (hotel?.id) {

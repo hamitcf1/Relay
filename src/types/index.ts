@@ -5,6 +5,7 @@
 
 // User Roles
 export type UserRole = 'gm' | 'receptionist' | 'housekeeping'
+export type WorkspaceMode = 'modern' | 'compact'
 
 // Shift Types
 export type ShiftType = 'A' | 'B' | 'C' | 'E'
@@ -66,6 +67,10 @@ export interface UserSettings {
     avatar_style?: 'initials' | 'name' | 'emoji'
     avatar_emoji?: string
     disable_animations?: boolean
+    workspace_mode?: WorkspaceMode
+    compact_collapsed_desktop?: Record<string, boolean>
+    compact_collapsed_mobile?: Record<string, boolean>
+    compact_operation_tab?: string
 }
 
 export interface StaffMember {
@@ -95,12 +100,18 @@ export interface NavigationRoleOverlay {
     sectionByModule?: Record<string, string>
 }
 
+export interface CompactLayout {
+    left: string[]
+    right: string[]
+}
+
 export interface HotelNavigationConfig {
     version: number
     sections: NavigationSectionConfig[]
     primaryModuleIds: string[]
     mobileModuleIds: string[]
     quickActionIds: string[]
+    compactLayout?: CompactLayout
     roleOverlays?: Record<string, NavigationRoleOverlay>
     updatedBy?: string
     updatedByName?: string

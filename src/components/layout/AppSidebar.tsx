@@ -17,6 +17,7 @@ import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
 import { RelayMark } from '@/components/brand/RelayBrand'
 import { getModuleLabel, resolveNavigation } from '@/lib/navigation'
 import type { ModuleDefinition } from '@/config/moduleRegistry'
+import { WorkspaceModeQuickToggle } from '@/components/workspace/WorkspaceModeQuickToggle'
 
 interface AppSidebarProps {
     activeTab: string
@@ -108,6 +109,7 @@ function UserMenu({ collapsed, user, t, language, setLanguage, signOut }: any) {
             <DropdownMenuTrigger asChild><button className={cn('flex min-h-12 w-full items-center gap-3 rounded-lg p-2 hover:bg-muted', collapsed && 'justify-center')}><UserAvatar user={user} size="sm" />{!collapsed && <span className="min-w-0 text-left"><strong className="block truncate text-xs">{user?.name || t('common.unknown')}</strong><small className="text-muted-foreground">{user?.role}</small></span>}</button></DropdownMenuTrigger>
             <DropdownMenuContent side={collapsed ? 'right' : 'top'} align="start" className="mb-2 w-64 p-2">
                 <DropdownMenuLabel>{user?.name}</DropdownMenuLabel><DropdownMenuSeparator />
+                <WorkspaceModeQuickToggle />
                 <DropdownMenuSub><DropdownMenuSubTrigger className="gap-2"><Palette className="h-4 w-4 text-primary" />{t('common.appearance')}</DropdownMenuSubTrigger><DropdownMenuPortal><DropdownMenuSubContent className="max-h-[calc(100dvh-1rem)] w-[min(22rem,calc(100vw-1rem))] overflow-y-auto p-4"><AppearanceOptions /></DropdownMenuSubContent></DropdownMenuPortal></DropdownMenuSub>
                 <DropdownMenuSub><DropdownMenuSubTrigger className="gap-2"><Globe className="h-4 w-4 text-primary" />{t('common.language')}</DropdownMenuSubTrigger><DropdownMenuPortal><DropdownMenuSubContent>{(['en', 'tr', 'ru'] as const).map((code) => <DropdownMenuItem key={code} onClick={() => setLanguage(code)}>{code === 'en' ? 'English' : code === 'tr' ? 'Türkçe' : 'Русский'}{language === code && <Check className="ml-auto h-3.5 w-3.5" />}</DropdownMenuItem>)}</DropdownMenuSubContent></DropdownMenuPortal></DropdownMenuSub>
                 <DropdownMenuSeparator /><DropdownMenuItem onClick={signOut} className="gap-2 text-destructive"><LogOut className="h-4 w-4" />{t('auth.logout')}</DropdownMenuItem>

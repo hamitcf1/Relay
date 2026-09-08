@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { NavigationPreview } from './NavigationPreview'
 import { cn } from '@/lib/utils'
 import { DEFAULT_NAVIGATION_CONFIG } from '@/lib/navigationDefaults'
+import { CompactLayoutEditor } from './CompactLayoutEditor'
 
 export function NavigationEditor() {
     const hotel = useHotelStore((state) => state.hotel)
@@ -23,14 +24,16 @@ export function NavigationEditor() {
     const incomingVersion = navigationConfig?.version ?? DEFAULT_NAVIGATION_CONFIG.version
     const [publishing, setPublishing] = useState(false)
     const copy = language === 'tr'
-        ? { title: 'Navigasyon ve hızlı işlemler', desc: 'Otel genelindeki masaüstü ve mobil menüleri düzenleyin.', base: 'Ortak düzen', reception: 'Resepsiyon', housekeeping: 'Kat hizmetleri', primary: 'Yan menüde göster', mobile: 'Mobil alt çubuk', publish: 'Herkes için yayınla', conflict: 'Düzen başka bir yönetici tarafından güncellendi. Güncel sürüm yüklendi.', quick: 'Hızlı işlem menüsü' }
-        : { title: 'Navigation and quick actions', desc: 'Arrange hotel-wide desktop and mobile navigation.', base: 'Shared layout', reception: 'Reception', housekeeping: 'Housekeeping', primary: 'Show in sidebar', mobile: 'Mobile bottom bar', publish: 'Publish for everyone', conflict: 'Another administrator updated this layout. The current version was loaded.', quick: 'Quick action menu' }
+        ? { title: 'Navigasyon ve hızlı işlemler', desc: 'Otel genelindeki masaüstü ve mobil menüleri düzenleyin.', base: 'Ortak düzen', reception: 'Resepsiyon', housekeeping: 'Kat hizmetleri', primary: 'Yan menüde göster', mobile: 'Mobil alt çubuk', publish: 'Herkes için yayınla', published: 'Navigasyon yayınlandı', conflict: 'Düzen başka bir yönetici tarafından güncellendi. Güncel sürüm yüklendi.', error: 'Navigasyon yayınlanamadı. Tekrar deneyin.', quick: 'Hızlı işlem menüsü' }
+        : language === 'ru'
+            ? { title: 'Навигация и быстрые действия', desc: 'Настройте меню отеля для компьютера и мобильных устройств.', base: 'Общий макет', reception: 'Ресепшен', housekeeping: 'Хаускипинг', primary: 'Показывать в боковом меню', mobile: 'Нижняя панель', publish: 'Опубликовать для всех', published: 'Навигация опубликована', conflict: 'Другой администратор обновил макет. Загружена актуальная версия.', error: 'Не удалось опубликовать навигацию. Повторите попытку.', quick: 'Меню быстрых действий' }
+            : { title: 'Navigation and quick actions', desc: 'Arrange hotel-wide desktop and mobile navigation.', base: 'Shared layout', reception: 'Reception', housekeeping: 'Housekeeping', primary: 'Show in sidebar', mobile: 'Mobile bottom bar', publish: 'Publish for everyone', published: 'Navigation published', conflict: 'Another administrator updated this layout. The current version was loaded.', error: 'Could not publish navigation. Try again.', quick: 'Quick action menu' }
 
     useEffect(() => {
-        if (draftVersion === undefined || (!editor.dirty && draftVersion !== incomingVersion)) {
-            editor.load(navigationConfig)
+        if (editor.loadedHotelId !== hotel?.id || draftVersion === undefined || (!editor.dirty && draftVersion !== incomingVersion)) {
+            editor.load(navigationConfig, hotel?.id)
         }
-    }, [draftVersion, editor.dirty, editor.load, incomingVersion, navigationConfig])
+    }, [draftVersion, editor.dirty, editor.load, editor.loadedHotelId, hotel?.id, incomingVersion, navigationConfig])
 
     if (!editor.draft || !hotel || !user) return null
     const role = editor.selectedRole === 'base' ? undefined : editor.selectedRole
@@ -39,15 +42,20 @@ export function NavigationEditor() {
 
     const publish = async () => {
         setPublishing(true)
-        const result = await publishNavigation(hotel.id, editor.draft!, editor.draft!.version, { uid: user.uid, name: user.name })
-        setPublishing(false)
-        if (!result.ok) {
-            editor.load(result.current)
-            toast.error(copy.conflict)
-            return
+        try {
+            const result = await publishNavigation(hotel.id, editor.draft!, editor.draft!.version, { uid: user.uid, name: user.name })
+            if (!result.ok) {
+                editor.load(result.current, hotel.id)
+                toast.error(copy.conflict)
+                return
+            }
+            editor.markPublished(result.version)
+            toast.success(copy.published)
+        } catch {
+            toast.error(copy.error)
+        } finally {
+            setPublishing(false)
         }
-        editor.markPublished(result.version)
-        toast.success(language === 'tr' ? 'Navigasyon yayınlandı' : 'Navigation published')
     }
 
     return (
@@ -86,6 +94,8 @@ export function NavigationEditor() {
                     </section>
                 ))}
             </div>
+
+            {editor.selectedRole === 'base' && <CompactLayoutEditor layout={editor.draft.compactLayout} language={language} onMove={editor.moveCompactModule} />}
 
             <section className="rounded-xl border border-border bg-card p-4">
                 <h3 className="mb-3 text-sm font-semibold">{copy.quick}</h3>

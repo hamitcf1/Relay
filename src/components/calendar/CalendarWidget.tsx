@@ -26,6 +26,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useConfirm } from '@/components/ui/confirm-dialog'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 interface CalendarWidgetProps {
     hotelId: string
@@ -49,6 +50,8 @@ export function CalendarWidget({ hotelId }: CalendarWidgetProps) {
     const [newEventCollected, setNewEventCollected] = useState<string>('0')
     const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null)
     const [tempCollected, setTempCollected] = useState<string>('')
+    const eventDraftDirty = isAdding && Boolean(newEventTitle.trim() || newEventTime || newEventRoom || newEventTotalPrice || newEventCollected !== '0' || newEventType !== 'reminder')
+    useWorkspaceDirty('calendar-event', eventDraftDirty || Boolean(updatingPaymentId && tempCollected))
 
     // Subscribe to events for current month view
     useEffect(() => {

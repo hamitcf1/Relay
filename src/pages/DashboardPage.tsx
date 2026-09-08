@@ -1,26 +1,20 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Clock as ClockIcon, ChevronLeft, EyeOff, Loader2, MoonStar, Search, SunMedium } from 'lucide-react'
+import { Clock as ClockIcon, ChevronLeft, EyeOff, MoonStar, Search, SunMedium } from 'lucide-react'
 
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
 
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown'
-import { ShiftNotes } from '@/components/notes/ShiftNotes'
-import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
-import { RosterMatrix } from '@/components/roster/RosterMatrix'
-import { CalendarWidget } from '@/components/calendar/CalendarWidget'
-import { StaffMealCard } from '@/components/hotel/StaffMealCard'
 import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 import { TourOverlay } from '@/components/onboarding/TourOverlay'
-import { CurrencyWidget } from '@/components/dashboard/CurrencyWidget'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -33,7 +27,6 @@ import { useStaffMealStore } from '@/stores/staffMealStore'
 import { useBlacklistStore } from '@/stores/blacklistStore'
 
 import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { AllTabsDirectory } from '@/components/layout/AllTabsDirectory'
@@ -44,32 +37,18 @@ import { OperationsOverview } from '@/components/dashboard/OperationsOverview'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { ShiftTimer } from '@/components/layout/ShiftTimer'
-import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { RelayMark } from '@/components/brand/RelayBrand'
 import { ModulePageSurface } from '@/components/layout/ModulePageSurface'
-
-
-// Lazy-loaded operations panels — each tab becomes its own chunk
-const MessagingPanel = lazy(() => import('@/components/messaging/MessagingPanel').then(m => ({ default: m.MessagingPanel })))
-const FeedbackSection = lazy(() => import('@/components/feedback/FeedbackSection').then(m => ({ default: m.FeedbackSection })))
-const OffDayScheduler = lazy(() => import('@/components/staff/OffDayScheduler').then(m => ({ default: m.OffDayScheduler })))
-const TourCatalogue = lazy(() => import('@/components/tours/TourCatalogue').then(m => ({ default: m.TourCatalogue })))
-const SalesPanel = lazy(() => import('@/components/sales/SalesPanel').then(m => ({ default: m.SalesPanel })))
-const PricingPanel = lazy(() => import('@/components/pricing/PricingPanel').then(m => ({ default: m.PricingPanel })))
-const LeaderboardPanel = lazy(() => import('@/components/team/LeaderboardPanel').then(m => ({ default: m.LeaderboardPanel })))
-const ActivityLogPanel = lazy(() => import('@/components/activity/ActivityLogPanel').then(m => ({ default: m.ActivityLogPanel })))
-const HotelSettings = lazy(() => import('@/components/settings/HotelSettings').then(m => ({ default: m.HotelSettings })))
-const CardsAndLoansPanel = lazy(() => import('@/components/loans/CardsAndLoansPanel').then(m => ({ default: m.CardsAndLoansPanel })))
-
-function TabFallback() {
-    return (
-        <div className="flex items-center justify-center h-full p-8">
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-        </div>
-    )
-}
-
+import { CompactShift } from '@/components/workspace/CompactShift'
+import { CompactNavigation, type CompactArea } from '@/components/workspace/CompactNavigation'
+import { CompactOperations } from '@/components/workspace/CompactOperations'
+import { normalizeWorkspaceMode, resolveWorkspaceTarget } from '@/lib/workspace'
+import { UserNav } from '@/components/layout/UserNav'
+import { ModuleContent } from '@/components/workspace/ModuleContent'
+import type { ModuleId } from '@/config/moduleRegistry'
+import { useWorkspaceEditStore } from '@/stores/workspaceEditStore'
+import { toast } from 'sonner'
 export function DashboardPage() {
     const location = useLocation()
     const user = useAuthStore((state) => state.user)
@@ -89,6 +68,15 @@ export function DashboardPage() {
     const [operationTab, setOperationTab] = useState('messaging')
     const [overviewTab, setOverviewTab] = useState('grid')
     const [openNewNote, setOpenNewNote] = useState(false)
+    const workspaceMode = normalizeWorkspaceMode(user?.settings?.workspace_mode)
+    const [compactArea, setCompactArea] = useState<CompactArea>('shift')
+    const [compactOperationTab, setCompactOperationTab] = useState(user?.settings?.compact_operation_tab || 'overview')
+    const [compactShiftTarget, setCompactShiftTarget] = useState<string | null>(null)
+    const [compactNoteComposerOpen, setCompactNoteComposerOpen] = useState(false)
+    const [lastCompactShiftModule, setLastCompactShiftModule] = useState('overview')
+    const previousWorkspaceMode = useRef(workspaceMode)
+    const previousUserId = useRef(user?.uid)
+    const clearWorkspaceEdits = useWorkspaceEditStore((state) => state.clear)
 
     // Mobile Detection
     const isMobile = useIsMobile()
@@ -109,6 +97,24 @@ export function DashboardPage() {
         const tabParam = searchParams.get('tab')
         const chatParam = searchParams.get('chat')
 
+        if (workspaceMode === 'compact') {
+            if (tabParam) {
+                const target = resolveWorkspaceTarget(tabParam, 'compact')
+                setCompactArea(target.area)
+                if (target.area === 'shift') {
+                    setCompactShiftTarget(target.moduleId)
+                    setLastCompactShiftModule(target.moduleId)
+                }
+                else setCompactOperationTab(target.moduleId)
+            } else if (location.pathname === '/operations') {
+                setCompactArea('operations')
+                setCompactOperationTab(chatParam ? 'messaging' : 'overview')
+            } else {
+                setCompactArea('shift')
+            }
+            return
+        }
+
         if (location.pathname === '/operations') {
             setActiveTab('operations')
             if (tabParam) {
@@ -124,7 +130,49 @@ export function DashboardPage() {
                 setOverviewTab('grid')
             }
         }
-    }, [location.pathname, location.search])
+    }, [location.pathname, location.search, workspaceMode])
+
+    useEffect(() => {
+        if (previousWorkspaceMode.current === workspaceMode) return
+        if (workspaceMode === 'compact') {
+            if (activeTab === 'operations') {
+                setCompactArea('operations')
+                setCompactOperationTab(operationTab === 'grid' ? 'overview' : operationTab)
+            } else {
+                setCompactArea('shift')
+                if (overviewTab !== 'grid') {
+                    setCompactShiftTarget(overviewTab)
+                    setLastCompactShiftModule(overviewTab)
+                }
+            }
+        } else if (compactArea === 'operations') {
+            if (compactOperationTab === 'overview') {
+                setActiveTab('overview')
+                setOverviewTab('grid')
+            } else {
+                setActiveTab('operations')
+                setOperationTab(compactOperationTab)
+            }
+        } else {
+            setActiveTab('overview')
+            setOverviewTab(lastCompactShiftModule === 'overview' ? 'grid' : lastCompactShiftModule)
+        }
+        previousWorkspaceMode.current = workspaceMode
+    }, [activeTab, compactArea, compactOperationTab, lastCompactShiftModule, operationTab, overviewTab, workspaceMode])
+
+    useEffect(() => {
+        if (previousUserId.current === user?.uid) return
+        clearWorkspaceEdits()
+        setActiveTab('overview')
+        setOperationTab('messaging')
+        setOverviewTab('grid')
+        setCompactArea('shift')
+        setCompactOperationTab(user?.settings?.compact_operation_tab || 'overview')
+        setCompactShiftTarget(null)
+        setLastCompactShiftModule('overview')
+        previousWorkspaceMode.current = workspaceMode
+        previousUserId.current = user?.uid
+    }, [clearWorkspaceEdits, user?.settings?.compact_operation_tab, user?.uid, workspaceMode])
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
@@ -200,6 +248,18 @@ export function DashboardPage() {
     }
 
     const handleQuickAction = (id: 'notes' | 'feedback' | 'sales' | 'messaging' | 'calendar') => {
+        if (workspaceMode === 'compact') {
+            if (id === 'notes' || id === 'calendar') {
+                setCompactArea('shift')
+                setCompactShiftTarget(id)
+                setLastCompactShiftModule(id)
+                if (id === 'notes') setCompactNoteComposerOpen(true)
+                return
+            }
+            setCompactArea('operations')
+            setCompactOperationTab(id)
+            return
+        }
         if (id === 'notes') {
             setActiveTab('overview')
             setOpenNewNote(true)
@@ -213,6 +273,22 @@ export function DashboardPage() {
         }
         setActiveTab('operations')
         setOperationTab(id)
+    }
+
+    const openCompactShiftModule = (id: string, add = false) => {
+        setCompactArea('shift')
+        setCompactShiftTarget(id)
+        setLastCompactShiftModule(id)
+        if (id === 'notes' && add) setCompactNoteComposerOpen(true)
+    }
+
+    const selectCompactOperation = async (id: string) => {
+        setCompactOperationTab(id)
+        try {
+            await useAuthStore.getState().updateSettings({ compact_operation_tab: id })
+        } catch {
+            toast.error(language === 'tr' ? 'Operasyon tercihi kaydedilemedi' : language === 'ru' ? 'Не удалось сохранить выбор операции' : 'Could not save operations preference')
+        }
     }
 
     const rosterShift = user ? schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] : undefined
@@ -236,7 +312,7 @@ export function DashboardPage() {
             <TourOverlay isOpen={showTour} onClose={() => setShowTour(false)} />
 
             {/* Application Sidebar (Desktop only) */}
-            <AppSidebar
+            {workspaceMode === 'compact' ? <CompactNavigation area={compactArea} onAreaChange={setCompactArea} /> : <AppSidebar
                 activeTab={activeTab}
                 operationTab={operationTab}
                 overviewTab={overviewTab}
@@ -250,11 +326,11 @@ export function DashboardPage() {
                         setOverviewTab(subTab || 'grid')
                     }
                 }}
-            />
+            />}
 
             {/* Main Content Pane */}
             <div className="flex flex-col flex-1 relative min-w-0 overflow-hidden">
-                <header className="relay-commandbar safe-header relative z-40 flex h-[84px] shrink-0 items-center justify-between border-b border-border/70 bg-[#080b0e]/95 px-5 backdrop-blur-xl md:px-7">
+                <header className="relay-commandbar safe-header relative z-40 flex h-[84px] shrink-0 items-center justify-between border-b border-border/70 bg-background/95 px-5 backdrop-blur-xl md:px-7">
                     <div className="flex items-center md:hidden">
                         <RelayMark className="h-10 w-10 text-primary" />
                     </div>
@@ -264,7 +340,7 @@ export function DashboardPage() {
                         <span><strong>{shiftName}</strong><small>{shiftStart}–{shiftEnd}</small></span>
                     </div>
 
-                    <label className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-white/[0.025] px-4 text-muted-foreground md:flex">
+                    <label className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-card/55 px-4 text-muted-foreground md:flex">
                         <Search className="h-4 w-4" />
                         <input aria-label={t('common.search') as string} placeholder={t('common.search') as string} className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
                         <kbd className="rounded border border-border/80 px-1.5 py-0.5 text-[10px] text-muted-foreground">⌘K</kbd>
@@ -300,10 +376,12 @@ export function DashboardPage() {
                         <div id="tour-notifications">
                             <NotificationDropdown />
                         </div>
+                        {workspaceMode === 'modern' && <div className="md:hidden"><UserNav /></div>}
                     </div>
                 </header>
 
-            <main className="relay-scroll-root relative min-h-0 flex-1 overflow-y-auto pb-28 md:pb-8">
+            <main className={cn('relay-scroll-root relative min-h-0 flex-1', workspaceMode === 'compact' ? 'overflow-hidden' : 'overflow-y-auto pb-28 md:pb-8')}>
+                {workspaceMode === 'compact' ? (compactArea === 'shift' ? <CompactShift focusModule={compactShiftTarget} initialAddOpen={compactNoteComposerOpen} onFocusHandled={() => { setCompactShiftTarget(null); setCompactNoteComposerOpen(false) }} onModuleFocus={setLastCompactShiftModule} /> : <CompactOperations activeModule={compactOperationTab} onModuleChange={(id) => { void selectCompactOperation(id) }} onOpenShiftModule={openCompactShiftModule} />) : (
                 <div className="relay-page">
                 <AnnouncementBanner />
                 
@@ -345,13 +423,7 @@ export function DashboardPage() {
                                 className="w-full"
                             >
                                 <ModulePageSurface wide>
-                                    {overviewTab === 'notes' && <ShiftNotes hotelId={hotel?.id || ''} initialAddOpen={openNewNote} />}
-                                    {overviewTab === 'roster' && (user?.role === 'gm' || user?.role === 'receptionist') && <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
-                                    {overviewTab === 'hotel-info' && <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
-                                    {overviewTab === 'currency' && <CurrencyWidget />}
-                                    {overviewTab === 'menu' && <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
-                                    {overviewTab === 'calendar' && <CalendarWidget hotelId={hotel?.id || ''} />}
-                                    {overviewTab === 'blacklist' && <BlacklistModule hotelId={hotel?.id || ''} />}
+                                    <ModuleContent moduleId={overviewTab as ModuleId} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} initialAddOpen={openNewNote} />
                                 </ModulePageSurface>
                             </motion.div>
                         )}
@@ -393,73 +465,30 @@ export function DashboardPage() {
                                         />
                                     )}
 
-                                    <div className={cn(isMobile && operationTab === 'grid' ? "hidden" : "block")}>
-                                        <Suspense fallback={<TabFallback />}>
-                                            <TabsContent value="messaging" className="m-0 min-h-[36rem] outline-none">
-                                                <ModulePageSurface wide><MessagingPanel /></ModulePageSurface>
-                                            </TabsContent>
-                                            <TabsContent value="compliance" className="m-0 outline-none">
-                                                <ModulePageSurface><div className="max-w-2xl mx-auto space-y-6">
-                                                    <div className="space-y-1">
-                                                        <h2 className="text-2xl font-bold tracking-tight">{t('module.compliance') || 'Compliance'}</h2>
-                                                        <p className="text-sm text-muted-foreground">{t('operations.compliance.desc') || 'Maintain operational standards for the current shift.'}</p>
-                                                    </div>
-                                                    <CompliancePanel hotelId={hotel?.id || ''} className="p-2" />
-                                                </div></ModulePageSurface>
-                                            </TabsContent>
-                                            <TabsContent value="settings" className="m-0 p-0 outline-none">
-                                                <ModulePageSurface><HotelSettings /></ModulePageSurface>
-                                            </TabsContent>
-                                            <TabsContent value="sales" className="m-0 p-0 outline-none">
-                                                <ModulePageSurface wide><SalesPanel /></ModulePageSurface>
-                                            </TabsContent>
-                                            <TabsContent value="feedback" className="m-0 outline-none">
-                                                <ModulePageSurface><FeedbackSection /></ModulePageSurface>
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                            <TabsContent value="off-days" className="m-0 outline-none">
-                                                <ModulePageSurface><OffDayScheduler /></ModulePageSurface>
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                            <TabsContent value="tours" className="m-0 outline-none">
-                                                <ModulePageSurface wide><TourCatalogue /></ModulePageSurface>
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                            <TabsContent value="cards-loans" className="m-0 p-0 outline-none">
-                                                <ModulePageSurface wide><CardsAndLoansPanel /></ModulePageSurface>
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                            <TabsContent value="pricing" className="m-0 p-0 outline-none">
-                                                <ModulePageSurface wide><PricingPanel /></ModulePageSurface>
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                            <TabsContent value="team" className="m-0 p-0 outline-none">
-                                                <ModulePageSurface><LeaderboardPanel /></ModulePageSurface>
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                            <TabsContent value="activity" className="m-0 p-0 outline-none">
-                                                <ModulePageSurface><ActivityLogPanel /></ModulePageSurface>
-                                                <ScrollToTopButton />
-                                            </TabsContent>
-                                        </Suspense>
-                                    </div>
+                                    {operationTab !== 'grid' && <div className="block">
+                                        <ModulePageSurface wide>
+                                            <ModuleContent moduleId={operationTab as ModuleId} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
+                                        </ModulePageSurface>
+                                        <ScrollToTopButton />
+                                    </div>}
                                 </div>
                             </Tabs>
                         </TabsContent>
                     </Tabs>
                 </div>
+                )}
                 </main>
             </div>
 
             {/* Mobile Bottom Navigation Layout stays consistent */}
-            <MobileNav
+            {workspaceMode === 'modern' && <MobileNav
                 activeTab={activeTab}
                 overviewTab={overviewTab}
                 operationTab={operationTab}
                 userRole={user?.role}
                 onSelect={handleModuleSelect}
-            />
-            <AllTabsDirectory role={user?.role} onSelect={handleModuleSelect} />
+            />}
+            {workspaceMode === 'modern' && <AllTabsDirectory role={user?.role} onSelect={handleModuleSelect} />}
             <QuickActionMenu onAction={handleQuickAction} />
             <AnnouncementModal />
 

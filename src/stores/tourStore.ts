@@ -36,6 +36,11 @@ export const useTourStore = create<TourStore>((set) => ({
     subscribeToTours: (hotelId) => {
         set({ loading: true, error: null })
 
+        if (hotelId === 'demo-hotel-id') {
+            set({ tours: [], loading: false, error: null })
+            return () => {}
+        }
+
         const toursRef = collection(db, 'hotels', hotelId, 'tours')
         const q = query(toursRef, limit(50))
 
@@ -65,6 +70,10 @@ export const useTourStore = create<TourStore>((set) => ({
     },
 
     addTour: async (hotelId, tourData) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ tours: [...state.tours, { ...tourData, id: `demo-tour-${Date.now()}` }] }))
+            return
+        }
         try {
             const toursRef = collection(db, 'hotels', hotelId, 'tours')
             await addDoc(toursRef, tourData)
@@ -75,6 +84,7 @@ export const useTourStore = create<TourStore>((set) => ({
     },
 
     updateTour: async (hotelId, tourId, updates) => {
+        if (hotelId === 'demo-hotel-id') { set((state) => ({ tours: state.tours.map((tour) => tour.id === tourId ? { ...tour, ...updates } : tour) })); return }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'tours', tourId)
             await updateDoc(docRef, updates)
@@ -85,6 +95,7 @@ export const useTourStore = create<TourStore>((set) => ({
     },
 
     deleteTour: async (hotelId, tourId) => {
+        if (hotelId === 'demo-hotel-id') { set((state) => ({ tours: state.tours.filter((tour) => tour.id !== tourId) })); return }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'tours', tourId)
             await deleteDoc(docRef)
@@ -95,6 +106,7 @@ export const useTourStore = create<TourStore>((set) => ({
     },
 
     toggleTourActive: async (hotelId, tourId, isActive) => {
+        if (hotelId === 'demo-hotel-id') { set((state) => ({ tours: state.tours.map((tour) => tour.id === tourId ? { ...tour, is_active: isActive } : tour) })); return }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'tours', tourId)
             await updateDoc(docRef, { is_active: isActive })

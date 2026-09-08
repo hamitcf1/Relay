@@ -30,6 +30,10 @@ export const useBlacklistStore = create<BlacklistState>((set) => ({
 
     subscribeToBlacklist: (hotelId: string) => {
         set({ loading: true, error: null })
+        if (hotelId === 'demo-hotel-id') {
+            set({ blacklistedGuests: [], loading: false, error: null })
+            return () => { }
+        }
         const blacklistRef = collection(db, 'hotels', hotelId, 'blacklists')
         const q = query(blacklistRef, orderBy('created_at', 'desc'))
 
