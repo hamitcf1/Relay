@@ -4,6 +4,7 @@ import { Sun, Moon, Smile, User, Type } from 'lucide-react'
 import { useThemeStore, ACCENT_COLORS, type Theme } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
+import { WorkspaceModeOptions } from '@/components/workspace/WorkspaceModeOptions'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react'
 import { cn } from '@/lib/utils'
@@ -73,6 +74,9 @@ export function AppearanceOptions() {
 
     return (
         <div className="space-y-5 p-1">
+            <WorkspaceModeOptions />
+
+            <div className="border-t border-border/50" />
             {/* Theme */}
             <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">

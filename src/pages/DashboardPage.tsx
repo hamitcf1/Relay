@@ -48,6 +48,7 @@ import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { RelayMark } from '@/components/brand/RelayBrand'
 import { ModulePageSurface } from '@/components/layout/ModulePageSurface'
+import { CompactShift } from '@/components/workspace/CompactShift'
 
 
 // Lazy-loaded operations panels — each tab becomes its own chunk
@@ -89,6 +90,7 @@ export function DashboardPage() {
     const [operationTab, setOperationTab] = useState('messaging')
     const [overviewTab, setOverviewTab] = useState('grid')
     const [openNewNote, setOpenNewNote] = useState(false)
+    const workspaceMode = user?.settings?.workspace_mode || 'modern'
 
     // Mobile Detection
     const isMobile = useIsMobile()
@@ -303,7 +305,8 @@ export function DashboardPage() {
                     </div>
                 </header>
 
-            <main className="relay-scroll-root relative min-h-0 flex-1 overflow-y-auto pb-28 md:pb-8">
+            <main className={cn('relay-scroll-root relative min-h-0 flex-1', workspaceMode === 'compact' ? 'overflow-hidden' : 'overflow-y-auto pb-28 md:pb-8')}>
+                {workspaceMode === 'compact' ? <CompactShift /> : (
                 <div className="relay-page">
                 <AnnouncementBanner />
                 
@@ -448,6 +451,7 @@ export function DashboardPage() {
                         </TabsContent>
                     </Tabs>
                 </div>
+                )}
                 </main>
             </div>
 

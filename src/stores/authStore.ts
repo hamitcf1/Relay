@@ -300,8 +300,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
         if (!user) return
 
         try {
-            const userRef = doc(db, 'users', user.uid)
             const newSettings = { ...user.settings, ...settings }
+            if (user.is_demo) {
+                set({ user: { ...user, settings: newSettings } })
+                return
+            }
+            const userRef = doc(db, 'users', user.uid)
             await updateDoc(userRef, { settings: newSettings })
 
             set({
@@ -312,6 +316,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
             })
         } catch (error) {
             console.error("Error updating user settings:", error)
+            throw error
         }
     },
     setBooted: (val) => set({ isBooted: val })
