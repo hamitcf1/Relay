@@ -1,6 +1,6 @@
 # Modern and Compact Workspaces
 
-Status: design approved in conversation on 2026-09-08; implementation pending.
+Status: design approved in conversation on 2026-09-08; implemented on `codex/compact-workspace`.
 
 ## Purpose and historical reference
 

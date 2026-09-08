@@ -309,12 +309,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
             const userRef = doc(db, 'users', user.uid)
             await updateDoc(userRef, buildUserSettingsPatch(settings) as UpdateData<DocumentData>)
 
-            set({
+            set((state) => state.user?.uid === user.uid ? {
                 user: {
-                    ...user,
-                    settings: newSettings
-                }
-            })
+                    ...state.user,
+                    settings: { ...state.user.settings, ...settings },
+                },
+            } : state)
         } catch (error) {
             console.error("Error updating user settings:", error)
             throw error

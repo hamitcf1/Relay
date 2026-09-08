@@ -43,10 +43,11 @@ import { ModulePageSurface } from '@/components/layout/ModulePageSurface'
 import { CompactShift } from '@/components/workspace/CompactShift'
 import { CompactNavigation, type CompactArea } from '@/components/workspace/CompactNavigation'
 import { CompactOperations } from '@/components/workspace/CompactOperations'
-import { resolveWorkspaceTarget } from '@/lib/workspace'
+import { normalizeWorkspaceMode, resolveWorkspaceTarget } from '@/lib/workspace'
 import { UserNav } from '@/components/layout/UserNav'
 import { ModuleContent } from '@/components/workspace/ModuleContent'
 import type { ModuleId } from '@/config/moduleRegistry'
+import { useWorkspaceEditStore } from '@/stores/workspaceEditStore'
 export function DashboardPage() {
     const location = useLocation()
     const user = useAuthStore((state) => state.user)
@@ -66,12 +67,14 @@ export function DashboardPage() {
     const [operationTab, setOperationTab] = useState('messaging')
     const [overviewTab, setOverviewTab] = useState('grid')
     const [openNewNote, setOpenNewNote] = useState(false)
-    const workspaceMode = user?.settings?.workspace_mode || 'modern'
+    const workspaceMode = normalizeWorkspaceMode(user?.settings?.workspace_mode)
     const [compactArea, setCompactArea] = useState<CompactArea>('shift')
     const [compactOperationTab, setCompactOperationTab] = useState(user?.settings?.compact_operation_tab || 'overview')
     const [compactShiftTarget, setCompactShiftTarget] = useState<string | null>(null)
     const [lastCompactShiftModule, setLastCompactShiftModule] = useState('overview')
     const previousWorkspaceMode = useRef(workspaceMode)
+    const previousUserId = useRef(user?.uid)
+    const clearWorkspaceEdits = useWorkspaceEditStore((state) => state.clear)
 
     // Mobile Detection
     const isMobile = useIsMobile()
@@ -154,6 +157,20 @@ export function DashboardPage() {
         }
         previousWorkspaceMode.current = workspaceMode
     }, [activeTab, compactArea, compactOperationTab, lastCompactShiftModule, operationTab, overviewTab, workspaceMode])
+
+    useEffect(() => {
+        if (previousUserId.current === user?.uid) return
+        clearWorkspaceEdits()
+        setActiveTab('overview')
+        setOperationTab('messaging')
+        setOverviewTab('grid')
+        setCompactArea('shift')
+        setCompactOperationTab(user?.settings?.compact_operation_tab || 'overview')
+        setCompactShiftTarget(null)
+        setLastCompactShiftModule('overview')
+        previousWorkspaceMode.current = workspaceMode
+        previousUserId.current = user?.uid
+    }, [clearWorkspaceEdits, user?.settings?.compact_operation_tab, user?.uid, workspaceMode])
 
     // Automate shifts
     useShiftAutomator(hotel?.id || null)

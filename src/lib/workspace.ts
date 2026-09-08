@@ -9,6 +9,10 @@ export const DEFAULT_COMPACT_LAYOUT: CompactLayout = {
 const COMPACT_SHIFT_IDS = new Set([...DEFAULT_COMPACT_LAYOUT.left, ...DEFAULT_COMPACT_LAYOUT.right])
 const KNOWN_MODULE_IDS = new Set(MODULE_REGISTRY.map((module) => module.id))
 
+export function normalizeWorkspaceMode(input?: string): WorkspaceMode {
+    return input === 'compact' ? 'compact' : 'modern'
+}
+
 export function normalizeCompactLayout(input?: CompactLayout): CompactLayout {
     if (!input) return structuredClone(DEFAULT_COMPACT_LAYOUT)
 

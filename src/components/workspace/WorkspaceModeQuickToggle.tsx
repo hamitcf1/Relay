@@ -7,6 +7,7 @@ import { useWorkspaceEditStore } from '@/stores/workspaceEditStore'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import type { WorkspaceMode } from '@/types'
+import { normalizeWorkspaceMode } from '@/lib/workspace'
 
 export function WorkspaceModeQuickToggle() {
     const user = useAuthStore((state) => state.user)
@@ -14,7 +15,7 @@ export function WorkspaceModeQuickToggle() {
     const dirtyIds = useWorkspaceEditStore((state) => state.dirtyIds)
     const clearDirty = useWorkspaceEditStore((state) => state.clear)
     const { language } = useLanguageStore()
-    const current = user?.settings?.workspace_mode || 'modern'
+    const current = normalizeWorkspaceMode(user?.settings?.workspace_mode)
     const [confirmationOpen, setConfirmationOpen] = useState(false)
     const next: WorkspaceMode = current === 'modern' ? 'compact' : 'modern'
     const copy = language === 'tr'

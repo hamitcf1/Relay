@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { buildUserSettingsPatch, normalizeCompactLayout, resolveWorkspaceTarget } from '../../src/lib/workspace'
+import { buildUserSettingsPatch, normalizeCompactLayout, normalizeWorkspaceMode, resolveWorkspaceTarget } from '../../src/lib/workspace'
 import { useNavigationEditorStore } from '../../src/stores/navigationEditorStore'
 
 test.describe('Compact workspace configuration', () => {
@@ -8,6 +8,12 @@ test.describe('Compact workspace configuration', () => {
       left: ['notes', 'roster', 'blacklist'],
       right: ['hotel-info', 'currency', 'menu', 'calendar'],
     })
+  })
+
+  test('falls back to Modern for missing or invalid personal modes', () => {
+    expect(normalizeWorkspaceMode(undefined)).toBe('modern')
+    expect(normalizeWorkspaceMode('legacy')).toBe('modern')
+    expect(normalizeWorkspaceMode('compact')).toBe('compact')
   })
 
   test('removes duplicate and unknown modules while restoring missing modules', () => {

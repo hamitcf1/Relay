@@ -7,12 +7,13 @@ import type { WorkspaceMode } from '@/types'
 import { cn } from '@/lib/utils'
 import { useWorkspaceEditStore } from '@/stores/workspaceEditStore'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { normalizeWorkspaceMode } from '@/lib/workspace'
 
 export function WorkspaceModeOptions() {
     const user = useAuthStore((state) => state.user)
     const updateSettings = useAuthStore((state) => state.updateSettings)
     const { language } = useLanguageStore()
-    const mode = user?.settings?.workspace_mode || 'modern'
+    const mode = normalizeWorkspaceMode(user?.settings?.workspace_mode)
     const dirtyIds = useWorkspaceEditStore((state) => state.dirtyIds)
     const clearDirty = useWorkspaceEditStore((state) => state.clear)
     const [pendingMode, setPendingMode] = useState<WorkspaceMode | null>(null)
