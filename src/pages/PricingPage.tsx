@@ -71,7 +71,7 @@ export function PricingPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30 flex flex-col">
+        <main className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30 flex flex-col">
             {/* Navigation Backlink */}
             <div className="container mx-auto px-6 pt-12 mb-8">
                 <Button
@@ -205,6 +205,6 @@ export function PricingPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     )
 }

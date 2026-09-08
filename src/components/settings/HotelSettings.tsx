@@ -12,6 +12,7 @@ import {
     ShieldCheck,
     BarChart3,
     Loader2
+    ,PanelLeft
 } from 'lucide-react'
 import { ManagementReportPanel } from '@/components/admin/ManagementReportPanel'
 import { StaffManagement } from './StaffManagement'
@@ -26,10 +27,11 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { NavigationEditor } from './navigation/NavigationEditor'
 
 export function HotelSettings() {
     const { hotel, updateHotelSettings, updateHotelInfo } = useHotelStore()
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const { user } = useAuthStore()
     const subscribeToRoster = useRosterStore(state => state.subscribeToRoster)
     
@@ -106,19 +108,20 @@ export function HotelSettings() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-32">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-3">
-                    <Settings className="w-8 h-8 text-primary" />
+        <div className="mx-auto max-w-4xl space-y-7">
+            <div className="border-b border-border/70 pb-5">
+                <p className="mb-2 text-xs font-semibold tracking-[0.12em] text-muted-foreground">RELAY / ADMIN</p>
+                <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+                    <Settings className="w-7 h-7 text-primary" />
                     {t('hotel.settings.title')}
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                     {t('hotel.settings.desc')}
                 </p>
             </div>
 
             <Tabs defaultValue="general" className="w-full">
-                <TabsList className="bg-muted/50 p-1 mb-8">
+                <TabsList className="mb-6 flex h-auto w-full justify-start gap-1 overflow-x-auto bg-muted/50 p-1 sm:w-fit">
                     <TabsTrigger value="general" className="gap-2">
                         <Hotel className="w-4 h-4" />
                         {t('hotel.settings.hotelDetails')}
@@ -126,6 +129,10 @@ export function HotelSettings() {
                     <TabsTrigger value="shifts" className="gap-2">
                         <Clock className="w-4 h-4" />
                         {t('module.roster')}
+                    </TabsTrigger>
+                    <TabsTrigger value="navigation" className="gap-2">
+                        <PanelLeft className="w-4 h-4" />
+                        {language === 'tr' ? 'Navigasyon' : language === 'ru' ? 'Навигация' : 'Navigation'}
                     </TabsTrigger>
                     <TabsTrigger value="roles" className="gap-2">
                         <Users className="w-4 h-4" />
@@ -270,6 +277,10 @@ export function HotelSettings() {
                             </div>
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                <TabsContent value="navigation" className="space-y-6">
+                    <NavigationEditor />
                 </TabsContent>
 
                 <TabsContent value="roles" className="space-y-6">

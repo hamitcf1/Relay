@@ -36,6 +36,9 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
 import { DateTimeWidget } from '@/components/layout/DateTimeWidget'
 import { MobileNav } from '@/components/layout/MobileNav'
+import { AllTabsDirectory } from '@/components/layout/AllTabsDirectory'
+import { QuickActionMenu } from '@/components/layout/QuickActionMenu'
+import type { ModuleDefinition } from '@/config/moduleRegistry'
 import { OperationsGrid } from '@/components/dashboard/OperationsGrid'
 import { OperationsOverview } from '@/components/dashboard/OperationsOverview'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
@@ -44,6 +47,7 @@ import { ShiftTimer } from '@/components/layout/ShiftTimer'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { RelayMark } from '@/components/brand/RelayBrand'
+import { ModulePageSurface } from '@/components/layout/ModulePageSurface'
 
 
 // Lazy-loaded operations panels — each tab becomes its own chunk
@@ -117,7 +121,7 @@ export function DashboardPage() {
             if (tabParam) {
                 setOverviewTab(tabParam)
             } else {
-                setOverviewTab(window.matchMedia('(max-width: 767px)').matches ? 'notes' : 'grid')
+                setOverviewTab('grid')
             }
         }
     }, [location.pathname, location.search])
@@ -184,6 +188,32 @@ export function DashboardPage() {
 
 
     const [showTutorial, setShowTutorial] = useState(false)
+
+    const handleModuleSelect = (item: ModuleDefinition) => {
+        setActiveTab(item.area)
+        if (item.area === 'overview') {
+            setOpenNewNote(false)
+            setOverviewTab(item.subTab || 'grid')
+        } else {
+            setOperationTab(item.subTab || 'messaging')
+        }
+    }
+
+    const handleQuickAction = (id: 'notes' | 'feedback' | 'sales' | 'messaging' | 'calendar') => {
+        if (id === 'notes') {
+            setActiveTab('overview')
+            setOpenNewNote(true)
+            setOverviewTab('notes')
+            return
+        }
+        if (id === 'calendar') {
+            setActiveTab('overview')
+            setOverviewTab('calendar')
+            return
+        }
+        setActiveTab('operations')
+        setOperationTab(id)
+    }
 
     const rosterShift = user ? schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] : undefined
     const inferredShift = new Date().getHours() >= 16 ? 'B' : new Date().getHours() < 8 ? 'C' : 'A'
@@ -312,15 +342,17 @@ export function DashboardPage() {
                                 initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
-                                className="mx-auto w-full max-w-6xl px-3 py-5 lg:px-6"
+                                className="w-full"
                             >
-                                {overviewTab === 'notes' && <ShiftNotes hotelId={hotel?.id || ''} initialAddOpen={openNewNote} />}
-                                {overviewTab === 'roster' && (user?.role === 'gm' || user?.role === 'receptionist') && <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
-                                {overviewTab === 'hotel-info' && <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
-                                {overviewTab === 'currency' && <CurrencyWidget />}
-                                {overviewTab === 'menu' && <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
-                                {overviewTab === 'calendar' && <CalendarWidget hotelId={hotel?.id || ''} />}
-                                {overviewTab === 'blacklist' && <BlacklistModule hotelId={hotel?.id || ''} />}
+                                <ModulePageSurface wide>
+                                    {overviewTab === 'notes' && <ShiftNotes hotelId={hotel?.id || ''} initialAddOpen={openNewNote} />}
+                                    {overviewTab === 'roster' && (user?.role === 'gm' || user?.role === 'receptionist') && <RosterMatrix hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
+                                    {overviewTab === 'hotel-info' && <HotelInfoPanel hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
+                                    {overviewTab === 'currency' && <CurrencyWidget />}
+                                    {overviewTab === 'menu' && <StaffMealCard hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />}
+                                    {overviewTab === 'calendar' && <CalendarWidget hotelId={hotel?.id || ''} />}
+                                    {overviewTab === 'blacklist' && <BlacklistModule hotelId={hotel?.id || ''} />}
+                                </ModulePageSurface>
                             </motion.div>
                         )}
                         <ScrollToTopButton />
@@ -363,50 +395,50 @@ export function DashboardPage() {
 
                                     <div className={cn(isMobile && operationTab === 'grid' ? "hidden" : "block")}>
                                         <Suspense fallback={<TabFallback />}>
-                                            <TabsContent value="messaging" className="m-0 h-[calc(100dvh-7rem)] min-h-[36rem] p-3 outline-none md:p-5">
-                                                <MessagingPanel />
+                                            <TabsContent value="messaging" className="m-0 min-h-[36rem] outline-none">
+                                                <ModulePageSurface wide><MessagingPanel /></ModulePageSurface>
                                             </TabsContent>
-                                            <TabsContent value="compliance" className="m-0 p-4 outline-none lg:p-6">
-                                                <div className="max-w-2xl mx-auto space-y-6">
+                                            <TabsContent value="compliance" className="m-0 outline-none">
+                                                <ModulePageSurface><div className="max-w-2xl mx-auto space-y-6">
                                                     <div className="space-y-1">
                                                         <h2 className="text-2xl font-bold tracking-tight">{t('module.compliance') || 'Compliance'}</h2>
                                                         <p className="text-sm text-muted-foreground">{t('operations.compliance.desc') || 'Maintain operational standards for the current shift.'}</p>
                                                     </div>
                                                     <CompliancePanel hotelId={hotel?.id || ''} className="p-2" />
-                                                </div>
+                                                </div></ModulePageSurface>
                                             </TabsContent>
                                             <TabsContent value="settings" className="m-0 p-0 outline-none">
-                                                <HotelSettings />
+                                                <ModulePageSurface><HotelSettings /></ModulePageSurface>
                                             </TabsContent>
                                             <TabsContent value="sales" className="m-0 p-0 outline-none">
-                                                <SalesPanel />
+                                                <ModulePageSurface wide><SalesPanel /></ModulePageSurface>
                                             </TabsContent>
-                                            <TabsContent value="feedback" className="m-0 p-4 outline-none md:p-6">
-                                                <FeedbackSection />
+                                            <TabsContent value="feedback" className="m-0 outline-none">
+                                                <ModulePageSurface><FeedbackSection /></ModulePageSurface>
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="off-days" className="m-0 p-4 outline-none md:p-6">
-                                                <OffDayScheduler />
+                                            <TabsContent value="off-days" className="m-0 outline-none">
+                                                <ModulePageSurface><OffDayScheduler /></ModulePageSurface>
                                                 <ScrollToTopButton />
                                             </TabsContent>
-                                            <TabsContent value="tours" className="m-0 p-4 outline-none md:p-6">
-                                                <TourCatalogue />
+                                            <TabsContent value="tours" className="m-0 outline-none">
+                                                <ModulePageSurface wide><TourCatalogue /></ModulePageSurface>
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                             <TabsContent value="cards-loans" className="m-0 p-0 outline-none">
-                                                <CardsAndLoansPanel />
+                                                <ModulePageSurface wide><CardsAndLoansPanel /></ModulePageSurface>
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                             <TabsContent value="pricing" className="m-0 p-0 outline-none">
-                                                <PricingPanel />
+                                                <ModulePageSurface wide><PricingPanel /></ModulePageSurface>
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                             <TabsContent value="team" className="m-0 p-0 outline-none">
-                                                <LeaderboardPanel />
+                                                <ModulePageSurface><LeaderboardPanel /></ModulePageSurface>
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                             <TabsContent value="activity" className="m-0 p-0 outline-none">
-                                                <ActivityLogPanel />
+                                                <ModulePageSurface><ActivityLogPanel /></ModulePageSurface>
                                                 <ScrollToTopButton />
                                             </TabsContent>
                                         </Suspense>
@@ -424,30 +456,11 @@ export function DashboardPage() {
                 activeTab={activeTab}
                 overviewTab={overviewTab}
                 operationTab={operationTab}
-                onOpenNotes={() => {
-                    setActiveTab('overview')
-                    setOpenNewNote(false)
-                    setOverviewTab('notes')
-                }}
-                onOpenRoster={() => {
-                    setActiveTab('overview')
-                    setOpenNewNote(false)
-                    setOverviewTab('roster')
-                }}
-                onNewRecord={() => {
-                    setActiveTab('overview')
-                    setOpenNewNote(true)
-                    setOverviewTab('notes')
-                }}
-                onOpenMessages={() => {
-                    setActiveTab('operations')
-                    setOperationTab('messaging')
-                }}
-                onOpenMenu={() => {
-                    setActiveTab('operations')
-                    setOperationTab('grid')
-                }}
+                userRole={user?.role}
+                onSelect={handleModuleSelect}
             />
+            <AllTabsDirectory role={user?.role} onSelect={handleModuleSelect} />
+            <QuickActionMenu onAction={handleQuickAction} />
             <AnnouncementModal />
 
         </div>
