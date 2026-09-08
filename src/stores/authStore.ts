@@ -6,7 +6,7 @@ import {
     onAuthStateChanged,
     type User as FirebaseUser
 } from 'firebase/auth'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, type DocumentData, type UpdateData } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import type { User, UserRole } from '@/types'
 import { useHotelStore } from './hotelStore'
@@ -15,6 +15,7 @@ import { useShiftStore } from './shiftStore'
 import { useActivityStore } from './activityStore'
 import { cleanAuthError } from '@/lib/utils'
 import { useLanguageStore } from './languageStore'
+import { buildUserSettingsPatch } from '@/lib/workspace'
 
 interface AuthState {
     user: User | null
@@ -306,7 +307,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
                 return
             }
             const userRef = doc(db, 'users', user.uid)
-            await updateDoc(userRef, { settings: newSettings })
+            await updateDoc(userRef, buildUserSettingsPatch(settings) as UpdateData<DocumentData>)
 
             set({
                 user: {

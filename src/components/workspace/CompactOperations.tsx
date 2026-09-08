@@ -19,6 +19,8 @@ interface CompactOperationsProps {
     onOpenShiftModule: (id: string, add?: boolean) => void
 }
 
+const COMPACT_SHIFT_IDS = new Set([...DEFAULT_COMPACT_LAYOUT.left, ...DEFAULT_COMPACT_LAYOUT.right])
+
 export function CompactOperations({ activeModule, onModuleChange, onOpenShiftModule }: CompactOperationsProps) {
     const user = useAuthStore((state) => state.user)
     const hotel = useHotelStore((state) => state.hotel)
@@ -26,17 +28,20 @@ export function CompactOperations({ activeModule, onModuleChange, onOpenShiftMod
     const isMobile = useIsMobile()
     const [railCollapsed, setRailCollapsed] = useState(false)
     const [selectorOpen, setSelectorOpen] = useState(false)
-    const shiftIds = new Set([...DEFAULT_COMPACT_LAYOUT.left, ...DEFAULT_COMPACT_LAYOUT.right])
     const modules = useMemo(() => {
         const config = normalizeNavigationConfig(hotel?.settings.navigation)
         const allowed = new Map(resolveNavigation(user?.role, hotel?.settings.navigation).all.map((item) => [item.id, item]))
         const order = getConfiguredSections(config, user?.role).flatMap((section) => section.moduleIds)
-        return [findModule('overview')!, ...order.filter((id) => id !== 'overview' && !shiftIds.has(id)).map((id) => allowed.get(id as ModuleId)).filter(Boolean)]
+        return [findModule('overview')!, ...order.filter((id) => id !== 'overview' && !COMPACT_SHIFT_IDS.has(id)).map((id) => allowed.get(id as ModuleId)).filter(Boolean)]
     }, [hotel?.settings.navigation, user?.role])
     const permittedIds = new Set(modules.map((module) => module!.id))
     const selected = permittedIds.has(activeModule as ModuleId) ? activeModule as ModuleId : 'overview'
     const selectedDefinition = findModule(selected) || findModule('overview')!
-    const copy = language === 'tr' ? { choose: 'Operasyon modülü seç', selector: 'Operasyon araçları' } : language === 'ru' ? { choose: 'Выбрать модуль', selector: 'Инструменты операций' } : { choose: 'Choose operations module', selector: 'Operations tools' }
+    const copy = language === 'tr'
+        ? { choose: 'Operasyon modülü seç', selector: 'Operasyon araçları', expand: 'Operasyon menüsünü genişlet', collapse: 'Operasyon menüsünü daralt' }
+        : language === 'ru'
+            ? { choose: 'Выбрать модуль', selector: 'Инструменты операций', expand: 'Развернуть меню операций', collapse: 'Свернуть меню операций' }
+            : { choose: 'Choose operations module', selector: 'Operations tools', expand: 'Expand operations navigation', collapse: 'Collapse operations navigation' }
 
     const choose = (id: string) => { onModuleChange(id); setSelectorOpen(false) }
     const content = selected === 'overview'
@@ -46,7 +51,7 @@ export function CompactOperations({ activeModule, onModuleChange, onOpenShiftMod
     return (
         <div data-testid="compact-operations" className="flex h-full min-h-0">
             <aside className={cn('hidden shrink-0 border-r border-border bg-card/35 p-2 transition-[width] md:block', railCollapsed ? 'w-14' : 'w-56')}>
-                <button onClick={() => setRailCollapsed((value) => !value)} aria-label={railCollapsed ? 'Expand operations navigation' : 'Collapse operations navigation'} className="mb-2 grid h-9 w-full place-items-center rounded-lg text-muted-foreground hover:bg-muted">{railCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
+                <button onClick={() => setRailCollapsed((value) => !value)} aria-label={railCollapsed ? copy.expand : copy.collapse} className="mb-2 grid h-9 w-full place-items-center rounded-lg text-muted-foreground hover:bg-muted">{railCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
                 <div className="space-y-1">{modules.map((module) => { if (!module) return null; const Icon = module.icon; const label = getModuleLabel(module, language); return <button key={module.id} title={label} onClick={() => choose(module.id)} aria-current={selected === module.id ? 'page' : undefined} className={cn('flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:bg-muted', selected === module.id && 'bg-primary/10 text-primary', railCollapsed && 'justify-center px-0')}><Icon className="h-4 w-4 shrink-0" />{!railCollapsed && <span className="truncate">{label}</span>}</button> })}</div>
             </aside>
             <section className="min-w-0 flex-1 overflow-y-auto pb-28 md:pb-6">

@@ -28,10 +28,10 @@ export function NavigationEditor() {
         : { title: 'Navigation and quick actions', desc: 'Arrange hotel-wide desktop and mobile navigation.', base: 'Shared layout', reception: 'Reception', housekeeping: 'Housekeeping', primary: 'Show in sidebar', mobile: 'Mobile bottom bar', publish: 'Publish for everyone', conflict: 'Another administrator updated this layout. The current version was loaded.', quick: 'Quick action menu' }
 
     useEffect(() => {
-        if (draftVersion === undefined || (!editor.dirty && draftVersion !== incomingVersion)) {
-            editor.load(navigationConfig)
+        if (editor.loadedHotelId !== hotel?.id || draftVersion === undefined || (!editor.dirty && draftVersion !== incomingVersion)) {
+            editor.load(navigationConfig, hotel?.id)
         }
-    }, [draftVersion, editor.dirty, editor.load, incomingVersion, navigationConfig])
+    }, [draftVersion, editor.dirty, editor.load, editor.loadedHotelId, hotel?.id, incomingVersion, navigationConfig])
 
     if (!editor.draft || !hotel || !user) return null
     const role = editor.selectedRole === 'base' ? undefined : editor.selectedRole
@@ -43,7 +43,7 @@ export function NavigationEditor() {
         const result = await publishNavigation(hotel.id, editor.draft!, editor.draft!.version, { uid: user.uid, name: user.name })
         setPublishing(false)
         if (!result.ok) {
-            editor.load(result.current)
+            editor.load(result.current, hotel.id)
             toast.error(copy.conflict)
             return
         }

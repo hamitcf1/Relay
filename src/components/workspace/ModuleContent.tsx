@@ -10,6 +10,9 @@ import { CalendarWidget } from '@/components/calendar/CalendarWidget'
 import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
 import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
 import { useLanguageStore } from '@/stores/languageStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useHotelStore } from '@/stores/hotelStore'
+import { resolveNavigation } from '@/lib/navigation'
 
 const MessagingPanel = lazy(() => import('@/components/messaging/MessagingPanel').then((m) => ({ default: m.MessagingPanel })))
 const FeedbackSection = lazy(() => import('@/components/feedback/FeedbackSection').then((m) => ({ default: m.FeedbackSection })))
@@ -31,6 +34,12 @@ interface ModuleContentProps {
 
 export function ModuleContent({ moduleId, hotelId, canEdit, initialAddOpen }: ModuleContentProps) {
     const { t, language } = useLanguageStore()
+    const role = useAuthStore((state) => state.user?.role)
+    const navigation = useHotelStore((state) => state.hotel?.settings.navigation)
+    const permitted = resolveNavigation(role, navigation).all.some((module) => module.id === moduleId)
+    if (!permitted) {
+        return <div className="grid min-h-48 place-items-center rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">{language === 'tr' ? 'Bu modüle erişim izniniz yok.' : language === 'ru' ? 'У вас нет доступа к этому модулю.' : 'You do not have access to this module.'}</div>
+    }
     if (moduleId === 'notes') return <ShiftNotes hotelId={hotelId} initialAddOpen={initialAddOpen} />
     if (moduleId === 'roster') return <RosterMatrix hotelId={hotelId} canEdit={canEdit} />
     if (moduleId === 'hotel-info') return <HotelInfoPanel hotelId={hotelId} canEdit={canEdit} />

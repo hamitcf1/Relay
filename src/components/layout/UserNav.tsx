@@ -31,6 +31,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { cn } from '@/lib/utils'
+import { WorkspaceModeQuickToggle } from '@/components/workspace/WorkspaceModeQuickToggle'
 
 export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile-nav' }) {
     const { user, signOut } = useAuthStore()
@@ -43,7 +44,7 @@ export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <button aria-label={variant === 'mobile-nav' ? (language === 'tr' ? 'Profil' : language === 'ru' ? 'Профиль' : 'Profile') : undefined} className={cn("flex items-center gap-2 px-2 h-9 rounded-lg border border-border/50 bg-card/40 hover:bg-card/70 hover:border-border transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background", variant === 'mobile-nav' && 'h-16 w-full flex-col justify-center gap-1 border-0 bg-transparent p-0 text-muted-foreground')}>
+                    <button aria-label={variant === 'mobile-nav' || isMobile ? (language === 'tr' ? 'Profil' : language === 'ru' ? 'Профиль' : 'Profile') : undefined} className={cn("flex items-center gap-2 px-2 h-9 rounded-lg border border-border/50 bg-card/40 hover:bg-card/70 hover:border-border transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background", variant === 'mobile-nav' && 'h-16 w-full flex-col justify-center gap-1 border-0 bg-transparent p-0 text-muted-foreground')}>
                         <UserAvatar user={user} size="sm" className="shadow-none" />
                         {variant === 'mobile-nav' && <span className="text-[10px] font-medium">{language === 'tr' ? 'Profil' : language === 'ru' ? 'Профиль' : 'Profile'}</span>}
                         <div className={cn("hidden sm:flex flex-col items-start leading-tight", variant === 'mobile-nav' && 'hidden')}>
@@ -66,6 +67,8 @@ export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile
                     </DropdownMenuLabel>
 
                     <DropdownMenuSeparator className="bg-border my-1" />
+
+                    <WorkspaceModeQuickToggle />
 
                     {/* APPEARANCE */}
                     {isMobile ? (

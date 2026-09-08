@@ -27,6 +27,7 @@ import { useCurrencyStore } from '@/stores/currencyStore'
 import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { SaleType, Currency, SaleStatus } from '@/types'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 export function SalesPanel() {
     const { t } = useLanguageStore()
@@ -71,6 +72,7 @@ export function SalesPanel() {
 
     const [hotelInfo, setHotelInfo] = useState<any>(null)
     const [shouldAddToNotes, setShouldAddToNotes] = useState(true)
+    useWorkspaceDirty('sale', isAdding)
     const { addNote } = useNotesStore()
 
     useEffect(() => {

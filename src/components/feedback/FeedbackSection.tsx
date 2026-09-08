@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { formatDistanceToNow } from 'date-fns'
 import type { NoteStatus } from '@/types'
 import { cn } from '@/lib/utils'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 export function FeedbackSection() {
     const { user } = useAuthStore()
@@ -22,6 +23,7 @@ export function FeedbackSection() {
     const [content, setContent] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const [success, setSuccess] = useState(false)
+    useWorkspaceDirty('complaint', Boolean(content.trim()))
 
     const isGM = user?.role === 'gm'
 

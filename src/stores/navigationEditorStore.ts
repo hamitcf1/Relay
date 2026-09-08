@@ -7,9 +7,10 @@ type EditorRole = 'base' | 'receptionist' | 'housekeeping'
 
 interface NavigationEditorState {
     draft: HotelNavigationConfig | null
+    loadedHotelId?: string
     selectedRole: EditorRole
     dirty: boolean
-    load: (config?: HotelNavigationConfig) => void
+    load: (config?: HotelNavigationConfig, hotelId?: string) => void
     setRole: (role: EditorRole) => void
     renameSection: (sectionId: string, name: string) => void
     moveModule: (moduleId: string, targetSectionId: string, targetIndex: number) => void
@@ -23,9 +24,10 @@ interface NavigationEditorState {
 
 export const useNavigationEditorStore = create<NavigationEditorState>((set, get) => ({
     draft: null,
+    loadedHotelId: undefined,
     selectedRole: 'base',
     dirty: false,
-    load: (config) => set({ draft: normalizeNavigationConfig(config), dirty: false }),
+    load: (config, loadedHotelId) => set({ draft: normalizeNavigationConfig(config), loadedHotelId, dirty: false }),
     setRole: (selectedRole) => set({ selectedRole }),
     renameSection: (sectionId, name) => set((state) => state.draft ? {
         draft: { ...state.draft, sections: state.draft.sections.map((section) => section.id === sectionId ? { ...section, name } : section) },
