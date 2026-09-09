@@ -61,10 +61,9 @@ test.describe('Live Demo & Simulation', () => {
     await onboardingClose.click({ timeout: 15000 });
 
     await page.getByRole('button', { name: /Demo Manager/i }).click();
-    const appearanceItem = page.getByText(/Appearance|Görünüm/i).last();
-    await appearanceItem.hover();
+    await page.getByRole('menuitem', { name: /Appearance|Görünüm/i }).click();
 
-    const themeGroup = page.getByTestId('theme-options');
+    const themeGroup = page.getByRole('dialog', { name: /Appearance|Görünüm/i }).getByTestId('theme-options');
     await expect(themeGroup.getByRole('button')).toHaveCount(2);
     await expect(themeGroup).toContainText(/Light|Aydınlık/i);
     await expect(themeGroup).toContainText(/Dark|Karanlık/i);

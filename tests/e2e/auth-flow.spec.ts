@@ -25,6 +25,14 @@ test.describe('Authentication & Security', () => {
     // Type password
     const passwordInput = page.locator('#password');
     await expect(passwordInput).toBeVisible();
+    await expect(passwordInput).toHaveAttribute('placeholder', /Password|Şifre/i);
+    const placeholderStyle = await passwordInput.evaluate((element) => {
+      const style = getComputedStyle(element, '::placeholder');
+      return { color: style.color, textFillColor: style.getPropertyValue('-webkit-text-fill-color') };
+    });
+    expect(placeholderStyle.color).not.toBe('rgba(0, 0, 0, 0)');
+    expect(placeholderStyle.textFillColor).not.toBe('transparent');
+    expect(placeholderStyle.textFillColor).not.toBe('rgba(0, 0, 0, 0)');
     await passwordInput.fill('SecurePass123!');
     await expect(passwordInput).toHaveValue('SecurePass123!');
 

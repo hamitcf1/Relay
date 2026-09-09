@@ -20,8 +20,8 @@ test.describe('Compact workspace', () => {
     await enterManagerDemo(page)
 
     await page.getByRole('button', { name: /Demo Manager/i }).click()
-    await page.getByText(/Appearance|Görünüm/i).last().hover()
-    await page.getByRole('button', { name: /Compact|Kompakt/i }).click()
+    await page.getByRole('menuitem', { name: /Appearance|Görünüm/i }).click()
+    await page.getByRole('dialog', { name: /Appearance|Görünüm/i }).getByRole('button', { name: /Compact|Kompakt/i }).click()
 
     await expect(page.getByTestId('compact-workspace')).toBeVisible()
     await expect(page.getByTestId('compact-card-notes')).toBeVisible()
@@ -45,11 +45,12 @@ test.describe('Compact workspace', () => {
     await expect(page.getByTestId('compact-operations').getByRole('button', { name: /Ayarlar|Settings/i })).toHaveCount(0)
   })
 
-  test('switches workspace directly from the profile menu', async ({ page, isMobile }) => {
-    test.skip(Boolean(isMobile), 'Desktop profile shortcut is covered here')
+  test('switches workspace from the appearance dialog', async ({ page, isMobile }) => {
+    test.skip(Boolean(isMobile), 'Desktop appearance dialog is covered here')
     await enterManagerDemo(page)
     await page.getByRole('button', { name: /Demo Manager/i }).click()
-    await page.getByRole('menuitem', { name: /Kompakt görünüme geç|Switch to Compact/i }).click()
+    await page.getByRole('menuitem', { name: /Appearance|Görünüm/i }).click()
+    await page.getByRole('dialog', { name: /Appearance|Görünüm/i }).getByRole('button', { name: /Compact|Kompakt/i }).click()
     await expect(page.getByTestId('compact-workspace')).toBeVisible()
   })
 
@@ -145,8 +146,9 @@ test.describe('Compact workspace', () => {
     await draft.fill('Do not lose this handover draft')
 
     await page.getByTestId('compact-desktop-nav').getByRole('button', { name: /Demo M/i }).click()
-    await page.getByText(/Appearance|Görünüm/i).last().hover()
-    await page.getByRole('button', { name: /Modern/i }).click()
+    await page.getByRole('menuitem', { name: /Appearance|Görünüm/i }).click()
+    const appearance = page.getByRole('dialog', { name: /Appearance|Görünüm/i })
+    await appearance.getByRole('button', { name: /Modern/i }).click()
     const warning = page.getByRole('alertdialog')
     await expect(warning).toBeVisible()
     await warning.getByRole('button', { name: /Kal ve düzenlemeye devam et|Stay and continue editing/i }).click()
@@ -154,7 +156,7 @@ test.describe('Compact workspace', () => {
     await expect(page.getByTestId('compact-workspace')).toBeVisible()
     await expect(draft).toHaveValue('Do not lose this handover draft')
 
-    await page.getByRole('menuitem', { name: /Modern görünüme geç|Switch to Modern/i }).click()
+    await appearance.getByRole('button', { name: /Modern/i }).click()
     await page.getByRole('alertdialog').getByRole('button', { name: /Değişiklikleri sil ve geç|Discard changes and switch/i }).click()
     await expect(page.getByTestId('compact-workspace')).toHaveCount(0)
   })

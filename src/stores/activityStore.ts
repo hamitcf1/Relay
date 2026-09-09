@@ -16,7 +16,7 @@ export interface ActivityLogEntry {
     user_id: string
     user_name: string
     user_role: UserRole
-    action: ActivityAction
+    action: ActivityAction | string
     details?: string
     timestamp: Timestamp
 }

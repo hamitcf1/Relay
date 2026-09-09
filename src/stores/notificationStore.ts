@@ -16,6 +16,8 @@ import {
 import { db } from '@/lib/firebase'
 import type { Notification, NotificationType, UserRole } from '@/types'
 
+let demoAudience: { uid: string; role: UserRole } | null = null
+
 interface NotificationState {
     notifications: Notification[]
     unreadCount: number
@@ -65,6 +67,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
         // Mock Notifications for Live Demo
         if (hotelId === 'demo-hotel-id') {
+            demoAudience = { uid, role }
             const mockNotifications: Notification[] = [
                 {
                     id: 'note-1',
@@ -153,6 +156,17 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
     addNotification: async (hotelId, notification) => {
         try {
+            if (hotelId === 'demo-hotel-id') {
+                const appliesToCurrentUser = !notification.target_uid && !notification.target_role
+                    || notification.target_uid === demoAudience?.uid
+                    || notification.target_role === 'all'
+                    || notification.target_role === demoAudience?.role
+                if (!appliesToCurrentUser) return
+                const next: Notification = { ...notification, id: `demo-notification-${Date.now()}-${Math.random().toString(36).slice(2)}`, timestamp: new Date(), is_read: false }
+                const notifications = [next, ...get().notifications]
+                set({ notifications, unreadCount: notifications.filter(item => !item.is_read).length })
+                return
+            }
             const notificationsRef = collection(db, 'hotels', hotelId, 'notifications')
             await addDoc(notificationsRef, {
                 ...notification,
@@ -167,6 +181,11 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
     markAsRead: async (hotelId, notificationId) => {
         try {
+            if (hotelId === 'demo-hotel-id') {
+                const notifications = get().notifications.map(item => item.id === notificationId ? { ...item, is_read: true } : item)
+                set({ notifications, unreadCount: notifications.filter(item => !item.is_read).length })
+                return
+            }
             const docRef = doc(db, 'hotels', hotelId, 'notifications', notificationId)
             await updateDoc(docRef, { is_read: true })
         } catch (error: any) {
@@ -194,6 +213,11 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
     removeNotification: async (hotelId, notificationId) => {
         try {
+            if (hotelId === 'demo-hotel-id') {
+                const notifications = get().notifications.filter(item => item.id !== notificationId)
+                set({ notifications, unreadCount: notifications.filter(item => !item.is_read).length })
+                return
+            }
             const docRef = doc(db, 'hotels', hotelId, 'notifications', notificationId)
             await deleteDoc(docRef)
         } catch (error) {

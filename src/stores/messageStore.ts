@@ -32,7 +32,7 @@ interface MessageActions {
 
 type MessageStore = MessageState & MessageActions
 
-export const useMessageStore = create<MessageStore>((set) => ({
+export const useMessageStore = create<MessageStore>((set, get) => ({
     messages: [],
     loading: true,
     error: null,
@@ -64,6 +64,9 @@ export const useMessageStore = create<MessageStore>((set) => ({
                     sender_name: data.sender_name,
                     receiver_id: data.receiver_id,
                     content: data.content,
+                    title: data.title,
+                    recipient_ids: data.recipient_ids,
+                    recipient_names: data.recipient_names,
                     timestamp: (data.timestamp as Timestamp)?.toDate() || new Date(),
                     is_read: data.is_read || false
                 }
@@ -74,6 +77,7 @@ export const useMessageStore = create<MessageStore>((set) => ({
             const filtered = allMessages.filter(m =>
                 m.sender_id === userId ||
                 m.receiver_id === userId ||
+                (m.receiver_id === 'selected' && m.recipient_ids?.includes(userId)) ||
                 m.receiver_id === 'gm' ||
                 m.receiver_id === 'all'
             )
@@ -90,6 +94,11 @@ export const useMessageStore = create<MessageStore>((set) => ({
 
     sendMessage: async (hotelId, message) => {
         try {
+            if (hotelId === 'demo-hotel-id') {
+                const demoMessage: PrivateMessage = { ...message, id: `demo-message-${Date.now()}`, timestamp: new Date(), is_read: false }
+                set({ messages: [...get().messages, demoMessage] })
+                return
+            }
             const messagesRef = collection(db, 'hotels', hotelId, 'messages')
             await addDoc(messagesRef, {
                 ...message,
@@ -104,6 +113,10 @@ export const useMessageStore = create<MessageStore>((set) => ({
 
     markAsRead: async (hotelId, messageId) => {
         try {
+            if (hotelId === 'demo-hotel-id') {
+                set({ messages: get().messages.map(message => message.id === messageId ? { ...message, is_read: true } : message) })
+                return
+            }
             const docRef = doc(db, 'hotels', hotelId, 'messages', messageId)
             await updateDoc(docRef, { is_read: true })
         } catch (error: any) {
@@ -112,6 +125,10 @@ export const useMessageStore = create<MessageStore>((set) => ({
     },
     deleteMessage: async (hotelId, messageId) => {
         try {
+            if (hotelId === 'demo-hotel-id') {
+                set({ messages: get().messages.filter(message => message.id !== messageId) })
+                return
+            }
             const docRef = doc(db, 'hotels', hotelId, 'messages', messageId)
             await deleteDoc(docRef)
             toast.success('Message deleted')
@@ -123,6 +140,10 @@ export const useMessageStore = create<MessageStore>((set) => ({
 
     clearChat: async (hotelId, currentUserId, otherUserId) => {
         try {
+            if (hotelId === 'demo-hotel-id') {
+                set({ messages: get().messages.filter(message => !((message.sender_id === currentUserId && message.receiver_id === otherUserId) || (message.sender_id === otherUserId && message.receiver_id === currentUserId))) })
+                return
+            }
             const messagesRef = collection(db, 'hotels', hotelId, 'messages')
             const q = query(messagesRef, orderBy('timestamp', 'desc'), limit(500)) // Fetch enough to clear recent history
             const snapshot = await import('firebase/firestore').then(m => m.getDocs(q))
