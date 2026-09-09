@@ -192,6 +192,13 @@
     color: transparent !important;
   }
 
+  .hide-password-text::placeholder {
+    -webkit-text-fill-color: hsl(var(--muted-foreground)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+    text-shadow: none !important;
+    opacity: 1;
+  }
+
   .hide-password-text:-webkit-autofill,
   .hide-password-text:-webkit-autofill:hover,
   .hide-password-text:-webkit-autofill:focus,
