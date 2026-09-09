@@ -182,14 +182,17 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             set({ draft: { weekId, version: 0, cells: {}, updatedBy: '', updatedByName: '', updatedAt: new Date() } })
             return () => {}
         }
-        return onSnapshot(doc(db, 'hotels', hotelId, 'roster_drafts', weekId), (snapshot) => {
-            if (!snapshot.exists()) return set({ draft: { weekId, version: 0, cells: {}, updatedBy: '', updatedByName: '', updatedAt: new Date() } })
+        return onSnapshot(doc(db, 'hotels', hotelId, 'roster', weekId), (snapshot) => {
+            if (!snapshot.exists()) return set({ draft: { weekId, version: 0, cells: {}, updatedBy: '', updatedByName: '', updatedAt: new Date() }, error: null })
             const data = snapshot.data()
-            const cells = Object.fromEntries(Object.entries(data.cells || {}).map(([key, raw]) => {
+            const cells = Object.fromEntries(Object.entries(data.draftCells || {}).map(([key, raw]) => {
                 const cell = raw as any
                 return [key, { ...cell, updatedAt: cell.updatedAt instanceof Timestamp ? cell.updatedAt.toDate() : new Date() }]
             })) as Record<string, RosterDraftCell>
-            set({ draft: { weekId, version: data.version || 0, cells, updatedBy: data.updatedBy || '', updatedByName: data.updatedByName || '', updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date() }, draftConflict: null })
+            set({ draft: { weekId, version: data.draftVersion || 0, cells, updatedBy: data.draftUpdatedBy || '', updatedByName: data.draftUpdatedByName || '', updatedAt: data.draftUpdatedAt instanceof Timestamp ? data.draftUpdatedAt.toDate() : new Date() }, draftConflict: null, error: null })
+        }, (error) => {
+            console.error('Roster draft subscription error', error)
+            set({ draft: null, draftSaving: false, error: error.message })
         })
     },
 
@@ -206,14 +209,21 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
             return 'saved'
         }
         try {
-            const draftRef = doc(db, 'hotels', hotelId, 'roster_drafts', weekId)
+            const draftRef = doc(db, 'hotels', hotelId, 'roster', weekId)
             const result = await runTransaction(db, async (transaction) => {
                 const snapshot = await transaction.get(draftRef)
-                const data = snapshot.data() || { version: 0, cells: {} }
+                const data = snapshot.data() || { draftVersion: 0, draftCells: {} }
                 const key = `${edit.staffId}:${edit.day}`
-                const actual = data.cells?.[key]?.version || 0
+                const actual = data.draftCells?.[key]?.version || 0
                 if (actual !== edit.expectedCellVersion) return 'conflict' as const
-                transaction.set(draftRef, { weekId, version: (data.version || 0) + 1, cells: { ...(data.cells || {}), [key]: { value: edit.value, version: actual + 1, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: serverTimestamp() } }, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: serverTimestamp() })
+                transaction.set(draftRef, {
+                    week_start: weekId,
+                    draftVersion: (data.draftVersion || 0) + 1,
+                    draftCells: { ...(data.draftCells || {}), [key]: { value: edit.value, version: actual + 1, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: serverTimestamp() } },
+                    draftUpdatedBy: actor.uid,
+                    draftUpdatedByName: actor.name,
+                    draftUpdatedAt: serverTimestamp(),
+                }, { merge: true })
                 return 'saved' as const
             })
             set({ draftSaving: false, draftConflict: result === 'conflict' ? `${edit.staffId}:${edit.day}` : null })
@@ -225,19 +235,36 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
         const actor = useAuthStore.getState().user
         const current = get().draft
         if (!actor || !current || current.version !== expectedDraftVersion) return 'conflict'
-        const schedule: Record<string, Record<string, RosterShiftValue>> = {}
-        Object.entries(current.cells).forEach(([key, cell]) => { const split = key.lastIndexOf(':'); const uid = key.slice(0, split); const day = key.slice(split + 1); schedule[uid] ||= {}; schedule[uid][day] = cell.value })
         if (hotelId === 'demo-hotel-id') { set({ draft: { ...current, cells: {}, version: current.version + 1, updatedAt: new Date() } }); return 'published' }
         const result = await runTransaction(db, async (transaction) => {
-            const draftRef = doc(db, 'hotels', hotelId, 'roster_drafts', weekId)
             const rosterRef = doc(db, 'hotels', hotelId, 'roster', weekId)
-            const snapshot = await transaction.get(draftRef)
-            const rosterSnapshot = await transaction.get(rosterRef)
-            if ((snapshot.data()?.version || 0) !== expectedDraftVersion) return 'conflict' as const
-            const mergedSchedule = { ...(rosterSnapshot.data()?.schedule || {}) }
+            const snapshot = await transaction.get(rosterRef)
+            const data = snapshot.data() || {}
+            if ((data.draftVersion || 0) !== expectedDraftVersion) return 'conflict' as const
+            const schedule: Record<string, Record<string, RosterShiftValue>> = {}
+            Object.entries(data.draftCells || {}).forEach(([key, raw]) => {
+                const cell = raw as RosterDraftCell
+                const split = key.lastIndexOf(':')
+                const uid = key.slice(0, split)
+                const day = key.slice(split + 1)
+                schedule[uid] ||= {}
+                schedule[uid][day] = cell.value
+            })
+            const mergedSchedule = { ...(data.schedule || {}) }
             Object.entries(schedule).forEach(([uid, days]) => { mergedSchedule[uid] = { ...(mergedSchedule[uid] || {}), ...days } })
-            transaction.set(rosterRef, { week_start: weekId, version: expectedDraftVersion, schedule: mergedSchedule, publishedBy: actor.uid, publishedByName: actor.name, publishedAt: serverTimestamp() }, { merge: true })
-            transaction.set(draftRef, { ...snapshot.data(), version: expectedDraftVersion + 1, cells: {}, updatedBy: actor.uid, updatedByName: actor.name, updatedAt: serverTimestamp() })
+            transaction.set(rosterRef, {
+                week_start: weekId,
+                version: (data.version || 0) + 1,
+                schedule: mergedSchedule,
+                publishedBy: actor.uid,
+                publishedByName: actor.name,
+                publishedAt: serverTimestamp(),
+                draftVersion: expectedDraftVersion + 1,
+                draftCells: {},
+                draftUpdatedBy: actor.uid,
+                draftUpdatedByName: actor.name,
+                draftUpdatedAt: serverTimestamp(),
+            }, { merge: true })
             return 'published' as const
         })
         return result

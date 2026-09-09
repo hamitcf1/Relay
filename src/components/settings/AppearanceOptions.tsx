@@ -25,7 +25,7 @@ function Toggle({ label, value, onChange, description }: ToggleProps) {
         >
             <div className="min-w-0 pr-3">
                 <span className="text-sm font-medium text-foreground">{label}</span>
-                {description && <span className="text-xs text-muted-foreground mt-0.5">{description}</span>}
+                {description && <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>}
             </div>
             <div
                 className={cn(
@@ -107,7 +107,7 @@ export function AppearanceOptions() {
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
                     {t('appearance.accent.title')}
                 </label>
-                <div data-testid="accent-options" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div data-testid="accent-options" className="grid grid-cols-2 gap-2">
                     {ACCENT_COLORS.map((color) => (
                         <button
                             key={color.key}

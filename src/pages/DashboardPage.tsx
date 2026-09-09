@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Clock as ClockIcon, ChevronLeft, EyeOff, MoonStar, Search, SunMedium } from 'lucide-react'
+import { Clock as ClockIcon, EyeOff, MoonStar, Search, SunMedium } from 'lucide-react'
 
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { AnnouncementModal } from '@/components/messaging/AnnouncementModal'
@@ -389,17 +389,6 @@ export function DashboardPage() {
                     
                     {/* OVERVIEW VIEW */}
                     <TabsContent value="overview" className="m-0 border-none p-0 outline-none">
-                        {overviewTab !== 'grid' && (
-                            <div className="sticky top-0 z-30 mb-5 flex items-center gap-2 rounded-[1.1rem] border border-border/50 bg-background/[0.82] px-3 py-2 backdrop-blur-xl">
-                                <Button variant="ghost" size="icon" onClick={() => setOverviewTab('grid')} className="-ml-2">
-                                    <ChevronLeft className="w-5 h-5" />
-                                </Button>
-                                <span className="text-sm font-medium text-muted-foreground">
-                                    {language === 'tr' ? 'Operasyon özetine dön' : language === 'ru' ? 'Вернуться к операциям' : 'Back to operations'}
-                                </span>
-                            </div>
-                        )}
-
                         {overviewTab === 'grid' ? (
                             <OperationsOverview
                                 onOpenNotes={() => {
@@ -422,7 +411,7 @@ export function DashboardPage() {
                                 transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
                                 className="w-full"
                             >
-                                <ModulePageSurface wide>
+                                <ModulePageSurface wide data-testid="modern-module-surface" className="h-[calc(100dvh-7rem)] min-h-0 overflow-y-auto overscroll-contain">
                                     <ModuleContent moduleId={overviewTab as ModuleId} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} initialAddOpen={openNewNote} />
                                 </ModulePageSurface>
                             </motion.div>
@@ -433,18 +422,6 @@ export function DashboardPage() {
                         {/* OPERATIONS VIEW */}
                         <TabsContent value="operations" className="m-0 border-none p-0 outline-none">
                             <Tabs value={operationTab} onValueChange={setOperationTab}>
-                                {/* Mobile Header for Sub-pages */}
-                                {isMobile && operationTab !== 'grid' && operationTab !== 'messaging' && (
-                                    <div className="sticky top-0 z-30 mb-4 flex items-center gap-2 rounded-[1.1rem] border border-border/50 bg-background/[0.82] px-3 py-2 backdrop-blur-xl">
-                                        <Button variant="ghost" size="icon" onClick={() => setOperationTab('grid')} className="-ml-2">
-                                            <ChevronLeft className="w-5 h-5" />
-                                        </Button>
-                                        <span className="font-semibold text-lg capitalize">
-                                            {(t(`module.${operationTab}` as any) as string) || operationTab}
-                                        </span>
-                                    </div>
-                                )}
-
                                 <div>
                                     {isMobile && operationTab === 'grid' && (
                                         <OperationsGrid
@@ -466,7 +443,7 @@ export function DashboardPage() {
                                     )}
 
                                     {operationTab !== 'grid' && <div className="block">
-                                        <ModulePageSurface wide>
+                                        <ModulePageSurface wide data-testid="modern-module-surface" className="h-[calc(100dvh-7rem)] min-h-0 overflow-y-auto overscroll-contain">
                                             <ModuleContent moduleId={operationTab as ModuleId} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                         </ModulePageSurface>
                                         <ScrollToTopButton />

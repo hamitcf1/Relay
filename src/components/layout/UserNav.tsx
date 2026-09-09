@@ -31,7 +31,6 @@ import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { cn } from '@/lib/utils'
-import { WorkspaceModeQuickToggle } from '@/components/workspace/WorkspaceModeQuickToggle'
 
 export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile-nav' }) {
     const { user, signOut } = useAuthStore()
@@ -68,30 +67,14 @@ export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile
 
                     <DropdownMenuSeparator className="bg-border my-1" />
 
-                    <WorkspaceModeQuickToggle />
-
                     {/* APPEARANCE */}
-                    {isMobile ? (
-                        <DropdownMenuItem
-                            onSelect={(e) => { e.preventDefault(); setShowAppearanceDialog(true); }}
-                            className="gap-2 cursor-pointer text-sm"
-                        >
-                            <Palette className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
-                            <span>{t('common.appearance')}</span>
-                        </DropdownMenuItem>
-                    ) : (
-                        <DropdownMenuSub>
-                            <DropdownMenuSubTrigger className="gap-2 cursor-pointer text-sm">
-                                <Palette className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
-                                <span>{t('common.appearance')}</span>
-                            </DropdownMenuSubTrigger>
-                            <DropdownMenuPortal>
-                                <DropdownMenuSubContent className="max-h-[calc(100dvh-1rem)] w-[min(22rem,calc(100vw-1rem))] overflow-y-auto overscroll-contain border-border bg-card p-4">
-                                    <AppearanceOptions />
-                                </DropdownMenuSubContent>
-                            </DropdownMenuPortal>
-                        </DropdownMenuSub>
-                    )}
+                    <DropdownMenuItem
+                        onSelect={() => setShowAppearanceDialog(true)}
+                        className="gap-2 cursor-pointer text-sm"
+                    >
+                        <Palette className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                        <span>{t('common.appearance')}</span>
+                    </DropdownMenuItem>
 
                     {/* LANGUAGE */}
                     {isMobile ? (
@@ -133,16 +116,15 @@ export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile Modals */}
             <Dialog open={showAppearanceDialog} onOpenChange={setShowAppearanceDialog}>
-                <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-y-auto border-border bg-card sm:max-w-md">
+                <DialogContent className="flex max-h-[calc(100dvh-1rem)] flex-col overflow-hidden border-border bg-card p-0 sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('common.appearance')}</DialogTitle>
+                        <DialogTitle className="px-6 pt-6">{t('common.appearance')}</DialogTitle>
                         <DialogDescription className="sr-only">
                             Customize the application appearance and theme settings.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="py-4">
+                    <div className="min-h-0 overflow-y-auto overscroll-contain px-6 pb-6">
                         <AppearanceOptions />
                     </div>
                 </DialogContent>

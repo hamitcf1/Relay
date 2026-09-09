@@ -23,11 +23,12 @@ import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
+import { AnnouncementComposer } from './AnnouncementComposer'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
     const { hotel } = useHotelStore()
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat, deleteMessage } = useMessageStore()
     const { activeStaff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
@@ -35,6 +36,8 @@ export function MessagingPanel() {
     const [searchParams] = useSearchParams()
 
     const [activeConversation, setActiveConversation] = useState<string>('all') // 'all' or user uid
+    const [mobileConversationOpen, setMobileConversationOpen] = useState(false)
+    const [announcementOpen, setAnnouncementOpen] = useState(false)
     const [newMessage, setNewMessage] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
     useWorkspaceDirty('message', Boolean(newMessage.trim()))
@@ -47,6 +50,7 @@ export function MessagingPanel() {
         const chatParam = searchParams.get('chat')
         if (chatParam) {
             setActiveConversation(chatParam)
+            setMobileConversationOpen(true)
         }
     }, [searchParams])
 
@@ -110,7 +114,7 @@ export function MessagingPanel() {
     // Get active conversation messages
     const currentMessages = useMemo(() => {
         if (activeConversation === 'all') {
-            return messages.filter(m => m.receiver_id === 'all')
+            return messages.filter(m => m.receiver_id === 'all' || m.receiver_id === 'selected')
         }
         return messages.filter(m =>
             (m.sender_id === user?.uid && m.receiver_id === activeConversation) ||
@@ -174,15 +178,36 @@ export function MessagingPanel() {
         }
     }
 
+    const handleAnnouncement = async ({ title, content, recipientIds, recipientNames, audience }: { title: string; content: string; recipientIds: string[]; recipientNames: string[]; audience: 'all' | 'selected' }) => {
+        if (!hotel?.id || !user || user.role !== 'gm') return
+        await sendMessage(hotel.id, {
+            sender_id: user.uid,
+            sender_name: user.name,
+            receiver_id: audience,
+            title,
+            content,
+            recipient_ids: audience === 'selected' ? recipientIds : undefined,
+            recipient_names: audience === 'selected' ? recipientNames : undefined,
+        })
+        if (audience === 'all') {
+            await addNotification(hotel.id, { type: 'announcement', title, content, target_role: 'all', link: '/dashboard?chat=all' })
+        } else {
+            await Promise.all(recipientIds.map(target_uid => addNotification(hotel.id, { type: 'announcement', title, content, target_uid, link: '/dashboard?chat=all' })))
+        }
+    }
+
     return (
         <section className="mx-auto flex h-full min-h-0 w-full max-w-[92rem] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-sm md:flex-row">
             {/* Sidebar */}
             <div className={cn(
                 "min-h-0 w-full bg-muted/30 flex flex-col border-b border-border md:w-72 md:shrink-0 md:border-b-0 md:border-r",
-                activeConversation !== 'all' && activeConversation !== '' ? "hidden md:flex" : "flex"
+                mobileConversationOpen ? "hidden md:flex" : "flex"
             )}>
                 <div className="p-4 border-b border-border">
-                    <h3 className="font-bold text-foreground mb-4">{t('messages.title')}</h3>
+                    <div className="mb-4 flex items-center justify-between gap-2">
+                        <h3 className="font-bold text-foreground">{t('messages.title')}</h3>
+                        {user?.role === 'gm' && <Button size="sm" className="h-8 md:hidden" onClick={() => setAnnouncementOpen(true)}><Megaphone className="mr-1.5 h-3.5 w-3.5" />{language === 'tr' ? 'Duyuru oluştur' : language === 'ru' ? 'Создать' : 'Create announcement'}</Button>}
+                    </div>
                     <div className="relative max-w-8 focus-within:max-w-full transition-[max-width] ease-in-out duration-300 ml-auto group">
                         <Input
                             value={searchTerm}
@@ -197,7 +222,7 @@ export function MessagingPanel() {
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1 relative">
                     {/* General Channel */}
                     <button
-                        onClick={() => setActiveConversation('all')}
+                        onClick={() => { setActiveConversation('all'); setMobileConversationOpen(true) }}
                         className={cn(
                             "w-full flex items-center gap-3 p-2 rounded-lg transition-all",
                             activeConversation === 'all'
@@ -222,7 +247,7 @@ export function MessagingPanel() {
                         return (
                             <button
                                 key={s.uid}
-                                onClick={() => setActiveConversation(s.uid)}
+                                onClick={() => { setActiveConversation(s.uid); setMobileConversationOpen(true) }}
                                 className={cn(
                                     "w-full flex items-center gap-3 p-2 rounded-lg transition-all group",
                                     activeConversation === s.uid
@@ -256,7 +281,7 @@ export function MessagingPanel() {
             {/* Chat Area */}
             <div className={cn(
                 "min-h-0 min-w-0 flex-1 flex-col bg-background/50",
-                activeConversation === 'all' || activeConversation === '' ? "hidden md:flex" : "flex"
+                mobileConversationOpen ? "flex" : "hidden md:flex"
             )}>
                 {/* Header */}
                 <div className="h-14 border-b border-border flex items-center px-4 md:px-6 justify-between shrink-0">
@@ -265,7 +290,7 @@ export function MessagingPanel() {
                             variant="ghost"
                             size="icon"
                             className="md:hidden -ml-2 mr-1"
-                            onClick={() => setActiveConversation('all')}
+                            onClick={() => setMobileConversationOpen(false)}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left w-5 h-5"><path d="m15 18-6-6 6-6" /></svg>
                         </Button>
@@ -302,6 +327,10 @@ export function MessagingPanel() {
                         )}
                     </div>
 
+                    <div className="flex items-center gap-2">
+                    {activeConversation === 'all' && user?.role === 'gm' && (
+                        <Button size="sm" className="hidden md:inline-flex" onClick={() => setAnnouncementOpen(true)}><Megaphone className="mr-1.5 h-3.5 w-3.5" />{language === 'tr' ? 'Duyuru oluştur' : language === 'ru' ? 'Создать' : 'Create announcement'}</Button>
+                    )}
                     {activeConversation !== 'all' && (
                         <Button
                             variant="ghost"
@@ -323,6 +352,7 @@ export function MessagingPanel() {
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     )}
+                    </div>
                 </div>
 
                 {/* Messages */}
@@ -367,6 +397,14 @@ export function MessagingPanel() {
                                                 {activeConversation === 'all' && !isMe && (
                                                     <p className="text-[10px] font-bold text-primary mb-1">{msg.sender_name}</p>
                                                 )}
+                                                {activeConversation === 'all' && <div className="mb-2 flex flex-wrap items-center gap-2">
+                                                    {msg.title && <strong className="text-sm">{msg.title}</strong>}
+                                                    <span className={cn('rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide', isMe ? 'border-primary-foreground/30' : 'border-border bg-muted/60 text-muted-foreground')}>
+                                                        {msg.receiver_id === 'all'
+                                                            ? (language === 'tr' ? 'Tüm personel' : language === 'ru' ? 'Весь персонал' : 'All staff')
+                                                            : (language === 'tr' ? `${msg.recipient_ids?.length || 0} kişi` : language === 'ru' ? `${msg.recipient_ids?.length || 0} чел.` : `${msg.recipient_ids?.length || 0} ${(msg.recipient_ids?.length || 0) === 1 ? 'person' : 'people'}`)}
+                                                    </span>
+                                                </div>}
                                                 <TextFormatter text={msg.content} />
                                                 <div className={cn("text-[9px] mt-1 flex items-center justify-end gap-1 opacity-70", isMe ? "text-primary-foreground/80" : "text-muted-foreground")}>
                                                     {format(msg.timestamp, 'HH:mm')}
@@ -408,7 +446,7 @@ export function MessagingPanel() {
                     <ScrollToTopButton />
                 </div>
 
-                <div className="shrink-0 border-t border-border bg-muted/20 p-3 sm:p-4">
+                {activeConversation !== 'all' && <div className="shrink-0 border-t border-border bg-muted/20 p-3 sm:p-4">
                     <form onSubmit={handleSend} className="flex gap-3">
                         <Textarea
                             ref={messageInputRef}
@@ -443,8 +481,9 @@ export function MessagingPanel() {
                             <Send className="w-4 h-4" />
                         </Button>
                     </form>
-                </div>
+                </div>}
             </div>
+            <AnnouncementComposer open={announcementOpen} onOpenChange={setAnnouncementOpen} staff={activeStaff.filter(member => member.uid !== user?.uid)} onSend={handleAnnouncement} />
         </section>
     )
 }
