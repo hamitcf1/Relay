@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Loader2 } from 'lucide-react'
 import type { ModuleId } from '@/config/moduleRegistry'
 import { ShiftNotes } from '@/components/notes/ShiftNotes'
+import { PersonalNotes } from '@/components/notes/PersonalNotes'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
 import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
 import { CurrencyWidget } from '@/components/dashboard/CurrencyWidget'
@@ -41,6 +42,7 @@ export function ModuleContent({ moduleId, hotelId, canEdit, initialAddOpen }: Mo
         return <div className="grid min-h-48 place-items-center rounded-xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">{language === 'tr' ? 'Bu modüle erişim izniniz yok.' : language === 'ru' ? 'У вас нет доступа к этому модулю.' : 'You do not have access to this module.'}</div>
     }
     if (moduleId === 'notes') return <ShiftNotes hotelId={hotelId} initialAddOpen={initialAddOpen} />
+    if (moduleId === 'personal-notes') return <PersonalNotes hotelId={hotelId} />
     if (moduleId === 'roster') return <RosterMatrix hotelId={hotelId} canEdit={canEdit} />
     if (moduleId === 'hotel-info') return <HotelInfoPanel hotelId={hotelId} canEdit={canEdit} />
     if (moduleId === 'currency') return <CurrencyWidget />

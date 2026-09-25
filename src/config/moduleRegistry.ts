@@ -1,12 +1,12 @@
 import type { LucideIcon } from 'lucide-react'
 import {
     Activity, ArrowLeftRight, CalendarDays, CircleDollarSign, CreditCard,
-    Info, KeyRound, LayoutDashboard, Map, MessageCircle, Settings,
+    Info, KeyRound, LayoutDashboard, Map, MessageCircle, NotebookPen, Settings,
     ShieldAlert, ShieldCheck, Utensils, UserX, Users, DollarSign,
 } from 'lucide-react'
 
 export type ModuleId =
-    | 'overview' | 'notes' | 'roster' | 'messaging' | 'compliance' | 'feedback'
+    | 'overview' | 'notes' | 'personal-notes' | 'roster' | 'messaging' | 'compliance' | 'feedback'
     | 'hotel-info' | 'currency' | 'calendar' | 'menu' | 'blacklist'
     | 'cards-loans' | 'pricing' | 'tours' | 'off-days' | 'sales'
     | 'team' | 'activity' | 'settings'
@@ -29,6 +29,7 @@ export interface ModuleDefinition {
 export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
     { id: 'overview', icon: LayoutDashboard, group: 'today', labels: { tr: 'Operasyon özeti', en: 'Operations overview', ru: 'Сводка операций' }, area: 'overview', primary: true },
     { id: 'notes', icon: ArrowLeftRight, group: 'today', labels: { tr: 'Vardiya devri', en: 'Shift handover', ru: 'Передача смены' }, area: 'overview', subTab: 'notes', primary: true },
+    { id: 'personal-notes', icon: NotebookPen, group: 'today', labels: { tr: 'Kişisel notlar', en: 'Personal notes', ru: 'Личные заметки' }, area: 'overview', subTab: 'personal-notes', primary: true },
     { id: 'roster', icon: CalendarDays, group: 'today', labels: { tr: 'Haftalık vardiya', en: 'Weekly roster', ru: 'График на неделю' }, area: 'overview', subTab: 'roster', primary: true },
     { id: 'messaging', icon: MessageCircle, group: 'operations', labelKey: 'module.messaging', labels: { tr: 'Mesajlar', en: 'Messages', ru: 'Сообщения' }, area: 'operations', subTab: 'messaging', primary: true },
     { id: 'compliance', icon: ShieldCheck, group: 'operations', labelKey: 'module.compliance', labels: { tr: 'Uyumluluk', en: 'Compliance', ru: 'Соответствие' }, area: 'operations', subTab: 'compliance' },
@@ -48,4 +49,4 @@ export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
     { id: 'settings', icon: Settings, group: 'management', labelKey: 'module.setting', labels: { tr: 'Ayarlar', en: 'Settings', ru: 'Настройки' }, area: 'operations', subTab: 'settings', roles: ['gm'] },
 ] as const
 
-export const DEFAULT_PRIMARY_IDS: ModuleId[] = ['overview', 'notes', 'roster', 'messaging']
+export const DEFAULT_PRIMARY_IDS: ModuleId[] = ['overview', 'notes', 'personal-notes', 'roster', 'messaging']

@@ -1,5 +1,5 @@
 import { DEFAULT_PRIMARY_IDS, MODULE_REGISTRY, type ModuleDefinition, type ModuleGroup, type ModuleId } from '@/config/moduleRegistry'
-import type { HotelNavigationConfig } from '@/types'
+import type { HotelNavigationConfig, UserSettings } from '@/types'
 import { normalizeNavigationConfig } from '@/lib/navigationDefaults'
 
 export interface ResolvedNavigation {
@@ -31,7 +31,7 @@ export function resolveNavigation(role?: string, publishedConfig?: HotelNavigati
     const effectiveSections = getConfiguredSections(config, role)
     const configuredOrder = effectiveSections.flatMap((section) => section.moduleIds)
     const primaryIds = publishedConfig
-        ? configuredOrder.filter((id) => config.primaryModuleIds.includes(id))
+        ? ['personal-notes', ...configuredOrder.filter((id) => config.primaryModuleIds.includes(id) && id !== 'personal-notes')]
         : DEFAULT_PRIMARY_IDS
     const primary = primaryIds
         .map((id) => all.find((item) => item.id === id))
@@ -56,4 +56,28 @@ export function findModule(id: ModuleId) {
 
 export function getModuleLabel(item: ModuleDefinition, language: 'tr' | 'en' | 'ru') {
     return item.labels[language]
+}
+
+export type SidebarPreferences = NonNullable<UserSettings['sidebar_preferences']>
+
+/** Personal ordering can rearrange visible modules, but never grants access to hidden modules. */
+export function resolvePersonalNavigation(role?: string, publishedConfig?: HotelNavigationConfig, preferences?: SidebarPreferences): ResolvedNavigation {
+    const base = resolveNavigation(role, publishedConfig)
+    if (!preferences) return base
+    const allowed = new Map(base.all.map(item => [item.id, item]))
+    const baseline = [...base.primary, ...base.sections.flatMap(section => section.items)]
+    const orderedIds = [...new Set([...preferences.module_order, ...baseline.map(item => item.id)])].filter(id => allowed.has(id as ModuleId))
+    const favorites = new Set(preferences.favorite_ids.filter(id => allowed.has(id as ModuleId)))
+    const primary = orderedIds.filter(id => favorites.has(id)).map(id => allowed.get(id as ModuleId)!)
+    const sections = getConfiguredSections(normalizeNavigationConfig(publishedConfig), role).map(section => ({
+        id: section.id,
+        name: section.name,
+        items: orderedIds.filter(id => !favorites.has(id) && (preferences.section_by_module[id] || sectionForModule(id, publishedConfig, role)) === section.id)
+            .map(id => allowed.get(id as ModuleId)!),
+    })).filter(section => section.items.length)
+    return { ...base, primary, sections }
+}
+
+function sectionForModule(id: string, config?: HotelNavigationConfig, role?: string) {
+    return getConfiguredSections(normalizeNavigationConfig(config), role).find(section => section.moduleIds.includes(id))?.id || 'tools'
 }

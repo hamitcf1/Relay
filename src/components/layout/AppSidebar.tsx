@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Check, ChevronDown, ChevronLeft, Globe, LogOut, Palette, Sparkles } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, Globe, LogOut, Palette, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -17,8 +17,9 @@ import {
 import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { RelayMark } from '@/components/brand/RelayBrand'
-import { getModuleLabel, resolveNavigation } from '@/lib/navigation'
+import { getModuleLabel, resolvePersonalNavigation } from '@/lib/navigation'
 import type { ModuleDefinition } from '@/config/moduleRegistry'
+import { PersonalSidebarEditor } from './PersonalSidebarEditor'
 
 interface AppSidebarProps {
     activeTab: string
@@ -31,10 +32,11 @@ interface AppSidebarProps {
 export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, userRole }: AppSidebarProps) {
     const { t, language, setLanguage } = useLanguageStore()
     const { user, signOut } = useAuthStore()
+    const [personalizeOpen, setPersonalizeOpen] = useState(false)
     const { sidebarCollapsed, toggleSidebar } = useLayoutStore()
     const toggleChat = useChatStore((state) => state.toggleOpen)
     const navigationConfig = useHotelStore((state) => state.hotel?.settings.navigation)
-    const navigation = resolveNavigation(userRole, navigationConfig)
+    const navigation = resolvePersonalNavigation(userRole, navigationConfig, user?.settings?.sidebar_preferences)
     const labels = language === 'tr'
         ? { primary: 'Çalışma alanı', all: 'Tüm araçlar', assistant: 'AI Asistan' }
         : language === 'ru'
@@ -59,7 +61,10 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
                 </div>
 
                 <nav className="custom-scrollbar flex flex-1 flex-col overflow-y-auto px-3 py-4" aria-label="Primary navigation">
-                    {!sidebarCollapsed && <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground">{labels.primary}</p>}
+                    <div className="mb-2 flex items-center justify-between gap-1">
+                        {!sidebarCollapsed && <p className="px-3 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground">{labels.primary}</p>}
+                        <button type="button" onClick={() => setPersonalizeOpen(true)} title={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} aria-label={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-primary"><SlidersHorizontal className="h-4 w-4" /></button>
+                    </div>
                     <div className="space-y-1">
                         {navigation.primary.map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language)} active={isActive(item)} collapsed={sidebarCollapsed} onClick={() => navigate(item)} />)}
                     </div>
@@ -88,6 +93,7 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
 
                 <div className="border-t border-border p-3"><UserMenu collapsed={sidebarCollapsed} user={user} t={t} language={language} setLanguage={setLanguage} signOut={signOut} /></div>
             </motion.aside>
+            <PersonalSidebarEditor open={personalizeOpen} onOpenChange={setPersonalizeOpen} />
         </TooltipProvider>
     )
 }

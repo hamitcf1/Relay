@@ -3,12 +3,12 @@ import { DEFAULT_COMPACT_LAYOUT, normalizeCompactLayout } from '@/lib/workspace'
 
 export const DEFAULT_NAVIGATION_CONFIG: HotelNavigationConfig = {
     version: 1,
-    primaryModuleIds: ['overview', 'notes', 'roster', 'messaging'],
-    mobileModuleIds: ['overview', 'notes', 'roster'],
+    primaryModuleIds: ['overview', 'notes', 'personal-notes', 'roster', 'messaging'],
+    mobileModuleIds: ['overview', 'notes', 'personal-notes', 'roster'],
     quickActionIds: ['notes', 'feedback', 'sales', 'messaging', 'calendar'],
     compactLayout: DEFAULT_COMPACT_LAYOUT,
     sections: [
-        { id: 'today', name: 'Bugün', moduleIds: ['overview', 'notes', 'roster', 'messaging'] },
+        { id: 'today', name: 'Bugün', moduleIds: ['overview', 'notes', 'personal-notes', 'roster', 'messaging'] },
         { id: 'operations', name: 'Operasyon', moduleIds: ['compliance', 'feedback', 'sales', 'tours', 'cards-loans'] },
         { id: 'tools', name: 'Araçlar', moduleIds: ['hotel-info', 'currency', 'calendar', 'menu', 'blacklist'] },
         { id: 'management', name: 'Yönetim', moduleIds: ['pricing', 'off-days', 'team', 'activity', 'settings'] },
