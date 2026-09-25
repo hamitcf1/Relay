@@ -660,7 +660,9 @@ export type Translations = {
     'announcement.recallNoticeBy': string
     'announcement.recallAck': string
     'announcement.retractionBody': string
-    'announcement.toldRetraction': string
+    'announcement.retractionTold': string
+    'announcement.retractionOutstanding': string
+    'announcement.retractionExpired': string
     'announcement.readReceipts': string
 
     // Status/Filter

@@ -1284,7 +1284,9 @@ const en: Translations = {
         'announcement.recallNoticeBy': '{name} отозвал это объявление. Полученная вами информация больше не действует.',
         'announcement.recallAck': 'Понятно',
         'announcement.retractionBody': '{name} отозвал это объявление. Полученная вами информация больше не действует, пожалуйста, не применяйте её.',
-        'announcement.toldRetraction': 'Уведомление об отзыве: подтвердили {count}/{total}',
+        'announcement.retractionTold': 'Уведомление об отзыве получили все, кто прочитал объявление.',
+        'announcement.retractionOutstanding': 'Уведомление об отзыве ещё не получили {count} чел. Напоминания идут 3 дня.',
+        'announcement.retractionExpired': 'Уведомление об отзыве не получили {count} чел., напоминания прекратились. Сообщите им сами.',
         'announcement.readReceipts': 'Отметки о прочтении',
         'common.clear': 'Clear Chat',
 
