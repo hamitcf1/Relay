@@ -34,7 +34,8 @@ export function normalizeNavigationConfig(config?: HotelNavigationConfig): Hotel
         ...config,
         sections,
         primaryModuleIds: config.primaryModuleIds.filter((id) => knownIds.has(id)).slice(0, 6),
-        mobileModuleIds: config.mobileModuleIds.filter((id) => knownIds.has(id)).slice(0, 3),
+        // The mobile bottom bar renders four module slots around the quick action button.
+        mobileModuleIds: config.mobileModuleIds.filter((id) => knownIds.has(id)).slice(0, 4),
         compactLayout: normalizeCompactLayout(config.compactLayout),
     }
 }

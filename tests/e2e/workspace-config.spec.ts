@@ -5,7 +5,7 @@ import { useNavigationEditorStore } from '../../src/stores/navigationEditorStore
 test.describe('Compact workspace configuration', () => {
   test('fills a missing compact layout with the supported default modules', () => {
     expect(normalizeCompactLayout(undefined)).toEqual({
-      left: ['notes', 'roster', 'blacklist'],
+      left: ['notes', 'personal-notes', 'roster', 'blacklist'],
       right: ['hotel-info', 'currency', 'menu', 'calendar'],
     })
   })
@@ -21,7 +21,7 @@ test.describe('Compact workspace configuration', () => {
       left: ['calendar', 'notes', 'notes', 'unknown'],
       right: ['hotel-info'],
     })).toEqual({
-      left: ['calendar', 'notes', 'roster', 'blacklist'],
+      left: ['calendar', 'notes', 'personal-notes', 'roster', 'blacklist'],
       right: ['hotel-info', 'currency', 'menu'],
     })
   })

@@ -20,6 +20,8 @@ export interface ModuleDefinition {
     group: ModuleGroup
     labelKey?: string
     labels: { tr: string; en: string; ru: string }
+    /** Compact label for narrow surfaces such as the mobile bottom bar. */
+    shortLabels?: { tr: string; en: string; ru: string }
     area: DashboardArea
     subTab?: string
     roles?: string[]
@@ -27,10 +29,10 @@ export interface ModuleDefinition {
 }
 
 export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
-    { id: 'overview', icon: LayoutDashboard, group: 'today', labels: { tr: 'Operasyon özeti', en: 'Operations overview', ru: 'Сводка операций' }, area: 'overview', primary: true },
-    { id: 'notes', icon: ArrowLeftRight, group: 'today', labels: { tr: 'Vardiya devri', en: 'Shift handover', ru: 'Передача смены' }, area: 'overview', subTab: 'notes', primary: true },
-    { id: 'personal-notes', icon: NotebookPen, group: 'today', labels: { tr: 'Kişisel notlar', en: 'Personal notes', ru: 'Личные заметки' }, area: 'overview', subTab: 'personal-notes', primary: true },
-    { id: 'roster', icon: CalendarDays, group: 'today', labels: { tr: 'Haftalık vardiya', en: 'Weekly roster', ru: 'График на неделю' }, area: 'overview', subTab: 'roster', primary: true },
+    { id: 'overview', icon: LayoutDashboard, group: 'today', labels: { tr: 'Operasyon özeti', en: 'Operations overview', ru: 'Сводка операций' }, shortLabels: { tr: 'Özet', en: 'Home', ru: 'Обзор' }, area: 'overview', primary: true },
+    { id: 'notes', icon: ArrowLeftRight, group: 'today', labels: { tr: 'Vardiya devri', en: 'Shift handover', ru: 'Передача смены' }, shortLabels: { tr: 'Devir', en: 'Handover', ru: 'Смена' }, area: 'overview', subTab: 'notes', primary: true },
+    { id: 'personal-notes', icon: NotebookPen, group: 'today', labels: { tr: 'Kişisel notlar', en: 'Personal notes', ru: 'Личные заметки' }, shortLabels: { tr: 'Notlar', en: 'Notes', ru: 'Заметки' }, area: 'overview', subTab: 'personal-notes', primary: true },
+    { id: 'roster', icon: CalendarDays, group: 'today', labels: { tr: 'Haftalık vardiya', en: 'Weekly roster', ru: 'График на неделю' }, shortLabels: { tr: 'Vardiya', en: 'Roster', ru: 'График' }, area: 'overview', subTab: 'roster', primary: true },
     { id: 'messaging', icon: MessageCircle, group: 'operations', labelKey: 'module.messaging', labels: { tr: 'Mesajlar', en: 'Messages', ru: 'Сообщения' }, area: 'operations', subTab: 'messaging', primary: true },
     { id: 'compliance', icon: ShieldCheck, group: 'operations', labelKey: 'module.compliance', labels: { tr: 'Uyumluluk', en: 'Compliance', ru: 'Соответствие' }, area: 'operations', subTab: 'compliance' },
     { id: 'feedback', icon: ShieldAlert, group: 'operations', labelKey: 'module.complaints', labels: { tr: 'Şikâyetler', en: 'Complaints', ru: 'Жалобы' }, area: 'operations', subTab: 'feedback' },

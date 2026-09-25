@@ -710,6 +710,59 @@ export type Translations = {
     'tours.book.totalPrice': string
     'tours.book.confirm': string
 
+    // Personal Notes
+    'personalNotes.title': string
+    'personalNotes.desc': string
+    'personalNotes.add': string
+    'personalNotes.create': string
+    'personalNotes.edit': string
+    'personalNotes.form.title': string
+    'personalNotes.form.body': string
+    'personalNotes.form.tags': string
+    'personalNotes.form.tagsHint': string
+    'personalNotes.share': string
+    'personalNotes.shareHint': string
+    'personalNotes.ownBadge': string
+    'personalNotes.sharedBadge': string
+    'personalNotes.preview': string
+    'personalNotes.unitWords': string
+    'personalNotes.unitChars': string
+    'personalNotes.noBody': string
+    'personalNotes.clickToEdit': string
+    'personalNotes.updated': string
+    'personalNotes.created': string
+    'personalNotes.empty': string
+    'personalNotes.createFirst': string
+    'personalNotes.viewActive': string
+    'personalNotes.viewShared': string
+    'personalNotes.viewArchived': string
+    'personalNotes.viewTrash': string
+    'personalNotes.search': string
+    'personalNotes.searchPlaceholder': string
+    'personalNotes.allTags': string
+    'personalNotes.copyBody': string
+    'personalNotes.copied': string
+    'personalNotes.copyFailed': string
+    'personalNotes.archive': string
+    'personalNotes.unarchive': string
+    'personalNotes.moveToTrash': string
+    'personalNotes.restore': string
+    'personalNotes.purge': string
+    'personalNotes.unsaved': string
+    'personalNotes.allSaved': string
+    'personalNotes.saving': string
+    'personalNotes.saved': string
+    'personalNotes.saveFailed': string
+    'personalNotes.createFailed': string
+    'personalNotes.updateFailed': string
+    'personalNotes.deleteFailed': string
+    'personalNotes.loadFailed': string
+    'personalNotes.sharedLoadFailed': string
+    'personalNotes.demoBlocked': string
+    'personalNotes.leaveConfirm': string
+    'personalNotes.purgeConfirm': string
+    'personalNotes.untitled': string
+
     // Sales
     'sales.tracker': string
     'sales.new': string
