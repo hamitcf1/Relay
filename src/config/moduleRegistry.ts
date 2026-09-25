@@ -14,6 +14,9 @@ export type ModuleId =
 export type ModuleGroup = 'today' | 'operations' | 'tools' | 'management'
 export type DashboardArea = 'overview' | 'operations'
 
+/** Sidebar section order. Section membership is derived from each module's `group`, not from a layout. */
+export const MODULE_GROUPS: readonly ModuleGroup[] = ['today', 'operations', 'tools', 'management']
+
 export interface ModuleDefinition {
     id: ModuleId
     icon: LucideIcon
@@ -52,3 +55,8 @@ export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
 ] as const
 
 export const DEFAULT_PRIMARY_IDS: ModuleId[] = ['overview', 'notes', 'personal-notes', 'roster', 'messaging']
+
+/** The mobile bottom bar renders four module slots around the quick action button. */
+export const MOBILE_SLOT_COUNT = 4
+
+export const DEFAULT_MOBILE_IDS: ModuleId[] = ['overview', 'notes', 'personal-notes', 'roster']

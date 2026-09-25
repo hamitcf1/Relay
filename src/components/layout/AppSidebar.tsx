@@ -66,12 +66,12 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
                         <button type="button" onClick={() => setPersonalizeOpen(true)} title={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} aria-label={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-primary"><SlidersHorizontal className="h-4 w-4" /></button>
                     </div>
                     <div className="space-y-1">
-                        {navigation.primary.map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language)} active={isActive(item)} collapsed={sidebarCollapsed} onClick={() => navigate(item)} />)}
+                        {navigation.primary.map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language, navigationConfig)} active={isActive(item)} collapsed={sidebarCollapsed} onClick={() => navigate(item)} />)}
                     </div>
 
-                    <div className="my-4 border-t border-border" />
+                    {navigation.primary.length > 0 && <div className="my-4 border-t border-border" />}
                     {sidebarCollapsed ? (
-                        navigation.sections.flatMap((section) => section.items).map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language)} active={isActive(item)} collapsed onClick={() => navigate(item)} />)
+                        navigation.sections.flatMap((section) => section.items).map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language, navigationConfig)} active={isActive(item)} collapsed onClick={() => navigate(item)} />)
                     ) : (
                         <details open className="group">
                             <summary className="flex cursor-pointer list-none items-center justify-between rounded-md px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted">
@@ -81,7 +81,7 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
                                 {navigation.sections.map((section) => (
                                     <section key={section.id}>
                                         <p className="mb-1 px-3 text-[10px] font-medium text-muted-foreground/75">{section.name || section.id}</p>
-                                        <div className="space-y-1">{section.items.map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language)} active={isActive(item)} collapsed={false} onClick={() => navigate(item)} />)}</div>
+                                        <div className="space-y-1">{section.items.map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language, navigationConfig)} active={isActive(item)} collapsed={false} onClick={() => navigate(item)} />)}</div>
                                     </section>
                                 ))}
                             </div>

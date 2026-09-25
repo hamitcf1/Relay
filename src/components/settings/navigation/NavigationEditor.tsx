@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react'
-import { ChevronDown, ChevronUp, Eye, EyeOff, GripVertical, Monitor, Save, Smartphone } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Eye, EyeOff, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useNavigationEditorStore } from '@/stores/navigationEditorStore'
-import { findModule, getConfiguredSections, getModuleLabel } from '@/lib/navigation'
-import type { ModuleId } from '@/config/moduleRegistry'
+import { getModuleLabel } from '@/lib/navigation'
+import { MODULE_GROUPS, MODULE_REGISTRY } from '@/config/moduleRegistry'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { NavigationPreview } from './NavigationPreview'
 import { cn } from '@/lib/utils'
 import { DEFAULT_NAVIGATION_CONFIG } from '@/lib/navigationDefaults'
@@ -24,10 +25,34 @@ export function NavigationEditor() {
     const incomingVersion = navigationConfig?.version ?? DEFAULT_NAVIGATION_CONFIG.version
     const [publishing, setPublishing] = useState(false)
     const copy = language === 'tr'
-        ? { title: 'Navigasyon ve hızlı işlemler', desc: 'Otel genelindeki masaüstü ve mobil menüleri düzenleyin.', base: 'Ortak düzen', reception: 'Resepsiyon', housekeeping: 'Kat hizmetleri', primary: 'Yan menüde göster', mobile: 'Mobil alt çubuk', publish: 'Herkes için yayınla', published: 'Navigasyon yayınlandı', conflict: 'Düzen başka bir yönetici tarafından güncellendi. Güncel sürüm yüklendi.', error: 'Navigasyon yayınlanamadı. Tekrar deneyin.', quick: 'Hızlı işlem menüsü' }
+        ? {
+            title: 'Sekme adları ve erişim', desc: 'Herkes kendi sırasını ve yerleşimini kendi belirler. Yönetici olarak sadece adları, bölüm başlıklarını ve kimin hangi sekmeyi görebileceğini ayarlarsınız.',
+            names: 'Sekme adları', namesHint: 'Sekmeyi yan panelde ve mobil alt çubukta bu adla gösterin. Kısa ad boşsa tam ad kullanılır.',
+            registry: 'Varsayılan ad', custom: 'Görünen ad', short: 'Kısa ad', reset: 'Varsayılana dön',
+            sections: 'Bölüm başlıkları', visibility: 'Rol bazlı görünürlük', visibilityHint: 'Gizlenen sekmeler o rol için hiçbir yerde görünmez.',
+            quick: 'Hızlı işlem menüsü', publish: 'Herkes için yayınla', published: 'Yayınlandı',
+            conflict: 'Düzen başka bir yönetici tarafından güncellendi. Güncel sürüm yüklendi.', error: 'Yayınlanamadı. Tekrar deneyin.',
+            dirty: 'Yayınlanmamış değişiklikler var', clean: 'Yayınlanan düzen güncel', personal: 'Kişisel düzen',
+        }
         : language === 'ru'
-            ? { title: 'Навигация и быстрые действия', desc: 'Настройте меню отеля для компьютера и мобильных устройств.', base: 'Общий макет', reception: 'Ресепшен', housekeeping: 'Хаускипинг', primary: 'Показывать в боковом меню', mobile: 'Нижняя панель', publish: 'Опубликовать для всех', published: 'Навигация опубликована', conflict: 'Другой администратор обновил макет. Загружена актуальная версия.', error: 'Не удалось опубликовать навигацию. Повторите попытку.', quick: 'Меню быстрых действий' }
-            : { title: 'Navigation and quick actions', desc: 'Arrange hotel-wide desktop and mobile navigation.', base: 'Shared layout', reception: 'Reception', housekeeping: 'Housekeeping', primary: 'Show in sidebar', mobile: 'Mobile bottom bar', publish: 'Publish for everyone', published: 'Navigation published', conflict: 'Another administrator updated this layout. The current version was loaded.', error: 'Could not publish navigation. Try again.', quick: 'Quick action menu' }
+            ? {
+                title: 'Названия вкладок и доступ', desc: 'Порядок и размещение каждый выбирает сам. Администратор задаёт только названия, заголовки разделов и права ролей.',
+                names: 'Названия вкладок', namesHint: 'Показывать вкладку с этим названием в боковом меню и на нижней панели. Короткое название используется, если полное слишком длинное.',
+                registry: 'Название по умолчанию', custom: 'Отображаемое', short: 'Короткое', reset: 'Сбросить',
+                sections: 'Заголовки разделов', visibility: 'Видимость по ролям', visibilityHint: 'Скрытые вкладки недоступны этой роли.',
+                quick: 'Меню быстрых действий', publish: 'Опубликовать для всех', published: 'Опубликовано',
+                conflict: 'Другой администратор обновил макет. Загружена актуальная версия.', error: 'Не удалось опубликовать. Повторите попытку.',
+                dirty: 'Есть неопубликованные изменения', clean: 'Опубликованный макет актуален', personal: 'Личный макет',
+            }
+            : {
+                title: 'Tab names and access', desc: 'Everyone arranges their own sidebar. As an admin you set names, section headings and which roles can open which tab.',
+                names: 'Tab names', namesHint: 'Show the tab under this name in the sidebar and mobile bar. The short name is used when the full one is too long.',
+                registry: 'Default name', custom: 'Shown as', short: 'Short', reset: 'Reset',
+                sections: 'Section headings', visibility: 'Role visibility', visibilityHint: 'Hidden tabs are unavailable to that role everywhere.',
+                quick: 'Quick action menu', publish: 'Publish for everyone', published: 'Published',
+                conflict: 'Another administrator updated this layout. The current version was loaded.', error: 'Could not publish. Try again.',
+                dirty: 'Unpublished changes', clean: 'Published layout is current', personal: 'Personal layout',
+            }
 
     useEffect(() => {
         if (editor.loadedHotelId !== hotel?.id || draftVersion === undefined || (!editor.dirty && draftVersion !== incomingVersion)) {
@@ -35,15 +60,19 @@ export function NavigationEditor() {
         }
     }, [draftVersion, editor.dirty, editor.load, editor.loadedHotelId, hotel?.id, incomingVersion, navigationConfig])
 
+    const hidden = useMemo(
+        () => new Set(editor.selectedRole === 'base' ? [] : editor.draft?.roleOverlays?.[editor.selectedRole]?.hiddenModuleIds || []),
+        [editor.draft, editor.selectedRole],
+    )
+
     if (!editor.draft || !hotel || !user) return null
+    const draft = editor.draft
     const role = editor.selectedRole === 'base' ? undefined : editor.selectedRole
-    const hidden = new Set(role ? editor.draft.roleOverlays?.[role]?.hiddenModuleIds || [] : [])
-    const displayedSections = getConfiguredSections(editor.draft, role)
 
     const publish = async () => {
         setPublishing(true)
         try {
-            const result = await publishNavigation(hotel.id, editor.draft!, editor.draft!.version, { uid: user.uid, name: user.name })
+            const result = await publishNavigation(hotel.id, draft, draft.version, { uid: user.uid, name: user.name })
             if (!result.ok) {
                 editor.load(result.current, hotel.id)
                 toast.error(copy.conflict)
@@ -60,51 +89,160 @@ export function NavigationEditor() {
 
     return (
         <div className="space-y-6" data-testid="navigation-editor">
-            <div><h2 className="text-xl font-semibold">{copy.title}</h2><p className="mt-1 text-sm text-muted-foreground">{copy.desc}</p></div>
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Navigation role">
-                {([['base', copy.base], ['receptionist', copy.reception], ['housekeeping', copy.housekeeping]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={editor.selectedRole === id} onClick={() => editor.setRole(id)} className={cn('rounded-lg border px-3 py-2 text-sm', editor.selectedRole === id ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card')}>{label}</button>)}
+            <div>
+                <h2 className="text-xl font-semibold">{copy.title}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{copy.desc}</p>
             </div>
 
-            <NavigationPreview config={editor.draft} role={role} />
+            <section className="rounded-xl border border-border bg-card p-4">
+                <h3 className="text-sm font-semibold">{copy.names}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{copy.namesHint}</p>
+                <div className="mt-3 grid gap-2">
+                    {MODULE_GROUPS.map((group) => {
+                        const section = draft.sections.find((item) => item.id === group)
+                        const modules = MODULE_REGISTRY.filter((item) => item.group === group)
+                        if (!modules.length) return null
+                        return (
+                            <div key={group} className="rounded-lg border border-border/70 p-2">
+                                <p className="px-1 pb-2 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                                    {section?.name || group}
+                                </p>
+                                <div className="space-y-1.5">
+                                    {modules.map((item) => {
+                                        const Icon = item.icon
+                                        const custom = draft.customLabels?.[item.id]
+                                        const fullValue = custom?.[language] || ''
+                                        const shortValue = custom?.short?.[language] || ''
+                                        const renamed = Boolean(fullValue.trim() || shortValue.trim())
+                                        return (
+                                            <div key={item.id} className="flex flex-wrap items-center gap-2">
+                                                <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                <span className="w-40 shrink-0 truncate text-xs text-muted-foreground" title={item.labels[language]}>{item.labels[language]}</span>
+                                                <Input
+                                                    value={fullValue}
+                                                    onChange={(event) => editor.setModuleLabel(item.id, language, event.target.value)}
+                                                    placeholder={item.labels[language]}
+                                                    aria-label={`${item.labels[language]} ${copy.custom}`}
+                                                    className="h-8 min-w-32 flex-1 text-xs"
+                                                />
+                                                <Input
+                                                    value={shortValue}
+                                                    onChange={(event) => editor.setModuleLabel(item.id, language, event.target.value, 'short')}
+                                                    placeholder={item.shortLabels?.[language] || item.labels[language]}
+                                                    aria-label={`${item.labels[language]} ${copy.short}`}
+                                                    className="h-8 w-28 shrink-0 text-xs"
+                                                />
+                                                {renamed && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            editor.setModuleLabel(item.id, language, '')
+                                                            editor.setModuleLabel(item.id, language, '', 'short')
+                                                        }}
+                                                        className="shrink-0 text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                                                    >
+                                                        {copy.reset}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </section>
 
-            <div className="grid gap-4 xl:grid-cols-2">
-                {displayedSections.map((section) => (
-                    <section key={section.id} className="rounded-xl border border-border bg-card p-4" onDragOver={(event) => event.preventDefault()} onDrop={(event) => editor.moveModule(event.dataTransfer.getData('text/module-id'), section.id, section.moduleIds.length)}>
-                        <input aria-label="Section name" value={section.name} disabled={editor.selectedRole !== 'base'} onChange={(event) => editor.renameSection(section.id, event.target.value)} className="mb-3 w-full border-b border-border bg-transparent pb-2 text-sm font-semibold outline-none focus:border-primary disabled:opacity-70" />
-                        <div className="space-y-2">
-                            {section.moduleIds.map((id, index) => {
-                                const item = findModule(id as ModuleId)
-                                if (!item) return null
-                                const visible = !hidden.has(id)
-                                return (
-                                    <div key={id} draggable onDragStart={(event) => event.dataTransfer.setData('text/module-id', id)} onDrop={(event) => { event.stopPropagation(); editor.moveModule(event.dataTransfer.getData('text/module-id'), section.id, index) }} className="flex items-center gap-2 rounded-lg border border-border/70 bg-background p-2">
-                                        <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" />
-                                        <span className="min-w-0 flex-1 truncate text-sm">{getModuleLabel(item, language)}</span>
-                                        <button aria-label="Move up" disabled={index === 0} onClick={() => editor.moveModule(id, section.id, index - 1)} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted disabled:opacity-25"><ChevronUp className="h-3.5 w-3.5" /></button>
-                                        <button aria-label="Move down" disabled={index === section.moduleIds.length - 1} onClick={() => editor.moveModule(id, section.id, index + 1)} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted disabled:opacity-25"><ChevronDown className="h-3.5 w-3.5" /></button>
-                                        {editor.selectedRole !== 'base' && <button onClick={() => editor.toggleRoleVisibility(id)} aria-label={visible ? 'Hide' : 'Show'} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted">{visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}</button>}
-                                        {editor.selectedRole === 'base' && <>
-                                            <button title={copy.primary} aria-pressed={editor.draft!.primaryModuleIds.includes(id)} onClick={() => editor.togglePrimary(id)} className={cn('grid h-8 w-8 place-items-center rounded-md', editor.draft!.primaryModuleIds.includes(id) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted')}><Monitor className="h-4 w-4" /></button>
-                                            <button title={copy.mobile} aria-pressed={editor.draft!.mobileModuleIds.includes(id)} onClick={() => editor.toggleMobile(id)} className={cn('grid h-8 w-8 place-items-center rounded-md', editor.draft!.mobileModuleIds.includes(id) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted')}><Smartphone className="h-4 w-4" /></button>
-                                        </>}
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </section>
-                ))}
-            </div>
+            <section className="rounded-xl border border-border bg-card p-4">
+                <h3 className="text-sm font-semibold">{copy.sections}</h3>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                    {draft.sections.map((section) => (
+                        <label key={section.id} className="block">
+                            <span className="mb-1 block text-[10px] font-medium text-muted-foreground">{section.id}</span>
+                            <Input
+                                aria-label="Section name"
+                                value={section.name}
+                                disabled={editor.selectedRole !== 'base'}
+                                onChange={(event) => editor.renameSection(section.id, event.target.value)}
+                                className="h-9 text-sm"
+                            />
+                        </label>
+                    ))}
+                </div>
+            </section>
 
-            {editor.selectedRole === 'base' && <CompactLayoutEditor layout={editor.draft.compactLayout} language={language} onMove={editor.moveCompactModule} />}
+            <section className="rounded-xl border border-border bg-card p-4">
+                <h3 className="text-sm font-semibold">{copy.visibility}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{copy.visibilityHint}</p>
+                <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Navigation role">
+                    {([['base', language === 'tr' ? 'Ortak düzen' : language === 'ru' ? 'Общий макет' : 'Shared layout'],
+                        ['receptionist', language === 'tr' ? 'Resepsiyon' : language === 'ru' ? 'Ресепшен' : 'Reception'],
+                        ['housekeeping', language === 'tr' ? 'Kat hizmetleri' : language === 'ru' ? 'Хаускипинг' : 'Housekeeping']] as const).map(([id, label]) => (
+                        <button
+                            key={id}
+                            role="tab"
+                            aria-selected={editor.selectedRole === id}
+                            onClick={() => editor.setRole(id)}
+                            className={cn('rounded-lg border px-3 py-2 text-sm', editor.selectedRole === id ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-background')}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                <div className="mt-3 grid gap-1.5">
+                    {MODULE_REGISTRY.map((item) => {
+                        const Icon = item.icon
+                        const visible = !hidden.has(item.id)
+                        const configurable = editor.selectedRole !== 'base' && (!item.roles || item.roles.includes(editor.selectedRole))
+                        return (
+                            <div key={item.id} className="flex items-center gap-2 rounded-lg border border-border/70 bg-background p-2">
+                                <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                <span className="min-w-0 flex-1 truncate text-sm">{getModuleLabel(item, language, draft)}</span>
+                                {configurable && (
+                                    <button
+                                        onClick={() => editor.toggleRoleVisibility(item.id)}
+                                        aria-label={visible ? `Hide ${item.labels[language]}` : `Show ${item.labels[language]}`}
+                                        aria-pressed={!visible}
+                                        className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-md', visible ? 'text-muted-foreground hover:bg-muted' : 'bg-primary/10 text-primary')}
+                                    >
+                                        {visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                    </button>
+                                )}
+                            </div>
+                        )
+                    })}
+                </div>
+            </section>
+
+            <NavigationPreview config={draft} role={role} />
+
+            <CompactLayoutEditor layout={draft.compactLayout} language={language} onMove={editor.moveCompactModule} />
 
             <section className="rounded-xl border border-border bg-card p-4">
                 <h3 className="mb-3 text-sm font-semibold">{copy.quick}</h3>
-                <div className="flex flex-wrap gap-2">{['notes', 'feedback', 'sales', 'messaging', 'calendar'].map((id) => <button key={id} aria-pressed={editor.draft!.quickActionIds.includes(id)} onClick={() => editor.toggleQuickAction(id)} className={cn('rounded-lg border px-3 py-2 text-sm', editor.draft!.quickActionIds.includes(id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground')}>{getModuleLabel(findModule(id as ModuleId)!, language)}</button>)}</div>
+                <div className="flex flex-wrap gap-2">
+                    {MODULE_REGISTRY.map((item) => (
+                        <button
+                            key={item.id}
+                            aria-pressed={draft.quickActionIds.includes(item.id)}
+                            onClick={() => editor.toggleQuickAction(item.id)}
+                            className={cn('rounded-lg border px-3 py-2 text-sm', draft.quickActionIds.includes(item.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground')}
+                        >
+                            {getModuleLabel(item, language, draft)}
+                        </button>
+                    ))}
+                </div>
             </section>
 
-            <div className="sticky bottom-3 flex items-center justify-between rounded-xl border border-border bg-background/95 p-3 shadow-xl backdrop-blur">
-                <p className="text-xs text-muted-foreground">{editor.dirty ? (language === 'tr' ? 'Yayınlanmamış değişiklikler var' : 'Unpublished changes') : (language === 'tr' ? 'Yayınlanan düzen güncel' : 'Published layout is current')}</p>
-                <Button onClick={publish} disabled={!editor.dirty || publishing} className="gap-2"><Save className="h-4 w-4" />{copy.publish}</Button>
+            <div className="sticky bottom-3 flex items-center justify-between gap-3 rounded-xl border border-border bg-background/95 p-3 shadow-xl backdrop-blur">
+                <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">{editor.dirty ? copy.dirty : copy.clean}</p>
+                    <p className="truncate text-[11px] text-muted-foreground/75">{copy.personal}: {copy.visibility}</p>
+                </div>
+                <Button onClick={publish} disabled={!editor.dirty || publishing} className="shrink-0 gap-2">
+                    <Save className="h-4 w-4" />{copy.publish}
+                </Button>
             </div>
         </div>
     )
