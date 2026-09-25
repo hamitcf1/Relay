@@ -239,6 +239,29 @@ service cloud.firestore {
         allow delete: if isGM();
       }
 
+      // ANNOUNCEMENTS - one record per management announcement.
+      // Read state lives on a per-person receipt rather than on the announcement itself,
+      // because a shared is_read flag would mark the whole hotel as read after one open.
+      match /announcements/{announcementId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+
+        allow create: if isGM() && belongsToHotel(hotelId) &&
+          request.resource.data.createdBy == request.auth.uid;
+        // Withdrawing and restoring an announcement are the only permitted edits.
+        allow update: if isGM() && belongsToHotel(hotelId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['recalledAt', 'recalledByName']);
+        allow delete: if isGM() && belongsToHotel(hotelId);
+
+        match /receipts/{uid} {
+          // A person may read their own receipt; only GMs may read the whole audience.
+          allow read: if isAuthenticated() && belongsToHotel(hotelId) &&
+            (uid == request.auth.uid || isGM());
+          allow write: if isAuthenticated() && belongsToHotel(hotelId) &&
+            uid == request.auth.uid &&
+            request.resource.data.keys().hasOnly(['uid', 'state', 'seenAt', 'dismissedAt']);
+        }
+      }
+
       // ANONYMOUS_FEEDBACK
       match /anonymous_feedback/{feedbackId} {
         allow read: if isGM() && belongsToHotel(hotelId);

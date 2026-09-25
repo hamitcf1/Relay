@@ -7,6 +7,7 @@ import { useRosterStore } from '@/stores/rosterStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useNotificationStore } from '@/stores/notificationStore'
+import { useAnnouncementStore } from '@/stores/announcementStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,6 +25,7 @@ import { useConfirm } from '@/components/ui/confirm-dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 import { AnnouncementComposer } from './AnnouncementComposer'
+import { AnnouncementFeed } from './AnnouncementFeed'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
@@ -32,6 +34,7 @@ export function MessagingPanel() {
     const { messages, subscribeToMessages, sendMessage, markAsRead, clearChat, deleteMessage } = useMessageStore()
     const { activeStaff, subscribeToRoster } = useRosterStore()
     const { addNotification } = useNotificationStore()
+    const { publishAnnouncement } = useAnnouncementStore()
     const confirm = useConfirm()
     const [searchParams] = useSearchParams()
 
@@ -111,11 +114,10 @@ export function MessagingPanel() {
         })
     }, [filteredStaff, getUnreadCount])
 
-    // Get active conversation messages
+    // Get active conversation messages. The 'all' channel is not message backed; it renders
+    // announcements from their own store so a withdrawn one leaves the history too.
     const currentMessages = useMemo(() => {
-        if (activeConversation === 'all') {
-            return messages.filter(m => m.receiver_id === 'all' || m.receiver_id === 'selected')
-        }
+        if (activeConversation === 'all') return []
         return messages.filter(m =>
             (m.sender_id === user?.uid && m.receiver_id === activeConversation) ||
             (m.sender_id === activeConversation && m.receiver_id === user?.uid)
@@ -148,6 +150,18 @@ export function MessagingPanel() {
         setNewMessage('') // Optimistic clear
 
         try {
+            if (isAnnouncement) {
+                // Typing straight into the announcements channel is still a publish action, so it
+                // goes through the same record as the composer and gets the same receipts.
+                await publishAnnouncement(hotel.id, {
+                    content,
+                    audience: 'all',
+                    createdBy: user.uid,
+                    createdByName: user.name,
+                })
+                return
+            }
+
             await sendMessage(hotel.id, {
                 sender_id: user.uid,
                 sender_name: user.name,
@@ -155,24 +169,13 @@ export function MessagingPanel() {
                 content: content
             })
 
-            // Notifications logic
-            if (activeConversation === 'all') {
-                await addNotification(hotel.id, {
-                    type: 'announcement',
-                    title: `📢 ${user.name}`,
-                    content: content,
-                    target_role: 'all',
-                    link: '/operations?chat=all'
-                })
-            } else {
-                await addNotification(hotel.id, {
-                    type: 'message',
-                    title: `Message from ${user.name}`,
-                    content: content,
-                    target_uid: activeConversation,
-                    link: `/operations?chat=${user.uid}`
-                })
-            }
+            await addNotification(hotel.id, {
+                type: 'message',
+                title: `Message from ${user.name}`,
+                content: content,
+                target_uid: activeConversation,
+                link: `/operations?chat=${user.uid}`
+            })
         } catch (error) {
             console.error("Failed to send", error)
         }
@@ -180,20 +183,15 @@ export function MessagingPanel() {
 
     const handleAnnouncement = async ({ title, content, recipientIds, recipientNames, audience }: { title: string; content: string; recipientIds: string[]; recipientNames: string[]; audience: 'all' | 'selected' }) => {
         if (!hotel?.id || !user || user.role !== 'gm') return
-        await sendMessage(hotel.id, {
-            sender_id: user.uid,
-            sender_name: user.name,
-            receiver_id: audience,
+        await publishAnnouncement(hotel.id, {
             title,
             content,
-            recipient_ids: audience === 'selected' ? recipientIds : undefined,
-            recipient_names: audience === 'selected' ? recipientNames : undefined,
+            audience,
+            recipientIds: audience === 'selected' ? recipientIds : undefined,
+            recipientNames: audience === 'selected' ? recipientNames : undefined,
+            createdBy: user.uid,
+            createdByName: user.name,
         })
-        if (audience === 'all') {
-            await addNotification(hotel.id, { type: 'announcement', title, content, target_role: 'all', link: '/dashboard?chat=all' })
-        } else {
-            await Promise.all(recipientIds.map(target_uid => addNotification(hotel.id, { type: 'announcement', title, content, target_uid, link: '/dashboard?chat=all' })))
-        }
     }
 
     return (
@@ -357,7 +355,9 @@ export function MessagingPanel() {
 
                 {/* Messages */}
                 <div className="relative flex-1 space-y-5 overflow-y-auto overscroll-contain p-3 sm:p-5" ref={scrollRef}>
-                    {groupedMessages.length === 0 ? (
+                    {activeConversation === 'all' ? (
+                        <AnnouncementFeed />
+                    ) : groupedMessages.length === 0 ? (
                         <EmptyState icon={MessageSquare} title={t('messaging.noMessages')} />
                     ) : (
                         groupedMessages.map((group, i) => (
@@ -394,17 +394,6 @@ export function MessagingPanel() {
                                                 "group/msg relative min-w-0 break-words rounded-2xl p-3 text-sm leading-relaxed [overflow-wrap:anywhere]",
                                                 isMe ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-card border border-border text-foreground rounded-tl-sm"
                                             )}>
-                                                {activeConversation === 'all' && !isMe && (
-                                                    <p className="text-[10px] font-bold text-primary mb-1">{msg.sender_name}</p>
-                                                )}
-                                                {activeConversation === 'all' && <div className="mb-2 flex flex-wrap items-center gap-2">
-                                                    {msg.title && <strong className="text-sm">{msg.title}</strong>}
-                                                    <span className={cn('rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide', isMe ? 'border-primary-foreground/30' : 'border-border bg-muted/60 text-muted-foreground')}>
-                                                        {msg.receiver_id === 'all'
-                                                            ? (language === 'tr' ? 'Tüm personel' : language === 'ru' ? 'Весь персонал' : 'All staff')
-                                                            : (language === 'tr' ? `${msg.recipient_ids?.length || 0} kişi` : language === 'ru' ? `${msg.recipient_ids?.length || 0} чел.` : `${msg.recipient_ids?.length || 0} ${(msg.recipient_ids?.length || 0) === 1 ? 'person' : 'people'}`)}
-                                                    </span>
-                                                </div>}
                                                 <TextFormatter text={msg.content} />
                                                 <div className={cn("text-[9px] mt-1 flex items-center justify-end gap-1 opacity-70", isMe ? "text-primary-foreground/80" : "text-muted-foreground")}>
                                                     {format(msg.timestamp, 'HH:mm')}

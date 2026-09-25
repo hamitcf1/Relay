@@ -642,6 +642,22 @@ export type Translations = {
     // Announcement
     'announcement.title': string
     'announcement.deleteConfirm': string
+    'announcement.withdraw': string
+    'announcement.withdrawConfirm': string
+    'announcement.withdrawn': string
+    'announcement.withdrawnBy': string
+    'announcement.restore': string
+    'announcement.purge': string
+    'announcement.purgeConfirm': string
+    'announcement.insights': string
+    'announcement.sentBy': string
+    'announcement.notSeenYet': string
+    'announcement.seen': string
+    'announcement.dismissed': string
+    'announcement.everyone': string
+    'announcement.selectedCount': string
+    'announcement.recallNotice': string
+    'announcement.readReceipts': string
 
     // Status/Filter
     'status.all': string

@@ -1,10 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
+import { enterDemo } from './helpers'
 
 async function enterManagerDemo(page: Page) {
-  await page.goto('/live-demo')
-  await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click()
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 })
-  await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 })
+  await enterDemo(page, 'Manager')
 }
 
 test.describe('Operations UX fixes', () => {
@@ -79,7 +77,9 @@ test.describe('Operations UX fixes', () => {
     await dialog.getByRole('button', { name: /Duyuruyu gönder|Send announcement/i }).click()
 
     await expect(dialog).toBeHidden()
-    await expect(page.getByText(/1 kişi|1 person/i)).toBeVisible()
+    // Scoped to the new row: the demo channel already holds a targeted announcement.
+    const published = page.getByTestId('announcement-feed-row').filter({ hasText: 'Gece vardiyası bilgisi' })
+    await expect(published.getByText(/1 kişi|1 person/i)).toBeVisible()
     await expect(page.getByTestId('modern-module-surface').getByText('Gece vardiyası bilgisi')).toBeVisible()
   })
 
