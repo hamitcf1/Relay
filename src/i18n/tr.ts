@@ -617,7 +617,7 @@ const tr: Translations = {
         'announcement.title': 'Önemli Duyuru',
         'announcement.deleteConfirm': 'Bu duyuruyu silmek istediğinize emin misiniz?',
         'announcement.withdraw': 'Yayından geri çek',
-        'announcement.withdrawConfirm': 'Bu duyuru herkesin ekranından kaldırılsın mı? Duyuruyu daha önce görenlere bilgi gösterilir ve istediğiniz an geri alabilirsiniz.',
+        'announcement.withdrawConfirm': 'Bu duyuru herkesin ekranından kaldırılsın mı? Duyuruyu daha önce görenlere geri alındığı bildirilecek ve onaylayana kadar hatırlatılacak. Henüz açmamış olanlar hiçbir şey görmeyecek.',
         'announcement.withdrawn': 'Geri alındı',
         'announcement.withdrawnBy': '{name} tarafından geri alındı',
         'announcement.restore': 'Yeniden yayınla',
@@ -631,6 +631,10 @@ const tr: Translations = {
         'announcement.everyone': 'Herkes',
         'announcement.selectedCount': '{count} kişi',
         'announcement.recallNotice': 'Bu duyuru yönetim tarafından geri alındı.',
+        'announcement.recallNoticeBy': '{name} bu duyuruyu geri aldı. Daha önce aldığınız bilgi artık geçerli değil.',
+        'announcement.recallAck': 'Anladım',
+        'announcement.retractionBody': '{name} bu duyuruyu geri aldı. Daha önce aldığınız bilgi artık geçerli değil, lütfen eskisi gibi uygulamayın.',
+        'announcement.toldRetraction': 'Geri alma bildirimi: {count}/{total} onaylandı',
         'announcement.readReceipts': 'Okunma kayıtları',
 
         // Roster

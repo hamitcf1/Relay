@@ -258,7 +258,7 @@ service cloud.firestore {
             (uid == request.auth.uid || isGM());
           allow write: if isAuthenticated() && belongsToHotel(hotelId) &&
             uid == request.auth.uid &&
-            request.resource.data.keys().hasOnly(['uid', 'state', 'seenAt', 'dismissedAt']);
+            request.resource.data.keys().hasOnly(['uid', 'state', 'seenAt', 'dismissedAt', 'recalledAckAt']);
         }
       }
 

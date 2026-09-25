@@ -134,12 +134,99 @@ test.describe('a reader is recorded as having seen and closed an announcement', 
       await (window as any).useAnnouncementStore.getState().recallAnnouncement('demo-hotel-id', 'demo-ann-2', 'Demo Manager')
     })
 
-    const notice = page.getByTestId('announcement-retracted')
-    await expect(notice).toBeVisible()
-    await expect(notice).toContainText(/yönetim tarafından geri alındı|withdrawn by management/i)
+    // A withdrawal is told as a correction, not as content: repeating the original text would
+    // invite the reader to act on the copy that is no longer valid.
+    const modal = page.getByTestId('announcement-modal')
+    await expect(modal).toBeVisible()
+    await expect(modal).toHaveAttribute('data-retraction', 'true')
+    await expect(modal).toContainText(/artık geçerli değil|no longer applies/i)
+    await expect(modal).not.toContainText('Lütfen odaya girmeden önce hazırlayın')
 
-    // It also leaves the channel, so the retraction is not contradicted by the history.
+    // The reader can tell which announcement is being corrected, so the notice is not just an
+    // unexplained retraction of something they half remember.
+    const notice = page.getByTestId('announcement-retracted')
+    await expect(notice).toContainText('Oda 214 hakkında')
+  })
+
+  test('stops reminding once the reader acknowledges the withdrawal', async ({ page }) => {
+    await enterDemo(page, 'Receptionist')
+    await page.evaluate(async () => {
+      await (window as any).useAnnouncementStore.getState().recallAnnouncement('demo-hotel-id', 'demo-ann-2', 'Demo Manager')
+    })
+
+    const modal = page.getByTestId('announcement-modal')
+    await expect(modal).toBeVisible()
+    await modal.getByRole('button', { name: /Anladım|Understood/i }).click()
+    await expect(modal).toBeHidden()
+    await expect(page.getByTestId('announcement-retracted')).toHaveCount(0)
+
+    // Acknowledging is recorded without disturbing when the announcement was originally read.
+    const receipt = await page.evaluate(() => {
+      const store = (window as any).useAnnouncementStore.getState()
+      return store.receipts['demo-ann-2'] || null
+    })
+    expect(receipt?.state).toBe('dismissed')
+    expect(receipt?.recalledAckAt).toBeTruthy()
+
+    // And a reload does not put it back in front of them.
+    await page.reload()
+    await expect(page.getByTestId('announcement-modal')).toBeHidden()
+    await expect(page.getByTestId('announcement-retracted')).toHaveCount(0)
+  })
+
+  test('a reader the announcement was not addressed to is told nothing about it', async ({ page }) => {
+    await enterDemo(page, 'Receptionist')
+
+    // A withdrawal must not leak to people the announcement was never addressed to, and must not
+    // tell them they read it. A reader can only end up with no receipt by being left out, because
+    // anything shown to them is recorded as read the moment it renders.
+    const id = await page.evaluate(async () => {
+      const store = (window as any).useAnnouncementStore.getState()
+      await store.publishAnnouncement('demo-hotel-id', {
+        title: 'Sadece Resepsiyona',
+        content: 'Bu duyuru yalnızca gece vardiyası ekibine gider.',
+        audience: 'selected',
+        recipientIds: ['demo-user-other'],
+        recipientNames: ['Someone Else'],
+        createdBy: 'demo-user-gm',
+        createdByName: 'Demo Manager',
+      })
+      const created = (window as any).useAnnouncementStore.getState().announcements
+      return created.find((item: any) => item.title === 'Sadece Resepsiyona')?.id || null
+    })
+    expect(id).not.toBeNull()
+
+    await page.evaluate(async (target: string) => {
+      await (window as any).useAnnouncementStore.getState().recallAnnouncement('demo-hotel-id', target, 'Demo Manager')
+    }, id)
+
+    await expect(page.getByTestId('announcement-modal')).toBeHidden()
+    await expect(page.getByTestId('announcement-retracted')).toHaveCount(0)
+  })
+
+  test('shows a manager how far the withdrawal notice has got', async ({ page }) => {
+    await enterManagerDemo(page)
     await openAnnouncementChannel(page)
-    await expect(page.getByTestId('announcement-feed-row').filter({ hasText: 'Oda 214 hakkında' })).toHaveCount(0)
+
+    const row = page.getByTestId('announcement-feed-row').filter({ hasText: 'Ramazan servisi değişikliği' })
+    await row.getByRole('button', { name: /Yayından geri çek|Withdraw/i }).click()
+    const confirm = page.getByRole('alertdialog')
+    await confirm.getByRole('button', { name: /Yayından geri çek|Withdraw/i }).click()
+    await expect(row).toHaveAttribute('data-recalled', 'true')
+
+    await row.getByRole('button', { name: /Kimler gördü|Who has seen/i }).click()
+    const manager = page.getByTestId('announcement-manager')
+    const entry = manager.getByTestId('announcement-manager-row').filter({ hasText: 'Ramazan servisi değişikliği' })
+    await expect(entry).toHaveAttribute('data-recalled', 'true')
+    await entry.locator('button[aria-expanded]').click()
+
+    // Demo Staff read this one, so the correction is still outstanding and the count says so.
+    const progress = entry.getByText(/Geri alma bildirimi|Withdrawal notice/)
+    await expect(progress).toContainText('0/1')
+
+    await page.evaluate(async () => {
+      await (window as any).useAnnouncementStore.getState().acknowledgeRecall('demo-hotel-id', 'demo-ann-1', 'demo-user-staff')
+    })
+    await expect(progress).toContainText('1/1')
   })
 })

@@ -5,7 +5,9 @@ import {
   getAudienceSummary,
   isAddressedTo,
   isAnnouncementVisibleTo,
+  isRetractionPending,
   nextUnreadAnnouncement,
+  pendingRetractions,
 } from '../../src/lib/announcements'
 import type { Announcement, AnnouncementReceipt, StaffMember } from '../../src/types'
 
@@ -108,11 +110,69 @@ test.describe('withdrawing an announcement', () => {
 
   test('stops it interrupting readers who had not opened it', () => {
     expect(nextUnreadAnnouncement([recalled], {}, { uid: 'a', role: 'receptionist' })).toBeUndefined()
+    expect(isRetractionPending(recalled, undefined)).toBe(false)
   })
 
   test('leaves the record intact for the management view', () => {
     const summary = getAudienceSummary(recalled, { a: receipt() }, staff)
     expect(summary.seen.map((entry) => entry.uid)).toEqual(['a'])
+  })
+})
+
+test.describe('telling a reader their announcement was withdrawn', () => {
+  const recalled = announcement({ recalledAt: minutesAgo(1), recalledByName: 'Manager' })
+  const read = { [recalled.id]: receipt({ state: 'dismissed' }) }
+  const acknowledged = { [recalled.id]: receipt({ state: 'dismissed', recalledAckAt: minutesAgo(1) }) }
+
+  test('owes a notice to someone who read it and has not acknowledged the withdrawal', () => {
+    expect(isRetractionPending(recalled, receipt({ state: 'dismissed' }))).toBe(true)
+  })
+
+  test('stops owing it once the reader acknowledges, and never repeats it', () => {
+    expect(isRetractionPending(recalled, receipt({ recalledAckAt: minutesAgo(1) }))).toBe(false)
+    expect(nextUnreadAnnouncement([recalled], acknowledged, { uid: 'a' })).toBeUndefined()
+  })
+
+  test('interrupts the reader, and does so ahead of a newer announcement', () => {
+    // The retraction corrects something already acted on, so it outranks new information.
+    const newer = announcement({ id: 'new', createdAt: new Date() })
+    expect(nextUnreadAnnouncement([newer, recalled], read, { uid: 'a' })?.id).toBe(recalled.id)
+  })
+
+  test('keeps reminding for as long as it is unacknowledged, with no expiry', () => {
+    const longAgo = announcement({ recalledAt: hoursAgo(400) })
+    const stale = { [longAgo.id]: receipt({ recalledAckAt: undefined }) }
+    expect(pendingRetractions([longAgo], stale, { uid: 'a' }).map((item) => item.id)).toEqual([longAgo.id])
+    // A fresh announcement is only a banner for a day; a withdrawal cannot be allowed to lapse.
+    expect(bannerAnnouncements([longAgo], stale, { uid: 'a' }, 1000 * 60 * 60 * 24)).toHaveLength(0)
+  })
+
+  test('does not tell someone who never read the announcement that they read it', () => {
+    expect(pendingRetractions([recalled], {}, { uid: 'b' })).toEqual([])
+  })
+
+  test('does not tell its own author', () => {
+    expect(pendingRetractions([recalled], { [recalled.id]: receipt({ uid: 'gm' }) }, { uid: 'gm' })).toEqual([])
+  })
+
+  test('leaves the original read time alone, so the audit still shows when it was read', () => {
+    const seenAt = hoursAgo(5)
+    const summary = getAudienceSummary(recalled, { a: receipt({ state: 'dismissed', seenAt, recalledAckAt: minutesAgo(1) }) }, staff)
+    expect(summary.dismissed[0].at).not.toEqual(seenAt)
+    expect(summary.toldRetraction).toBe(1)
+  })
+
+  test('reports how far the correction has got, out of everyone who had read it', () => {
+    const partway = getAudienceSummary(recalled, {
+      a: receipt({ uid: 'a', recalledAckAt: minutesAgo(1) }),
+      b: receipt({ uid: 'b' }),
+    }, staff)
+    expect(partway.toldRetraction).toBe(1)
+    expect(partway.seen.length + partway.dismissed.length).toBe(2)
+  })
+
+  test('counts nobody as told when the announcement is still live', () => {
+    expect(getAudienceSummary(announcement(), { a: receipt() }, staff).toldRetraction).toBe(0)
   })
 })
 

@@ -127,6 +127,17 @@ export function AnnouncementManager({ open, onOpenChange }: { open: boolean; onO
                             {group(t('announcement.seen'), Eye, summary.seen, 'text-sky-600 dark:text-sky-400')}
                             {group(t('announcement.dismissed'), EyeOff, summary.dismissed, 'text-emerald-600 dark:text-emerald-400')}
                         </div>
+                        {announcement.recalledAt && (
+                            // Shows whether the correction actually reached the people it had to. A
+                            // retraction nobody has acknowledged yet is not finished being delivered.
+                            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Undo2 className="h-3.5 w-3.5 shrink-0" />
+                                {t('announcement.toldRetraction', {
+                                    count: String(summary.toldRetraction),
+                                    total: String(summary.seen.length + summary.dismissed.length),
+                                })}
+                            </p>
+                        )}
                         <div className="flex flex-wrap justify-end gap-2 pt-1">
                             {announcement.recalledAt ? (
                                 <>
