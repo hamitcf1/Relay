@@ -69,7 +69,7 @@ export function CompactShift({ focusModule, initialAddOpen, onFocusHandled, onMo
                             if (!module) return null
                             const expanded = !isCollapsed(id)
                             return (
-                                <CompactModuleCard key={id} id={id} label={getModuleLabel(module, language)} expanded={expanded} onExpandedChange={(next) => { void saveExpanded(id, next) }} onInteract={() => onModuleFocus?.(id)}>
+                                <CompactModuleCard key={id} id={id} label={getModuleLabel(module, language, hotel?.settings.navigation)} expanded={expanded} onExpandedChange={(next) => { void saveExpanded(id, next) }} onInteract={() => onModuleFocus?.(id)}>
                                     <ModuleContent moduleId={module.id} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} initialAddOpen={module.id === 'notes' ? initialAddOpen : undefined} />
                                 </CompactModuleCard>
                             )

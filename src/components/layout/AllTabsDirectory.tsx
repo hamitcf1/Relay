@@ -33,7 +33,7 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
     ]
         .map((section) => ({
             ...section,
-            items: section.items.filter((item) => getModuleLabel(item, language).toLocaleLowerCase(language).includes(normalized)),
+            items: section.items.filter((item) => getModuleLabel(item, language, navigationConfig).toLocaleLowerCase(language).includes(normalized)),
         }))
         .filter((section) => section.items.length)
 
@@ -66,7 +66,7 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
                                 return (
                                     <button key={item.id} onClick={() => { onSelect(item); closeAllTabs() }} className={cn('flex min-h-16 items-center gap-3 rounded-lg border border-border/70 bg-card px-3 text-left text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/5')}>
                                         <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                        <span>{getModuleLabel(item, language)}</span>
+                                        <span>{getModuleLabel(item, language, navigationConfig)}</span>
                                     </button>
                                 )
                             })}

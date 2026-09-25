@@ -98,7 +98,7 @@ test.describe('Live Demo & Simulation', () => {
 
     await editor.getByLabel('Section name').nth(1).fill('Ön Büro');
     await editor.getByRole('button', { name: /Herkes için yayınla|Publish for everyone/i }).click();
-    await expect(page.getByText('Ön Büro', { exact: true })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByText('Ön Büro', { exact: true })).toBeVisible();
   });
 
   test('operations overview leads with work that needs attention', async ({ page }) => {

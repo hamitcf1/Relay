@@ -71,7 +71,17 @@ export interface UserSettings {
     compact_collapsed_desktop?: Record<string, boolean>
     compact_collapsed_mobile?: Record<string, boolean>
     compact_operation_tab?: string
-    sidebar_preferences?: { favorite_ids: string[]; module_order: string[]; section_by_module: Record<string, string> }
+    /**
+     * Personal sidebar arrangement. `mobile_ids` and `hidden_ids` were added after the
+     * first release, so records saved by older builds simply omit them.
+     */
+    sidebar_preferences?: {
+        favorite_ids: string[]
+        module_order: string[]
+        section_by_module: Record<string, string>
+        mobile_ids?: string[]
+        hidden_ids?: string[]
+    }
 }
 
 export interface StaffMember {
@@ -92,13 +102,24 @@ export interface HotelInfo {
 export interface NavigationSectionConfig {
     id: string
     name: string
+    /** Retained so published configs stay readable. Section membership is structural and now comes from the module registry. */
     moduleIds: string[]
 }
 
+export type NavigationLanguage = 'tr' | 'en' | 'ru'
+
+/** Admin-supplied display name for a tab, e.g. "Kişisel notlar" renamed to "Notlar". */
+export interface NavigationCustomLabel {
+    tr?: string
+    en?: string
+    ru?: string
+    /** Optional narrow-surface name, used by the mobile bottom bar when the full name is too long. */
+    short?: Partial<Record<NavigationLanguage, string>>
+}
+
+/** Role overlays are access control only: which modules a role may not see. Ordering belongs to each account. */
 export interface NavigationRoleOverlay {
     hiddenModuleIds?: string[]
-    moduleOrder?: string[]
-    sectionByModule?: Record<string, string>
 }
 
 export interface CompactLayout {
@@ -109,7 +130,11 @@ export interface CompactLayout {
 export interface HotelNavigationConfig {
     version: number
     sections: NavigationSectionConfig[]
+    /** Admin-renamed tab titles. Absent or blank languages fall back to the registry. */
+    customLabels?: Record<string, NavigationCustomLabel>
+    /** Default starred tabs for accounts that have not personalised their own sidebar. */
     primaryModuleIds: string[]
+    /** Default mobile bottom bar for accounts that have not chosen their own. */
     mobileModuleIds: string[]
     quickActionIds: string[]
     compactLayout?: CompactLayout
