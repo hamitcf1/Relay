@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BarChart3, Eye, EyeOff, Megaphone, RotateCcw, Trash2, Undo2, Users } from 'lucide-react'
+import { AlertTriangle, BarChart3, Eye, EyeOff, Megaphone, RotateCcw, Trash2, Undo2, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { useAnnouncementStore } from '@/stores/announcementStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useRosterStore } from '@/stores/rosterStore'
 import { useLanguageStore } from '@/stores/languageStore'
-import { getAudienceSummary, isAnnouncementVisibleTo, type AudienceEntry } from '@/lib/announcements'
+import { getAudienceSummary, isAnnouncementVisibleTo, isRecallAckExpired, type AudienceEntry } from '@/lib/announcements'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useConfirm } from '@/components/ui/confirm-dialog'
@@ -127,16 +127,31 @@ export function AnnouncementManager({ open, onOpenChange }: { open: boolean; onO
                             {group(t('announcement.seen'), Eye, summary.seen, 'text-sky-600 dark:text-sky-400')}
                             {group(t('announcement.dismissed'), EyeOff, summary.dismissed, 'text-emerald-600 dark:text-emerald-400')}
                         </div>
-                        {announcement.recalledAt && (
-                            // Shows whether the correction actually reached the people it had to. A
-                            // retraction nobody has acknowledged yet is not finished being delivered.
-                            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Undo2 className="h-3.5 w-3.5 shrink-0" />
-                                {t('announcement.toldRetraction', {
-                                    count: String(summary.toldRetraction),
-                                    total: String(summary.seen.length + summary.dismissed.length),
-                                })}
-                            </p>
+                        {announcement.recalledAt && summary.seen.length + summary.dismissed.length > 0 && (
+                            // Shows whether the correction actually reached the people it had to, and
+                            // names the ones it did not. Once the reminder window closes those people
+                            // will not find out on their own, so the list stops being informative and
+                            // becomes a task.
+                            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-2">
+                                <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                                    <AlertTriangle className="h-3.5 w-3.5" />
+                                    {summary.untoldRetraction.length === 0
+                                        ? t('announcement.retractionTold')
+                                        : isRecallAckExpired(announcement)
+                                            ? t('announcement.retractionExpired', { count: String(summary.untoldRetraction.length) })
+                                            : t('announcement.retractionOutstanding', { count: String(summary.untoldRetraction.length) })}
+                                </p>
+                                {summary.untoldRetraction.length > 0 && (
+                                    <ul className="mt-1.5 space-y-0.5">
+                                        {summary.untoldRetraction.map((entry) => (
+                                            <li key={entry.uid} className="flex items-baseline justify-between gap-3 text-xs text-muted-foreground">
+                                                <span className="truncate">{entry.name}</span>
+                                                <span className="shrink-0 text-[10px] opacity-70">{entry.at ? stamp(entry.at) : ''}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                         )}
                         <div className="flex flex-wrap justify-end gap-2 pt-1">
                             {announcement.recalledAt ? (

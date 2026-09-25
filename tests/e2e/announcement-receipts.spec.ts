@@ -5,9 +5,11 @@ import {
   getAudienceSummary,
   isAddressedTo,
   isAnnouncementVisibleTo,
+  isRecallAckExpired,
   isRetractionPending,
   nextUnreadAnnouncement,
   pendingRetractions,
+  RECALL_ACK_WINDOW_MS,
 } from '../../src/lib/announcements'
 import type { Announcement, AnnouncementReceipt, StaffMember } from '../../src/types'
 
@@ -139,12 +141,25 @@ test.describe('telling a reader their announcement was withdrawn', () => {
     expect(nextUnreadAnnouncement([newer, recalled], read, { uid: 'a' })?.id).toBe(recalled.id)
   })
 
-  test('keeps reminding for as long as it is unacknowledged, with no expiry', () => {
-    const longAgo = announcement({ recalledAt: hoursAgo(400) })
-    const stale = { [longAgo.id]: receipt({ recalledAckAt: undefined }) }
-    expect(pendingRetractions([longAgo], stale, { uid: 'a' }).map((item) => item.id)).toEqual([longAgo.id])
-    // A fresh announcement is only a banner for a day; a withdrawal cannot be allowed to lapse.
-    expect(bannerAnnouncements([longAgo], stale, { uid: 'a' }, 1000 * 60 * 60 * 24)).toHaveLength(0)
+  test('keeps reminding for as long as the window lasts', () => {
+    const almostOver = announcement({ recalledAt: new Date(Date.now() - RECALL_ACK_WINDOW_MS + 60_000) })
+    expect(pendingRetractions([almostOver], read, { uid: 'a' }).map((item) => item.id)).toEqual([almostOver.id])
+  })
+
+  test('stops reminding once the window closes, unlike a fresh announcement banner', () => {
+    const over = announcement({ recalledAt: new Date(Date.now() - RECALL_ACK_WINDOW_MS - 60_000) })
+    expect(isRecallAckExpired(over)).toBe(true)
+    expect(pendingRetractions([over], read, { uid: 'a' })).toEqual([])
+    // A fresh announcement is only a banner for a day, so an old retraction is the stricter case.
+    expect(bannerAnnouncements([over], read, { uid: 'a' }, 1000 * 60 * 60 * 24)).toHaveLength(0)
+  })
+
+  test('keeps the audit intact after the reminder window closes', () => {
+    // The reminder stopping says nothing about what was read, and the record must not lose it.
+    const over = announcement({ recalledAt: new Date(Date.now() - RECALL_ACK_WINDOW_MS - 60_000) })
+    const summary = getAudienceSummary(over, { a: receipt({ state: 'dismissed', seenAt: hoursAgo(5) }) }, staff)
+    expect(summary.dismissed).toHaveLength(1)
+    expect(summary.untoldRetraction.map((entry) => entry.uid)).toEqual(['a'])
   })
 
   test('does not tell someone who never read the announcement that they read it', () => {
@@ -162,17 +177,20 @@ test.describe('telling a reader their announcement was withdrawn', () => {
     expect(summary.toldRetraction).toBe(1)
   })
 
-  test('reports how far the correction has got, out of everyone who had read it', () => {
-    const partway = getAudienceSummary(recalled, {
+  test('names who still has to be told, so management can go and tell them', () => {
+    const summary = getAudienceSummary(recalled, {
       a: receipt({ uid: 'a', recalledAckAt: minutesAgo(1) }),
       b: receipt({ uid: 'b' }),
+      c: receipt({ uid: 'c', state: 'dismissed' }),
     }, staff)
-    expect(partway.toldRetraction).toBe(1)
-    expect(partway.seen.length + partway.dismissed.length).toBe(2)
+    expect(summary.toldRetraction).toBe(1)
+    expect(summary.untoldRetraction.map((entry) => entry.name)).toEqual(['Bora', 'Ceren'])
   })
 
-  test('counts nobody as told when the announcement is still live', () => {
-    expect(getAudienceSummary(announcement(), { a: receipt() }, staff).toldRetraction).toBe(0)
+  test('has nobody to tell when the announcement is still live', () => {
+    const summary = getAudienceSummary(announcement(), { a: receipt() }, staff)
+    expect(summary.toldRetraction).toBe(0)
+    expect(summary.untoldRetraction).toEqual([])
   })
 })
 

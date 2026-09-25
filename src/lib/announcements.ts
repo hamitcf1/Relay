@@ -32,12 +32,31 @@ export function isAddressedTo(announcement: Announcement, viewer: { uid?: string
 }
 
 /**
- * A reader who had already opened an announcement must be told it was withdrawn, and stays owed
- * that notice until they acknowledge it. A retraction that quietly expires is worse than no
- * retraction at all: the person keeps acting on an instruction that no longer stands.
+ * How long a reader is reminded that an announcement they had read was withdrawn. The reminder has
+ * to be finite: an announcement nobody acknowledges would otherwise be raised forever. What stops
+ * reminding is a reminder, not the correction itself, so the manager is left holding the list of
+ * who never acknowledged, and the record of what they read stays intact either way.
  */
-export function isRetractionPending(announcement: Announcement, receipt?: AnnouncementReceipt) {
-    return isAnnouncementWithdrawn(announcement) && Boolean(receipt) && !receipt?.recalledAckAt
+export const RECALL_ACK_WINDOW_MS = 1000 * 60 * 60 * 72
+
+/**
+ * True once the reminder window has closed, meaning the manager can no longer rely on the reader
+ * finding out on their own.
+ */
+export function isRecallAckExpired(announcement: Announcement, now = Date.now()) {
+    if (!isAnnouncementWithdrawn(announcement)) return false
+    return (announcement.recalledAt?.getTime() || 0) + RECALL_ACK_WINDOW_MS <= now
+}
+
+/**
+ * A reader who had already opened an announcement must be told it was withdrawn, and stays owed
+ * that notice until they acknowledge it or the reminder window closes. A retraction that quietly
+ * expires on its own is worse than no retraction at all: the person keeps acting on an instruction
+ * that no longer stands.
+ */
+export function isRetractionPending(announcement: Announcement, receipt?: AnnouncementReceipt, now = Date.now()) {
+    if (!isAnnouncementWithdrawn(announcement) || !receipt || receipt.recalledAckAt) return false
+    return !isRecallAckExpired(announcement, now)
 }
 
 /** Withdrawn announcements this reader still has to be told about, most recent recall first. */
@@ -64,8 +83,13 @@ export interface AudienceSummary {
     seen: AudienceEntry[]
     dismissed: AudienceEntry[]
     total: number
-    /** Of the people who had already read it, how many have acknowledged the withdrawal. */
+    /**
+     * Of the people who had already read it, how many have acknowledged the withdrawal. Only
+     * meaningful once the announcement is withdrawn.
+     */
     toldRetraction: number
+    /** The ones who read it and have not been told yet, so management can go and tell them. */
+    untoldRetraction: AudienceEntry[]
 }
 
 /**
@@ -81,27 +105,38 @@ export function getAudienceSummary(
     const expected = expectedRecipients(announcement, staff)
     const nameById = new Map(staff.map((member) => [member.uid, member.name]))
     const name = (uid: string) => nameById.get(uid) || uid
-    const summary: AudienceSummary = { pending: [], seen: [], dismissed: [], total: 0, toldRetraction: 0 }
+    const summary: AudienceSummary = {
+        pending: [], seen: [], dismissed: [], total: 0, toldRetraction: 0, untoldRetraction: [],
+    }
     const counted = new Set<string>()
-    const tallyRetraction = (receipt: AnnouncementReceipt | undefined) => {
-        if (receipt?.recalledAckAt) summary.toldRetraction += 1
+    // Only a withdrawal produces a correction to acknowledge, so a live announcement has none.
+    const withdrawn = isAnnouncementWithdrawn(announcement)
+    const acknowledge = (uid: string, name: string, receipt: AnnouncementReceipt | undefined, at?: Date) => {
+        if (!withdrawn || !receipt) return
+        if (receipt.recalledAckAt) summary.toldRetraction += 1
+        else summary.untoldRetraction.push({ uid, name, at })
     }
 
     for (const uid of expected) {
         counted.add(uid)
         const receipt = receipts[uid]
-        tallyRetraction(receipt)
-        if (receipt?.state === 'dismissed') summary.dismissed.push({ uid, name: name(uid), at: receipt.dismissedAt })
-        else if (receipt) summary.seen.push({ uid, name: name(uid), at: receipt.seenAt })
-        else summary.pending.push({ uid, name: name(uid) })
+        if (receipt?.state === 'dismissed') {
+            summary.dismissed.push({ uid, name: name(uid), at: receipt.dismissedAt })
+            acknowledge(uid, name(uid), receipt, receipt.dismissedAt)
+        } else if (receipt) {
+            summary.seen.push({ uid, name: name(uid), at: receipt.seenAt })
+            acknowledge(uid, name(uid), receipt, receipt.seenAt)
+        } else {
+            summary.pending.push({ uid, name: name(uid) })
+        }
     }
 
     for (const [uid, receipt] of Object.entries(receipts)) {
         if (counted.has(uid)) continue
-        tallyRetraction(receipt)
         const entry = { uid, name: name(uid), at: receipt.dismissedAt || receipt.seenAt }
         if (receipt.state === 'dismissed') summary.dismissed.push(entry)
         else summary.seen.push(entry)
+        acknowledge(uid, entry.name, receipt, entry.at)
     }
 
     summary.total = summary.pending.length + summary.seen.length + summary.dismissed.length

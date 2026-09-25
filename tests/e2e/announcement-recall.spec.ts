@@ -204,7 +204,7 @@ test.describe('a reader is recorded as having seen and closed an announcement', 
     await expect(page.getByTestId('announcement-retracted')).toHaveCount(0)
   })
 
-  test('shows a manager how far the withdrawal notice has got', async ({ page }) => {
+  test('shows a manager who the withdrawal notice has not reached yet', async ({ page }) => {
     await enterManagerDemo(page)
     await openAnnouncementChannel(page)
 
@@ -220,13 +220,40 @@ test.describe('a reader is recorded as having seen and closed an announcement', 
     await expect(entry).toHaveAttribute('data-recalled', 'true')
     await entry.locator('button[aria-expanded]').click()
 
-    // Demo Staff read this one, so the correction is still outstanding and the count says so.
-    const progress = entry.getByText(/Geri alma bildirimi|Withdrawal notice/)
-    await expect(progress).toContainText('0/1')
+    // Demo Staff read this one, so the correction is still outstanding and is named.
+    const warning = entry.locator('div').filter({ hasText: /Geri alma bildirimi|Withdrawal notice/ }).last()
+    await expect(warning).toContainText('Demo Staff')
+    await expect(warning).toContainText(/1 kişiye daha ulaşmadı|not been reached yet/)
 
+    // Once acknowledged the warning clears, which is the difference between a reminder and a task.
     await page.evaluate(async () => {
       await (window as any).useAnnouncementStore.getState().acknowledgeRecall('demo-hotel-id', 'demo-ann-1', 'demo-user-staff')
     })
-    await expect(progress).toContainText('1/1')
+    await expect(warning).toContainText(/herkese ulaştı|Everyone who had read it/)
+  })
+
+  test('stops reminding a reader after three days and leaves it with the manager instead', async ({ page }) => {
+    await enterDemo(page, 'Receptionist')
+    // Backdate the withdrawal past the reminder window without waiting three days.
+    await page.evaluate(async () => {
+      const store = (window as any).useAnnouncementStore
+      const state = store.getState()
+      await state.recallAnnouncement('demo-hotel-id', 'demo-ann-2', 'Demo Manager')
+      // A bare recalledAt cannot be pushed back through the store, so the announcement is re-seeded
+      // with an old recall time by writing the demo list directly.
+      const list = store.getState().announcements.map((item: any) => item.id === 'demo-ann-2'
+        ? { ...item, recalledAt: new Date(Date.now() - 1000 * 60 * 60 * 96) }
+        : item)
+      store.setState({ announcements: list })
+    })
+
+    await expect(page.getByTestId('announcement-modal')).toBeHidden()
+    await expect(page.getByTestId('announcement-retracted')).toHaveCount(0)
+    // The read record itself is untouched, so the audit still shows when it was read.
+    const receipt = await page.evaluate(() => {
+      const store = (window as any).useAnnouncementStore.getState()
+      return store.receipts['demo-ann-2'] || null
+    })
+    expect(receipt?.state).toBe('dismissed')
   })
 })

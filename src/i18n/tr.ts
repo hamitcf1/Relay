@@ -634,7 +634,9 @@ const tr: Translations = {
         'announcement.recallNoticeBy': '{name} bu duyuruyu geri aldı. Daha önce aldığınız bilgi artık geçerli değil.',
         'announcement.recallAck': 'Anladım',
         'announcement.retractionBody': '{name} bu duyuruyu geri aldı. Daha önce aldığınız bilgi artık geçerli değil, lütfen eskisi gibi uygulamayın.',
-        'announcement.toldRetraction': 'Geri alma bildirimi: {count}/{total} onaylandı',
+        'announcement.retractionTold': 'Geri alma bildirimi herkese ulaştı.',
+        'announcement.retractionOutstanding': 'Geri alma bildirimi {count} kişiye daha ulaşmadı. Hatırlatma 3 gün boyunca sürer.',
+        'announcement.retractionExpired': 'Geri alma bildirimi {count} kişiye ulaşmadı ve hatırlatma durdu. Bu kişilere ayrıca haber verin.',
         'announcement.readReceipts': 'Okunma kayıtları',
 
         // Roster

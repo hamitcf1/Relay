@@ -1284,7 +1284,9 @@ const en: Translations = {
         'announcement.recallNoticeBy': '{name} withdrew this announcement. The information you were given no longer applies.',
         'announcement.recallAck': 'Understood',
         'announcement.retractionBody': '{name} withdrew this announcement. The information you were given no longer applies, so please stop acting on it.',
-        'announcement.toldRetraction': 'Withdrawal notice: acknowledged by {count}/{total}',
+        'announcement.retractionTold': 'Everyone who had read it has acknowledged the withdrawal.',
+        'announcement.retractionOutstanding': '{count} people have not been reached yet. They are reminded for 3 days.',
+        'announcement.retractionExpired': '{count} people were not reached and the reminder has stopped. Tell them yourself.',
         'announcement.readReceipts': 'Read receipts',
         'common.clear': 'Clear Chat',
 
