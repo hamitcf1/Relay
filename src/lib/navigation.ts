@@ -58,6 +58,11 @@ export function getModuleLabel(item: ModuleDefinition, language: 'tr' | 'en' | '
     return item.labels[language]
 }
 
+/** Mobile bottom bar labels fall back to the full label when no short form is defined. */
+export function getModuleShortLabel(item: ModuleDefinition, language: 'tr' | 'en' | 'ru') {
+    return item.shortLabels?.[language] || item.labels[language]
+}
+
 export type SidebarPreferences = NonNullable<UserSettings['sidebar_preferences']>
 
 /** Personal ordering can rearrange visible modules, but never grants access to hidden modules. */

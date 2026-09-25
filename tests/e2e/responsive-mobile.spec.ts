@@ -47,7 +47,7 @@ test.describe('Responsive Mobile Experience', () => {
     await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click();
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
     await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 });
-    await page.getByRole('button', { name: /Haftalık vardiya|Weekly roster/i }).click();
+    await page.getByRole('button', { name: /Haftalık vardiya|Weekly roster|^Vardiya$|^Roster$/i }).click();
 
     const views = page.getByRole('tablist', { name: 'Roster view' });
     await expect(views.getByRole('tab')).toHaveCount(3);
