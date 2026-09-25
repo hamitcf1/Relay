@@ -38,6 +38,11 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions
 
+const DEMO_UIDS: Partial<Record<UserRole, string>> = {
+    gm: 'demo-user-gm',
+    receptionist: 'demo-user-staff',
+}
+
 export const useAuthStore = create<AuthStore>((set) => ({
     // State
     user: null,
@@ -122,7 +127,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1500))
 
-        const demoUid = 'demo-user-' + role
+        // Demo accounts are shared fixtures: the roster, hotel, shift and note seeds all
+        // reference these ids, so a persona that is not in them would be invisible to
+        // staff lists, message threads and announcement audiences.
+        const demoUid = DEMO_UIDS[role] || 'demo-user-' + role
         const demoHotelId = 'demo-hotel-id'
 
         const demoUser: User = {

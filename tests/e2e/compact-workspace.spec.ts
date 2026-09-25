@@ -1,17 +1,12 @@
 import { expect, test } from '@playwright/test'
+import { enterDemo } from './helpers'
 
 async function enterManagerDemo(page: import('@playwright/test').Page) {
-  await page.goto('/live-demo')
-  await page.getByRole('button', { name: /Enter as Manager|Yönetici/i }).click()
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 })
-  await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 })
+  await enterDemo(page, 'Manager')
 }
 
 async function enterStaffDemo(page: import('@playwright/test').Page) {
-  await page.goto('/live-demo')
-  await page.getByRole('button', { name: /Enter as Receptionist|Resepsiyonist/i }).click()
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 })
-  await page.locator('div.fixed.inset-0 button').first().click({ timeout: 15000 })
+  await enterDemo(page, 'Receptionist')
 }
 
 test.describe('Compact workspace', () => {

@@ -616,6 +616,22 @@ const tr: Translations = {
         // Announcement
         'announcement.title': 'Önemli Duyuru',
         'announcement.deleteConfirm': 'Bu duyuruyu silmek istediğinize emin misiniz?',
+        'announcement.withdraw': 'Yayından geri çek',
+        'announcement.withdrawConfirm': 'Bu duyuru herkesin ekranından kaldırılsın mı? Duyuruyu daha önce görenlere bilgi gösterilir ve istediğiniz an geri alabilirsiniz.',
+        'announcement.withdrawn': 'Geri alındı',
+        'announcement.withdrawnBy': '{name} tarafından geri alındı',
+        'announcement.restore': 'Yeniden yayınla',
+        'announcement.purge': 'Kalıcı olarak sil',
+        'announcement.purgeConfirm': 'Bu duyuru ve okunma kayıtları kalıcı olarak silinsin mi? Bu işlem geri alınamaz.',
+        'announcement.insights': 'Kimler gördü?',
+        'announcement.sentBy': 'Gönderen',
+        'announcement.notSeenYet': 'Henüz görmeyenler',
+        'announcement.seen': 'Görenler',
+        'announcement.dismissed': 'Kapatanlar',
+        'announcement.everyone': 'Herkes',
+        'announcement.selectedCount': '{count} kişi',
+        'announcement.recallNotice': 'Bu duyuru yönetim tarafından geri alındı.',
+        'announcement.readReceipts': 'Okunma kayıtları',
 
         // Roster
         'roster.title': 'Haftalık Çizelge',

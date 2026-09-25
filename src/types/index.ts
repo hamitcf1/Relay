@@ -372,6 +372,39 @@ export interface Room {
     active_loans?: RoomLoan[]      // Items currently lent to guest (not yet returned)
 }
 
+// Announcements
+export type AnnouncementAudience = 'all' | 'selected'
+/** `seen` means the reader opened it; `dismissed` means they closed it. No receipt at all means still unread. */
+export type AnnouncementReceiptState = 'seen' | 'dismissed'
+
+/**
+ * A management announcement is a single record so it can be recalled and audited.
+ * Read state lives on a per-person receipt rather than on this document, because a shared
+ * `is_read` flag would mark the whole hotel as read as soon as one person opened it.
+ */
+export interface Announcement {
+    id: string
+    title?: string
+    content: string
+    audience: AnnouncementAudience
+    recipientIds?: string[]
+    recipientNames?: string[]
+    createdBy: string
+    createdByName: string
+    createdAt: Date
+    /** Set once the author pulls it back. Recalled announcements stop reaching recipients but stay auditable. */
+    recalledAt?: Date | null
+    recalledByName?: string
+}
+
+export interface AnnouncementReceipt {
+    announcementId: string
+    uid: string
+    state: AnnouncementReceiptState
+    seenAt: Date
+    dismissedAt?: Date
+}
+
 // Notification types
 export type NotificationType = 'compliance' | 'message' | 'announcement' | 'off_day' | 'system'
 
