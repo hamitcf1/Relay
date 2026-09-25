@@ -2,7 +2,7 @@ import { MODULE_REGISTRY, type ModuleId } from '@/config/moduleRegistry'
 import type { CompactLayout, UserSettings, WorkspaceMode } from '@/types'
 
 export const DEFAULT_COMPACT_LAYOUT: CompactLayout = {
-    left: ['notes', 'roster', 'blacklist'],
+    left: ['notes', 'personal-notes', 'roster', 'blacklist'],
     right: ['hotel-info', 'currency', 'menu', 'calendar'],
 }
 

@@ -71,6 +71,7 @@ export interface UserSettings {
     compact_collapsed_desktop?: Record<string, boolean>
     compact_collapsed_mobile?: Record<string, boolean>
     compact_operation_tab?: string
+    sidebar_preferences?: { favorite_ids: string[]; module_order: string[]; section_by_module: Record<string, string> }
 }
 
 export interface StaffMember {

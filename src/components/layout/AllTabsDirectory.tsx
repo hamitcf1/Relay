@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Search, X } from 'lucide-react'
-import { resolveNavigation, getModuleLabel } from '@/lib/navigation'
+import { resolvePersonalNavigation, getModuleLabel } from '@/lib/navigation'
 import type { ModuleDefinition } from '@/config/moduleRegistry'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useNavigationStore } from '@/stores/navigationStore'
 import { cn } from '@/lib/utils'
 import { useHotelStore } from '@/stores/hotelStore'
+import { useAuthStore } from '@/stores/authStore'
 
 interface AllTabsDirectoryProps {
     role?: string
@@ -17,7 +18,8 @@ export function AllTabsDirectory({ role, onSelect }: AllTabsDirectoryProps) {
     const { language } = useLanguageStore()
     const [query, setQuery] = useState('')
     const navigationConfig = useHotelStore((state) => state.hotel?.settings.navigation)
-    const navigation = useMemo(() => resolveNavigation(role, navigationConfig), [role, navigationConfig])
+    const preferences = useAuthStore(state => state.user?.settings?.sidebar_preferences)
+    const navigation = useMemo(() => resolvePersonalNavigation(role, navigationConfig, preferences), [role, navigationConfig, preferences])
     const copy = language === 'tr'
         ? { title: 'Tüm sekmeler', search: 'Sekme ara…', empty: 'Eşleşen sekme yok', close: 'Kapat', groups: { today: 'Bugün', operations: 'Operasyon', tools: 'Araçlar', management: 'Yönetim' } }
         : language === 'ru'

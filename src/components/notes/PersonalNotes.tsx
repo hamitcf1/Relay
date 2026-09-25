@@ -134,10 +134,15 @@ export function PersonalNotes({ hotelId }: { hotelId: string }) {
                 <label className="relative block"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input aria-label="Notlarda ara" value={search} onChange={event => setSearch(event.target.value)} placeholder="Başlık, metin veya etiket ara" className="pl-9" /></label>
                 <select aria-label="Etikete göre filtrele" value={tagFilter} onChange={event => setTagFilter(event.target.value)} className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"><option value="">Tüm etiketler</option>{tags.map(tag => <option key={tag} value={tag}>{tag}</option>)}</select>
                 <div className="max-h-[32rem] space-y-2 overflow-y-auto">
-                    {visible.map(note => <button key={note.id} type="button" onClick={() => choose(note)} className={`w-full rounded-lg border p-3 text-left transition-colors ${selectedId === note.id ? 'border-primary bg-primary/10' : 'border-border bg-background hover:bg-muted'}`}>
-                        <strong className="block truncate text-sm">{note.title || 'Başlıksız not'}</strong><span className="mt-1 block truncate text-xs text-muted-foreground">{note.content || 'İçerik yok'}</span>
+                    {visible.map(note => <article key={note.id} className={`w-full rounded-lg border p-3 text-left transition-colors ${selectedId === note.id ? 'border-primary bg-primary/10' : 'border-border bg-background hover:bg-muted'}`}>
+                        <div className="flex items-start gap-2">
+                            <button type="button" onClick={() => choose(note)} className="min-w-0 flex-1 text-left">
+                                <strong className="block truncate text-sm">{note.title || 'Başlıksız not'}</strong><span className="mt-1 block truncate text-xs text-muted-foreground">{note.content || 'İçerik yok'}</span>
+                            </button>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" aria-label={`${note.title || 'Not'} içeriğini kopyala`} title="İçeriği kopyala" onClick={async () => { try { await navigator.clipboard.writeText(note.content || ''); toast.success('Not içeriği kopyalandı.') } catch { toast.error('Kopyalanamadı.') } }}><Clipboard className="h-4 w-4" /></Button>
+                        </div>
                         <span className="mt-2 block text-[11px] text-muted-foreground">{note.updated_at?.toDate?.().toLocaleString('tr-TR') || 'Az önce'} · {(note.tags || []).join(', ')}</span>
-                    </button>)}
+                    </article>)}
                     {!visible.length && <p className="p-4 text-sm text-muted-foreground">Bu görünümde not yok.</p>}
                 </div>
             </aside>
