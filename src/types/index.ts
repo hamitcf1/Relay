@@ -403,6 +403,12 @@ export interface AnnouncementReceipt {
     state: AnnouncementReceiptState
     seenAt: Date
     dismissedAt?: Date
+    /**
+     * When this person was told the announcement they had already read was withdrawn. Absent means
+     * they have not been told yet, which keeps the retraction in front of them until they act on
+     * it: someone who read a retracted shift notice must not simply go back to following it.
+     */
+    recalledAckAt?: Date
 }
 
 // Notification types

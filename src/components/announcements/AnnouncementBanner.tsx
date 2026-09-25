@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAnnouncementFeed } from '@/hooks/useAnnouncementFeed'
-import { bannerAnnouncements, isAddressedTo } from '@/lib/announcements'
+import { bannerAnnouncements, pendingRetractions } from '@/lib/announcements'
 import { Button } from '@/components/ui/button'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { AnnouncementManager } from './AnnouncementManager'
@@ -24,23 +24,21 @@ export function AnnouncementBanner() {
     const { t } = useLanguageStore()
     const user = useAuthStore((state) => state.user)
     const hotelId = useHotelStore((state) => state.hotel?.id)
-    const { announcements, receipts, markDismissed, recallAnnouncement } = useAnnouncementStore()
+    const { announcements, receipts, markDismissed, recallAnnouncement, acknowledgeRecall } = useAnnouncementStore()
     const confirm = useConfirm()
     const [managerOpen, setManagerOpen] = useState(false)
 
     const viewer = useMemo(() => ({ uid: user?.uid, role: user?.role }), [user?.uid, user?.role])
-    const addressed = useMemo(() => announcements.filter((item) => isAddressedTo(item, viewer)), [announcements, viewer])
     const active = useMemo(
         () => bannerAnnouncements(announcements, receipts, viewer, RECENCY_MS),
         [announcements, receipts, viewer],
     )
-    // Withdrawn announcements a reader had already opened get an explicit notice instead of vanishing.
+    // Withdrawals this reader has not acknowledged yet. Unlike a fresh announcement these carry no
+    // expiry: the point of a retraction is to stop someone acting on stale information, and a
+    // notice that quietly disappears after a day lets exactly that happen unnoticed.
     const retracted = useMemo(
-        () => addressed
-            .filter((item) => item.recalledAt && item.recalledAt.getTime() >= Date.now() - RECENCY_MS)
-            .filter((item) => Boolean(receipts[item.id]))
-            .sort((a, b) => b.recalledAt!.getTime() - a.recalledAt!.getTime()),
-        [addressed, receipts],
+        () => pendingRetractions(announcements, receipts, viewer),
+        [announcements, receipts, viewer],
     )
 
     const withdraw = async (id: string) => {
@@ -68,13 +66,21 @@ export function AnnouncementBanner() {
                             <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
                                 {t('announcement.withdrawn')}
                             </p>
-                            <p className="mt-0.5 text-sm text-muted-foreground">{t('announcement.recallNotice')}</p>
-                            <p className="mt-1 text-xs text-muted-foreground/70">
+                            {item.title && <p className="mt-0.5 text-sm font-semibold text-foreground">{item.title}</p>}
+                            <p className="mt-0.5 text-sm text-muted-foreground">
                                 {item.recalledByName
-                                    ? t('announcement.withdrawnBy', { name: item.recalledByName })
+                                    ? t('announcement.recallNoticeBy', { name: item.recalledByName })
                                     : t('announcement.recallNotice')}
                             </p>
                         </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="shrink-0"
+                            onClick={() => void acknowledgeRecall(hotelId!, item.id, user!.uid)}
+                        >
+                            {t('announcement.recallAck')}
+                        </Button>
                     </motion.div>
                 ))}
             </AnimatePresence>

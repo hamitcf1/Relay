@@ -45,6 +45,7 @@ const toReceipt = (announcementId: string, uid: string, data: Record<string, any
     state: data.state === 'dismissed' ? 'dismissed' : 'seen',
     seenAt: data.seenAt instanceof Timestamp ? data.seenAt.toDate() : new Date(),
     dismissedAt: data.dismissedAt instanceof Timestamp ? data.dismissedAt.toDate() : undefined,
+    recalledAckAt: data.recalledAckAt instanceof Timestamp ? data.recalledAckAt.toDate() : undefined,
 })
 
 interface AnnouncementState {
@@ -64,6 +65,7 @@ interface AnnouncementActions {
     publishAnnouncement: (hotelId: string, announcement: Omit<Announcement, 'id' | 'createdAt' | 'recalledAt'>) => Promise<void>
     markSeen: (hotelId: string, announcementId: string, uid: string) => Promise<void>
     markDismissed: (hotelId: string, announcementId: string, uid: string) => Promise<void>
+    acknowledgeRecall: (hotelId: string, announcementId: string, uid: string) => Promise<void>
     recallAnnouncement: (hotelId: string, announcementId: string, byName: string) => Promise<void>
     restoreAnnouncement: (hotelId: string, announcementId: string) => Promise<void>
     purgeAnnouncement: (hotelId: string, announcementId: string) => Promise<void>
@@ -257,8 +259,33 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
         }, { merge: true })
     },
 
-    recallAnnouncement: async (hotelId, announcementId, byName) => {
+    /**
+     * Records that this person was told the announcement they had read was withdrawn. It is a
+     * separate field rather than a new receipt state, because what the reader did with the original
+     * announcement and what they did with the retraction are two different facts to audit.
+     */
+    acknowledgeRecall: async (hotelId, announcementId, uid) => {
+        if (!uid) return
         if (hotelId === DEMO_HOTEL_ID) {
+            const existing = receiptsFor(announcementId)[uid]
+            if (!existing || existing.recalledAckAt) return
+            demoReceipts = {
+                ...demoReceipts,
+                [announcementId]: {
+                    ...receiptsFor(announcementId),
+                    [uid]: { ...existing, recalledAckAt: new Date() },
+                },
+            }
+            if (demoViewer) set({ receipts: myDemoReceipts(demoViewer) })
+            set((state) => ({ audience: { ...state.audience, [announcementId]: receiptsFor(announcementId) } }))
+            return
+        }
+        await updateDoc(doc(db, 'hotels', hotelId, 'announcements', announcementId, 'receipts', uid), {
+            recalledAckAt: serverTimestamp(),
+        })
+    },
+
+    recallAnnouncement: async (hotelId, announcementId, byName) => {        if (hotelId === DEMO_HOTEL_ID) {
             demoAnnouncements = demoAnnouncements.map((item) => item.id === announcementId
                 ? { ...item, recalledAt: new Date(), recalledByName: byName }
                 : item)

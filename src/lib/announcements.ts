@@ -31,6 +31,28 @@ export function isAddressedTo(announcement: Announcement, viewer: { uid?: string
     return (announcement.recipientIds || []).includes(viewer.uid)
 }
 
+/**
+ * A reader who had already opened an announcement must be told it was withdrawn, and stays owed
+ * that notice until they acknowledge it. A retraction that quietly expires is worse than no
+ * retraction at all: the person keeps acting on an instruction that no longer stands.
+ */
+export function isRetractionPending(announcement: Announcement, receipt?: AnnouncementReceipt) {
+    return isAnnouncementWithdrawn(announcement) && Boolean(receipt) && !receipt?.recalledAckAt
+}
+
+/** Withdrawn announcements this reader still has to be told about, most recent recall first. */
+export function pendingRetractions(
+    announcements: Announcement[],
+    receipts: Record<string, AnnouncementReceipt>,
+    viewer: { uid?: string; role?: string },
+) {
+    return announcements
+        .filter((announcement) => announcement.createdBy !== viewer.uid)
+        .filter((announcement) => isAddressedTo(announcement, viewer))
+        .filter((announcement) => isRetractionPending(announcement, receipts[announcement.id]))
+        .sort((a, b) => (b.recalledAt?.getTime() || 0) - (a.recalledAt?.getTime() || 0))
+}
+
 export interface AudienceEntry {
     uid: string
     name: string
@@ -42,6 +64,8 @@ export interface AudienceSummary {
     seen: AudienceEntry[]
     dismissed: AudienceEntry[]
     total: number
+    /** Of the people who had already read it, how many have acknowledged the withdrawal. */
+    toldRetraction: number
 }
 
 /**
@@ -57,12 +81,16 @@ export function getAudienceSummary(
     const expected = expectedRecipients(announcement, staff)
     const nameById = new Map(staff.map((member) => [member.uid, member.name]))
     const name = (uid: string) => nameById.get(uid) || uid
-    const summary: AudienceSummary = { pending: [], seen: [], dismissed: [], total: 0 }
+    const summary: AudienceSummary = { pending: [], seen: [], dismissed: [], total: 0, toldRetraction: 0 }
     const counted = new Set<string>()
+    const tallyRetraction = (receipt: AnnouncementReceipt | undefined) => {
+        if (receipt?.recalledAckAt) summary.toldRetraction += 1
+    }
 
     for (const uid of expected) {
         counted.add(uid)
         const receipt = receipts[uid]
+        tallyRetraction(receipt)
         if (receipt?.state === 'dismissed') summary.dismissed.push({ uid, name: name(uid), at: receipt.dismissedAt })
         else if (receipt) summary.seen.push({ uid, name: name(uid), at: receipt.seenAt })
         else summary.pending.push({ uid, name: name(uid) })
@@ -70,6 +98,7 @@ export function getAudienceSummary(
 
     for (const [uid, receipt] of Object.entries(receipts)) {
         if (counted.has(uid)) continue
+        tallyRetraction(receipt)
         const entry = { uid, name: name(uid), at: receipt.dismissedAt || receipt.seenAt }
         if (receipt.state === 'dismissed') summary.dismissed.push(entry)
         else summary.seen.push(entry)
@@ -79,12 +108,21 @@ export function getAudienceSummary(
     return summary
 }
 
-/** The announcement a reader should be shown next: newest, addressed to them, not yet closed. */
+/**
+ * The announcement a reader should be shown next.
+ *
+ * A pending retraction comes first even when a newer announcement exists: it is not new
+ * information but a correction telling the reader to stop acting on something they already acted
+ * on, and that should not have to queue behind a menu change.
+ */
 export function nextUnreadAnnouncement(
     announcements: Announcement[],
     receipts: Record<string, AnnouncementReceipt>,
     viewer: { uid?: string; role?: string },
 ) {
+    const retraction = pendingRetractions(announcements, receipts, viewer)[0]
+    if (retraction) return retraction
+
     return announcements
         // Nobody is nagged about an announcement they wrote themselves.
         .filter((announcement) => announcement.createdBy !== viewer.uid)
