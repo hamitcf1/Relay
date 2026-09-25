@@ -480,7 +480,7 @@ function BulkRateEditor({ hotelId }: { hotelId: string }) {
                 await setAgencyOverride(hotelId, target, overrideData)
             }
             toast.success(t('pricing.save.success'))
-        } catch (error) {
+        } catch (_error) {
             toast.error(t('pricing.save.error'))
         } finally {
             setIsSaving(false)
@@ -1241,6 +1241,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
     const [editingId, setEditingId] = useState<string | null>(null) // 'global' or agency id
     const [editPrices, setEditPrices] = useState<Record<string, RoomPriceEntry>>({})
     const [isSaving, setIsSaving] = useState(false)
+    const [agencySearch, setAgencySearch] = useState('')
     useWorkspaceDirty('pricing-base-table', Boolean(editingId))
 
     const startEditing = (id: string, prices: Record<string, RoomPriceEntry>) => {
@@ -1258,6 +1259,10 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                 await updateAgencyBasePrices(hotelId, editingId, editPrices)
             }
             setEditingId(null)
+            toast.success('Fiyatlar kaydedildi.')
+        } catch (error) {
+            console.error('Price save failed:', error)
+            toast.error('Fiyatlar kaydedilemedi.')
         } finally {
             setIsSaving(false)
         }
@@ -1280,9 +1285,10 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                             <Users className="w-5 h-5 text-primary" />
                             {t('pricing.base.title')}
                         </CardTitle>
-                        <CardDescription>Genel ve acenta bazlı standart oda fiyatları</CardDescription>
+                        <CardDescription>Önce genel fiyatı belirleyin. Acentada boş bıraktığınız oda genel fiyatı kullanır.</CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Input aria-label="Acenta ara" placeholder="Acenta ara..." value={agencySearch} onChange={e => setAgencySearch(e.target.value)} className="h-9 w-40" />
                         {isGM && (
                             <AddAgencyDialog dirtyId="pricing-new-base-agency" onAdd={onAddAgency} />
                         )}
@@ -1323,16 +1329,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                                 {ROOM_TYPES.map(room => (
                                     <td key={room} className="p-3 text-center">
                                         {editingId === 'global' ? (
-                                            <Input
-                                                type="number"
-                                                className="h-8 w-20 text-center text-xs px-1 font-mono mx-auto"
-                                                value={editPrices[room]?.amount || 0}
-                                                step="0.01"
-                                                onChange={e => setEditPrices(prev => ({
-                                                    ...prev,
-                                                    [room]: { amount: parseFloat(e.target.value) || 0, currency: prev[room]?.currency || 'EUR' }
-                                                }))}
-                                            />
+                                            <div className="flex min-w-28 flex-col gap-1"><Input aria-label={`${t(`room.${room}`)} genel fiyat`} type="number" min="0" step="0.01" className="h-9 text-center text-xs" value={editPrices[room]?.amount ?? ''} placeholder="Fiyat" onChange={e => setEditPrices(prev => ({ ...prev, [room]: { amount: Number(e.target.value), currency: prev[room]?.currency || 'EUR' } }))} /><select aria-label={`${t(`room.${room}`)} para birimi`} value={editPrices[room]?.currency || 'EUR'} onChange={e => setEditPrices(prev => ({ ...prev, [room]: { amount: prev[room]?.amount || 0, currency: e.target.value as PricingCurrency } }))} className="h-8 rounded-md border border-border bg-background px-1 text-xs"><option>EUR</option><option>TRY</option><option>USD</option><option>GBP</option></select></div>
                                         ) : (
                                             <div className="flex flex-col items-center">
                                                 <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
@@ -1359,7 +1356,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                                         ) : (
                                             <Button
                                                 variant="ghost" size="sm"
-                                                className="h-7 text-[10px] font-bold uppercase tracking-tighter opacity-0 group-hover/row:opacity-100 transition-opacity bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                                className="h-8 text-xs font-semibold bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                                                 onClick={() => startEditing('global', globalPrices)}
                                             >
                                                 Düzenle
@@ -1370,7 +1367,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                             </motion.tr>
 
                             {/* ===== AGENCY ROWS ===== */}
-                            {agencies.map((agency) => (
+                            {agencies.filter(agency => agency.name.toLocaleLowerCase('tr').includes(agencySearch.toLocaleLowerCase('tr'))).map((agency) => (
                                 <motion.tr
                                     key={agency.id}
                                     className={cn(
@@ -1395,17 +1392,7 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                                         return (
                                             <td key={room} className="p-3 text-center">
                                                 {editingId === agency.id ? (
-                                                    <Input
-                                                        type="number"
-                                                        className="h-8 w-20 text-center text-xs px-1 font-mono mx-auto"
-                                                        value={editPrices[room]?.amount || 0}
-                                                        step="0.01"
-                                                        placeholder={globalPrices[room]?.amount?.toFixed(2) || '0'}
-                                                        onChange={e => setEditPrices(prev => ({
-                                                            ...prev,
-                                                            [room]: { amount: parseFloat(e.target.value) || 0, currency: prev[room]?.currency || globalPrices[room]?.currency || 'EUR' }
-                                                        }))}
-                                                    />
+                                                    <div className="flex min-w-28 flex-col gap-1"><Input aria-label={`${agency.name} ${t(`room.${room}`)} fiyat`} type="number" min="0" step="0.01" className="h-9 text-center text-xs" value={editPrices[room]?.amount ?? ''} placeholder={globalPrices[room] ? `Genel ${globalPrices[room].amount}` : 'Genel fiyat yok'} onChange={e => setEditPrices(prev => { const next = { ...prev }; if (e.target.value === '') delete next[room]; else next[room] = { amount: Number(e.target.value), currency: prev[room]?.currency || globalPrices[room]?.currency || 'EUR' }; return next })} /><select aria-label={`${agency.name} ${t(`room.${room}`)} para birimi`} value={editPrices[room]?.currency || globalPrices[room]?.currency || 'EUR'} onChange={e => setEditPrices(prev => ({ ...prev, [room]: { amount: prev[room]?.amount || 0, currency: e.target.value as PricingCurrency } }))} className="h-8 rounded-md border border-border bg-background px-1 text-xs"><option>EUR</option><option>TRY</option><option>USD</option><option>GBP</option></select></div>
                                                 ) : (
                                                     <div className="flex flex-col items-center">
                                                         <span className={cn(
@@ -1440,17 +1427,18 @@ function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRem
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                                                <div className="flex items-center justify-end gap-1.5">
                                                     <Button
-                                                        variant="ghost" size="sm"
-                                                        className="h-7 text-[10px] font-bold uppercase tracking-tighter bg-primary/5 hover:bg-primary/10"
+                                                        variant="outline" size="sm"
+                                                        className="h-8 text-xs"
                                                         onClick={() => startEditing(agency.id, agency.base_prices || {})}
                                                     >
                                                         Düzenle
                                                     </Button>
                                                     <Button
                                                         variant="ghost" size="icon"
-                                                        className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                                                        aria-label={`${agency.name} acentasını sil`}
+                                                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
                                                         onClick={async () => {
                                                             const confirmed = await confirm({
                                                                 title: `${agency.name} silinsin mi?`,

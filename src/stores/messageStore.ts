@@ -101,7 +101,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
             }
             const messagesRef = collection(db, 'hotels', hotelId, 'messages')
             await addDoc(messagesRef, {
-                ...message,
+                ...Object.fromEntries(Object.entries(message).filter(([, value]) => value !== undefined)),
                 timestamp: serverTimestamp(),
                 is_read: false
             })

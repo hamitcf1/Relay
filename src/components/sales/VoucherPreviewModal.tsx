@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
 import QRCode from 'react-qr-code'
-import { Download, Printer, Sun, Moon, ChevronDown } from 'lucide-react'
+import { Download, Printer, Sun, Moon, ChevronDown, Share2, Copy } from 'lucide-react'
 
 import {
     Dialog,
@@ -22,6 +22,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useCurrencyStore } from '@/stores/currencyStore'
 import { cn, formatDisplayDate } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface VoucherPreviewModalProps {
     saleId: string | null
@@ -57,7 +58,8 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
         type: sale.type,
         guest: sale.customer_name,
         room: sale.room_number,
-        date: sale.date, // ISO string
+        date: sale.date.toISOString(),
+        sale_date: (sale.sale_date || sale.created_at).toISOString(),
         pickup_time: sale.pickup_time || '',
         pax: sale.pax,
         status: sale.status || 'waiting',
@@ -71,6 +73,13 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
     // Create a URL for the QR code to point to the Public Voucher Page
     const b64Data = typeof window !== 'undefined' ? btoa(encodeURIComponent(JSON.stringify(compactData))) : ''
     const qrData = `${window.location.origin}/voucher?d=${b64Data}`
+
+    const handleShare = async () => {
+        try {
+            if (navigator.share) await navigator.share({ title: `${sale.name} voucher`, url: qrData })
+            else { await navigator.clipboard.writeText(qrData); toast.success('Voucher bağlantısı kopyalandı.') }
+        } catch (error) { if ((error as DOMException)?.name !== 'AbortError') toast.error('Voucher paylaşılamadı.') }
+    }
 
     const handleDownload = async () => {
         if (!voucherRef.current) return
@@ -201,6 +210,8 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        <Button variant="outline" onClick={handleShare}><Share2 className="mr-2 h-4 w-4" />Paylaş</Button>
+                        <Button variant="outline" onClick={async () => { try { await navigator.clipboard.writeText(qrData); toast.success('Bağlantı kopyalandı.') } catch { toast.error('Kopyalanamadı.') } }}><Copy className="mr-2 h-4 w-4" />Bağlantı</Button>
                         <Button onClick={handleDownload} disabled={isGenerating}>
                             <Download className="w-4 h-4 mr-2" />
                             {isGenerating ? 'Generating...' : 'Download Image'}
@@ -211,7 +222,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                 <div className="w-full flex justify-center print:m-0 print:p-0 overflow-x-auto p-1">
                     <div 
                         ref={voucherRef}
-                        className={cn("relative flex flex-col sm:flex-row w-full sm:w-[850px] sm:h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[850px] print:h-[380px] print:flex-row", bgContainer)}
+                        className={cn("relative flex flex-col sm:flex-row w-full sm:w-[850px] sm:min-h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[850px] print:min-h-[380px] print:flex-row", bgContainer)}
                         style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                         <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30", gradientFrom, isDark ? "to-[#111318]" : "to-white")} />
@@ -289,7 +300,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                 </div>
                                 <div>
                                     <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
-                                    <p className={cn("text-sm font-bold", textValue)}>{sale.room_number}</p>
+                                    <p className={cn("text-sm font-bold", textValue)}>{sale.room_number || '—'}</p>
                                 </div>
                                 <div>
                                     <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pax')}</p>
@@ -301,8 +312,9 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                             <div className="flex flex-col sm:flex-row items-start justify-between mt-0 sm:mt-4 gap-4 sm:gap-0">
                                 <div className="space-y-4 w-full sm:w-auto">
                                     <div className="flex gap-6 sm:gap-8">
+                                        <div><p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Satış tarihi</p><p className={cn("text-sm font-semibold", textValue)}>{formatDisplayDate(sale.sale_date || sale.created_at)}</p></div>
                                         <div>
-                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.date')}</p>
+                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Hizmet tarihi</p>
                                             <p className={cn("text-base font-bold", textValue)}>{formatDisplayDate(sale.date)}</p>
                                         </div>
                                         {(sale.pickup_time || sale.type === 'transfer') && (
@@ -317,7 +329,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                     {sale.notes && (
                                         <div>
                                             <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.notes')}</p>
-                                            <p className={cn("text-xs max-w-[400px] line-clamp-2", isDark ? 'text-white/80' : 'text-zinc-600')}>{sale.notes}</p>
+                                            <p className={cn("text-xs max-w-[400px] whitespace-pre-wrap break-words", isDark ? 'text-white/80' : 'text-zinc-600')}>{sale.notes}</p>
                                         </div>
                                     )}
                                 </div>

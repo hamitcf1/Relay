@@ -27,6 +27,7 @@ import { useCurrencyStore } from '@/stores/currencyStore'
 import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { SaleType, Currency, SaleStatus } from '@/types'
+import { toast } from 'sonner'
 import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 export function SalesPanel() {
@@ -49,6 +50,7 @@ export function SalesPanel() {
         room_number: '',
         pax: 1,
         date: format(new Date(), 'yyyy-MM-dd'),
+        sale_date: format(new Date(), 'yyyy-MM-dd'),
         pickup_time: '',
         total_price: '',
         currency: 'EUR' as Currency,
@@ -72,6 +74,8 @@ export function SalesPanel() {
 
     const [hotelInfo, setHotelInfo] = useState<any>(null)
     const [shouldAddToNotes, setShouldAddToNotes] = useState(true)
+    const [paidOnSale, setPaidOnSale] = useState(false)
+    const [saving, setSaving] = useState(false)
     useWorkspaceDirty('sale', isAdding)
     const { addNote } = useNotesStore()
 
@@ -121,6 +125,7 @@ export function SalesPanel() {
             room_number: '',
             pax: 1,
             date: format(new Date(), 'yyyy-MM-dd'),
+        sale_date: format(new Date(), 'yyyy-MM-dd'),
             pickup_time: '',
             total_price: '',
             currency: 'EUR',
@@ -139,6 +144,7 @@ export function SalesPanel() {
             flightNumber: '',
             restAmount: ''
         })
+        setPaidOnSale(false)
         setIsAdding(false)
     }
 
@@ -147,9 +153,16 @@ export function SalesPanel() {
         const isTransfer = activeTab === 'transfer'
 
         const finalName = isLaundry ? t('sales.type.laundry') : (isTransfer ? transferData.destination : formData.name.trim())
-        if (!hotel?.id || !user || !finalName || !formData.total_price) return
+        if (!hotel?.id || !user || !finalName || !formData.total_price || !formData.date || !formData.sale_date || !formData.pickup_time) {
+            toast.error('Satış tarihi, hizmet tarihi ve teslim alma saati zorunludur.')
+            return
+        }
+        if (saving) return
+        setSaving(true)
 
-        const saleDate = new Date(formData.date)
+        try {
+        const saleDate = new Date(`${formData.date}T12:00:00`)
+        const recordedSaleDate = new Date(`${formData.sale_date}T12:00:00`)
         const totalPrice = parseFloat(formData.total_price)
 
         let finalNotes = formData.notes.trim()
@@ -177,7 +190,8 @@ export function SalesPanel() {
             room_number: formData.room_number.trim(),
             pax: formData.pax,
             date: saleDate,
-            pickup_time: formData.pickup_time || null,
+            sale_date: recordedSaleDate,
+            pickup_time: formData.pickup_time,
             total_price: totalPrice,
             currency: isLaundry ? 'TRY' : formData.currency,
             notes: finalNotes,
@@ -186,9 +200,18 @@ export function SalesPanel() {
             status: formData.status
         })
 
-        // Also add to Shift Notes if enabled
+        // Record the initial payment before creating the linked shift note.
+        if (paidOnSale) await useSalesStore.getState().collectPayment(hotel.id, saleId, totalPrice, isLaundry ? 'TRY' : formData.currency)
+
         if (shouldAddToNotes) {
-            const noteContent = `${finalName} - Room ${formData.room_number}: ${totalPrice} ${isLaundry ? 'TRY' : formData.currency}${finalNotes ? ` (${finalNotes.replace(/\n/g, ' ')})` : ''}`
+            const noteContent = [
+                t(saleTypeInfo[activeTab].label as any), finalName,
+                formData.customer_name.trim() && `Misafir: ${formData.customer_name.trim()}`,
+                formData.room_number.trim() && `Oda: ${formData.room_number.trim()}`,
+                `Satış: ${formData.sale_date}`, `Hizmet: ${formData.date}`,
+                `Alış saati: ${formData.pickup_time}`,
+                `${totalPrice} ${isLaundry ? 'TRY' : formData.currency}`, finalNotes
+            ].filter(Boolean).join(' · ')
             await addNote(hotel.id, {
                 category: 'payment_needed',
                 content: noteContent,
@@ -199,13 +222,19 @@ export function SalesPanel() {
                 guest_name: formData.customer_name.trim(),
                 shift_id: null,
                 amount_due: totalPrice,
-                is_paid: false,
+                is_paid: paidOnSale,
                 currency: isLaundry ? 'TRY' : formData.currency,
                 sale_id: saleId
             })
         }
 
         resetForm()
+        } catch (error) {
+            console.error('Sale creation failed:', error)
+            toast.error('Satış kaydedilemedi. Lütfen tekrar deneyin.')
+        } finally {
+            setSaving(false)
+        }
     }
 
     const tabs: { type: SaleType; icon: React.ReactNode }[] = [
@@ -400,12 +429,12 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.room')}</label>
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">Oda numarası (varsa)</label>
                                         <Input
                                             value={formData.room_number}
                                             onChange={e => setFormData(p => ({ ...p, room_number: e.target.value }))}
                                             className="h-8 text-xs bg-background border-border"
-                                            placeholder="101"
+                                            placeholder="Örn. 101 · otel dışıysa boş bırakın"
                                         />
                                     </div>
 
@@ -432,11 +461,16 @@ export function SalesPanel() {
                                         />
                                     </div>
 
-                                    <div className="col-span-2 grid grid-cols-2 gap-2">
+                                    <div className="col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-2 rounded-xl border border-primary/20 bg-primary/5 p-3">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('tours.book.date')}</label>
+                                            <label className="text-xs font-semibold">Satış tarihi *</label>
+                                            <Input type="date" required value={formData.sale_date} onChange={e => setFormData(p => ({ ...p, sale_date: e.target.value }))} className="h-9 bg-background" />
+                                            <p className="text-[10px] text-muted-foreground">İşlemin yapıldığı gün</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-semibold">Hizmet / gerçekleşme tarihi *</label>
                                             <Input
-                                                type="date"
+                                                type="date" required
                                                 value={formData.date}
                                                 onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
                                                 className="h-8 text-xs bg-background border-border"
@@ -444,9 +478,9 @@ export function SalesPanel() {
                                         </div>
 
                                         <div className="space-y-1">
-                                            <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('sales.pickupTime')}</label>
+                                            <label className="text-xs font-semibold">Teslim alma / pick-up saati *</label>
                                             <Input
-                                                type="time"
+                                                type="time" required
                                                 value={formData.pickup_time}
                                                 onChange={e => setFormData(p => ({ ...p, pickup_time: e.target.value }))}
                                                 className="h-8 text-xs bg-background border-border"
@@ -588,6 +622,10 @@ export function SalesPanel() {
                                         </button>
                                     </div>
                                 </div>
+                                <label className="flex items-center gap-2 rounded-lg border border-border p-3 text-xs">
+                                    <input type="checkbox" checked={paidOnSale} onChange={e => setPaidOnSale(e.target.checked)} />
+                                    Ödemenin tamamı satış sırasında alındı
+                                </label>
                                 <div className="flex gap-2 pt-2 col-span-2">
                                     <Button
                                         onClick={handleAddSale}
@@ -596,7 +634,7 @@ export function SalesPanel() {
                                             (activeTab === 'transfer' && !transferData.destination) ||
                                             (activeTab === 'laundry' && (laundryData.whites === 0 && laundryData.colors === 0 && laundryData.ironingPieces === 0)) ||
                                             (activeTab === 'other' && !formData.name.trim()) ||
-                                            !formData.total_price
+                                            !formData.total_price || !formData.date || !formData.sale_date || !formData.pickup_time || saving
                                         }
                                         className="flex-1 bg-primary hover:bg-primary/90 h-8 text-xs"
                                     >
@@ -664,7 +702,7 @@ export function SalesPanel() {
                                             </div>
 
                                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-                                                <span className="bg-muted px-1.5 py-0.5 rounded border border-border">Rm {sale.room_number}</span>
+                                                {sale.room_number && <span className="bg-muted px-1.5 py-0.5 rounded border border-border">Oda {sale.room_number}</span>}
                                                 <span>{sale.customer_name}</span>
                                                 <span className="text-muted-foreground/50">•</span>
                                                 <span>{formatDisplayDate(sale.date)}</span>
