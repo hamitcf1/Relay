@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toPng } from 'html-to-image'
 import QRCode from 'react-qr-code'
-import { Printer, Download, Globe } from 'lucide-react'
+import { Printer, Download, Globe, Share2 } from 'lucide-react'
 
 import {
     DropdownMenu,
@@ -70,6 +70,12 @@ export function VoucherPage() {
     const qrData = window.location.href
 
     const handlePrint = () => window.print()
+    const handleShare = async () => {
+        try {
+            if (navigator.share) await navigator.share({ title: `${data.name} voucher`, url: window.location.href })
+            else await navigator.clipboard.writeText(window.location.href)
+        } catch (error) { if ((error as DOMException)?.name !== 'AbortError') console.error('Voucher share failed', error) }
+    }
 
     const handleDownload = async () => {
         const el = document.getElementById('voucher-canvas')
@@ -80,7 +86,7 @@ export function VoucherPage() {
             await new Promise(r => setTimeout(r, 100))
             const dataUrl = await toPng(el, { quality: 1, pixelRatio: 2 })
             const link = document.createElement('a')
-            link.download = `Voucher-${data.room}-${data.name.replace(/\s+/g, '-')}.png`
+            link.download = `Voucher-${data.room || 'guest'}-${data.name.replace(/\s+/g, '-')}.png`
             link.href = dataUrl
             link.click()
         } catch (err) {
@@ -126,6 +132,7 @@ export function VoucherPage() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
+                    <Button variant="outline" onClick={handleShare}><Share2 className="w-4 h-4 mr-2" />Paylaş / bağlantıyı kopyala</Button>
                     <Button variant="outline" onClick={handlePrint} className="shrink-0">
                         <Printer className="w-4 h-4 mr-2" />
                         Print
@@ -141,7 +148,7 @@ export function VoucherPage() {
             <div className="w-full max-w-[850px] flex justify-center print:m-0 print:p-0">
                 <div 
                     id="voucher-canvas"
-                    className={cn("relative flex flex-col sm:flex-row w-full sm:w-[850px] sm:h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[850px] print:h-[380px] print:flex-row", bgContainer)}
+                    className={cn("relative flex flex-col sm:flex-row w-full sm:w-[850px] sm:min-h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[850px] print:min-h-[380px] print:flex-row", bgContainer)}
                     style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                     <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30", gradientFrom, isDark ? "to-[#111318]" : "to-white")} />
@@ -222,7 +229,7 @@ export function VoucherPage() {
                             </div>
                             <div>
                                 <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
-                                <p className={cn("text-sm font-bold", textValue)}>{data.room}</p>
+                                <p className={cn("text-sm font-bold", textValue)}>{data.room || '—'}</p>
                             </div>
                             <div>
                                 <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pax')}</p>
@@ -233,9 +240,10 @@ export function VoucherPage() {
                         {/* Logistics & Notes */}
                         <div className="flex flex-col sm:flex-row items-start justify-between mt-0 sm:mt-4 gap-4 sm:gap-0">
                             <div className="space-y-4 w-full sm:w-auto">
-                                <div className="flex gap-6 sm:gap-8">
+                                <div className="flex flex-wrap gap-4 sm:gap-8">
+                                        {data.sale_date && <div><p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Satış tarihi</p><p className={cn("text-sm font-semibold", textValue)}>{formatDisplayDate(new Date(data.sale_date))}</p></div>}
                                     <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.date')}</p>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Hizmet tarihi</p>
                                         <p className={cn("text-base font-bold", textValue)}>{formatDisplayDate(new Date(data.date))}</p>
                                     </div>
                                     {(data.pickup_time || data.type === 'transfer') && (
@@ -249,7 +257,7 @@ export function VoucherPage() {
                                 {data.notes && (
                                     <div>
                                         <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.notes')}</p>
-                                        <p className={cn("text-xs max-w-[400px] line-clamp-2", isDark ? 'text-white/80' : 'text-zinc-600')}>{data.notes}</p>
+                                        <p className={cn("text-xs max-w-[400px] whitespace-pre-wrap break-words", isDark ? 'text-white/80' : 'text-zinc-600')}>{data.notes}</p>
                                     </div>
                                 )}
                             </div>

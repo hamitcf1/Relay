@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import { toast } from 'sonner'
 import {
     collection,
+    getDoc,
+    getDocs,
+    where,
     doc,
     addDoc,
     updateDoc,
@@ -106,6 +109,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     room_number: data.room_number,
                     pax: data.pax || 1,
                     date: convertTimestamp(data.date),
+                    sale_date: data.sale_date ? convertTimestamp(data.sale_date) : convertTimestamp(data.created_at),
                     pickup_time: data.pickup_time,
                     ticket_number: data.ticket_number,
                     total_price: data.total_price || 0,
@@ -145,6 +149,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             collected_amount: 0,
             payment_status: 'pending' as PaymentStatus,
             date: Timestamp.fromDate(saleData.date),
+            sale_date: Timestamp.fromDate(saleData.sale_date || new Date()),
             created_at: serverTimestamp()
         }
 
@@ -159,7 +164,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                 const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
                 const eventData = {
                     type: saleData.type,
-                    title: `${saleTypeInfo[saleData.type].icon} ${saleData.name} - ${saleData.room_number}`,
+                    title: `${saleTypeInfo[saleData.type].icon} ${saleData.name}${saleData.room_number ? ` - Oda ${saleData.room_number}` : ''}`,
                     description: `Guest: ${saleData.customer_name}\nPax: ${saleData.pax}\nPrice: ${saleData.total_price} ${saleData.currency}`,
                     date: Timestamp.fromDate(saleData.date),
                     time: saleData.pickup_time || null, // Use pickup time if available
@@ -201,6 +206,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         if (updates.date) {
             updateData.date = Timestamp.fromDate(updates.date)
         }
+        if (updates.sale_date) updateData.sale_date = Timestamp.fromDate(updates.sale_date)
 
         // Recalculate payment status if amounts changed
         if (updates.total_price !== undefined) {
@@ -234,6 +240,9 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 
         updateData.updated_at = serverTimestamp()
         await updateDoc(saleRef, updateData)
+        if (currentSale && (updates.total_price !== undefined || updates.name !== undefined || updates.date !== undefined || updates.pickup_time !== undefined || updates.room_number !== undefined || updates.customer_name !== undefined || updates.notes !== undefined || updates.sale_date !== undefined)) {
+            await syncLinkedNotes(hotelId, saleId, currentSale.collected_amount, updates.total_price ?? currentSale.total_price, updateData.payment_status || currentSale.payment_status, { ...currentSale, ...updates })
+        }
         toast.success('Sale updated')
 
         // Sync to calendar if critical fields changed
@@ -242,9 +251,9 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             if (updates.date) syncUpdates.date = Timestamp.fromDate(updates.date)
             if (updates.pickup_time) syncUpdates.time = updates.pickup_time
             if (updates.total_price !== undefined) syncUpdates.total_price = updates.total_price
-            if (updates.name) syncUpdates.title = `${saleTypeInfo[currentSale.type].icon} ${updates.name} - Room ${currentSale.room_number}`
-            if (updates.room_number) syncUpdates.room_number = updates.room_number
-            if (updates.notes) syncUpdates.description = `Guest: ${currentSale.customer_name}\nPax: ${currentSale.pax}\nPrice: ${currentSale.total_price} ${currentSale.currency}\nNotes: ${updates.notes}`
+            if (updates.name || updates.room_number !== undefined) syncUpdates.title = `${saleTypeInfo[currentSale.type].icon} ${updates.name || currentSale.name}${(updates.room_number ?? currentSale.room_number) ? ` - Oda ${updates.room_number ?? currentSale.room_number}` : ''}`
+            if (updates.room_number !== undefined) syncUpdates.room_number = updates.room_number
+            if (updates.notes !== undefined || updates.customer_name !== undefined) syncUpdates.description = `Guest: ${updates.customer_name ?? currentSale.customer_name}\nPax: ${currentSale.pax}\nPrice: ${updates.total_price ?? currentSale.total_price} ${updates.currency ?? currentSale.currency}\nNotes: ${updates.notes ?? currentSale.notes ?? ''}`
 
             if (Object.keys(syncUpdates).length > 0) {
                 try {
@@ -270,6 +279,13 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         const sale = get().sales.find(s => s.id === saleId)
         const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
         await deleteDoc(saleRef)
+        try {
+            const linked = await getDocs(query(collection(db, 'hotels', hotelId, 'shift_notes'), where('sale_id', '==', saleId)))
+            await Promise.all(linked.docs.map(note => deleteDoc(note.ref)))
+        } catch (error) {
+            console.error('Linked shift note deletion failed:', error)
+            toast.error('Satış silindi ancak bağlı nöbet notu silinemedi.')
+        }
         toast.success('Sale deleted')
 
         // Also delete calendar event if exists
@@ -284,8 +300,13 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     },
 
     collectPayment: async (hotelId: string, saleId: string, amount: number, currency?: Currency, targetAmount?: number) => {
-        const sale = get().sales.find(s => s.id === saleId)
-        if (!sale) return
+        let sale = get().sales.find(s => s.id === saleId)
+        if (!sale) {
+            const snapshot = await getDoc(doc(db, 'hotels', hotelId, 'sales', saleId))
+            if (!snapshot.exists()) throw new Error('Sale not found')
+            const data = snapshot.data()
+            sale = { ...data, id: saleId, hotel_id: hotelId, date: convertTimestamp(data.date), created_at: convertTimestamp(data.created_at), collected_amount: data.collected_amount || 0, payments: data.payments || [] } as Sale
+        }
 
         const paymentCurrency = currency || sale.currency
         // Use targetAmount if provided (for cross-currency), otherwise use straight amount if matching currency
@@ -328,6 +349,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             payment_status: paymentStatus,
             payments: sanitizedPayments
         })
+        await syncLinkedNotes(hotelId, saleId, newTotalCollected, sale.total_price, paymentStatus)
         toast.success(paymentStatus === 'paid' ? 'Fully paid! ✓' : `Payment collected: ${amount} ${paymentCurrency}`)
 
         // Sync to calendar
@@ -350,6 +372,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             payment_status: 'cancelled',
             updated_at: serverTimestamp()
         })
+        await syncLinkedNotes(hotelId, saleId, 0, get().sales.find(s => s.id === saleId)?.total_price || 0, 'cancelled')
         toast.success('Payment cancelled')
     },
 
@@ -363,6 +386,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             collected_amount: 0,
             updated_at: serverTimestamp()
         })
+        await syncLinkedNotes(hotelId, saleId, 0, sale.total_price, 'refunded')
         toast.success('Payment refunded')
 
         // Sync to calendar
@@ -392,3 +416,19 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         return get().sales.filter(sale => sale.type === type)
     }
 }))
+
+async function syncLinkedNotes(hotelId: string, saleId: string, collected: number, total: number, status: PaymentStatus, sale?: Sale) {
+    try {
+        const notes = await getDocs(query(collection(db, 'hotels', hotelId, 'shift_notes'), where('sale_id', '==', saleId)))
+        const content = sale ? [saleTypeInfo[sale.type]?.icon, sale.name, sale.customer_name && `Misafir: ${sale.customer_name}`, sale.room_number && `Oda: ${sale.room_number}`, `Satış: ${(sale.sale_date || sale.created_at).toLocaleDateString('tr-TR')}`, `Hizmet: ${sale.date.toLocaleDateString('tr-TR')}`, sale.pickup_time && `Alış saati: ${sale.pickup_time}`, `${total} ${sale.currency}`, sale.notes].filter(Boolean).join(' · ') : undefined
+        await Promise.all(notes.docs.map(note => updateDoc(note.ref, {
+            ...(content ? { content, room_number: sale?.room_number || null, guest_name: sale?.customer_name || null } : {}),
+            amount_due: Math.max(0, total - collected),
+            is_paid: status === 'paid',
+            updated_at: serverTimestamp()
+        })))
+    } catch (error) {
+        console.error('Linked shift note sync failed:', error)
+        toast.error('Satış kaydedildi ancak nöbet notu güncellenemedi.')
+    }
+}

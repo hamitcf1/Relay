@@ -73,8 +73,10 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                 pickup_time: sale.pickup_time || '',
                 ticket_number: sale.ticket_number || '',
                 date: sale.date,
+                sale_date: sale.sale_date || sale.created_at,
                 name: sale.name,
                 room_number: sale.room_number,
+                customer_name: sale.customer_name,
                 currency: sale.currency,
                 status: sale.status || 'waiting'
             })
@@ -89,6 +91,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
     const handleSave = async () => {
         if (!hotel?.id || !saleId) return
+        if (!editForm.date || !editForm.sale_date || !editForm.pickup_time) return
         try {
             await updateSale(hotel.id, saleId, editForm)
             setIsEditing(false)
@@ -250,13 +253,34 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
                         <div className="flex items-center gap-4 text-muted-foreground text-sm">
                             <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {sale.customer_name}</span>
-                            <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {t('common.room')} {sale.room_number}</span>
-                            <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {formatDisplayDate(sale.date)}</span>
+                            {sale.room_number && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {t('common.room')} {sale.room_number}</span>}
+                            <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Hizmet: {formatDisplayDate(sale.date)}</span>
                         </div>
                     </div>
 
                     {/* C O N T E N T */}
                     <div className="p-6 space-y-8">
+
+                        <div className="grid gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:grid-cols-3">
+                            <label className="space-y-1 text-xs font-semibold">Satış tarihi *
+                                {isEditing ? <Input type="date" required value={editForm.sale_date ? format(editForm.sale_date, 'yyyy-MM-dd') : ''} onChange={e => setEditForm(prev => ({ ...prev, sale_date: new Date(`${e.target.value}T12:00:00`) }))} /> : <span className="block text-sm font-normal">{formatDisplayDate(sale.sale_date || sale.created_at)}</span>}
+                            </label>
+                            <label className="space-y-1 text-xs font-semibold">Hizmet / gerçekleşme tarihi *
+                                {isEditing ? <Input type="date" required value={editForm.date ? format(editForm.date, 'yyyy-MM-dd') : ''} onChange={e => setEditForm(prev => ({ ...prev, date: new Date(`${e.target.value}T12:00:00`) }))} /> : <span className="block text-sm font-normal">{formatDisplayDate(sale.date)}</span>}
+                            </label>
+                            <label className="space-y-1 text-xs font-semibold">Pick-up saati *
+                                {isEditing ? <Input type="time" required value={editForm.pickup_time || ''} onChange={e => setEditForm(prev => ({ ...prev, pickup_time: e.target.value }))} /> : <span className="block text-sm font-normal">{sale.pickup_time || 'Belirtilmemiş'}</span>}
+                            </label>
+                        </div>
+
+                        {isEditing && <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="space-y-1 text-xs font-semibold">Misafir adı
+                                <Input value={editForm.customer_name || ''} onChange={e => setEditForm(prev => ({ ...prev, customer_name: e.target.value }))} placeholder="Misafir adı" />
+                            </label>
+                            <label className="space-y-1 text-xs font-semibold">Oda numarası (varsa)
+                                <Input value={editForm.room_number || ''} onChange={e => setEditForm(prev => ({ ...prev, room_number: e.target.value }))} placeholder="Otel dışıysa boş bırakın" />
+                            </label>
+                        </div>}
 
                         {/* Details Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

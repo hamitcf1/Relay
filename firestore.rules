@@ -122,6 +122,26 @@ service cloud.firestore {
         allow delete: if isGM();
       }
       
+      // Personal notes: only the owner and explicitly invited collaborators can read.
+      match /personal_notes/{noteId} {
+        function canAccessNote() {
+          return isAuthenticated() && belongsToHotel(hotelId) &&
+            (resource.data.owner_id == request.auth.uid || request.auth.uid in resource.data.collaborator_ids);
+        }
+        allow read: if canAccessNote();
+        allow create: if isAuthenticated() && belongsToHotel(hotelId) &&
+          request.resource.data.owner_id == request.auth.uid &&
+          request.resource.data.collaborator_ids is list;
+        allow update: if canAccessNote() &&
+          request.resource.data.owner_id == resource.data.owner_id &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+            resource.data.owner_id == request.auth.uid
+              ? ['title', 'content', 'tags', 'collaborator_ids', 'archived', 'deleted', 'updated_at']
+              : ['title', 'content', 'tags', 'updated_at']);
+        allow delete: if isAuthenticated() && belongsToHotel(hotelId) &&
+          resource.data.owner_id == request.auth.uid;
+      }
+
       // SHIFT_NOTES - Notes for all shifts
       match /shift_notes/{noteId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);

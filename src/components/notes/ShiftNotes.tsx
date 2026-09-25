@@ -10,6 +10,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { NoteFilters } from './NoteFilters'
 import { NoteForm } from './NoteForm'
 import { NoteList } from './NoteList'
+import { PersonalNotes } from './PersonalNotes'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -17,7 +18,20 @@ interface ShiftNotesProps {
     initialAddOpen?: boolean
 }
 
-export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = false }: ShiftNotesProps) {
+export function ShiftNotes(props: ShiftNotesProps) {
+    const [tab, setTab] = useState<'handover' | 'personal'>('handover')
+    useEffect(() => { if (props.initialAddOpen) setTab('handover') }, [props.initialAddOpen])
+    return <div className="space-y-5">
+        <nav className="inline-flex flex-wrap gap-1 rounded-xl border border-border bg-muted/60 p-1" aria-label="Not bölümleri">
+            <button type="button" onClick={() => setTab('handover')} className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab === 'handover' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'}`}>Nöbet notları</button>
+            <button type="button" onClick={() => setTab('personal')} className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab === 'personal' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'}`}>Kişisel notlar</button>
+        </nav>
+        <div className={tab === 'handover' ? '' : 'hidden'}><ShiftHandover {...props} /></div>
+        {tab === 'personal' && <PersonalNotes hotelId={props.hotelId} />}
+    </div>
+}
+
+function ShiftHandover({ hotelId, showAddButton = true, initialAddOpen = false }: ShiftNotesProps) {
     const notes = useNotesStore((state) => state.notes)
     const language = useLanguageStore((state) => state.language)
     const { activeStaff, subscribeToRoster } = useRosterStore()
