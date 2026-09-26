@@ -2,11 +2,12 @@ import type { LucideIcon } from 'lucide-react'
 import {
     Activity, ArrowLeftRight, CalendarDays, CircleDollarSign, CreditCard,
     Info, KeyRound, LayoutDashboard, Map, MessageCircle, NotebookPen, Settings,
-    ShieldAlert, ShieldCheck, Utensils, UserX, Users, DollarSign,
+    ShieldAlert, ShieldCheck, Utensils, UserX, Users, DollarSign, Wrench,
 } from 'lucide-react'
 
 export type ModuleId =
     | 'overview' | 'notes' | 'personal-notes' | 'roster' | 'messaging' | 'compliance' | 'feedback'
+    | 'maintenance'
     | 'hotel-info' | 'currency' | 'calendar' | 'menu' | 'blacklist'
     | 'cards-loans' | 'pricing' | 'tours' | 'off-days' | 'sales'
     | 'team' | 'activity' | 'settings'
@@ -39,6 +40,7 @@ export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
     { id: 'messaging', icon: MessageCircle, group: 'operations', labelKey: 'module.messaging', labels: { tr: 'Mesajlar', en: 'Messages', ru: 'Сообщения' }, area: 'operations', subTab: 'messaging', primary: true },
     { id: 'compliance', icon: ShieldCheck, group: 'operations', labelKey: 'module.compliance', labels: { tr: 'Uyumluluk', en: 'Compliance', ru: 'Соответствие' }, area: 'operations', subTab: 'compliance' },
     { id: 'feedback', icon: ShieldAlert, group: 'operations', labelKey: 'module.complaints', labels: { tr: 'Şikâyetler', en: 'Complaints', ru: 'Жалобы' }, area: 'operations', subTab: 'feedback' },
+    { id: 'maintenance', icon: Wrench, group: 'operations', labelKey: 'module.maintenance', labels: { tr: 'Bakım', en: 'Maintenance', ru: 'Обслуживание' }, shortLabels: { tr: 'Bakım', en: 'Maint.', ru: 'Сервис' }, area: 'operations', subTab: 'maintenance' },
     { id: 'sales', icon: CreditCard, group: 'operations', labelKey: 'module.sales', labels: { tr: 'Satışlar', en: 'Sales', ru: 'Продажи' }, area: 'operations', subTab: 'sales' },
     { id: 'tours', icon: Map, group: 'operations', labelKey: 'module.tours', labels: { tr: 'Turlar', en: 'Tours', ru: 'Туры' }, area: 'operations', subTab: 'tours' },
     { id: 'cards-loans', icon: KeyRound, group: 'operations', labelKey: 'module.cards-loans', labels: { tr: 'Kart ve ödünç', en: 'Cards & loans', ru: 'Карты и займы' }, area: 'operations', subTab: 'cards-loans' },

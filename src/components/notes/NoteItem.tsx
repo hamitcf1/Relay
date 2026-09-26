@@ -29,9 +29,11 @@ interface NoteItemProps {
     hotelId: string
     hotel: Hotel | null
     staff: StaffMember[]
+    selected?: boolean
+    onToggleSelect?: () => void
 }
 
-export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
+export function NoteItem({ note, hotelId, hotel, staff, selected, onToggleSelect }: NoteItemProps) {
     const { updateNote, updateNoteStatus, markPaid, deleteNote, convertToLog, togglePin } = useNotesStore()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
@@ -182,6 +184,17 @@ export function NoteItem({ note, hotelId, hotel, staff }: NoteItemProps) {
         >
             
             <div className="flex items-start justify-between gap-2">
+                {onToggleSelect && (
+                    <input
+                        type="checkbox"
+                        checked={!!selected}
+                        onChange={(e) => {
+                            e.stopPropagation()
+                            onToggleSelect()
+                        }}
+                        className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary cursor-pointer shrink-0"
+                    />
+                )}
                 <div className="flex-1 min-w-0">
                     {/* Header */}
                     <div className="flex items-center gap-2 flex-wrap mb-1">

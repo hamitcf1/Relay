@@ -28,6 +28,10 @@ export function LoginPage() {
 
         const user = useAuthStore.getState().user
         if (user) {
+            if (user.is_demo || user.hotel_id === 'demo-hotel-id') {
+                navigate('/dashboard')
+                return
+            }
             try {
                 const { doc, getDoc } = await import('firebase/firestore')
                 const { db } = await import('@/lib/firebase')
