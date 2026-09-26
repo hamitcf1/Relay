@@ -62,10 +62,54 @@ export function useDuePaymentNotifier() {
             }
 
             const { t } = useLanguageStore.getState()
-            const owedIds = new Set(dueSales.map((sale) => sale.id))
             const next = { ...reported }
 
-            for (const sale of dueSales) {
+            const now = new Date()
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+
+            // 1. Process all sales for 1-day advance reminders
+            for (const sale of sales) {
+                if (sale.status === 'cancelled') continue
+
+                const serviceDate = new Date(sale.date)
+                const serviceStart = new Date(serviceDate.getFullYear(), serviceDate.getMonth(), serviceDate.getDate()).getTime()
+                const dayBeforeServiceStart = serviceStart - (24 * 60 * 60 * 1000)
+
+                // 1-Day Before Reminder
+                if (todayStart === dayBeforeServiceStart) {
+                    const reminderKey = `upcoming_reminder_${sale.id}_${dayBeforeServiceStart}`
+                    if (!localStorage.getItem(reminderKey)) {
+                        try {
+                            await addNotification(hotelId, {
+                                type: 'system',
+                                title: t('notifications.upcomingSaleReminder.title'),
+                                content: t('notifications.upcomingSaleReminder.content', {
+                                    name: sale.name,
+                                    room: sale.room_number || '-',
+                                    guest: sale.customer_name || '-',
+                                    time: sale.pickup_time || '--:--'
+                                }),
+                                target_role: 'all',
+                                link: `/operations?tab=sales&sale=${sale.id}`
+                            })
+                            localStorage.setItem(reminderKey, 'true')
+                        } catch (err) {
+                            console.error('Upcoming sale reminder notification failed:', err)
+                        }
+                    }
+                }
+            }
+
+            // 2. Process due payments ONLY for sales whose realization date has arrived (todayStart >= serviceStart)
+            const dueSalesOnOrAfterServiceDate = dueSales.filter(sale => {
+                const serviceDate = new Date(sale.date)
+                const serviceStart = new Date(serviceDate.getFullYear(), serviceDate.getMonth(), serviceDate.getDate()).getTime()
+                return todayStart >= serviceStart
+            })
+
+            const owedIds = new Set(dueSalesOnOrAfterServiceDate.map((sale) => sale.id))
+
+            for (const sale of dueSalesOnOrAfterServiceDate) {
                 const outstanding = Math.max(0, sale.total_price - sale.collected_amount)
                 const fingerprint = `${outstanding} ${sale.currency}`
 
@@ -76,26 +120,17 @@ export function useDuePaymentNotifier() {
                         type: 'payment',
                         title: t('notifications.duePayments.title'),
                         content: describeSale(t, sale, outstanding),
-                        // Straight to the sale, so the reminder can be settled without hunting for it.
                         link: `/operations?tab=sales&sale=${sale.id}`
                     })
                 } catch (error) {
-                    // addNotification rethrows. Leave this sale's fingerprint untouched so the next
-                    // run tries again, and stop the run here: the notifications are independent, so
-                    // the sales after this one are still worth reporting, but they are not worth
-                    // reporting from inside a loop that is already failing.
                     console.error('Due payment notification failed:', error)
                     break
                 }
 
-                // Recorded only after the write succeeded. Recording it first would mean a failed
-                // write leaves a sale marked as already reported, and it would then stay silent for
-                // good.
                 next[sale.id] = fingerprint
             }
 
-            // Forget sales that are no longer owed. Without this the record only ever grows, and a
-            // sale that is settled and then re-opened would be silenced by its stale fingerprint.
+            // Forget sales that are no longer owed or not yet arrived
             for (const id of Object.keys(next)) {
                 if (!owedIds.has(id)) delete next[id]
             }
@@ -103,9 +138,6 @@ export function useDuePaymentNotifier() {
         }
 
         reportDuePayments()
-        // The check is a read of in-memory state, so this is only an upper bound on how quickly a
-        // payment taken in another tab is noticed. The effect re-runs on its own whenever `sales`
-        // changes, so the interval is a backstop rather than the main path.
         const intervalId = setInterval(reportDuePayments, 60 * 60 * 1000)
 
         return () => clearInterval(intervalId)

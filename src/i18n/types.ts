@@ -194,6 +194,37 @@ export type Translations = {
     'module.operations': string
     'module.messaging': string
     'module.complaints': string
+    'maintenance.title': string
+    'maintenance.subtitle': string
+    'maintenance.openCount': string
+    'maintenance.overdueCount': string
+    'maintenance.filter.label': string
+    'maintenance.filter.open': string
+    'maintenance.filter.resolved': string
+    'maintenance.filter.all': string
+    'maintenance.emptyOpen': string
+    'maintenance.emptyResolved': string
+    'maintenance.emptyAll': string
+    'maintenance.report.title': string
+    'maintenance.report.submit': string
+    'maintenance.room': string
+    'maintenance.roomPlaceholder': string
+    'maintenance.roomLabel': string
+    'maintenance.what': string
+    'maintenance.whatPlaceholder': string
+    'maintenance.priority': string
+    'maintenance.due': string
+    'maintenance.dueOn': string
+    'maintenance.overdue': string
+    'maintenance.reportedBy': string
+    'maintenance.assign': string
+    'maintenance.unassigned': string
+    'maintenance.resolve': string
+    'maintenance.reopen': string
+    'maintenance.confirmResolve': string
+    'maintenance.resolutionLabel': string
+    'maintenance.resolutionPlaceholder': string
+    'maintenance.gmOnly': string
     'module.offDays': string
     'module.tours': string
     'module.sales': string
@@ -604,6 +635,8 @@ export type Translations = {
     'notifications.duePayments.title': string
     'notifications.duePayments.room': string
     'notifications.duePayments.amount': string
+    'notifications.upcomingSaleReminder.title': string
+    'notifications.upcomingSaleReminder.content': string
     'notifications.clearAll': string
     'notifications.clearAllConfirm': string
     'notifications.clearAllDescription': string
@@ -682,6 +715,7 @@ export type Translations = {
 
     // Status/Filter
     'status.all': string
+    'status.trash': string
     
     // Reports
     'report.generate': string

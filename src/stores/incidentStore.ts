@@ -60,6 +60,18 @@ export const useIncidentStore = create<IncidentStore>((set) => ({
     },
 
     addIncident: async (hotelId, data) => {
+        const isDemo = hotelId === 'demo-hotel-id'
+        if (isDemo) {
+            const newIncident: Incident = {
+                id: `incident-${Date.now()}`,
+                hotel_id: hotelId,
+                ...data,
+                created_at: new Date()
+            }
+            set(state => ({ incidents: [newIncident, ...state.incidents] }))
+            toast.success('Incident reported')
+            return
+        }
         try {
             const incidentsRef = collection(db, 'hotels', hotelId, 'incidents')
             await addDoc(incidentsRef, {
@@ -86,6 +98,14 @@ export const useIncidentStore = create<IncidentStore>((set) => ({
     },
 
     updateIncidentStatus: async (hotelId, incidentId, status) => {
+        const isDemo = hotelId === 'demo-hotel-id'
+        if (isDemo) {
+            set(state => ({
+                incidents: state.incidents.map(i => i.id === incidentId ? { ...i, status, updated_at: new Date() } : i)
+            }))
+            toast.success(`Incident marked as ${status}`)
+            return
+        }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'incidents', incidentId)
             await updateDoc(docRef, { 
@@ -100,6 +120,14 @@ export const useIncidentStore = create<IncidentStore>((set) => ({
     },
 
     deleteIncident: async (hotelId, incidentId) => {
+        const isDemo = hotelId === 'demo-hotel-id'
+        if (isDemo) {
+            set(state => ({
+                incidents: state.incidents.filter(i => i.id !== incidentId)
+            }))
+            toast.success('Incident removed')
+            return
+        }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'incidents', incidentId)
             await deleteDoc(docRef)

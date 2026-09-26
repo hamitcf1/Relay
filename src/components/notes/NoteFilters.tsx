@@ -20,6 +20,7 @@ export function NoteFilters({ statusFilter, setStatusFilter, filter, setFilter, 
         { key: 'active' as const, label: t('status.active') || 'Active' },
         { key: 'resolved' as const, label: t('status.resolved') || 'Resolved' },
         { key: 'archived' as const, label: t('status.archived') || 'Archived' },
+        { key: 'trash' as const, label: t('status.trash') || 'Çöp Kutusu' },
         { key: 'all' as const, label: t('status.all') || 'All' },
     ]
     const categories = [

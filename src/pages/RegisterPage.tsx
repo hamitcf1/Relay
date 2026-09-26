@@ -71,20 +71,23 @@ export function RegisterPage() {
                 }
             }
 
-            await setDoc(doc(db, 'users', credential.user.uid), {
-                email: email,
-                name: name.trim(),
-                role: isGM ? 'gm' : role,
-                current_shift_type: null,
-                hotel_id: validatedHotelId,
-                created_at: new Date(),
-            })
-
-            if (validatedHotelId) {
-                const { updateDoc, arrayUnion, doc: firestoreDoc } = await import('firebase/firestore')
-                await updateDoc(firestoreDoc(db, 'hotels', validatedHotelId), {
-                    staff_list: arrayUnion(credential.user.uid)
+            const isDemoMode = validatedHotelId === 'demo-hotel-id' || email.includes('demo')
+            if (!isDemoMode) {
+                await setDoc(doc(db, 'users', credential.user.uid), {
+                    email: email,
+                    name: name.trim(),
+                    role: isGM ? 'gm' : role,
+                    current_shift_type: null,
+                    hotel_id: validatedHotelId,
+                    created_at: new Date(),
                 })
+
+                if (validatedHotelId) {
+                    const { updateDoc, arrayUnion, doc: firestoreDoc } = await import('firebase/firestore')
+                    await updateDoc(firestoreDoc(db, 'hotels', validatedHotelId), {
+                        staff_list: arrayUnion(credential.user.uid)
+                    })
+                }
             }
 
             navigate(isGM ? '/setup-hotel' : '/')

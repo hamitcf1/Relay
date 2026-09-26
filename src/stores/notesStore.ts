@@ -12,12 +12,15 @@ import {
     serverTimestamp,
     Timestamp,
     arrayUnion,
+    writeBatch,
+    limit,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { ShiftNote, NoteCategory, NoteStatus, NotePriority } from '@/types'
 import { syncNoteToCalendar, removeNoteFromCalendar } from '@/lib/calendar-sync'
 import { useAuthStore } from './authStore'
 import { useActivityStore } from './activityStore'
+import { useSalesStore } from './salesStore'
 
 export type { NoteCategory, NoteStatus, NotePriority }
 
@@ -37,6 +40,9 @@ interface NotesActions {
     deleteNote: (hotelId: string, noteId: string) => Promise<void>
     convertToLog: (hotelId: string, noteId: string) => Promise<void>
     togglePin: (hotelId: string, noteId: string, isPinned: boolean) => Promise<void>
+    bulkUpdateNoteStatus: (hotelId: string, noteIds: string[], status: NoteStatus, resolvedBy?: string) => Promise<void>
+    bulkDeleteNotes: (hotelId: string, noteIds: string[]) => Promise<void>
+    emptyTrash: (hotelId: string) => Promise<void>
 }
 
 type NotesStore = NotesState & NotesActions
@@ -56,7 +62,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
         set({ loading: true, error: null })
 
         const notesRef = collection(db, 'hotels', hotelId, 'shift_notes')
-        const notesQuery = query(notesRef, orderBy('created_at', 'desc'))
+        const notesQuery = query(notesRef, orderBy('created_at', 'desc'), limit(200))
 
         // Mock Notes for Live Demo
         if (hotelId === 'demo-hotel-id') {
@@ -101,6 +107,70 @@ export const useNotesStore = create<NotesStore>((set) => ({
                     priority: 'high',
                     assigned_staff_name: 'Receptionist',
                     updated_at: new Date(Date.now() - 7200000)
+                },
+                // Three maintenance tickets, deliberately in the order that proves the queue sorts
+                // rather than just listing: one overdue and unassigned, one due today and assigned,
+                // one closed with the work written down. A queue shown with a single empty-shaped
+                // ticket teaches nothing about how it behaves when it matters.
+                {
+                    id: 'note-maint-1',
+                    category: 'maintenance',
+                    content: 'The lift in the east wing stops between floors 2 and 3.',
+                    room_number: null,
+                    is_relevant: false,
+                    status: 'active',
+                    amount_due: null,
+                    is_paid: false,
+                    created_at: new Date(Date.now() - 172800000),
+                    created_by: 'demo-user-staff',
+                    created_by_name: 'Receptionist',
+                    shift_id: 'DEMO_SHIFT_A',
+                    resolved_at: null,
+                    resolved_by: null,
+                    is_anonymous: false,
+                    priority: 'critical',
+                    due_at: new Date(Date.now() - 86400000),
+                    updated_at: new Date(Date.now() - 172800000)
+                },
+                {
+                    id: 'note-maint-2',
+                    category: 'maintenance',
+                    content: 'Room 204 air conditioning runs but does not cool.',
+                    room_number: '204',
+                    is_relevant: false,
+                    status: 'active',
+                    amount_due: null,
+                    is_paid: false,
+                    created_at: new Date(Date.now() - 3600000),
+                    created_by: 'demo-user-gm',
+                    created_by_name: 'Manager',
+                    shift_id: 'DEMO_SHIFT_A',
+                    resolved_at: null,
+                    resolved_by: null,
+                    is_anonymous: false,
+                    priority: 'medium',
+                    due_at: new Date(Date.now() + 86400000),
+                    updated_at: new Date(Date.now() - 3600000)
+                },
+                {
+                    id: 'note-maint-3',
+                    category: 'maintenance',
+                    content: 'The hot water takes over ten minutes to arrive.',
+                    room_number: '310',
+                    is_relevant: false,
+                    status: 'resolved',
+                    amount_due: null,
+                    is_paid: false,
+                    created_at: new Date(Date.now() - 259200000),
+                    created_by: 'demo-user-staff',
+                    created_by_name: 'Receptionist',
+                    shift_id: 'DEMO_SHIFT_A',
+                    resolved_at: new Date(Date.now() - 43200000),
+                    resolved_by: 'demo-user-gm',
+                    is_anonymous: false,
+                    priority: 'high',
+                    resolution: 'The mixing valve on the third floor was replaced.',
+                    updated_at: new Date(Date.now() - 43200000)
                 }
             ]
 
@@ -120,7 +190,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         content: data.content,
                         room_number: data.room_number || null,
                         is_relevant: data.is_relevant ?? true,
-                        status: data.status || (data.resolved_at ? 'resolved' : 'active'),
+                        status: (data.status as NoteStatus) || (data.resolved_at ? 'resolved' : 'active'),
                         amount_due: data.amount_due || null,
                         is_paid: data.is_paid || false,
                         created_at: convertTimestamp(data.created_at),
@@ -131,6 +201,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         resolved_by: data.resolved_by || null,
                         is_anonymous: data.is_anonymous || false,
                         updated_at: data.updated_at ? convertTimestamp(data.updated_at) : undefined,
+                        trashed_at: data.trashed_at ? convertTimestamp(data.trashed_at) : undefined,
                         currency: data.currency || undefined,
                         time: data.time || null,
                         guest_name: data.guest_name || null,
@@ -148,6 +219,19 @@ export const useNotesStore = create<NotesStore>((set) => ({
                         sale_id: data.sale_id || undefined
                     }
                 })
+
+                // Auto Purge Trash older than 30 days
+                const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                const expiredTrash = notesList.filter(n => n.status === 'trash' && ((n.trashed_at || n.updated_at || n.created_at) < thirtyDaysAgo))
+                if (expiredTrash.length > 0) {
+                    expiredTrash.forEach(async (n) => {
+                        try {
+                            await deleteDoc(doc(db, 'hotels', hotelId, 'shift_notes', n.id))
+                        } catch (e) {
+                            console.error('Trash auto purge error:', e)
+                        }
+                    })
+                }
 
                 set({ notes: notesList, loading: false, error: null })
             },
@@ -373,20 +457,37 @@ export const useNotesStore = create<NotesStore>((set) => ({
         try {
             const isDemo = hotelId === 'demo-hotel-id'
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
+            const note = useNotesStore.getState().notes.find(n => n.id === noteId)
+
+            // If note is linked to a sale, sync with salesStore
+            if (note?.sale_id) {
+                const sales = useSalesStore.getState().sales
+                const sale = sales.find(s => s.id === note.sale_id)
+                if (sale) {
+                    const remaining = Math.max(0, sale.total_price - sale.collected_amount)
+                    if (remaining > 0) {
+                        await useSalesStore.getState().collectPayment(
+                            hotelId,
+                            note.sale_id,
+                            remaining,
+                            sale.currency
+                        )
+                    }
+                }
+            }
+
             const localPatch: Partial<ShiftNote> = {
                 is_paid: true,
-                status: 'resolved',
-                resolved_at: new Date(),
+                amount_due: 0,
             }
             if (isDemo) {
                 set((state) => ({
                     notes: state.notes.map(n => n.id === noteId ? { ...n, ...localPatch } : n)
                 }))
             } else {
-                await updateDoc(noteRef, { ...localPatch, resolved_at: serverTimestamp() })
+                await updateDoc(noteRef, localPatch)
             }
-            await removeNoteFromCalendar(hotelId, noteId)
-            toast.success('Marked as paid ✓')
+            toast.success('Ödeme alındı olarak işaretlendi ✓')
         } catch (error) {
             console.error('Error marking paid:', error)
             toast.error('Failed to mark as paid')
@@ -473,6 +574,89 @@ export const useNotesStore = create<NotesStore>((set) => ({
             console.error('Error toggling pin:', error)
             toast.error('Failed to update pin status')
         }
+    },
+
+    bulkUpdateNoteStatus: async (hotelId: string, noteIds: string[], status: NoteStatus, resolvedBy?: string) => {
+        if (noteIds.length === 0) return
+        try {
+            const isDemo = hotelId === 'demo-hotel-id'
+            const updates: any = { status, updated_at: isDemo ? new Date() : serverTimestamp() }
+            if (status === 'resolved' || status === 'archived') {
+                updates.resolved_at = isDemo ? new Date() : serverTimestamp()
+                if (resolvedBy) updates.resolved_by = resolvedBy
+            } else if (status === 'trash') {
+                updates.trashed_at = isDemo ? new Date() : serverTimestamp()
+            } else if (status === 'active') {
+                updates.resolved_at = null
+                updates.resolved_by = null
+                updates.trashed_at = null
+            }
+
+            if (isDemo) {
+                set((state) => ({
+                    notes: state.notes.map(n => noteIds.includes(n.id) ? { ...n, ...updates } : n)
+                }))
+            } else {
+                const batch = writeBatch(db)
+                noteIds.forEach(id => {
+                    const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', id)
+                    batch.update(noteRef, updates)
+                })
+                await batch.commit()
+            }
+            toast.success(`${noteIds.length} not güncellendi`)
+        } catch (error) {
+            console.error('Error bulk updating notes:', error)
+            toast.error('Toplu güncelleme başarısız oldu')
+        }
+    },
+
+    bulkDeleteNotes: async (hotelId: string, noteIds: string[]) => {
+        if (noteIds.length === 0) return
+        try {
+            const isDemo = hotelId === 'demo-hotel-id'
+            if (isDemo) {
+                set((state) => ({ notes: state.notes.filter(n => !noteIds.includes(n.id)) }))
+            } else {
+                const batch = writeBatch(db)
+                noteIds.forEach(id => {
+                    const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', id)
+                    batch.delete(noteRef)
+                })
+                await batch.commit()
+            }
+            toast.success(`${noteIds.length} not kalıcı olarak silindi`)
+        } catch (error) {
+            console.error('Error bulk deleting notes:', error)
+            toast.error('Toplu silme başarısız oldu')
+        }
+    },
+
+    emptyTrash: async (hotelId: string) => {
+        try {
+            const { notes } = useNotesStore.getState()
+            const trashNoteIds = notes.filter(n => n.status === 'trash').map(n => n.id)
+            if (trashNoteIds.length === 0) {
+                toast.info('Çöp kutusu zaten boş')
+                return
+            }
+
+            const isDemo = hotelId === 'demo-hotel-id'
+            if (isDemo) {
+                set((state) => ({ notes: state.notes.filter(n => n.status !== 'trash') }))
+            } else {
+                const batch = writeBatch(db)
+                trashNoteIds.forEach(id => {
+                    const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', id)
+                    batch.delete(noteRef)
+                })
+                await batch.commit()
+            }
+            toast.success('Çöp kutusu temizlendi')
+        } catch (error) {
+            console.error('Error emptying trash:', error)
+            toast.error('Çöp kutusu temizlenemedi')
+        }
     }
 }))
 
@@ -484,6 +668,7 @@ export const categoryInfo: Record<NoteCategory, { label: string; color: string; 
     payment_needed: { label: 'Payment Needed', color: 'bg-green-500', icon: '💳' },
     restaurant: { label: 'Restaurant', color: 'bg-orange-500', icon: '🍽️' },
     minibar: { label: 'Minibar', color: 'bg-zinc-700', icon: '🥤' },
+    maintenance: { label: 'Maintenance', color: 'bg-amber-500', icon: '🔧' },
     early_checkout: { label: 'Early Checkout', color: 'bg-amber-500', icon: '🚪' },
     guest_info: { label: 'Guest Info', color: 'bg-cyan-500', icon: '👤' },
     feedback: { label: 'Feedback', color: 'bg-purple-500', icon: '💬' },

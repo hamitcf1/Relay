@@ -195,6 +195,21 @@ export function VoucherPage() {
                                     )}>
                                         {t(saleStatusInfo[(data.status || 'waiting') as keyof typeof saleStatusInfo]?.label as any) || data.status}
                                     </span>
+                                    {data.type === 'transfer' && (
+                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                            🚐 VIP Transfer Pass
+                                        </span>
+                                    )}
+                                    {data.type === 'tour' && (
+                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                                            🗺️ Guided Excursion Pass
+                                        </span>
+                                    )}
+                                    {data.type === 'laundry' && (
+                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                            🧺 Laundry Service Ticket
+                                        </span>
+                                    )}
                                 </div>
                                 <h1 className={cn("text-3xl font-black tracking-tight uppercase", isDark ? 'text-white/90' : 'text-zinc-900')}>{data.name}</h1>
                                 <p className={cn("text-sm font-medium uppercase tracking-widest mt-1", textMuted)}>
@@ -221,21 +236,113 @@ export function VoucherPage() {
                             </div>
                         </div>
 
-                        {/* Middle Grid */}
-                        <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mt-0 sm:mt-4 rounded-xl p-4 border", bgGrid)}>
-                            <div>
-                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                <p className={cn("text-sm font-bold truncate", textValue)}>{data.guest}</p>
+                        {/* Category Specific Custom Callouts & Grids */}
+                        {data.type === 'transfer' ? (
+                            <div className="space-y-3 my-2">
+                                <div className={cn("flex items-center justify-between p-3 rounded-xl border border-amber-500/30", isDark ? "bg-amber-500/10" : "bg-amber-50")}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">🚐</span>
+                                        <div>
+                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-amber-300" : "text-amber-800")}>Transfer Alış Saati / Pickup Time</p>
+                                            <p className={cn("text-xl font-black tracking-tight", isDark ? "text-amber-200" : "text-amber-900")}>{data.pickup_time || '--:--'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>Pax / Yolcu</p>
+                                        <p className={cn("text-base font-bold", textValue)}>{data.pax} Person</p>
+                                    </div>
+                                </div>
+                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                        <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest}</p>
+                                    </div>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{data.room || '—'}</p>
+                                    </div>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Transfer Tarihi</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{formatDisplayDate(new Date(data.date))}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
-                                <p className={cn("text-sm font-bold", textValue)}>{data.room || '—'}</p>
+                        ) : data.type === 'tour' ? (
+                            <div className="space-y-3 my-2">
+                                <div className={cn("flex items-center justify-between p-3 rounded-xl border border-indigo-500/30", isDark ? "bg-indigo-500/10" : "bg-indigo-50")}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">🗺️</span>
+                                        <div>
+                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-indigo-300" : "text-indigo-800")}>Tur & Gezi Bilet Detayı</p>
+                                            <p className={cn("text-sm font-bold truncate", isDark ? "text-indigo-200" : "text-indigo-900")}>{data.name}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>Kalkış Saati</p>
+                                        <p className={cn("text-base font-bold", isDark ? "text-indigo-200" : "text-indigo-900")}>{data.pickup_time || '--:--'}</p>
+                                    </div>
+                                </div>
+                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                        <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest}</p>
+                                    </div>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{data.room || '—'}</p>
+                                    </div>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Katılımcı (Pax)</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{data.pax} Katılımcı</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pax')}</p>
-                                <p className={cn("text-sm font-bold", textValue)}>{data.pax}</p>
+                        ) : data.type === 'laundry' ? (
+                            <div className="space-y-3 my-2">
+                                <div className={cn("flex items-center justify-between p-3 rounded-xl border border-emerald-500/30", isDark ? "bg-emerald-500/10" : "bg-emerald-50")}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">🧺</span>
+                                        <div>
+                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-emerald-300" : "text-emerald-800")}>Çamaşırhane Oda No</p>
+                                            <p className={cn("text-xl font-black tracking-tight", isDark ? "text-emerald-200" : "text-emerald-900")}>Oda {data.room || '—'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>Teslim Saati</p>
+                                        <p className={cn("text-base font-bold", isDark ? "text-emerald-200" : "text-emerald-900")}>{data.pickup_time || '--:--'}</p>
+                                    </div>
+                                </div>
+                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                        <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest}</p>
+                                    </div>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Teslim Tarihi</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{formatDisplayDate(new Date(data.date))}</p>
+                                    </div>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Parça / Servis</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{data.pax} Parça</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mt-0 sm:mt-4 rounded-xl p-4 border", bgGrid)}>
+                                <div>
+                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                    <p className={cn("text-sm font-bold truncate", textValue)}>{data.guest}</p>
+                                </div>
+                                <div>
+                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
+                                    <p className={cn("text-sm font-bold", textValue)}>{data.room || '—'}</p>
+                                </div>
+                                <div>
+                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pax')}</p>
+                                    <p className={cn("text-sm font-bold", textValue)}>{data.pax}</p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Logistics & Notes */}
                         <div className="flex flex-col sm:flex-row items-start justify-between mt-0 sm:mt-4 gap-4 sm:gap-0">

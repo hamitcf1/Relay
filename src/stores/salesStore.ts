@@ -13,7 +13,8 @@ import {
     query,
     orderBy,
     serverTimestamp,
-    Timestamp
+    Timestamp,
+    writeBatch
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { Sale, SaleType, PaymentStatus, Currency, PaymentEntry, SaleStatus } from '@/types'
@@ -70,6 +71,9 @@ interface SalesActions {
     refundPayment: (hotelId: string, saleId: string) => Promise<void>
     getDueSales: () => Sale[]
     getSalesByType: (type: SaleType) => Sale[]
+    bulkUpdateSales: (hotelId: string, saleIds: string[], updates: Partial<Sale>) => Promise<void>
+    bulkDeleteSales: (hotelId: string, saleIds: string[]) => Promise<void>
+    emptySalesTrash: (hotelId: string) => Promise<void>
 }
 
 const convertTimestamp = (timestamp: any): Date => {
@@ -142,6 +146,9 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     collected_amount: data.collected_amount || 0,
                     currency: data.currency || 'EUR',
                     status: data.status as SaleStatus || 'waiting',
+                    priority: data.priority || 'low',
+                    lifecycle_status: data.lifecycle_status || 'active',
+                    trashed_at: data.trashed_at ? convertTimestamp(data.trashed_at) : undefined,
                     payment_status: data.payment_status as PaymentStatus,
                     notes: data.notes,
                     created_by: data.created_by,
@@ -156,6 +163,19 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     })) || []
                 }
             })
+
+            // Auto purge sales trash older than 30 days
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            const expiredTrash = salesList.filter(s => s.lifecycle_status === 'trash' && ((s.trashed_at || s.updated_at || s.created_at) < thirtyDaysAgo))
+            if (expiredTrash.length > 0 && hotelId !== 'demo-hotel-id') {
+                expiredTrash.forEach(async (s) => {
+                    try {
+                        await deleteDoc(doc(db, 'hotels', hotelId, 'sales', s.id))
+                    } catch (e) {
+                        console.error('Sales trash auto purge error:', e)
+                    }
+                })
+            }
 
             set({ sales: salesList, loading: false, loaded: true })
         }, (error) => {
@@ -528,6 +548,78 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 
     getSalesByType: (type) => {
         return get().sales.filter(sale => sale.type === type)
+    },
+
+    bulkUpdateSales: async (hotelId: string, saleIds: string[], updates: Partial<Sale>) => {
+        if (saleIds.length === 0) return
+        try {
+            const isDemo = hotelId === 'demo-hotel-id'
+            if (isDemo) {
+                set((state) => ({
+                    sales: state.sales.map(s => saleIds.includes(s.id) ? { ...s, ...updates, updated_at: new Date() } : s)
+                }))
+            } else {
+                const docUpdate = { ...updates, updated_at: serverTimestamp() }
+                const batch = writeBatch(db)
+                saleIds.forEach(id => {
+                    const saleRef = doc(db, 'hotels', hotelId, 'sales', id)
+                    batch.update(saleRef, docUpdate)
+                })
+                await batch.commit()
+            }
+            toast.success(`${saleIds.length} satış güncellendi`)
+        } catch (error) {
+            console.error('Error bulk updating sales:', error)
+            toast.error('Toplu satış güncelleme başarısız')
+        }
+    },
+
+    bulkDeleteSales: async (hotelId: string, saleIds: string[]) => {
+        if (saleIds.length === 0) return
+        try {
+            const isDemo = hotelId === 'demo-hotel-id'
+            if (isDemo) {
+                set((state) => ({ sales: state.sales.filter(s => !saleIds.includes(s.id)) }))
+            } else {
+                const batch = writeBatch(db)
+                saleIds.forEach(id => {
+                    const saleRef = doc(db, 'hotels', hotelId, 'sales', id)
+                    batch.delete(saleRef)
+                })
+                await batch.commit()
+            }
+            toast.success(`${saleIds.length} satış silindi`)
+        } catch (error) {
+            console.error('Error bulk deleting sales:', error)
+            toast.error('Toplu silme başarısız')
+        }
+    },
+
+    emptySalesTrash: async (hotelId: string) => {
+        try {
+            const { sales } = get()
+            const trashIds = sales.filter(s => s.lifecycle_status === 'trash').map(s => s.id)
+            if (trashIds.length === 0) {
+                toast.info('Çöp kutusu boş')
+                return
+            }
+
+            const isDemo = hotelId === 'demo-hotel-id'
+            if (isDemo) {
+                set((state) => ({ sales: state.sales.filter(s => s.lifecycle_status !== 'trash') }))
+            } else {
+                const batch = writeBatch(db)
+                trashIds.forEach(id => {
+                    const saleRef = doc(db, 'hotels', hotelId, 'sales', id)
+                    batch.delete(saleRef)
+                })
+                await batch.commit()
+            }
+            toast.success('Satış çöp kutusu temizlendi')
+        } catch (error) {
+            console.error('Error emptying sales trash:', error)
+            toast.error('Çöp kutusu temizlenemedi')
+        }
     }
 }))
 

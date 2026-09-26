@@ -250,6 +250,7 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
         }
     },
     joinHotelByCode: async (code, user) => {
+        if (user.is_demo || user.hotel_id === 'demo-hotel-id') return true
         try {
             const { collection, query, where, getDocs, updateDoc, arrayUnion, doc: firestoreDoc } = await import('firebase/firestore')
 
@@ -280,6 +281,7 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
     },
 
     validateHotelCode: async (code: string) => {
+        if (code === 'DEMO' || code === 'DEMO123' || code === 'demo-hotel-id') return 'demo-hotel-id'
         try {
             const { collection, query, where, getDocs } = await import('firebase/firestore')
             const hotelsRef = collection(db, 'hotels')
@@ -298,6 +300,7 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
     },
 
     createNewHotel: async (info, user) => {
+        if (user.is_demo || user.hotel_id === 'demo-hotel-id') return 'demo-hotel-id'
         try {
             const generateCode = () => {
                 const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'

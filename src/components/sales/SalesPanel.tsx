@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket } from 'lucide-react'
+import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket, Trash2, Archive } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,11 +22,12 @@ import {
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
-import { useNotesStore } from '@/stores/notesStore'
+import { useNotesStore, priorityInfo } from '@/stores/notesStore'
 import { useCurrencyStore } from '@/stores/currencyStore'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { SaleType, Currency, SaleStatus } from '@/types'
+import type { SaleType, Currency, SaleStatus, NotePriority } from '@/types'
 import { toast } from 'sonner'
 import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 import { useSearchParams } from 'react-router-dom'
@@ -34,24 +35,21 @@ import { useSearchParams } from 'react-router-dom'
 export function SalesPanel() {
     const { t } = useLanguageStore()
     const [searchParams, setSearchParams] = useSearchParams()
-    const { sales, loading, subscribeToSales, addSale, updateSale } = useSalesStore()
+    const { sales, loading, subscribeToSales, addSale, updateSale, bulkUpdateSales, bulkDeleteSales, emptySalesTrash } = useSalesStore()
     const { tours, subscribeToTours } = useTourStore()
     const { hotel } = useHotelStore()
     const { user } = useAuthStore()
     const { rates, fetchRates } = useCurrencyStore()
+    const confirm = useConfirm()
 
     const [activeTab, setActiveTab] = useState<SaleType>('tour')
     const [isAdding, setIsAdding] = useState(false)
     const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
     const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null)
+    const [selectedSaleIds, setSelectedSaleIds] = useState<string[]>([])
+    const [filterPriority, setFilterPriority] = useState<NotePriority | 'all'>('all')
+    const [filterLifecycle, setFilterLifecycle] = useState<'active' | 'archived' | 'trash'>('active')
 
-    // An unpaid-sale reminder links straight at the sale it is about
-    // ("/operations?tab=sales&sale=ID"), so which sale to open can arrive in the URL. The id is
-    // read from the URL rather than baked into the initial state because the panel is already
-    // mounted when a reminder is clicked from another tab, and a useState initialiser would not
-    // run again. SalesDetailModal looks the id up in the store and renders nothing until the
-    // subscription delivers it, so holding the id is enough: the modal appears on its own once the
-    // data lands, and there is no separate check for whether the id referred to a real sale.
     const saleParam = searchParams.get('sale')
 
     useEffect(() => {
@@ -60,9 +58,6 @@ export function SalesPanel() {
 
     const closeDetail = () => {
         setSelectedSaleId(null)
-        // Drop the param as well, so a reload does not reopen the sale that was just dismissed.
-        // Replaces the entry rather than pushing one, otherwise the back button would bring the
-        // modal back after it was closed.
         if (!saleParam) return
         const next = new URLSearchParams(searchParams)
         next.delete('sale')
@@ -81,7 +76,8 @@ export function SalesPanel() {
         total_price: '',
         currency: 'EUR' as Currency,
         notes: '',
-        status: 'waiting' as SaleStatus
+        status: 'waiting' as SaleStatus,
+        priority: 'medium' as NotePriority
     })
 
     const [laundryData, setLaundryData] = useState({
@@ -142,7 +138,13 @@ export function SalesPanel() {
         }
     }, [laundryData.colors, laundryData.whites, laundryData.ironingPieces, laundryData.service, activeTab, hotelInfo])
 
-    const filteredSales = sales.filter(s => s.type === activeTab)
+    const filteredSales = sales.filter(s => {
+        if (s.type !== activeTab) return false
+        const saleLifecycle = s.lifecycle_status || 'active'
+        if (saleLifecycle !== filterLifecycle) return false
+        if (filterPriority !== 'all' && (s.priority || 'medium') !== filterPriority) return false
+        return true
+    })
 
     const resetForm = () => {
         setFormData({
@@ -151,12 +153,13 @@ export function SalesPanel() {
             room_number: '',
             pax: 1,
             date: format(new Date(), 'yyyy-MM-dd'),
-        sale_date: format(new Date(), 'yyyy-MM-dd'),
+            sale_date: format(new Date(), 'yyyy-MM-dd'),
             pickup_time: '',
             total_price: '',
             currency: 'EUR',
             notes: '',
-            status: 'waiting'
+            status: 'waiting',
+            priority: 'medium'
         })
         setLaundryData({
             whites: 0,
@@ -172,6 +175,69 @@ export function SalesPanel() {
         })
         setPaidOnSale(false)
         setIsAdding(false)
+    }
+
+    const handleToggleSelectAll = () => {
+        if (selectedSaleIds.length === filteredSales.length) {
+            setSelectedSaleIds([])
+        } else {
+            setSelectedSaleIds(filteredSales.map(s => s.id))
+        }
+    }
+
+    const handleToggleSelectSale = (id: string) => {
+        setSelectedSaleIds(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        )
+    }
+
+    const handleBulkStatusChange = async (status: SaleStatus) => {
+        if (!hotel?.id || selectedSaleIds.length === 0) return
+        await bulkUpdateSales(hotel.id, selectedSaleIds, { status })
+        setSelectedSaleIds([])
+    }
+
+    const handleBulkPriorityChange = async (priority: NotePriority) => {
+        if (!hotel?.id || selectedSaleIds.length === 0) return
+        await bulkUpdateSales(hotel.id, selectedSaleIds, { priority })
+        setSelectedSaleIds([])
+    }
+
+    const handleBulkLifecycleChange = async (lifecycle_status: 'active' | 'archived' | 'trash') => {
+        if (!hotel?.id || selectedSaleIds.length === 0) return
+        const updates: any = { lifecycle_status }
+        if (lifecycle_status === 'trash') updates.trashed_at = new Date()
+        if (lifecycle_status === 'active') updates.trashed_at = null
+        await bulkUpdateSales(hotel.id, selectedSaleIds, updates)
+        setSelectedSaleIds([])
+    }
+
+    const handleBulkDelete = async () => {
+        if (!hotel?.id || selectedSaleIds.length === 0) return
+        const confirmed = await confirm({
+            title: 'Seçili Satışları Kalıcı Olarak Sil',
+            description: `${selectedSaleIds.length} satışı veritabanından kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`,
+            variant: 'destructive',
+            confirmLabel: 'Evet, Sil'
+        })
+        if (confirmed) {
+            await bulkDeleteSales(hotel.id, selectedSaleIds)
+            setSelectedSaleIds([])
+        }
+    }
+
+    const handleEmptyTrash = async () => {
+        if (!hotel?.id) return
+        const confirmed = await confirm({
+            title: 'Çöp Kutusu Temizlensin mi?',
+            description: 'Çöp kutusundaki TÜM satışlar kalıcı olarak silinecek (30 günü beklemeden). Emin misiniz?',
+            variant: 'destructive',
+            confirmLabel: 'Çöp Kutusunu Boşalt'
+        })
+        if (confirmed) {
+            await emptySalesTrash(hotel.id)
+            setSelectedSaleIds([])
+        }
     }
 
     const handleAddSale = async () => {
@@ -223,7 +289,9 @@ export function SalesPanel() {
             notes: finalNotes,
             created_by: user.uid,
             created_by_name: user.name || 'Unknown',
-            status: formData.status
+            status: formData.status,
+            priority: formData.priority,
+            lifecycle_status: 'active'
         })
 
         // Record the initial payment before creating the linked shift note.
@@ -250,7 +318,8 @@ export function SalesPanel() {
                 amount_due: totalPrice,
                 is_paid: paidOnSale,
                 currency: isLaundry ? 'TRY' : formData.currency,
-                sale_id: saleId
+                sale_id: saleId,
+                priority: formData.priority
             })
         }
 
@@ -270,7 +339,7 @@ export function SalesPanel() {
     ]
 
     return (
-        <Card className="bg-card/50 border-border h-full flex flex-col">
+        <Card className="bg-card/50 border-border min-h-full w-full flex flex-col">
             <CardHeader className="pb-3 flex-shrink-0">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -294,7 +363,7 @@ export function SalesPanel() {
                     {tabs.map(({ type, icon }) => (
                         <button
                             key={type}
-                            onClick={() => setActiveTab(type)}
+                            onClick={() => { setActiveTab(type); setSelectedSaleIds([]); }}
                             className={cn(
                                 'flex-1 flex items-center justify-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium transition-all',
                                 activeTab === type
@@ -306,6 +375,54 @@ export function SalesPanel() {
                             {t(saleTypeInfo[type].label as any)}
                         </button>
                     ))}
+                </div>
+
+                {/* Filter Bar: Lifecycle & Priority */}
+                <div className="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t border-border/40">
+                    <div className="flex items-center gap-1">
+                        {(['active', 'archived', 'trash'] as const).map(l => (
+                            <button
+                                key={l}
+                                onClick={() => { setFilterLifecycle(l); setSelectedSaleIds([]); }}
+                                className={cn(
+                                    "text-xs px-2.5 py-1 rounded-md transition-all font-medium border",
+                                    filterLifecycle === l
+                                        ? "bg-primary/10 text-primary border-primary/30"
+                                        : "bg-background text-muted-foreground border-border hover:bg-muted"
+                                )}
+                            >
+                                {l === 'active' ? 'Aktif Satışlar' : (l === 'archived' ? 'Arşiv' : 'Çöp Kutusu')}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Select value={filterPriority} onValueChange={(val: any) => setFilterPriority(val)}>
+                            <SelectTrigger className="h-7 text-xs bg-background border-border w-[130px]">
+                                <SelectValue placeholder="Aciliyet" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all" className="text-xs">Tüm Aciliyetler</SelectItem>
+                                {(Object.keys(priorityInfo) as NotePriority[]).map(p => (
+                                    <SelectItem key={p} value={p} className="text-xs">
+                                        {priorityInfo[p].symbol} {t(`priority.${p}` as any) as string}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        {filterLifecycle === 'trash' && user?.role === 'gm' && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleEmptyTrash}
+                                className="h-7 text-xs gap-1"
+                            >
+                                <Trash2 className="w-3 h-3" />
+                                Çöp Kutusunu Boşalt
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </CardHeader>
 
@@ -601,7 +718,7 @@ export function SalesPanel() {
                                     </div>
                                 </div>
 
-                                <div className="col-span-2 grid grid-cols-2 gap-2 py-1">
+                                <div className="col-span-2 grid grid-cols-3 gap-2 py-1">
                                     <div className="space-y-1">
                                         <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('status.label' as any)}</label>
                                         <Select
@@ -620,6 +737,28 @@ export function SalesPanel() {
                                                         <div className="flex items-center gap-2">
                                                             <span className={cn("w-2 h-2 rounded-full", saleStatusInfo[status].color.split(' ')[0].replace('/20', ''))} />
                                                             {t(saleStatusInfo[status].label as any)}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">{t('priority.label' as any)}</label>
+                                        <Select
+                                            value={formData.priority}
+                                            onValueChange={(val: any) => setFormData(p => ({ ...p, priority: val }))}
+                                        >
+                                            <SelectTrigger className="h-8 text-xs bg-background border-border">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-popover border-border">
+                                                {(Object.keys(priorityInfo) as NotePriority[]).map((p) => (
+                                                    <SelectItem key={p} value={p} className="text-xs">
+                                                        <div className="flex items-center gap-2">
+                                                            <span>{priorityInfo[p].symbol}</span>
+                                                            <span>{t(`priority.${p}` as any) as string}</span>
                                                         </div>
                                                     </SelectItem>
                                                 ))}
@@ -710,10 +849,28 @@ export function SalesPanel() {
                                     )}
                                 >
                                     <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-center pt-1" onClick={(e) => e.stopPropagation()}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedSaleIds.includes(sale.id)}
+                                                onChange={() => handleToggleSelectSale(sale.id)}
+                                                className="h-4 w-4 rounded border-border text-primary focus:ring-primary cursor-pointer shrink-0"
+                                            />
+                                        </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span className="text-lg group-hover:scale-110 transition-transform">{saleTypeInfo[sale.type].icon}</span>
                                                 <span className="font-semibold text-foreground truncate">{sale.name}</span>
+                                                {sale.priority && sale.priority !== 'low' && (
+                                                    <span className={cn(
+                                                        "inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase",
+                                                        sale.priority === 'critical' ? "bg-rose-500/10 text-rose-500 border-rose-500/20" :
+                                                        sale.priority === 'high' ? "bg-orange-500/10 text-orange-500 border-orange-500/20" :
+                                                        "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                                    )}>
+                                                        {priorityInfo[sale.priority]?.symbol} {t(`priority.${sale.priority}` as any) as string}
+                                                    </span>
+                                                )}
                                                 {sale.status !== 'cancelled' && remaining > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
                                                 
                                                 <Button 
@@ -758,7 +915,7 @@ export function SalesPanel() {
                                                         if (hotel?.id) {
                                                             updateSale(hotel.id, sale.id, { status: val })
                                                         }
-                                                    }}
+                                                     }}
                                                 >
                                                     <SelectTrigger className={cn(
                                                         "h-6 text-[10px] uppercase font-bold tracking-wider px-2 py-0 border-0 min-w-[90px] justify-between gap-1 transition-colors rounded-md shadow-sm",
@@ -784,6 +941,91 @@ export function SalesPanel() {
                             )
                         })}
                     </div>
+                )}
+
+                {/* Floating Bulk Actions Bar */}
+                {selectedSaleIds.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="sticky bottom-4 z-40 p-2.5 bg-card/95 backdrop-blur border border-primary/30 rounded-xl shadow-2xl flex flex-wrap items-center justify-between gap-3 text-xs"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-primary">{selectedSaleIds.length} satış seçildi</span>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleToggleSelectAll}
+                                className="h-7 text-xs px-2 text-muted-foreground hover:text-foreground"
+                            >
+                                {selectedSaleIds.length === filteredSales.length ? 'Seçimi Kaldır' : 'Tümünü Seç'}
+                            </Button>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Select onValueChange={(val: any) => handleBulkStatusChange(val)}>
+                                <SelectTrigger className="h-7 text-xs bg-background border-border w-[120px]">
+                                    <SelectValue placeholder="Durum Değiştir" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {(Object.keys(saleStatusInfo) as SaleStatus[]).map(status => (
+                                        <SelectItem key={status} value={status} className="text-xs">
+                                            {t(saleStatusInfo[status].label as any)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Select onValueChange={(val: any) => handleBulkPriorityChange(val)}>
+                                <SelectTrigger className="h-7 text-xs bg-background border-border w-[120px]">
+                                    <SelectValue placeholder="Aciliyet Belirle" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {(Object.keys(priorityInfo) as NotePriority[]).map(p => (
+                                        <SelectItem key={p} value={p} className="text-xs">
+                                            {priorityInfo[p].symbol} {t(`priority.${p}` as any) as string}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {filterLifecycle === 'active' && (
+                                <>
+                                    <Button variant="outline" size="sm" onClick={() => handleBulkLifecycleChange('archived')} className="h-7 text-xs gap-1">
+                                        <Archive className="w-3 h-3" /> Arşive Al
+                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => handleBulkLifecycleChange('trash')} className="h-7 text-xs gap-1 text-rose-500 border-rose-500/30 hover:bg-rose-500/10">
+                                        <Trash2 className="w-3 h-3" /> Çöpe At
+                                    </Button>
+                                </>
+                            )}
+
+                            {filterLifecycle === 'archived' && (
+                                <>
+                                    <Button variant="outline" size="sm" onClick={() => handleBulkLifecycleChange('active')} className="h-7 text-xs gap-1">
+                                        Aktife Taşı
+                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => handleBulkLifecycleChange('trash')} className="h-7 text-xs gap-1 text-rose-500 border-rose-500/30 hover:bg-rose-500/10">
+                                        <Trash2 className="w-3 h-3" /> Çöpe At
+                                    </Button>
+                                </>
+                            )}
+
+                            {filterLifecycle === 'trash' && (
+                                <>
+                                    <Button variant="outline" size="sm" onClick={() => handleBulkLifecycleChange('active')} className="h-7 text-xs gap-1">
+                                        Geri Yükle
+                                    </Button>
+                                    {user?.role === 'gm' && (
+                                        <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="h-7 text-xs gap-1">
+                                            <Trash2 className="w-3 h-3" /> Kalıcı Sil
+                                        </Button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </motion.div>
                 )}
                 <ScrollToTopButton />
             </CardContent>
