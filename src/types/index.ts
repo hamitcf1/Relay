@@ -181,6 +181,7 @@ export interface HotelSettings {
     }
     fixture_prices?: Record<string, number>
     minibar_prices?: Record<string, number>
+    archived_notes_retention_days?: number
 }
 
 export interface Hotel {
@@ -277,9 +278,10 @@ export type NoteCategory =
     | 'payment_needed'  // Payment collection needed (financial)
     | 'restaurant'      // Restaurant/Bar payments (financial)
     | 'minibar'         // Minibar usage (financial)
+    | 'maintenance'     // Maintenance tickets, worked as a queue
     | 'other'
 
-export type NoteStatus = 'active' | 'resolved' | 'archived'
+export type NoteStatus = 'active' | 'resolved' | 'archived' | 'trash'
 
 // One edit entry — written on every successful updateNote() call that
 // actually changes one or more user-editable fields.
@@ -318,6 +320,18 @@ export interface ShiftNote {
     is_pinned?: boolean
     edit_history?: NoteEditEntry[]   // Newest-last log of content edits
     sale_id?: string                 // Link back to a sale voucher
+    trashed_at?: Date | null
+    /**
+     * When a maintenance ticket should be done by. Separate from `created_at`, which is when
+     * somebody noticed. A lift that has been broken since Tuesday was reported on Tuesday.
+     */
+    due_at?: Date | null
+    /**
+     * What was actually done, written when the ticket is closed. `content` is the report and is
+     * left alone, so the two never overwrite each other and "it was reported broken" is still
+     * readable next to "the pump was replaced".
+     */
+    resolution?: string | null
 }
 
 export interface BlacklistedGuest {
@@ -635,6 +649,9 @@ export interface Sale {
     updated_at?: Date
     updated_by?: string
     status?: SaleStatus       // New status field
+    priority?: NotePriority   // Urgency level (low, medium, high, critical)
+    lifecycle_status?: 'active' | 'archived' | 'trash'
+    trashed_at?: Date
 }
 
 export type SaleStatus = 'waiting' | 'confirmed' | 'cancelled' | 'pickup_pending' | 'realized' | 'delivered'

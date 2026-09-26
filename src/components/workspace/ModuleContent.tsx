@@ -17,6 +17,7 @@ import { resolveNavigation } from '@/lib/navigation'
 
 const MessagingPanel = lazy(() => import('@/components/messaging/MessagingPanel').then((m) => ({ default: m.MessagingPanel })))
 const FeedbackSection = lazy(() => import('@/components/feedback/FeedbackSection').then((m) => ({ default: m.FeedbackSection })))
+const MaintenanceQueue = lazy(() => import('@/components/maintenance/MaintenanceQueue').then((m) => ({ default: m.MaintenanceQueue })))
 const OffDayScheduler = lazy(() => import('@/components/staff/OffDayScheduler').then((m) => ({ default: m.OffDayScheduler })))
 const TourCatalogue = lazy(() => import('@/components/tours/TourCatalogue').then((m) => ({ default: m.TourCatalogue })))
 const SalesPanel = lazy(() => import('@/components/sales/SalesPanel').then((m) => ({ default: m.SalesPanel })))
@@ -49,6 +50,9 @@ export function ModuleContent({ moduleId, hotelId, canEdit, initialAddOpen }: Mo
     if (moduleId === 'menu') return <StaffMealCard hotelId={hotelId} canEdit={canEdit} />
     if (moduleId === 'calendar') return <CalendarWidget hotelId={hotelId} />
     if (moduleId === 'blacklist') return <BlacklistModule hotelId={hotelId} />
+    // An early return rather than one more link in the chain below. The chain is already nine
+    // ternaries deep, and this module does not need anything the ternary chain cannot give it.
+    if (moduleId === 'maintenance') return <MaintenanceQueue />
     const content = moduleId === 'messaging' ? <MessagingPanel />
         : moduleId === 'compliance' ? <div className="mx-auto max-w-2xl space-y-6"><div><h2 className="text-2xl font-semibold">{t('module.compliance')}</h2><p className="text-sm text-muted-foreground">{language === 'tr' ? 'Güncel vardiyanın operasyon standartlarını takip edin.' : language === 'ru' ? 'Контролируйте стандарты текущей смены.' : 'Track operational standards for the current shift.'}</p></div><CompliancePanel hotelId={hotelId} /></div>
             : moduleId === 'settings' ? <HotelSettings />

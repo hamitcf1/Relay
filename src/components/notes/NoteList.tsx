@@ -8,9 +8,11 @@ interface NoteListProps {
     hotelId: string
     hotel: Hotel | null
     staff: StaffMember[]
+    selectedIds?: string[]
+    onToggleSelectNote?: (id: string) => void
 }
 
-export function NoteList({ notes, hotelId, hotel, staff }: NoteListProps) {
+export function NoteList({ notes, hotelId, hotel, staff, selectedIds = [], onToggleSelectNote }: NoteListProps) {
     const { t } = useLanguageStore()
 
     if (notes.length === 0) {
@@ -30,6 +32,8 @@ export function NoteList({ notes, hotelId, hotel, staff }: NoteListProps) {
                     hotelId={hotelId}
                     hotel={hotel}
                     staff={staff}
+                    selected={selectedIds.includes(note.id)}
+                    onToggleSelect={onToggleSelectNote ? () => onToggleSelectNote(note.id) : undefined}
                 />
             ))}
             <ScrollToTopButton />
