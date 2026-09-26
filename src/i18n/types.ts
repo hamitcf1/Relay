@@ -659,6 +659,7 @@ export type Translations = {
     'announcement.recallNotice': string
     'announcement.recallNoticeBy': string
     'announcement.recallAck': string
+    'announcement.openForReceipts': string
     'announcement.retractionBody': string
     'announcement.retractionTold': string
     'announcement.retractionOutstanding': string

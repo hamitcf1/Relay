@@ -58,8 +58,30 @@ export function AnnouncementFeed() {
         if (ok) await recallAnnouncement(hotelId, id, user!.name)
     }
 
+    // The insights button is the only route to the read receipt report, and this empty state used
+    // to swallow it. A manager who has just published their first announcement, or whose history
+    // is empty, had no way to reach the report at all, which is the one moment they most want it.
     if (visible.length === 0) {
-        return <EmptyState icon={Megaphone} title={t('messaging.noMessages')} />
+        return (
+            <div data-testid="announcement-feed">
+                <div className="mb-3 flex justify-end">
+                    {user?.role === 'gm' && (
+                        <>
+                            <button
+                                type="button"
+                                aria-label={t('announcement.insights')}
+                                onClick={() => setManagerOpen(true)}
+                                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                            >
+                                <BarChart3 className="h-3.5 w-3.5" />
+                            </button>
+                            <AnnouncementManager open={managerOpen} onOpenChange={setManagerOpen} />
+                        </>
+                    )}
+                </div>
+                <EmptyState icon={Megaphone} title={t('messaging.noMessages')} />
+            </div>
+        )
     }
 
     return (

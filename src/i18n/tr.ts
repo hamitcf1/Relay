@@ -633,6 +633,7 @@ const tr: Translations = {
         'announcement.recallNotice': 'Bu duyuru yönetim tarafından geri alındı.',
         'announcement.recallNoticeBy': '{name} bu duyuruyu geri aldı. Daha önce aldığınız bilgi artık geçerli değil.',
         'announcement.recallAck': 'Anladım',
+        'announcement.openForReceipts': 'Kimlerin okuduğunu görmek için açın',
         'announcement.retractionBody': '{name} bu duyuruyu geri aldı. Daha önce aldığınız bilgi artık geçerli değil, lütfen eskisi gibi uygulamayın.',
         'announcement.retractionTold': 'Geri alma bildirimi herkese ulaştı.',
         'announcement.retractionOutstanding': 'Geri alma bildirimi {count} kişiye daha ulaşmadı. Hatırlatma 3 gün boyunca sürer.',

@@ -268,15 +268,51 @@ service cloud.firestore {
         allow update: if managesHotel(hotelId) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['recalledAt', 'recalledByName']);
         allow delete: if managesHotel(hotelId);
+      }
 
-        match /receipts/{uid} {
-          // A person may read their own receipt; only GMs may read the whole audience.
-          allow read: if isAuthenticated() && belongsToHotel(hotelId) &&
-            (uid == request.auth.uid || isGM());
-          allow write: if isAuthenticated() && belongsToHotel(hotelId) &&
-            uid == request.auth.uid &&
-            request.resource.data.keys().hasOnly(['uid', 'state', 'seenAt', 'dismissedAt', 'recalledAckAt']);
-        }
+      // READ RECEIPTS - one document per person per announcement, keyed {announcementId}__{uid}.
+      //
+      // This used to be a subcollection of each announcement, read with a collection group query.
+      // That cannot work: Firestore authorises a collection group query against every document it
+      // could return, across every hotel, and the hotel in the path is a wildcard there, so a rule
+      // scoped to one hotel is not provable and the query is denied outright. The failure was
+      // silent, because the query rejected the whole subscription and the store simply stayed
+      // empty, so every announcement looked unread to everyone and no receipt was ever recorded.
+      //
+      // A flat collection under the hotel fixes it: the path now names the hotel, so belongsToHotel
+      // is provable and both of the reads below are authorised by the query's own constraints.
+      match /announcement_receipts/{receiptId} {
+        // A person may read their own receipt; only GMs may read the whole audience. Matching on
+        // the stored uid rather than the document id is what makes the first branch provable for
+        // the `where('uid', '==', request.auth.uid)` query the app runs.
+        allow read: if isAuthenticated() && belongsToHotel(hotelId) &&
+          (resource.data.uid == request.auth.uid || isGM());
+
+        // A person writes only their own receipt, and only the receipt fields. announcementId is
+        // included so a GM can ask who read one specific announcement.
+        allow create: if isAuthenticated() && belongsToHotel(hotelId) &&
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.keys().hasAll(['announcementId', 'uid', 'state']) &&
+          request.resource.data.keys().hasOnly([
+            'announcementId', 'uid', 'state', 'seenAt', 'dismissedAt', 'recalledAckAt'
+          ]);
+
+        // On update, announcementId is frozen. It is the only thing tying a receipt to the
+        // announcement it is evidence about, and a person allowed to move their own receipt to
+        // another announcement could file their read somewhere else, which is how a receipt for a
+        // retracted announcement goes missing without anyone touching it. uid is already pinned to
+        // the caller, and the hotel is pinned by the path, so this closes the last way to relabel
+        // what you were told. seenAt is deliberately NOT frozen: it is set once, by the app, and
+        // only when absent, which is what keeps "first read" distinct from "last read".
+        allow update: if isAuthenticated() && belongsToHotel(hotelId) &&
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.announcementId == resource.data.announcementId &&
+          request.resource.data.keys().hasAll(['announcementId', 'uid', 'state']) &&
+          request.resource.data.keys().hasOnly([
+            'announcementId', 'uid', 'state', 'seenAt', 'dismissedAt', 'recalledAckAt'
+          ]);
+
+        allow delete: if managesHotel(hotelId);
       }
 
       // ANONYMOUS_FEEDBACK

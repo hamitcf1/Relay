@@ -13,7 +13,15 @@ import { useConfirm } from '@/components/ui/confirm-dialog'
 import { AnnouncementManager } from './AnnouncementManager'
 import { cn } from '@/lib/utils'
 
-const RECENCY_MS = 1000 * 60 * 60 * 24
+/**
+ * How recent an announcement must be to earn a banner.
+ *
+ * A banner sits above the dashboard and cannot be scrolled past, so it is for things that are
+ * still current. An announcement from last month is not urgent, and the reader who never opened it
+ * still has it in the history and in the modal. Withdrawals are exempt: a correction is worth
+ * interrupting for no matter how old the thing it corrects was.
+ */
+const BANNER_RECENCY_MS = 1000 * 60 * 60 * 24
 
 /**
  * Surfaces management announcements at the top of the dashboard, and tells a reader when one
@@ -30,7 +38,7 @@ export function AnnouncementBanner() {
 
     const viewer = useMemo(() => ({ uid: user?.uid, role: user?.role }), [user?.uid, user?.role])
     const active = useMemo(
-        () => bannerAnnouncements(announcements, receipts, viewer, RECENCY_MS),
+        () => bannerAnnouncements(announcements, receipts, viewer, BANNER_RECENCY_MS),
         [announcements, receipts, viewer],
     )
     // Withdrawals this reader has not acknowledged yet. Unlike a fresh announcement these carry no

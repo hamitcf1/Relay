@@ -64,11 +64,12 @@ export function pendingRetractions(
     announcements: Announcement[],
     receipts: Record<string, AnnouncementReceipt>,
     viewer: { uid?: string; role?: string },
+    now = Date.now(),
 ) {
     return announcements
         .filter((announcement) => announcement.createdBy !== viewer.uid)
         .filter((announcement) => isAddressedTo(announcement, viewer))
-        .filter((announcement) => isRetractionPending(announcement, receipts[announcement.id]))
+        .filter((announcement) => isRetractionPending(announcement, receipts[announcement.id], now))
         .sort((a, b) => (b.recalledAt?.getTime() || 0) - (a.recalledAt?.getTime() || 0))
 }
 
@@ -144,6 +145,20 @@ export function getAudienceSummary(
 }
 
 /**
+ * How far back the modal looks for something to interrupt the reader with.
+ *
+ * The modal opens on top of the dashboard and blocks it, so what it chooses has to be worth the
+ * interruption. An announcement from eight months ago that this person simply never opened is not
+ * urgent, and surfacing it is how the modal trains people to close it without reading. Recency is
+ * the honest signal here: the reader can still find the old one in the history, and a manager
+ * republishing something that genuinely still matters is the normal way to re-raise it.
+ *
+ * A withdrawal is exempt, and for the opposite reason: it is a correction, and a correction about
+ * an old announcement is exactly the case where being ignored is expensive.
+ */
+export const UNREAD_PROMPT_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 14
+
+/**
  * The announcement a reader should be shown next.
  *
  * A pending retraction comes first even when a newer announcement exists: it is not new
@@ -154,16 +169,19 @@ export function nextUnreadAnnouncement(
     announcements: Announcement[],
     receipts: Record<string, AnnouncementReceipt>,
     viewer: { uid?: string; role?: string },
+    now = Date.now(),
 ) {
-    const retraction = pendingRetractions(announcements, receipts, viewer)[0]
+    const retraction = pendingRetractions(announcements, receipts, viewer, now)[0]
     if (retraction) return retraction
 
+    const cutoff = now - UNREAD_PROMPT_MAX_AGE_MS
     return announcements
         // Nobody is nagged about an announcement they wrote themselves.
         .filter((announcement) => announcement.createdBy !== viewer.uid)
         .filter((announcement) => isAddressedTo(announcement, viewer))
         .filter((announcement) => !isAnnouncementWithdrawn(announcement))
         .filter((announcement) => isReceiptUnread(receipts[announcement.id]))
+        .filter((announcement) => announcement.createdAt.getTime() >= cutoff)
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
 }
 
@@ -174,8 +192,9 @@ export function bannerAnnouncements(
     viewer: { uid?: string; role?: string },
     withinMs: number,
     limit = 3,
+    now = Date.now(),
 ) {
-    const cutoff = Date.now() - withinMs
+    const cutoff = now - withinMs
     return announcements
         .filter((announcement) => announcement.createdBy !== viewer.uid)
         .filter((announcement) => isAddressedTo(announcement, viewer))
