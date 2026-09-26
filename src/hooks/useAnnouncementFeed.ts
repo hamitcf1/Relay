@@ -22,11 +22,13 @@ let active: { key: string; stops: Array<() => void>; users: number } | null = nu
  */
 export function useAnnouncementFeed() {
     const hotelId = useHotelStore((state) => state.hotel?.id)
-    const uid = useAuthStore((state) => state.user?.uid)
+    const user = useAuthStore((state) => state.user)
+    const uid = user?.uid
+    const effectiveHotelId = user?.is_demo ? 'demo-hotel-id' : (user?.hotel_id || hotelId)
 
     useEffect(() => {
-        if (!hotelId || !uid) return
-        const key = `${hotelId}:${uid}`
+        if (!effectiveHotelId || !uid) return
+        const key = `${effectiveHotelId}:${uid}`
 
         // Already live for this hotel and person: join the existing subscription.
         if (active?.key === key) {
@@ -37,10 +39,10 @@ export function useAnnouncementFeed() {
         // Either no subscription, or one for a different hotel or person. Stop it and start over.
         active?.stops.forEach((stop) => stop())
         const { subscribeToAnnouncements, subscribeToMyReceipts } = useAnnouncementStore.getState()
-        const stops = [subscribeToAnnouncements(hotelId), subscribeToMyReceipts(hotelId, uid)]
+        const stops = [subscribeToAnnouncements(effectiveHotelId), subscribeToMyReceipts(effectiveHotelId, uid)]
         active = { key, stops, users: 1 }
         return () => { release(key) }
-    }, [hotelId, uid])
+    }, [effectiveHotelId, uid])
 }
 
 /** Drops one consumer, and only tears the listeners down when the last one has gone. */

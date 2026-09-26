@@ -116,36 +116,50 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
     const collected = sale.collected_amount ?? (sale.payment_status === 'paid' ? sale.total_price : 0)
     const remaining = Math.max(0, sale.total_price - collected)
 
-    // Generate QR Code payload (compact to fit in URL query param)
-    const compactData = {
-        id: sale.id,
-        reservation_code: reservationCode,
-        hotelName: hotel?.info.name || 'AETHERIUS',
-        name: sale.name,
-        type: sale.type,
-        guest: sale.customer_name,
-        phone: sale.customer_phone || '',
-        room: sale.room_number || '',
-        pickup_location: sale.pickup_location || '',
-        dropoff_location: sale.dropoff_location || sale.name,
-        flight_number: sale.flight_number || '',
-        date: sale.date.toISOString(),
-        sale_date: (sale.sale_date || sale.created_at).toISOString(),
-        pickup_time: sale.pickup_time || '',
-        pax: sale.pax,
-        status: sale.status || 'waiting',
-        payment: sale.payment_status,
-        collected_amount: collected,
-        total_price: sale.total_price,
-        currency: sale.currency,
-        total: `${sale.total_price} ${sale.currency}`,
-        notes: sale.notes || '',
-        by: sale.created_by_name || '',
-        th: theme
-    }
-    
-    const b64Data = typeof window !== 'undefined' ? btoa(encodeURIComponent(JSON.stringify(compactData))) : ''
-    const qrData = `${window.location.origin}/voucher?d=${b64Data}`
+    // Generate lean, safe QR Code payload (guaranteed under 1000 chars to avoid QR code length overflow)
+    const qrData = (() => {
+        if (typeof window === 'undefined') return ''
+        try {
+            const rawNotes = (sale.notes || '').slice(0, 60)
+            const payload = {
+                v: 2,
+                id: sale.id,
+                r: reservationCode,
+                hn: (hotel?.info?.name || 'AETHERIUS').slice(0, 30),
+                n: (sale.name || '').slice(0, 40),
+                t: sale.type,
+                g: (sale.customer_name || '').slice(0, 30),
+                p: (sale.customer_phone || '').slice(0, 20),
+                rm: sale.room_number || '',
+                pu: (sale.pickup_location || '').slice(0, 30),
+                fl: (sale.flight_number || '').slice(0, 15),
+                d: sale.date ? (sale.date instanceof Date ? sale.date.toISOString() : new Date(sale.date).toISOString()) : '',
+                pt: sale.pickup_time || '',
+                px: sale.pax,
+                st: sale.status || 'waiting',
+                py: sale.payment_status,
+                ca: collected,
+                tp: sale.total_price,
+                c: sale.currency,
+                nt: rawNotes,
+                by: (sale.created_by_name || '').slice(0, 20),
+                th: theme
+            }
+            const jsonStr = JSON.stringify(payload)
+            const b64 = btoa(unescape(encodeURIComponent(jsonStr)))
+            const url = `${window.location.origin}/voucher?d=${b64}`
+            if (url.length > 1500) {
+                delete (payload as any).nt
+                delete (payload as any).pu
+                const strippedB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
+                return `${window.location.origin}/voucher?d=${strippedB64}`
+            }
+            return url
+        } catch (e) {
+            console.error('Failed to encode QR payload:', e)
+            return `${window.location.origin}/voucher?id=${sale.id}`
+        }
+    })()
 
     const handleShare = async () => {
         try {

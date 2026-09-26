@@ -34,8 +34,43 @@ export function VoucherPage() {
         try {
             const d = searchParams.get('d')
             if (!d) throw new Error("No data")
-            const decoded = JSON.parse(decodeURIComponent(atob(d)))
-            setData(decoded)
+
+            let rawJson = ''
+            try {
+                rawJson = decodeURIComponent(escape(atob(d)))
+            } catch {
+                rawJson = decodeURIComponent(atob(d))
+            }
+
+            const decoded = JSON.parse(rawJson)
+
+            // Map compact v2 keys to full properties with fallbacks to legacy keys
+            const mappedData = {
+                ...decoded,
+                id: decoded.id || '',
+                reservation_code: decoded.r || decoded.reservation_code || '',
+                hotelName: decoded.hn || decoded.hotelName || 'AETHERIUS',
+                name: decoded.n || decoded.name || 'Service',
+                type: decoded.t || decoded.type || 'other',
+                customer_name: decoded.g || decoded.customer_name || decoded.guest || '',
+                customer_phone: decoded.p || decoded.customer_phone || decoded.phone || '',
+                room_number: decoded.rm || decoded.room_number || decoded.room || '',
+                pickup_location: decoded.pu || decoded.pickup_location || '',
+                flight_number: decoded.fl || decoded.flight_number || '',
+                date: decoded.d || decoded.date || new Date().toISOString(),
+                pickup_time: decoded.pt || decoded.pickup_time || '',
+                pax: decoded.px ?? decoded.pax ?? 1,
+                status: decoded.st || decoded.status || 'waiting',
+                payment: decoded.py || decoded.payment || decoded.payment_status || 'pending',
+                collected_amount: decoded.ca ?? decoded.collected_amount ?? 0,
+                total_price: decoded.tp ?? decoded.total_price ?? 0,
+                currency: decoded.c || decoded.currency || 'EUR',
+                notes: decoded.nt || decoded.notes || '',
+                created_by_name: decoded.by || decoded.created_by_name || decoded.by || '',
+                th: decoded.th || decoded.theme || 'dark'
+            }
+
+            setData(mappedData)
         } catch (e) {
             console.error("Failed to parse voucher data", e)
             setError(true)

@@ -181,18 +181,11 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
     subscribeToAnnouncements: (hotelId) => {
         set({ loading: true, error: null })
 
-        if (hotelId === DEMO_HOTEL_ID) {
+        if (hotelId === DEMO_HOTEL_ID || hotelId.includes('demo')) {
             set({ announcements: demoAnnouncements, loading: false, error: null })
             return () => { }
         }
 
-        // The cap exists so a long-lived hotel does not load its entire announcement history into
-        // every open dashboard. It is deliberately far above the point where anyone would notice:
-        // the reader's feed is what matters, and a withdrawal can be raised on an announcement that
-        // is months old. At the previous 50, a hotel that published steadily pushed old
-        // announcements, and any withdrawal on one of them, past the cut and out of the store
-        // entirely, so a retraction could not be delivered at all and the reader carried on
-        // following an instruction that had been withdrawn.
         const q = query(
             collection(db, 'hotels', hotelId, 'announcements'),
             orderBy('createdAt', 'desc'),
@@ -204,7 +197,9 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
                 loading: false,
             })
         }, (err) => {
-            console.error("Announcement subscription error:", err)
+            if (err.code !== 'permission-denied') {
+                console.error("Announcement subscription error:", err)
+            }
             set({ error: err.message, loading: false })
         })
         return unsubscribe
@@ -212,15 +207,11 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
 
     subscribeToMyReceipts: (hotelId, uid) => {
         if (!uid) return () => { }
-        if (hotelId === DEMO_HOTEL_ID) {
+        if (hotelId === DEMO_HOTEL_ID || hotelId.includes('demo')) {
             demoViewer = uid
             set({ receipts: myDemoReceipts(uid) })
             return () => { }
         }
-        // Scoped to this hotel by path and to this person by the filter, which is exactly what
-        // the rule needs to authorise the query. No arbitrary cap: a person has at most one
-        // receipt per announcement, so the collection is bounded by the hotel's own history and
-        // a limit here would silently drop receipts for older announcements.
         const q = query(
             collection(db, 'hotels', hotelId, 'announcement_receipts'),
             where('uid', '==', uid),
@@ -229,16 +220,13 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             const next: Record<string, AnnouncementReceipt> = {}
             for (const entry of snapshot.docs) {
                 const receipt = toReceipt(entry.data())
-                // announcementId is stored on the document rather than taken from the path, so a
-                // receipt with no announcement to attach to is dropped rather than filed under "".
                 if (receipt.announcementId) next[receipt.announcementId] = receipt
             }
             set({ receipts: next })
         }, (err) => {
-            // A rejected query is the failure mode this subscription had: the store stayed
-            // empty and every announcement looked unread. Surfacing it makes that visible
-            // instead of silent.
-            console.error("Announcement receipt subscription error:", err)
+            if (err.code !== 'permission-denied') {
+                console.error("Announcement receipt subscription error:", err)
+            }
             set({ error: err.message })
         })
         return unsubscribe
