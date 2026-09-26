@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale, formatDisplayDateTime, cn } from '@/lib/utils'
-import { User, Trash2, Wand2, Pencil, DollarSign, Clock, Pin, PinOff, History, Ticket } from 'lucide-react'
+import { User, Trash2, Wand2, Pencil, DollarSign, Clock, Pin, PinOff, History, Ticket, RotateCcw } from 'lucide-react'
 import { NoteHistoryModal } from './NoteHistoryModal'
 import { VoucherPreviewModal } from '../sales/VoucherPreviewModal'
 import { Button } from '@/components/ui/button'
@@ -34,7 +34,7 @@ interface NoteItemProps {
 }
 
 export function NoteItem({ note, hotelId, hotel, staff, selected, onToggleSelect }: NoteItemProps) {
-    const { updateNote, updateNoteStatus, markPaid, deleteNote, convertToLog, togglePin } = useNotesStore()
+    const { updateNote, updateNoteStatus, markPaid, markUnpaid, deleteNote, convertToLog, togglePin } = useNotesStore()
     const { user } = useAuthStore()
     const { t } = useLanguageStore()
     const confirm = useConfirm()
@@ -141,6 +141,10 @@ export function NoteItem({ note, hotelId, hotel, staff, selected, onToggleSelect
 
     const handleMarkPaid = async () => {
         await markPaid(hotelId, note.id)
+    }
+
+    const handleMarkUnpaid = async () => {
+        await markUnpaid(hotelId, note.id)
     }
 
     const handleDelete = async () => {
@@ -592,15 +596,30 @@ export function NoteItem({ note, hotelId, hotel, staff, selected, onToggleSelect
                     >
                         {note.is_pinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
                     </Button>
-                    {isFinancialCategory(note.category) && !note.is_paid && note.amount_due && (
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={handleMarkPaid}
-                            className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10"
-                        >
-                            <DollarSign className="w-4 h-4" />
-                        </Button>
+                    {isFinancialCategory(note.category) && (
+                        note.is_paid ? (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleMarkUnpaid}
+                                className="h-8 w-8 text-amber-500 hover:bg-amber-500/10"
+                                title="Ödemeyi Geri Al (Ödenmedi Yap)"
+                                aria-label="Ödemeyi Geri Al"
+                            >
+                                <RotateCcw className="w-4 h-4" />
+                            </Button>
+                        ) : note.amount_due ? (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleMarkPaid}
+                                className="h-8 w-8 text-emerald-500 hover:bg-emerald-500/10"
+                                title="Ödeme Alındı İşaretle"
+                                aria-label="Ödeme Alındı"
+                            >
+                                <DollarSign className="w-4 h-4" />
+                            </Button>
+                        ) : null
                     )}
 
 

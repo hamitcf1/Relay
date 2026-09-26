@@ -37,6 +37,7 @@ interface NotesActions {
     updateNoteStatus: (hotelId: string, noteId: string, status: NoteStatus, resolvedBy?: string) => Promise<void>
     toggleRelevance: (hotelId: string, noteId: string, isRelevant: boolean) => Promise<void>
     markPaid: (hotelId: string, noteId: string) => Promise<void>
+    markUnpaid: (hotelId: string, noteId: string) => Promise<void>
     deleteNote: (hotelId: string, noteId: string) => Promise<void>
     convertToLog: (hotelId: string, noteId: string) => Promise<void>
     togglePin: (hotelId: string, noteId: string, isPinned: boolean) => Promise<void>
@@ -478,7 +479,7 @@ export const useNotesStore = create<NotesStore>((set) => ({
 
             const localPatch: Partial<ShiftNote> = {
                 is_paid: true,
-                amount_due: 0,
+                ...(note?.sale_id ? { amount_due: 0 } : {}),
             }
             if (isDemo) {
                 set((state) => ({
@@ -491,6 +492,42 @@ export const useNotesStore = create<NotesStore>((set) => ({
         } catch (error) {
             console.error('Error marking paid:', error)
             toast.error('Failed to mark as paid')
+            throw error
+        }
+    },
+
+    markUnpaid: async (hotelId, noteId) => {
+        try {
+            const isDemo = hotelId === 'demo-hotel-id'
+            const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
+            const note = useNotesStore.getState().notes.find(n => n.id === noteId)
+            if (!note) return
+
+            // If note is linked to a sale, sync with salesStore by calling revertPayment on sale
+            if (note.sale_id) {
+                const sales = useSalesStore.getState().sales
+                const sale = sales.find(s => s.id === note.sale_id)
+                if (sale) {
+                    await useSalesStore.getState().revertPayment(hotelId, note.sale_id)
+                    toast.success('Satış ve vardiya notu ödemesi geri alındı ↺')
+                    return
+                }
+            }
+
+            const localPatch: Partial<ShiftNote> = {
+                is_paid: false,
+            }
+            if (isDemo) {
+                set((state) => ({
+                    notes: state.notes.map(n => n.id === noteId ? { ...n, ...localPatch } : n)
+                }))
+            } else {
+                await updateDoc(noteRef, localPatch)
+            }
+            toast.success('Ödeme kaydı geri alındı (Ödenmedi) ↺')
+        } catch (error) {
+            console.error('Error marking unpaid:', error)
+            toast.error('Ödeme kaydı geri alınamadı')
             throw error
         }
     },

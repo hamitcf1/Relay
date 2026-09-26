@@ -43,7 +43,7 @@ interface SalesDetailModalProps {
 export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const { hotel } = useHotelStore()
     const { t } = useLanguageStore()
-    const { sales, updateSale, deleteSale, collectPayment, markPaymentCancelled, refundPayment } = useSalesStore()
+    const { sales, updateSale, deleteSale, collectPayment, markPaymentCancelled, refundPayment, revertPayment } = useSalesStore()
     const confirm = useConfirm()
 
     const [isEditing, setIsEditing] = useState(false)
@@ -160,6 +160,23 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                 await refundPayment(hotel.id, saleId)
             } catch (error) {
                 console.error("Failed to refund payment:", error)
+            }
+        }
+    }
+
+    const handleRevertPayment = async () => {
+        if (!hotel?.id || !saleId) return
+        const confirmed = await confirm({
+            title: 'Ödemeyi Geri Al',
+            description: `${sale.name} için alınan ${getCurrencySymbol(sale.currency)}${sale.collected_amount} tutarındaki ödemeyi iptal edip ödenmedi durumuna getirmek istediğinize emin misiniz?`,
+            variant: 'destructive',
+            confirmLabel: 'Ödemeyi Geri Al',
+        })
+        if (confirmed) {
+            try {
+                await revertPayment(hotel.id, saleId)
+            } catch (error) {
+                console.error("Failed to revert payment:", error)
             }
         }
     }
@@ -469,6 +486,19 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                             </Button>
 
                                             <p className="text-[10px] text-muted-foreground text-right">{t('sales.details.remaining')}: <span className="text-rose-500 font-bold">{getCurrencySymbol(sale.currency)}{remaining.toFixed(2)}</span></p>
+                                        </div>
+                                    )}
+
+                                    {sale.collected_amount > 0 && !isCancelled && (
+                                        <div className="pt-3 mt-3 border-t border-border">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={handleRevertPayment}
+                                                className="w-full h-8 border-amber-500/30 text-amber-500 hover:bg-amber-500/10 hover:text-amber-400"
+                                            >
+                                                <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Ödemeyi Geri Al (Tahsilatı İptal Et)
+                                            </Button>
                                         </div>
                                     )}
                                 </div>

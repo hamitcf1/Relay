@@ -69,6 +69,7 @@ interface SalesActions {
     collectPayment: (hotelId: string, saleId: string, amount: number, currency?: Currency, targetAmount?: number) => Promise<void>
     markPaymentCancelled: (hotelId: string, saleId: string) => Promise<void>
     refundPayment: (hotelId: string, saleId: string) => Promise<void>
+    revertPayment: (hotelId: string, saleId: string) => Promise<void>
     getDueSales: () => Sale[]
     getSalesByType: (type: SaleType) => Sale[]
     bulkUpdateSales: (hotelId: string, saleIds: string[], updates: Partial<Sale>) => Promise<void>
@@ -540,6 +541,47 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                 }
             } catch (error) {
                 console.error('Error updating calendar event for refund:', error)
+            }
+        }
+    },
+
+    revertPayment: async (hotelId: string, saleId: string) => {
+        const isDemo = hotelId === 'demo-hotel-id'
+        const sale = get().sales.find(s => s.id === saleId)
+        if (!sale) return
+
+        if (isDemo) {
+            set((state) => ({
+                sales: state.sales.map(s => s.id === saleId
+                    ? { ...s, collected_amount: 0, payment_status: 'pending', payments: [], updated_at: new Date() }
+                    : s)
+            }))
+        } else {
+            const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
+            await updateDoc(saleRef, {
+                collected_amount: 0,
+                payment_status: 'pending',
+                payments: [],
+                updated_at: serverTimestamp()
+            })
+        }
+        await syncLinkedNotes(hotelId, saleId, 0, sale.total_price, 'pending')
+        toast.success('Ödeme kaydı geri alındı')
+
+        // Sync to calendar
+        if (sale.calendar_event_id) {
+            try {
+                if (isDemo) {
+                    await useCalendarStore.getState().updateEvent(hotelId, sale.calendar_event_id, { collected_amount: 0 })
+                } else {
+                    const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
+                    await updateDoc(eventRef, {
+                        collected_amount: 0,
+                        updated_at: serverTimestamp()
+                    })
+                }
+            } catch (error) {
+                console.error('Error updating calendar event for revert:', error)
             }
         }
     },
