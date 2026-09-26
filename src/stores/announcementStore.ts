@@ -2,17 +2,18 @@ import { create } from 'zustand'
 import {
     addDoc,
     collection,
-    collectionGroup,
-    deleteDoc,
     doc,
+    getDocs,
     limit,
     onSnapshot,
     orderBy,
     query,
+    runTransaction,
     serverTimestamp,
     setDoc,
     updateDoc,
     where,
+    writeBatch,
     Timestamp,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -39,13 +40,33 @@ const toAnnouncement = (id: string, data: Record<string, any>): Announcement => 
     recalledByName: data.recalledByName || undefined,
 })
 
-const toReceipt = (announcementId: string, uid: string, data: Record<string, any>): AnnouncementReceipt => ({
-    announcementId,
-    uid,
+const toReceipt = (data: Record<string, any>): AnnouncementReceipt => ({
+    announcementId: data.announcementId || '',
+    uid: data.uid || '',
     state: data.state === 'dismissed' ? 'dismissed' : 'seen',
     seenAt: data.seenAt instanceof Timestamp ? data.seenAt.toDate() : new Date(),
     dismissedAt: data.dismissedAt instanceof Timestamp ? data.dismissedAt.toDate() : undefined,
     recalledAckAt: data.recalledAckAt instanceof Timestamp ? data.recalledAckAt.toDate() : undefined,
+})
+
+/**
+ * Where a person's read receipt for one announcement lives.
+ *
+ * Flat under the hotel and keyed by both ids, rather than a subcollection of each announcement.
+ * A subcollection can only be read back with a collection group query, and Firestore will not
+ * authorise that against a hotel scoped rule, because the hotel in the path is a wildcard for a
+ * collection group. The query is rejected, the subscription never delivers, and read receipts
+ * silently never work. Keeping the hotel in the path makes both reads provable.
+ */
+const receiptDocId = (announcementId: string, uid: string) => `${announcementId}__${uid}`
+
+const receiptDoc = (hotelId: string, announcementId: string, uid: string) =>
+    doc(db, 'hotels', hotelId, 'announcement_receipts', receiptDocId(announcementId, uid))
+
+const receiptFields = (announcementId: string, uid: string, state: AnnouncementReceipt['state']) => ({
+    announcementId,
+    uid,
+    state,
 })
 
 interface AnnouncementState {
@@ -165,10 +186,17 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             return () => { }
         }
 
+        // The cap exists so a long-lived hotel does not load its entire announcement history into
+        // every open dashboard. It is deliberately far above the point where anyone would notice:
+        // the reader's feed is what matters, and a withdrawal can be raised on an announcement that
+        // is months old. At the previous 50, a hotel that published steadily pushed old
+        // announcements, and any withdrawal on one of them, past the cut and out of the store
+        // entirely, so a retraction could not be delivered at all and the reader carried on
+        // following an instruction that had been withdrawn.
         const q = query(
             collection(db, 'hotels', hotelId, 'announcements'),
             orderBy('createdAt', 'desc'),
-            limit(50),
+            limit(500),
         )
         const unsubscribe = onSnapshot(q, (snapshot) => {
             set({
@@ -189,20 +217,29 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             set({ receipts: myDemoReceipts(uid) })
             return () => { }
         }
-        // Receipts live under each announcement, so a single listener covers every one. The query
-        // spans hotels, so the result is narrowed to this one before it reaches the store.
-        const prefix = `hotels/${hotelId}/announcements/`
-        const q = query(collectionGroup(db, 'receipts'), where('uid', '==', uid), limit(200))
+        // Scoped to this hotel by path and to this person by the filter, which is exactly what
+        // the rule needs to authorise the query. No arbitrary cap: a person has at most one
+        // receipt per announcement, so the collection is bounded by the hotel's own history and
+        // a limit here would silently drop receipts for older announcements.
+        const q = query(
+            collection(db, 'hotels', hotelId, 'announcement_receipts'),
+            where('uid', '==', uid),
+        )
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const next: Record<string, AnnouncementReceipt> = {}
             for (const entry of snapshot.docs) {
-                if (!entry.ref.path.startsWith(prefix)) continue
-                const announcementId = entry.ref.parent.parent?.id
-                if (announcementId) next[announcementId] = toReceipt(announcementId, uid, entry.data())
+                const receipt = toReceipt(entry.data())
+                // announcementId is stored on the document rather than taken from the path, so a
+                // receipt with no announcement to attach to is dropped rather than filed under "".
+                if (receipt.announcementId) next[receipt.announcementId] = receipt
             }
             set({ receipts: next })
         }, (err) => {
+            // A rejected query is the failure mode this subscription had: the store stayed
+            // empty and every announcement looked unread. Surfacing it makes that visible
+            // instead of silent.
             console.error("Announcement receipt subscription error:", err)
+            set({ error: err.message })
         })
         return unsubscribe
     },
@@ -212,10 +249,18 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             set((state) => ({ audience: { ...state.audience, [announcementId]: receiptsFor(announcementId) } }))
             return () => { }
         }
-        const q = collection(db, 'hotels', hotelId, 'announcements', announcementId, 'receipts')
+        const q = query(
+            collection(db, 'hotels', hotelId, 'announcement_receipts'),
+            where('announcementId', '==', announcementId),
+        )
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const next: Record<string, AnnouncementReceipt> = {}
-            for (const entry of snapshot.docs) next[entry.id] = toReceipt(announcementId, entry.id, entry.data())
+            for (const entry of snapshot.docs) {
+                const receipt = toReceipt(entry.data())
+                // The document id is {announcementId}__{uid}, so it must not be used as the person.
+                // The uid comes from the stored field, which the rules require to be present.
+                if (receipt.uid) next[receipt.uid] = receipt
+            }
             set((state) => ({ audience: { ...state.audience, [announcementId]: next } }))
         }, (err) => {
             console.error("Announcement audience error:", err)
@@ -246,11 +291,22 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             if (mine) set({ receipts: mine })
             return
         }
-        await setDoc(doc(db, 'hotels', hotelId, 'announcements', announcementId, 'receipts', uid), {
-            uid,
-            state: 'seen',
-            seenAt: serverTimestamp(),
-        }, { merge: true })
+        // A transaction rather than a plain set, because seenAt has to mean "first opened" and not
+        // "last opened". The banner reappears every day until it is closed, so a plain merge would
+        // move seenAt forward on each visit, and the receipt could no longer answer the only
+        // question it exists for: when was this person actually told. It also gives the dismissed
+        // guard the demo path already had, instead of leaving the two implementations to disagree.
+        await runTransaction(db, async (tx) => {
+            const ref = receiptDoc(hotelId, announcementId, uid)
+            const existing = await tx.get(ref)
+            const data = existing.exists() ? existing.data() : undefined
+            if (data?.state === 'dismissed') return
+
+            const fields: Record<string, unknown> = { ...receiptFields(announcementId, uid, 'seen') }
+            // Only set when absent, so the first opening is the one that is kept.
+            if (!data?.seenAt) fields.seenAt = serverTimestamp()
+            tx.set(ref, fields, { merge: true })
+        })
     },
 
     markDismissed: async (hotelId, announcementId, uid) => {
@@ -260,10 +316,12 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             if (mine) set({ receipts: mine })
             return
         }
-        await setDoc(doc(db, 'hotels', hotelId, 'announcements', announcementId, 'receipts', uid), {
-            uid,
-            state: 'dismissed',
-            seenAt: serverTimestamp(),
+        // seenAt is deliberately not written here. Dismissing is a later moment than reading, and
+        // the receipt is the audit trail: overwriting seenAt made the two indistinguishable and
+        // destroyed when the person actually first opened the announcement, which is the fact a
+        // manager needs when a shift notice is disputed. Marking seen is what sets it.
+        await setDoc(receiptDoc(hotelId, announcementId, uid), {
+            ...receiptFields(announcementId, uid, 'dismissed'),
             dismissedAt: serverTimestamp(),
         }, { merge: true })
     },
@@ -289,7 +347,10 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             set((state) => ({ audience: { ...state.audience, [announcementId]: receiptsFor(announcementId) } }))
             return
         }
-        await updateDoc(doc(db, 'hotels', hotelId, 'announcements', announcementId, 'receipts', uid), {
+        // updateDoc, not a merging set: acknowledging presupposes a receipt already exists, and a
+        // merge would quietly create a half filled one that the rules then reject anyway. Failing
+        // outright is the honest outcome.
+        await updateDoc(receiptDoc(hotelId, announcementId, uid), {
             recalledAckAt: serverTimestamp(),
         })
     },
@@ -328,7 +389,28 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             set({ announcements: demoAnnouncements })
             return
         }
-        await deleteDoc(doc(db, 'hotels', hotelId, 'announcements', announcementId))
+        // The receipts have to go with it. They used to sit under the announcement, so deleting the
+        // parent left them behind with no way to reach or clean them, and every purge leaked one
+        // orphaned receipt set per reader. Now they are addressable, so they are removed here.
+        // The announcement is deleted last: if the receipt sweep fails, the announcement is still
+        // there and the purge can be retried, rather than the other way round leaving nothing to
+        // retry against.
+        const receipts = await getDocs(query(
+            collection(db, 'hotels', hotelId, 'announcement_receipts'),
+            where('announcementId', '==', announcementId),
+        ))
+        const batch = writeBatch(db)
+        for (const receipt of receipts.docs) batch.delete(receipt.ref)
+        batch.delete(doc(db, 'hotels', hotelId, 'announcements', announcementId))
+        await batch.commit()
+
+        set((state) => {
+            const audience = { ...state.audience }
+            delete audience[announcementId]
+            const receipts_ = { ...state.receipts }
+            delete receipts_[announcementId]
+            return { audience, receipts: receipts_ }
+        })
     },
 }))
 

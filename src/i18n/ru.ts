@@ -1283,6 +1283,7 @@ const en: Translations = {
         'announcement.recallNotice': 'Это объявление было отозвано руководством.',
         'announcement.recallNoticeBy': '{name} отозвал это объявление. Полученная вами информация больше не действует.',
         'announcement.recallAck': 'Понятно',
+        'announcement.openForReceipts': 'Open to see who has read this',
         'announcement.retractionBody': '{name} отозвал это объявление. Полученная вами информация больше не действует, пожалуйста, не применяйте её.',
         'announcement.retractionTold': 'Уведомление об отзыве получили все, кто прочитал объявление.',
         'announcement.retractionOutstanding': 'Уведомление об отзыве ещё не получили {count} чел. Напоминания идут 3 дня.',

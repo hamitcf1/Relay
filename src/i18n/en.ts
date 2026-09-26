@@ -1283,6 +1283,7 @@ const en: Translations = {
         'announcement.recallNotice': 'This announcement was withdrawn by management.',
         'announcement.recallNoticeBy': '{name} withdrew this announcement. The information you were given no longer applies.',
         'announcement.recallAck': 'Understood',
+        'announcement.openForReceipts': 'Open to see who has read this',
         'announcement.retractionBody': '{name} withdrew this announcement. The information you were given no longer applies, so please stop acting on it.',
         'announcement.retractionTold': 'Everyone who had read it has acknowledged the withdrawal.',
         'announcement.retractionOutstanding': '{count} people have not been reached yet. They are reminded for 3 days.',

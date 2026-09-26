@@ -174,13 +174,27 @@ await check('GM publishes an announcement', () =>
         createdBy: GM_A, content: 'shift change', audience: 'all', recipientIds: [],
     })))
 await check('a staff member writes their own read receipt', () =>
-    assertSucceeds(setDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcements', 'a1', 'receipts', REC_A), {
-        uid: REC_A, state: 'seen',
+    assertSucceeds(setDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${REC_A}`), {
+        announcementId: 'a1', uid: REC_A, state: 'seen',
     })))
 await check('a staff member cannot forge a receipt for someone else', () =>
-    assertFails(setDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcements', 'a1', 'receipts', GM_A), {
-        uid: GM_A, state: 'seen',
+    assertFails(setDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${GM_A}`), {
+        announcementId: 'a1', uid: GM_A, state: 'seen',
     })))
+await check('a staff member cannot put a receipt in another hotel', () =>
+    assertFails(setDoc(doc(asUser(REC_A), 'hotels', HOTEL_B, 'announcement_receipts', `a1__${REC_A}`), {
+        announcementId: 'a1', uid: REC_A, state: 'seen',
+    })))
+await check('a staff member cannot smuggle extra fields into their own receipt', () =>
+    assertFails(setDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${REC_A}`), {
+        announcementId: 'a1', uid: REC_A, state: 'seen', sneaky: true,
+    })))
+await check('a staff member cannot read a colleague receipt', () =>
+    assertFails(getDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${GM_A}`))))
+await check('a GM can read the whole audience of their own hotel', () =>
+    assertSucceeds(getDoc(doc(asUser(GM_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${REC_A}`))))
+await check('a GM cannot read another hotel audience', () =>
+    assertFails(getDoc(doc(asUser(GM_B), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${REC_A}`))))
 await check('a staff member cannot edit the announcement body', () =>
     assertFails(updateDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcements', 'a1'), { content: 'edited' })))
 await check('a GM of another hotel cannot publish into this hotel', () =>
@@ -203,6 +217,55 @@ await check('a staff member cannot withdraw an announcement', () =>
     assertFails(setDoc(doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcements', 'a3'), {
         createdBy: REC_A, content: 'x', audience: 'all', recipientIds: [],
     })))
+
+// These two are the exact queries announcementStore runs, and they are the whole read receipt
+// feature. They are here because this used to be broken in a way nothing caught: receipts were a
+// subcollection of each announcement and read back with a collection group query, which Firestore
+// denies outright, because for a collection group the hotel in the path is a wildcard and a rule
+// scoped to one hotel cannot be shown to hold. The denial was silent, the store stayed empty, and
+// every announcement looked unread to every person in every real hotel, forever.
+// Re-opening an announcement goes through a transaction that rewrites only the state, because
+// seenAt must stay at the first opening. So the rule has to accept a write that carries no seenAt
+// on a receipt that already has one, which is a narrower document than the create above.
+await check('a person can update only the state of a receipt they already have', () =>
+    assertSucceeds(setDoc(
+        doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${REC_A}`),
+        { announcementId: 'a1', uid: REC_A, state: 'dismissed' },
+        { merge: true },
+    )))
+await check('a person can record that they acknowledged a withdrawal', () =>
+    assertSucceeds(setDoc(
+        doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${REC_A}`),
+        { recalledAckAt: new Date() },
+        { merge: true },
+    )))
+// Without this, clearing a field could drop announcementId and the receipt would no longer be
+// findable by the audience query, silently detaching it from the announcement it belongs to.
+await check('a person cannot overwrite the announcementId of their own receipt', () =>
+    assertFails(setDoc(
+        doc(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts', `a1__${REC_A}`),
+        { announcementId: 'someone-elses-announcement', state: 'seen' },
+        { merge: true },
+    )))
+
+await check('a person can list their own receipts with the query the app runs', () =>
+    assertSucceeds(getDocs(query(
+        collection(asUser(REC_A), 'hotels', HOTEL_A, 'announcement_receipts'),
+        where('uid', '==', REC_A),
+    ))))
+
+await check('a GM can list one announcement audience with the query the app runs', () =>
+    assertSucceeds(getDocs(query(
+        collection(asUser(GM_A), 'hotels', HOTEL_A, 'announcement_receipts'),
+        where('announcementId', '==', 'a1'),
+    ))))
+
+// A GM must not be able to read another hotel's audience by asking for their own receipts either.
+await check('a GM cannot list another hotel receipts', () =>
+    assertFails(getDocs(query(
+        collection(asUser(GM_B), 'hotels', HOTEL_A, 'announcement_receipts'),
+        where('uid', '==', REC_A),
+    ))))
 
 // --- Unauthenticated -------------------------------------------------------------------------
 await check('anonymous cannot write pricing', () =>

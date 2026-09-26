@@ -84,7 +84,13 @@ export function AnnouncementManager({ open, onOpenChange }: { open: boolean; onO
     )
 
     const renderRow = (announcement: Announcement) => {
-        const summary = getAudienceSummary(announcement, receiptsFor(announcement), staff)
+        // Receipts are only fetched for the row that is open, so a collapsed row has no data at
+        // all. Summarising it anyway produced "0/12" on every collapsed row, which reads as
+        // "nobody has read this" and is a claim nobody made. A manager scanning the list would
+        // reasonably conclude staff were ignoring announcements when the truth is that nobody had
+        // looked. So the count only appears once the receipts for that row are actually in hand.
+        const loaded = announcement.id in audience
+        const summary = loaded ? getAudienceSummary(announcement, receiptsFor(announcement), staff) : null
         const open = expanded === announcement.id
         return (
             <li
@@ -113,13 +119,25 @@ export function AnnouncementManager({ open, onOpenChange }: { open: boolean; onO
                     </button>
                     {announcement.recalledAt
                         ? <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{t('announcement.withdrawn')}</span>
-                        : (
-                            <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                                <Eye className="h-3 w-3" />{summary.seen.length + summary.dismissed.length}/{summary.total}
-                            </span>
-                        )}
+                        : summary
+                            ? (
+                                <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                                    <Eye className="h-3 w-3" />{summary.seen.length + summary.dismissed.length}/{summary.total}
+                                </span>
+                            )
+                            : (
+                                // No receipts fetched yet, so deliberately not a number. A dash says
+                                // "not looked at" where "0" would say "nobody has".
+                                <span
+                                    data-testid="announcement-manager-unread-count"
+                                    title={t('announcement.openForReceipts')}
+                                    className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground"
+                                >
+                                    <Eye className="h-3 w-3" />—
+                                </span>
+                            )}
                 </div>
-                {open && (
+                {open && summary && (
                     <div className="space-y-2 border-t border-border/60 p-3">
                         <p className="text-xs text-muted-foreground">{t('announcement.readReceipts')}</p>
                         <div className="grid gap-2 sm:grid-cols-3">
