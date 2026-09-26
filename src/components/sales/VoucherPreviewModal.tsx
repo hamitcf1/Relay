@@ -544,12 +544,12 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                     </div>
                 )}
 
-                {/* LUXURY CONCIERGE VOUCHER CANVAS (SPACIOUS, UN-CRAMPED & CLEAN) */}
+                {/* LUXURY CONCIERGE VOUCHER CANVAS (SPACIOUS, DYNAMIC & ELEGANT) */}
                 <div className="w-full flex justify-center print:m-0 print:p-0 overflow-x-auto p-2">
                     <div 
                         ref={voucherRef}
                         className={cn(
-                            "relative flex flex-col sm:flex-row w-full sm:w-[880px] sm:min-h-[420px] rounded-3xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[880px] print:min-h-[420px] print:flex-row",
+                            "relative flex flex-col sm:flex-row w-full sm:w-[880px] min-h-[420px] h-auto rounded-3xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[880px] print:min-h-[420px] print:flex-row",
                             bgContainer
                         )}
                         style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
@@ -558,7 +558,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                         
                         {/* LEFT STUB (BRANDING & HIGH-CONTRAST SCANNABLE QR CODE) */}
                         <div className={cn(
-                            "w-full sm:w-[28%] border-b sm:border-b-0 sm:border-r border-dashed border-white/20 relative flex flex-col justify-between p-6 gap-5 backdrop-blur-md z-10",
+                            "w-full sm:w-[28%] self-stretch border-b sm:border-b-0 sm:border-r border-dashed border-white/20 relative flex flex-col justify-between p-6 gap-5 backdrop-blur-md z-10",
                             bgStub
                         )}>
                             <div className={cn("hidden sm:block absolute -top-4 -right-4 w-8 h-8 rounded-full z-20", cutoutBg)} />
@@ -576,7 +576,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                 </p>
                             </div>
 
-                            <div className="flex flex-col items-center justify-center my-auto">
+                            <div className="flex flex-col items-center justify-center my-auto py-2">
                                 <div className={qrWrapper}>
                                     <QRCode 
                                         value={qrData} 
@@ -606,10 +606,10 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                         </div>
 
                         {/* RIGHT MAIN PANEL (SPACIOUS & ELEGANT) */}
-                        <div className="flex-1 relative p-6 sm:p-7 flex flex-col justify-between z-10 gap-5">
+                        <div className="flex-1 relative p-6 sm:p-7 flex flex-col justify-between z-10 gap-4">
                             
                             {/* Header Row: Title & Clean Single Payment Status Badge */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-white/10">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-white/10">
                                 <div className="space-y-1.5 min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", typeInfo.color)}>
@@ -620,146 +620,149 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                         </span>
                                     </div>
                                     <h1 className={cn("text-2xl sm:text-3xl font-black tracking-tight uppercase leading-tight break-words", isDark ? 'text-white' : 'text-zinc-900')}>
-                                         {sale.name}
-                                     </h1>
-                                 </div>
-                                 
-                                 {/* SINGLE UNIFIED PRICE & PAYMENT BADGE */}
-                                 <div className={cn(
-                                     "p-3 rounded-2xl border text-right shrink-0 min-w-[170px] shadow-sm backdrop-blur-md",
-                                     sale.payment_status === 'paid'
-                                         ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" : "bg-emerald-50 border-emerald-300 text-emerald-950")
-                                         : sale.payment_status === 'partial'
-                                             ? (isDark ? "bg-amber-500/15 border-amber-500/30 text-amber-300" : "bg-amber-50 border-amber-300 text-amber-950")
-                                             : (isDark ? "bg-rose-500/15 border-rose-500/30 text-rose-300" : "bg-rose-50 border-rose-300 text-rose-950")
+                                        {sale.name}
+                                    </h1>
+                                </div>
+                                
+                                {/* SINGLE UNIFIED PRICE & PAYMENT BADGE */}
+                                <div className={cn(
+                                    "p-3 rounded-2xl border text-right shrink-0 min-w-[170px] shadow-sm backdrop-blur-md",
+                                    sale.payment_status === 'paid'
+                                        ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" : "bg-emerald-50 border-emerald-300 text-emerald-950")
+                                        : sale.payment_status === 'partial'
+                                            ? (isDark ? "bg-amber-500/15 border-amber-500/30 text-amber-300" : "bg-amber-50 border-amber-300 text-amber-950")
+                                            : (isDark ? "bg-rose-500/15 border-rose-500/30 text-rose-300" : "bg-rose-50 border-rose-300 text-rose-950")
                                 )}>
-                                     <p className="text-[9px] font-bold uppercase tracking-wider opacity-75">
-                                         {sale.payment_status === 'paid' ? '🟢 ÖDEME ALINDI / PAID' : sale.payment_status === 'partial' ? '🟡 KISMİ / PARTIAL' : '🔴 ÖDEME ALINACAK / UNPAID'}
-                                     </p>
-                                     <p className="text-2xl font-black tracking-tight mt-0.5">
-                                         {sale.total_price} <span className="text-base font-bold">{sale.currency}</span>
-                                     </p>
-                                     {sale.payment_status !== 'paid' && remaining > 0 && (
-                                         <p className="text-[10px] font-semibold text-rose-400 mt-0.5">
-                                             Kalan Bakiye: {remaining} {sale.currency}
-                                         </p>
-                                     )}
-                                     {!isTRYCurrency(sale.currency) && rates?.[sale.currency as keyof typeof rates] && (
-                                         <p className={cn("text-[10px] opacity-75 font-semibold mt-0.5", textMuted)}>
-                                             ≈ {(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)} ₺
-                                         </p>
-                                     )}
-                                 </div>
-                             </div>
-
-                             {/* MAIN DETAILS GRID (SPACIOUS 2-COLUMN LAYOUT) */}
-                             <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl border backdrop-blur-sm", bgCard)}>
-                                 {/* COLUMN 1: ROUTE & LOGISTICS */}
-                                 <div className="space-y-2.5">
-                                     <p className={cn("text-[9px]", textLabel)}>HİZMET & GÜZERGAH / SERVICE LOGISTICS</p>
-                                     
-                                     {sale.type === 'transfer' ? (
-                                         <div className="space-y-1.5 text-xs font-semibold">
-                                             <div className="flex items-start gap-2">
-                                                 <span className="text-base shrink-0 mt-0.5">📍</span>
-                                                 <div className="min-w-0 flex-1">
-                                                     <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereden / From:</span>
-                                                     <span className={cn("font-bold break-words block", textValue)}>{sale.pickup_location || 'Otel Resepsiyon'}</span>
-                                                 </div>
-                                             </div>
-                                             <div className="flex items-start gap-2">
-                                                 <span className="text-base shrink-0 mt-0.5">🏁</span>
-                                                 <div className="min-w-0 flex-1">
-                                                     <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereye / To:</span>
-                                                     <span className={cn("font-bold break-words block", textValue)}>{sale.dropoff_location || sale.name}</span>
-                                                 </div>
-                                             </div>
-                                             {sale.flight_number && (
-                                                 <div className="flex items-center gap-2">
-                                                     <span className="text-base shrink-0">✈️</span>
-                                                     <span className={textMuted}>Uçuş:</span>
-                                                     <span className={cn("font-mono font-bold", textValue)}>{sale.flight_number}</span>
-                                                 </div>
-                                             )}
-                                         </div>
-                                     ) : (
-                                         <div className="space-y-1.5 text-xs font-semibold">
-                                             <div className="flex items-start gap-2">
-                                                 <span className="text-base shrink-0 mt-0.5">✨</span>
-                                                 <div className="min-w-0 flex-1">
-                                                     <span className={cn("text-[10px] block opacity-75", textMuted)}>Hizmet / Service:</span>
-                                                     <span className={cn("font-bold break-words block", textValue)}>{sale.name}</span>
-                                                 </div>
-                                             </div>
-                                             <div className="flex items-center gap-2">
-                                                 <span className="text-base shrink-0">🕒</span>
-                                                 <span className={textMuted}>Saat / Time:</span>
-                                                 <span className={cn("font-bold", textValue)}>{sale.pickup_time || '--:--'}</span>
-                                             </div>
-                                         </div>
-                                     )}
-                                 </div>
-
-                                 {/* COLUMN 2: GUEST & ROOM DETAILS */}
-                                 <div className="space-y-2.5 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
-                                     <p className={cn("text-[9px]", textLabel)}>MİSAFİR BİLGİLERİ / GUEST DETAILS</p>
-                                     
-                                     <div className="space-y-2 text-xs font-semibold">
-                                         <div className="flex items-start gap-2">
-                                             <span className="text-base shrink-0 mt-0.5">👤</span>
-                                             <div className="min-w-0 flex-1">
-                                                 <span className={cn("text-[10px] block opacity-75", textMuted)}>Misafir / Guest(s):</span>
-                                                 {(() => {
-                                                     const guests = parseGuestNames(sale.customer_name)
-                                                     if (guests.length > 1) {
-                                                         return (
-                                                             <div className="flex flex-wrap gap-1 mt-1">
-                                                                 {guests.map((g, i) => (
-                                                                     <span key={i} className={cn("text-xs font-bold px-2 py-0.5 rounded-md border leading-tight", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
-                                                                         {g}
-                                                                     </span>
-                                                                 ))}
-                                                             </div>
-                                                         )
-                                                     }
-                                                     return (
-                                                         <span className={cn("font-bold text-xs leading-snug break-words block mt-0.5", textValue)}>
-                                                             {sale.customer_name || '—'}
-                                                         </span>
-                                                     )
-                                                 })()}
-                                             </div>
-                                         </div>
-                                         <div className="flex items-center gap-2">
-                                             <span className="text-base shrink-0">📞</span>
-                                             <span className={textMuted}>Telefon:</span>
-                                             <span className={cn("font-bold break-all", textValue)}>{sale.customer_phone || '—'}</span>
-                                         </div>
-                                         <div className="flex items-center gap-2">
-                                             <span className="text-base shrink-0">🔑</span>
-                                             <span className={textMuted}>Oda / Pax:</span>
-                                             <span className={cn("font-bold", textValue)}>
-                                                 {sale.room_number ? `#${sale.room_number}` : '—'} · {sale.pax} Person
-                                             </span>
-                                         </div>
-                                     </div>
-                                 </div>
-                             </div>
-
-                            {/* FOOTER ROW: NOTES & ISSUER */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-white/10 text-xs">
-                                <div className="flex-1 min-w-0">
-                                    {sale.notes ? (
-                                        <div className="flex items-start gap-1.5 text-xs">
-                                            <span className="text-amber-400 font-bold shrink-0">📝 Not:</span>
-                                            <p className={cn("italic truncate", textMuted)}>{sale.notes}</p>
-                                        </div>
-                                    ) : (
-                                        <p className={cn("text-[10px] tracking-wide", textMuted)}>
-                                            Aetherius Concierge Network · Official Digital Voucher Pass
+                                    <p className="text-[9px] font-bold uppercase tracking-wider opacity-75">
+                                        {sale.payment_status === 'paid' ? '🟢 ÖDEME ALINDI / PAID' : sale.payment_status === 'partial' ? '🟡 KISMİ / PARTIAL' : '🔴 ÖDEME ALINACAK / UNPAID'}
+                                    </p>
+                                    <p className="text-2xl font-black tracking-tight mt-0.5">
+                                        {sale.total_price} <span className="text-base font-bold">{sale.currency}</span>
+                                    </p>
+                                    {sale.payment_status !== 'paid' && remaining > 0 && (
+                                        <p className="text-[10px] font-semibold text-rose-400 mt-0.5">
+                                            Kalan Bakiye: {remaining} {sale.currency}
+                                        </p>
+                                    )}
+                                    {!isTRYCurrency(sale.currency) && rates?.[sale.currency as keyof typeof rates] && (
+                                        <p className={cn("text-[10px] opacity-75 font-semibold mt-0.5", textMuted)}>
+                                            ≈ {(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)} ₺
                                         </p>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* MAIN DETAILS GRID (SPACIOUS 2-COLUMN LAYOUT) */}
+                            <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl border backdrop-blur-sm", bgCard)}>
+                                {/* COLUMN 1: ROUTE & LOGISTICS */}
+                                <div className="space-y-2.5">
+                                    <p className={cn("text-[9px]", textLabel)}>HİZMET & GÜZERGAH / SERVICE LOGISTICS</p>
+                                    
+                                    {sale.type === 'transfer' ? (
+                                        <div className="space-y-1.5 text-xs font-semibold">
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-base shrink-0 mt-0.5">📍</span>
+                                                <div className="min-w-0 flex-1">
+                                                    <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereden / From:</span>
+                                                    <span className={cn("font-bold break-words block", textValue)}>{sale.pickup_location || 'Otel Resepsiyon'}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-base shrink-0 mt-0.5">🏁</span>
+                                                <div className="min-w-0 flex-1">
+                                                    <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereye / To:</span>
+                                                    <span className={cn("font-bold break-words block", textValue)}>{sale.dropoff_location || sale.name}</span>
+                                                </div>
+                                            </div>
+                                            {sale.flight_number && (
+                                                <div className="flex items-center gap-2 pt-0.5">
+                                                    <span className="text-base shrink-0">✈️</span>
+                                                    <span className={textMuted}>Uçuş:</span>
+                                                    <span className={cn("font-mono font-bold", textValue)}>{sale.flight_number}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-1.5 text-xs font-semibold">
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-base shrink-0 mt-0.5">✨</span>
+                                                <div className="min-w-0 flex-1">
+                                                    <span className={cn("text-[10px] block opacity-75", textMuted)}>Hizmet / Service:</span>
+                                                    <span className={cn("font-bold break-words block", textValue)}>{sale.name}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-base shrink-0">🕒</span>
+                                                <span className={textMuted}>Saat / Time:</span>
+                                                <span className={cn("font-bold", textValue)}>{sale.pickup_time || '--:--'}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* COLUMN 2: GUEST & ROOM DETAILS */}
+                                <div className="space-y-2.5 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
+                                    <p className={cn("text-[9px]", textLabel)}>MİSAFİR BİLGİLERİ / GUEST DETAILS</p>
+                                    
+                                    <div className="space-y-2 text-xs font-semibold">
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-base shrink-0 mt-0.5">👤</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className={cn("text-[10px] block opacity-75", textMuted)}>Misafir / Guest(s):</span>
+                                                {(() => {
+                                                    const guests = parseGuestNames(sale.customer_name)
+                                                    if (guests.length > 1) {
+                                                        return (
+                                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                                {guests.map((g, i) => (
+                                                                    <span key={i} className={cn("text-xs font-bold px-2 py-0.5 rounded-md border leading-tight break-words", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                                        {g}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )
+                                                    }
+                                                    return (
+                                                        <span className={cn("font-bold text-xs leading-snug break-words block mt-0.5", textValue)}>
+                                                            {sale.customer_name || '—'}
+                                                        </span>
+                                                    )
+                                                })()}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-base shrink-0">📞</span>
+                                            <span className={textMuted}>Telefon:</span>
+                                            <span className={cn("font-bold break-all", textValue)}>{sale.customer_phone || '—'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-base shrink-0">🔑</span>
+                                            <span className={textMuted}>Oda / Pax:</span>
+                                            <span className={cn("font-bold", textValue)}>
+                                                {sale.room_number ? `#${sale.room_number}` : '—'} · {sale.pax} Person
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* DEDICATED FULL-WIDTH NOTES CARD (IF PRESENT) */}
+                            {sale.notes && (
+                                <div className={cn("p-3 rounded-2xl border text-xs backdrop-blur-sm space-y-1", bgCard)}>
+                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5", textLabel)}>
+                                        <span className="text-amber-400">📝</span> NOTLAR & TALİMATLAR / NOTES & SPECIAL REQUESTS
+                                    </p>
+                                    <p className={cn("whitespace-pre-wrap break-words text-xs font-medium leading-relaxed", isDark ? 'text-white/90' : 'text-zinc-800')}>
+                                        {sale.notes}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* FOOTER ROW: ISSUER & BRAND FOOTER */}
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs mt-auto">
+                                <p className={cn("text-[10px] tracking-wide opacity-75", textMuted)}>
+                                    Aetherius Concierge Network · Official Digital Voucher Pass
+                                </p>
                                 
                                 <div className="text-right shrink-0 text-[10px] font-medium opacity-80">
                                     <span className={textMuted}>Satan / Issued: </span>

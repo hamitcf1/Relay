@@ -183,7 +183,7 @@ export function VoucherPage() {
                 <div 
                     id="voucher-canvas"
                     className={cn(
-                        "relative flex flex-col sm:flex-row w-full sm:w-[880px] sm:min-h-[420px] rounded-3xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[880px] print:min-h-[420px] print:flex-row",
+                        "relative flex flex-col sm:flex-row w-full sm:w-[880px] min-h-[420px] h-auto rounded-3xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[880px] print:min-h-[420px] print:flex-row",
                         bgContainer
                     )}
                     style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
@@ -192,7 +192,7 @@ export function VoucherPage() {
                     
                     {/* LEFT STUB (BRANDING & HIGH-CONTRAST SCANNABLE QR CODE AREA) */}
                     <div className={cn(
-                        "w-full sm:w-[28%] border-b sm:border-b-0 sm:border-r border-dashed border-white/20 relative flex flex-col justify-between p-6 gap-5 backdrop-blur-md z-10",
+                        "w-full sm:w-[28%] self-stretch border-b sm:border-b-0 sm:border-r border-dashed border-white/20 relative flex flex-col justify-between p-6 gap-5 backdrop-blur-md z-10",
                         bgStub
                     )}>
                         <div className={cn("hidden sm:block absolute -top-4 -right-4 w-8 h-8 rounded-full z-20", cutoutBg)} />
@@ -381,20 +381,23 @@ export function VoucherPage() {
                             </div>
                         </div>
 
-                        {/* FOOTER ROW: NOTES & ISSUER */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-white/10 text-xs">
-                            <div className="flex-1 min-w-0">
-                                {data.notes ? (
-                                    <div className="flex items-start gap-1.5 text-xs">
-                                        <span className="text-amber-400 font-bold shrink-0">📝 Not:</span>
-                                        <p className={cn("italic truncate", textMuted)}>{data.notes}</p>
-                                    </div>
-                                ) : (
-                                    <p className={cn("text-[10px] tracking-wide", textMuted)}>
-                                        Aetherius Concierge Network · Official Digital Voucher Pass
-                                    </p>
-                                )}
+                        {/* DEDICATED FULL-WIDTH NOTES CARD (IF PRESENT) */}
+                        {data.notes && (
+                            <div className={cn("p-3 rounded-2xl border text-xs backdrop-blur-sm space-y-1", bgCard)}>
+                                <p className={cn("text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5", textLabel)}>
+                                    <span className="text-amber-400">📝</span> NOTLAR & TALİMATLAR / NOTES & SPECIAL REQUESTS
+                                </p>
+                                <p className={cn("whitespace-pre-wrap break-words text-xs font-medium leading-relaxed", isDark ? 'text-white/90' : 'text-zinc-800')}>
+                                    {data.notes}
+                                </p>
                             </div>
+                        )}
+
+                        {/* FOOTER ROW: ISSUER & BRAND FOOTER */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs mt-auto">
+                            <p className={cn("text-[10px] tracking-wide opacity-75", textMuted)}>
+                                Aetherius Concierge Network · Official Digital Voucher Pass
+                            </p>
                             
                             <div className="text-right shrink-0 text-[10px] font-medium opacity-80">
                                 <span className={textMuted}>Satan / Issued: </span>
