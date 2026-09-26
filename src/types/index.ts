@@ -62,6 +62,14 @@ export interface UserSettings {
     theme?: 'light' | 'dark' | 'sepia' | 'comfort' | 'midnight'
     accent_color?: string
     notifications?: boolean
+    /**
+     * Raise a notification on this machine's desktop for anything new that arrives.
+     *
+     * Separate from `notifications`, which has never been read by anything, and separate from the
+     * browser's own permission: this is the account's preference and travels with it, while the
+     * permission is per browser per device and can be withdrawn without the account knowing.
+     */
+    desktop_notifications?: boolean
     show_datetime?: boolean
     collapsed_cards?: Record<string, boolean>
     avatar_style?: 'initials' | 'name' | 'emoji'

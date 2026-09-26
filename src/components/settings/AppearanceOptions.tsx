@@ -1,47 +1,14 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { Sun, Moon, Smile, User, Type } from 'lucide-react'
 import { useThemeStore, ACCENT_COLORS, type Theme } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { WorkspaceModeOptions } from '@/components/workspace/WorkspaceModeOptions'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { Toggle } from '@/components/ui/Toggle'
+import { DesktopNotificationSetting } from '@/components/settings/DesktopNotificationSetting'
 import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react'
 import { cn } from '@/lib/utils'
-
-interface ToggleProps {
-    label: string
-    value: boolean
-    onChange: () => void
-    description?: string
-}
-
-function Toggle({ label, value, onChange, description }: ToggleProps) {
-    return (
-        <button
-            onClick={onChange}
-            className="w-full flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card/40 hover:bg-card/70 hover:border-border transition-colors text-left"
-            aria-pressed={value}
-        >
-            <div className="min-w-0 pr-3">
-                <span className="text-sm font-medium text-foreground">{label}</span>
-                {description && <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>}
-            </div>
-            <div
-                className={cn(
-                    "w-9 h-5 rounded-full relative transition-colors shrink-0",
-                    value ? "bg-primary" : "bg-muted"
-                )}
-            >
-                <motion.div
-                    className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
-                    animate={{ left: value ? 18 : 2 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-            </div>
-        </button>
-    )
-}
 
 export function AppearanceOptions() {
     const { theme, setTheme, accentColor, setAccentColor } = useThemeStore()
@@ -146,6 +113,11 @@ export function AppearanceOptions() {
                     value={animationsEnabled}
                     onChange={() => updateSettings({ disable_animations: animationsEnabled })}
                 />
+            </div>
+
+            {/* Desktop Notifications */}
+            <div className="border-t border-border/50 pt-6">
+                <DesktopNotificationSetting />
             </div>
 
             {/* Avatar Style */}

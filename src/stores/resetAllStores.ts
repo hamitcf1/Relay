@@ -80,7 +80,7 @@ function clearHotelScopedStorage() {
 
 export function resetAllStores() {
     useHotelStore.setState({ hotel: null, error: null, loading: true })
-    useNotificationStore.setState({ notifications: [], unreadCount: 0, error: null, loading: true })
+    useNotificationStore.setState({ notifications: [], unreadCount: 0, error: null, loading: true, loaded: false })
     clearNotificationDemoAudience()
 
     useShiftStore.setState({ currentShift: null, error: null, loading: true })

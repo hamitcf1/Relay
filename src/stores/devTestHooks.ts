@@ -14,6 +14,7 @@ import { resetAllStores } from './resetAllStores'
 import { useActivityStore } from './activityStore'
 import { useAIStore } from './aiStore'
 import { useAnnouncementStore } from './announcementStore'
+import { useAuthStore } from './authStore'
 import { useBlacklistStore } from './blacklistStore'
 import { useCalendarStore } from './calendarStore'
 import { useChatStore } from './chatStore'
@@ -42,7 +43,7 @@ import { useWorkspaceEditStore } from './workspaceEditStore'
 export function installStoreTestHooks() {
     ;(window as unknown as Record<string, unknown>).__relayStores = {
         resetAllStores,
-        useActivityStore, useAIStore, useAnnouncementStore, useBlacklistStore,
+        useActivityStore, useAIStore, useAnnouncementStore, useAuthStore, useBlacklistStore,
         useCalendarStore, useChatStore, useCurrencyStore, useFeedbackStore, useHotelStore,
         useIncidentStore, useLanguageStore, useLeaderboardStore, useLogsStore, useMessageStore,
         useNavigationEditorStore, useNotesStore, useNotificationStore, useOffDayStore,

@@ -15,6 +15,7 @@ import { useThemeStore } from '@/stores/themeStore'
 import { useAuthStore } from '@/stores/authStore'
 import { ActivityTracker } from '@/components/tracking/ActivityTracker'
 import { AIChatBot } from '@/components/ai/AIChatBot'
+import { useDesktopNotifications } from '@/hooks/useDesktopNotifications'
 import { CyberLoadingScreen } from '@/components/ui/CyberLoadingScreen'
 
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })))
@@ -43,6 +44,13 @@ function ProtectedDashboardShell() {
     const user = useAuthStore(s => s.user)
     const isBooted = useAuthStore(s => s.isBooted)
     const setBooted = useAuthStore(s => s.setBooted)
+
+    // Here rather than inside the dashboard, so it stays up for the whole session instead of only
+    // while the overview module happens to be on screen. A manager who lives in another module all
+    // day still needs to be told. This runs before the dashboard's own subscriptions are set up,
+    // which is why the store carries a `loaded` flag: the hook has to know the difference between
+    // "nothing has arrived yet" and "nothing is there".
+    useDesktopNotifications()
 
     return (
         <ProtectedRoute>

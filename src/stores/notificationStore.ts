@@ -27,6 +27,14 @@ interface NotificationState {
     notifications: Notification[]
     unreadCount: number
     loading: boolean
+    /**
+     * Whether a subscription has ever delivered. `loading` cannot answer this: it is also false
+     * before a subscription exists, so a component mounted alongside the subscriber would read an
+     * empty list as the real one. This is the same distinction salesStore makes, and for the same
+     * reason: the desktop notification hook treats the first delivered batch as the baseline, and
+     * an empty list delivered too early is a baseline of nothing.
+     */
+    loaded: boolean
     error: string | null
 }
 
@@ -52,10 +60,11 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     notifications: [],
     unreadCount: 0,
     loading: true,
+    loaded: false,
     error: null,
 
     subscribeToNotifications: (hotelId, uid, role) => {
-        set({ loading: true, error: null })
+        set({ loading: true, loaded: false, error: null })
 
         const notificationsRef = collection(db, 'hotels', hotelId, 'notifications')
 
@@ -118,6 +127,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
                     // reflected in the badge instead of being overwritten by the fixture count.
                     unreadCount: merged.filter((n) => !n.is_read).length,
                     loading: false,
+                    loaded: true,
                     error: null
                 }
             })
@@ -171,10 +181,14 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
             set({
                 notifications: filtered,
                 unreadCount: unread,
-                loading: false
+                loading: false,
+                loaded: true
             })
         }, (err) => {
             console.error("Notification subscription error:", err)
+            // `loaded` stays false on purpose. A subscription that failed has not told us anything
+            // about the notifications, and reporting it as loaded would make an empty list look
+            // authoritative.
             set({ error: err.message, loading: false })
         })
 
