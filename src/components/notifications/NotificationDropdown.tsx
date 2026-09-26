@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck, X, Trash2, CreditCard } from 'lucide-react'
+import { Bell, CheckCheck, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -11,34 +11,13 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { NotificationListItem } from './NotificationListItem'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
-import { formatDistanceToNow } from 'date-fns'
-import { cn, getDateLocale } from '@/lib/utils'
 import { useConfirm } from '@/components/ui/confirm-dialog'
-import type { NotificationType } from '@/types'
-
-const notificationIcons: Record<NotificationType, any> = {
-    compliance: AlertCircle,
-    message: MessageCircle,
-    announcement: Info,
-    off_day: UserCheck,
-    // Money owed is the one category a manager acts on from another screen, so it gets its own
-    // mark rather than borrowing the compliance alert's.
-    payment: CreditCard,
-    system: Bell
-}
-
-const notificationColors: Record<NotificationType, string> = {
-    compliance: 'text-rose-500 bg-rose-500/10 dark:text-rose-400',
-    message: 'text-indigo-500 bg-indigo-500/10 dark:text-indigo-400',
-    announcement: 'text-amber-500 bg-amber-500/10 dark:text-amber-400',
-    off_day: 'text-emerald-500 bg-emerald-500/10 dark:text-emerald-400',
-    payment: 'text-amber-600 bg-amber-500/15 dark:text-amber-300 dark:bg-amber-500/20',
-    system: 'text-muted-foreground bg-muted'
-}
+import { cn } from '@/lib/utils'
 
 export function NotificationDropdown() {
     const { user } = useAuthStore()
@@ -81,7 +60,7 @@ export function NotificationDropdown() {
             title: t('notifications.clearAllConfirm') as string || 'Clear all notifications?',
             description: t('notifications.clearAllDescription') as string || 'This action cannot be undone.',
             variant: 'destructive',
-            confirmLabel: t('common.clear') as string || 'Clear All'
+            confirmLabel: t('notifications.clearAll') as string || 'Clear All'
         })
         if (confirmed) {
             await clearAllNotifications(hotel.id)
@@ -93,7 +72,9 @@ export function NotificationDropdown() {
             <DropdownMenuTrigger asChild>
                 <button
                     className="relative p-2 rounded-lg hover:bg-muted transition-colors active:scale-95"
-                    aria-label={unreadCount > 0 ? `${t('notifications.title')} (${unreadCount} unread)` : t('notifications.title')}
+                    aria-label={unreadCount > 0
+                        ? `${t('notifications.title')} (${t('notifications.unreadBadge', { count: String(unreadCount) })})`
+                        : t('notifications.title')}
                 >
                     <Bell aria-hidden="true" className={cn("w-5 h-5 transition-colors", unreadCount > 0 ? "text-primary" : "text-muted-foreground")} />
                     <AnimatePresence>
@@ -148,63 +129,31 @@ export function NotificationDropdown() {
                         </div>
                     ) : (
                         <div className="py-1">
-                            {notifications.map((n) => {
-                                const Icon = notificationIcons[n.type]
-                                return (
-                                    <DropdownMenuItem
-                                        key={n.id}
-                                        onSelect={(e) => {
-                                            e.preventDefault()
-                                            handleNotificationClick(n)
-                                        }}
-                                        className={cn(
-                                            "flex gap-2.5 p-3 cursor-pointer relative group outline-none transition-colors",
-                                            !n.is_read ? "bg-primary/5 hover:bg-primary/10 focus:bg-primary/10" : "hover:bg-muted/50 focus:bg-muted/50"
-                                        )}
-                                    >
-                                        {!n.is_read && (
-                                            <div className="absolute left-1 top-3 w-1 h-1 rounded-full bg-primary" aria-hidden="true" />
-                                        )}
-                                        <div className={cn("shrink-0 w-8 h-8 rounded-lg flex items-center justify-center", notificationColors[n.type])}>
-                                            <Icon className="w-4 h-4" aria-hidden="true" />
-                                        </div>
-                                        <div className="flex-1 min-w-0 space-y-0.5">
-                                            <div className="flex items-baseline justify-between gap-2">
-                                                <p className={cn("text-xs font-semibold truncate pr-5", n.is_read ? "text-muted-foreground" : "text-foreground")}>
-                                                    {n.title}
-                                                </p>
-                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-                                                    {formatDistanceToNow(n.timestamp, { addSuffix: true, locale: getDateLocale() })}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                                {n.content}
-                                            </p>
-                                        </div>
-
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                if (hotel?.id) {
-                                                    removeNotification(hotel.id, n.id)
-                                                }
-                                            }}
-                                            className="absolute top-1.5 right-1.5 p-1 text-muted-foreground hover:text-foreground rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                                            title={t('common.dismiss') as string}
-                                            aria-label={t('common.dismiss') as string}
-                                        >
-                                            <X className="w-3 h-3" aria-hidden="true" />
-                                        </button>
-                                    </DropdownMenuItem>
-                                )
-                            })}
+                            {notifications.map((n) => (
+                                <DropdownMenuItem
+                                    key={n.id}
+                                    onSelect={(e) => {
+                                        // Keeps the menu open so the click reads as "go there" rather
+                                        // than "dismiss and stay", and the destination is a full
+                                        // screen anyway.
+                                        e.preventDefault()
+                                        handleNotificationClick(n)
+                                    }}
+                                    className="cursor-pointer outline-none"
+                                >
+                                    <NotificationListItem
+                                        notification={n}
+                                        onDismiss={(item) => hotel?.id && removeNotification(hotel.id, item.id)}
+                                    />
+                                </DropdownMenuItem>
+                            ))}
                         </div>
                     )}
                 </div>
 
                 <DropdownMenuSeparator className="bg-border m-0" />
                 <DropdownMenuItem
-                    onSelect={() => navigate('/operations?tab=activity')}
+                    onSelect={() => navigate('/notifications')}
                     className="w-full rounded-none h-9 text-xs text-muted-foreground hover:text-foreground focus:text-foreground flex items-center justify-center cursor-pointer focus:bg-muted"
                 >
                     {t('notifications.viewAll')}
