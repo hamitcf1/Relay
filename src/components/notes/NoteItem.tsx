@@ -178,12 +178,12 @@ export function NoteItem({ note, hotelId, hotel, staff, selected, onToggleSelect
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className={cn(
-                'handover-note p-3 rounded-lg border transition-colors group relative',
+                'handover-note p-3.5 rounded-xl border transition-all duration-200 group relative shadow-xs hover:border-primary/40 hover:shadow-md',
                 note.is_pinned
-                    ? 'border-l-2 border-l-primary border-y-border border-r-border bg-primary/[0.03]'
+                    ? 'border-l-4 border-l-primary border-y-border/70 border-r-border/70 bg-primary/[0.04]'
                     : note.status === 'active'
-                        ? 'border-border bg-muted/30'
-                        : 'border-border/30 bg-muted/10 opacity-60',
+                        ? 'border-border/70 bg-card/90 hover:bg-card'
+                        : 'border-border/40 bg-muted/20 opacity-65 hover:opacity-100',
             )}
         >
             

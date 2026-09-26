@@ -937,18 +937,18 @@ export function SalesPanel() {
                                 <motion.div
                                     key={sale.id}
                                     layout
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     onClick={() => setSelectedSaleId(sale.id)}
                                     className={cn(
-                                        'group p-3 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]',
+                                        'group relative p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-[1px]',
                                         sale.status === 'cancelled' || sale.payment_status === 'cancelled' || sale.payment_status === 'refunded'
-                                            ? 'bg-rose-500/5 border-rose-500/10 hover:border-rose-500/30'
+                                            ? 'bg-rose-500/5 border-rose-500/20 hover:border-rose-500/40'
                                             : sale.payment_status === 'paid'
-                                                ? 'bg-emerald-500/5 border-emerald-500/10 hover:border-emerald-500/30'
+                                                ? 'bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40'
                                                 : sale.payment_status === 'partial'
-                                                    ? 'bg-amber-500/5 border-amber-500/10 hover:border-amber-500/30'
-                                                    : 'bg-card border-border hover:border-primary/50 hover:bg-accent/40'
+                                                    ? 'bg-amber-500/5 border-amber-500/20 hover:border-amber-500/40'
+                                                    : 'bg-card/90 border-border/80 hover:border-primary/40 hover:bg-card'
                                     )}
                                 >
                                     <div className="flex items-start justify-between gap-3">
@@ -960,16 +960,28 @@ export function SalesPanel() {
                                                 className="h-4 w-4 rounded border-border text-primary focus:ring-primary cursor-pointer shrink-0"
                                             />
                                         </div>
+
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                <span className="text-lg group-hover:scale-110 transition-transform">{saleTypeInfo[sale.type].icon}</span>
-                                                <span className="font-semibold text-foreground truncate">{sale.name}</span>
-                                                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
+                                            {/* Header Row: Type Icon, Sale Title, Reservation Code Badge, Priority & Status Pulse */}
+                                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                                <div className="p-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 shrink-0 group-hover:scale-105 transition-transform">
+                                                    {saleTypeInfo[sale.type].icon}
+                                                </div>
+                                                <span className="font-bold text-foreground text-sm tracking-tight truncate">{sale.name}</span>
+
+                                                <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 shrink-0 flex items-center gap-1">
                                                     #{sale.reservation_code || ('RES-' + sale.id.slice(0, 6).toUpperCase())}
                                                 </span>
+
+                                                {sale.pax > 1 && (
+                                                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border shrink-0">
+                                                        👥 {sale.pax} Pax
+                                                    </span>
+                                                )}
+
                                                 {sale.priority && sale.priority !== 'low' && (
                                                     <span className={cn(
-                                                        "inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase",
+                                                        "inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase shrink-0",
                                                         sale.priority === 'critical' ? "bg-rose-500/10 text-rose-500 border-rose-500/20" :
                                                         sale.priority === 'high' ? "bg-orange-500/10 text-orange-500 border-orange-500/20" :
                                                         "bg-amber-500/10 text-amber-500 border-amber-500/20"
@@ -977,54 +989,65 @@ export function SalesPanel() {
                                                         {priorityInfo[sale.priority]?.symbol} {t(`priority.${sale.priority}` as any) as string}
                                                     </span>
                                                 )}
-                                                {sale.status !== 'cancelled' && remaining > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+
+                                                {sale.status !== 'cancelled' && remaining > 0 && (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" /> Kalan Borç
+                                                    </span>
+                                                )}
                                                 
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
-                                                    className="w-6 h-6 ml-auto hover:bg-primary/20 hover:text-primary" 
+                                                    className="w-7 h-7 ml-auto hover:bg-primary/20 hover:text-primary transition-colors" 
                                                     onClick={(e) => { e.stopPropagation(); setSelectedVoucherId(sale.id); }}
-                                                    title="Digital Voucher"
+                                                    title="Digital Voucher Görüntüle ve Yazdır"
                                                 >
-                                                    <Ticket className="w-4 h-4" />
+                                                    <Ticket className="w-4 h-4 text-primary" />
                                                 </Button>
                                             </div>
 
-                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-                                                {sale.room_number && <span className="bg-muted px-1.5 py-0.5 rounded border border-border">Oda {sale.room_number}</span>}
+                                            {/* Secondary Meta Details: Room, Guest Names, Date & Creator */}
+                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                                                {sale.room_number && (
+                                                    <span className="bg-muted/80 text-foreground font-semibold px-2 py-0.5 rounded-md border border-border text-[11px]">
+                                                        Oda {sale.room_number}
+                                                    </span>
+                                                )}
                                                 {(() => {
                                                     const guests = parseGuestNames(sale.customer_name)
                                                     if (guests.length > 1) {
                                                         return (
-                                                            <span className="font-medium text-foreground bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded text-[10px] inline-flex items-center gap-1">
+                                                            <span className="font-medium text-foreground bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md text-[11px] inline-flex items-center gap-1">
                                                                 👥 {guests.join(', ')} ({guests.length} Misafir)
                                                             </span>
                                                         )
                                                     }
-                                                    return <span>{sale.customer_name || 'Misafir İsimsiz'}</span>
+                                                    return <span className="font-medium text-foreground/90">{sale.customer_name || 'Misafir İsimsiz'}</span>
                                                 })()}
-                                                <span className="text-muted-foreground/50">•</span>
-                                                <span>{formatDisplayDate(sale.date)}</span>
-                                                <span className="text-muted-foreground/50">•</span>
-                                                <span className="text-primary">{t('sales.soldBy', { name: sale.created_by_name })}</span>
+                                                <span className="text-muted-foreground/40">•</span>
+                                                <span>Hizmet: <strong className="text-foreground">{formatDisplayDate(sale.date)}</strong></span>
+                                                <span className="text-muted-foreground/40">•</span>
+                                                <span className="text-primary/90">{t('sales.soldBy', { name: sale.created_by_name })}</span>
                                             </div>
                                         </div>
 
-                                        <div className="text-right">
-                                            <div className="text-sm font-bold text-foreground">
+                                        {/* Right Section: Price & Status */}
+                                        <div className="text-right shrink-0">
+                                            <div className="text-base font-extrabold text-foreground tracking-tight">
                                                 {sale.currency === 'EUR' ? '€' : (sale.currency === 'TRY' ? '₺' : '$')}
                                                 {sale.total_price}
                                                 {!isTRYCurrency(sale.currency) && rates?.[sale.currency as keyof typeof rates] && (
-                                                    <span className="text-[10px] text-muted-foreground ml-1 font-normal whitespace-nowrap">
-                                                        (₺{(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)})
+                                                    <span className="block text-[10px] text-muted-foreground font-normal">
+                                                        ≈ ₺{(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)}
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className={cn("text-[10px] font-medium", paymentStatusInfo[sale.payment_status].color.replace('bg-', 'text-').split(' ')[1])}>
+                                            <div className={cn("text-[11px] font-bold mt-0.5", paymentStatusInfo[sale.payment_status].color.replace('bg-', 'text-').split(' ')[1])}>
                                                 {t(paymentStatusInfo[sale.payment_status].label as any)}
                                             </div>
                                             {/* Detailed Status Select */}
-                                            <div onClick={(e) => e.stopPropagation()} className="mt-2">
+                                            <div onClick={(e) => e.stopPropagation()} className="mt-1.5">
                                                 <Select
                                                     value={sale.status || 'waiting'}
                                                     onValueChange={(val: any) => {
@@ -1034,7 +1057,7 @@ export function SalesPanel() {
                                                      }}
                                                 >
                                                     <SelectTrigger className={cn(
-                                                        "h-6 text-[10px] uppercase font-bold tracking-wider px-2 py-0 border-0 min-w-[90px] justify-between gap-1 transition-colors rounded-md shadow-sm",
+                                                        "h-6 text-[10px] uppercase font-bold tracking-wider px-2 py-0 border-0 min-w-[95px] justify-between gap-1 transition-colors rounded-md shadow-xs",
                                                         saleStatusInfo[sale.status as SaleStatus || 'waiting']?.color || "bg-muted text-muted-foreground"
                                                     )}>
                                                         <SelectValue />

@@ -289,66 +289,79 @@ export function LostAndFoundModule() {
                 {/* Items List */}
                 <div className="space-y-2">
                     {filteredItems.length === 0 ? (
-                        <div className="text-center py-8 text-xs text-muted-foreground">
+                        <div className="text-center py-10 text-xs text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border/60">
                             Kayıtlı bulunmuş eşya bulunmuyor.
                         </div>
                     ) : (
-                        filteredItems.map(item => (
-                            <div
-                                key={item.id}
-                                className={cn(
-                                    "p-3 rounded-xl border transition-all flex items-center justify-between",
-                                    item.status === 'claimed'
-                                        ? "bg-emerald-500/5 border-emerald-500/20"
-                                        : item.status === 'disposed'
-                                            ? "bg-muted/40 border-border opacity-70"
-                                            : "bg-card border-border hover:border-primary/40"
-                                )}
-                            >
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                                            #{item.tracking_code}
-                                        </span>
-                                        <span className="font-bold text-xs text-foreground">{item.title}</span>
-                                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border">
-                                            {categoryLabels[item.category]}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                                        <span>Yer: {item.location_found || 'Belirtilmedi'}</span>
-                                        <span>•</span>
-                                        <span>Saklama: {item.storage_location}</span>
-                                        <span>•</span>
-                                        <span>Tarih: {item.date_found}</span>
-                                        {item.guest_name && (
-                                            <>
-                                                <span>•</span>
-                                                <span className="text-primary font-medium">Misafir: {item.guest_name}</span>
-                                            </>
+                        filteredItems.map(item => {
+                            const categoryColors: Record<LostItem['category'], string> = {
+                                electronics: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/25',
+                                jewelry: 'bg-amber-500/10 text-amber-400 border-amber-500/25',
+                                clothing: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/25',
+                                documents: 'bg-sky-500/10 text-sky-400 border-sky-500/25',
+                                other: 'bg-muted text-muted-foreground border-border'
+                            }
+
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={cn(
+                                        "p-3.5 rounded-2xl border transition-all duration-200 flex flex-wrap items-center justify-between gap-3 shadow-xs hover:shadow-md hover:-translate-y-[1px]",
+                                        item.status === 'claimed'
+                                            ? "bg-emerald-500/5 border-emerald-500/20"
+                                            : item.status === 'disposed'
+                                                ? "bg-muted/40 border-border opacity-70"
+                                                : "bg-card/90 border-border/80 hover:border-primary/40"
+                                    )}
+                                >
+                                    <div className="space-y-1.5 flex-1 min-w-[240px]">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
+                                                #{item.tracking_code}
+                                            </span>
+                                            <span className="font-bold text-sm text-foreground tracking-tight">{item.title}</span>
+                                            <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border", categoryColors[item.category])}>
+                                                {categoryLabels[item.category]}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                                            <span>Bulunduğu Yer: <strong className="text-foreground">{item.location_found || 'Belirtilmedi'}</strong></span>
+                                            <span className="text-muted-foreground/40">•</span>
+                                            <span>Saklandığı Yeri: <strong className="text-foreground">{item.storage_location}</strong></span>
+                                            <span className="text-muted-foreground/40">•</span>
+                                            <span>Tarih: {item.date_found}</span>
+                                            {item.guest_name && (
+                                                <>
+                                                    <span className="text-muted-foreground/40">•</span>
+                                                    <span className="text-primary font-semibold">Misafir: {item.guest_name}</span>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {item.status === 'claimed' && item.claimed_by_guest && (
+                                            <div className="text-xs text-emerald-500 font-semibold flex items-center gap-1.5 pt-0.5">
+                                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                                Teslim Alan: {item.claimed_by_guest} ({formatDisplayDate(item.claimed_at || new Date())})
+                                            </div>
                                         )}
                                     </div>
-                                    {item.status === 'claimed' && item.claimed_by_guest && (
-                                        <div className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1">
-                                            <CheckCircle2 className="w-3 h-3" /> Teslim Alan: {item.claimed_by_guest} ({formatDisplayDate(item.claimed_at || new Date())})
-                                        </div>
-                                    )}
-                                </div>
 
-                                <div className="flex items-center gap-2">
-                                    {item.status === 'unclaimed' && (
-                                        <Button size="sm" onClick={() => handleMarkClaimed(item)} className="bg-emerald-600 hover:bg-emerald-500 text-white h-7 text-xs">
-                                            Misafire Teslim Et
-                                        </Button>
-                                    )}
-                                    {user?.role === 'gm' && (
-                                        <Button size="icon" variant="ghost" onClick={() => handleDelete(item.id)} className="w-7 h-7 text-rose-500 hover:bg-rose-500/10">
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </Button>
-                                    )}
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {item.status === 'unclaimed' && (
+                                            <Button size="sm" onClick={() => handleMarkClaimed(item)} className="bg-emerald-600 hover:bg-emerald-500 text-white h-8 text-xs font-semibold px-3">
+                                                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Misafire Teslim Et
+                                            </Button>
+                                        )}
+                                        {user?.role === 'gm' && (
+                                            <Button size="icon" variant="ghost" onClick={() => handleDelete(item.id)} className="w-8 h-8 text-rose-500 hover:bg-rose-500/10 hover:text-rose-400">
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            )
+                        })
                     )}
                 </div>
             </CardContent>

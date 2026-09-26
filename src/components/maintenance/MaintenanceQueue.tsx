@@ -331,26 +331,30 @@ function TicketRow({
     return (
         <li
             className={cn(
-                'space-y-3 rounded-xl border bg-card/60 p-4',
-                overdue ? 'border-red-500/40' : 'border-border',
-                ticket.status !== 'active' && 'opacity-70'
+                'space-y-3 rounded-2xl border p-4.5 transition-all duration-200 shadow-xs hover:shadow-md hover:-translate-y-[1px]',
+                overdue
+                    ? 'bg-rose-500/5 border-rose-500/30 hover:border-rose-500/50'
+                    : ticket.status === 'resolved'
+                        ? 'bg-emerald-500/5 border-emerald-500/20 opacity-80'
+                        : 'bg-card/90 border-border/80 hover:border-primary/40'
             )}
             data-testid="maintenance-ticket"
         >
             <div className="flex flex-wrap items-center gap-2">
                 <Badge
                     className={cn(
-                        'text-[10px]',
-                        pri === 'critical' ? 'bg-red-500/15 text-red-500 border-red-500/25'
-                            : pri === 'high' ? 'bg-amber-500/15 text-amber-500 border-amber-500/25'
-                                : 'bg-muted text-muted-foreground'
+                        'text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border',
+                        pri === 'critical' ? 'bg-rose-500/15 text-rose-500 border-rose-500/30 animate-pulse'
+                            : pri === 'high' ? 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                                : pri === 'medium' ? 'bg-sky-500/15 text-sky-400 border-sky-500/30'
+                                    : 'bg-muted text-muted-foreground border-border'
                     )}
                 >
                     {t(`priority.${pri}` as const)}
                 </Badge>
 
                 {ticket.room_number && (
-                    <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-mono text-foreground">
+                    <span className="rounded-md bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs font-mono font-bold text-primary">
                         {t('maintenance.roomLabel').replace('{room}', ticket.room_number)}
                     </span>
                 )}
@@ -358,43 +362,45 @@ function TicketRow({
                 <StatusBadge status={ticket.status} />
 
                 {overdue && (
-                    <Badge className="bg-red-500/15 text-[10px] text-red-500 border-red-500/25" data-testid="overdue-badge">
-                        {t('maintenance.overdue')}
+                    <Badge className="bg-rose-500/15 text-[10px] font-bold text-rose-500 border-rose-500/30" data-testid="overdue-badge">
+                        ⚠️ {t('maintenance.overdue')}
                     </Badge>
                 )}
 
-                <span className="ml-auto text-[10px] text-muted-foreground">
+                <span className="ml-auto text-[11px] font-medium text-muted-foreground">
                     {format(ticket.created_at, 'd MMM yyyy')}
                 </span>
             </div>
 
-            <p className="text-sm leading-relaxed text-foreground">{ticket.content}</p>
+            <p className="text-sm leading-relaxed text-foreground font-medium">{ticket.content}</p>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
                 {ticket.due_at && (
-                    <span className={cn('flex items-center gap-1', overdue && 'font-semibold text-red-500')} data-testid="ticket-due">
-                        <CalendarClock className="h-3 w-3" aria-hidden="true" />
+                    <span className={cn('flex items-center gap-1.5 font-medium', overdue && 'font-bold text-rose-500')} data-testid="ticket-due">
+                        <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
                         {t('maintenance.dueOn').replace('{date}', format(ticket.due_at, 'd MMM'))}
                     </span>
                 )}
-                <span>{t('maintenance.reportedBy').replace('{name}', ticket.created_by_name)}</span>
+                <span>Raporlayan: <strong className="text-foreground">{ticket.created_by_name}</strong></span>
             </div>
 
             {ticket.resolution && (
-                <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2.5 text-xs text-foreground" data-testid="ticket-resolution">
-                    <span className="font-semibold text-emerald-500">{t('maintenance.resolutionLabel')}</span>{' '}
-                    {ticket.resolution}
-                </p>
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-foreground" data-testid="ticket-resolution">
+                    <span className="font-bold text-emerald-500 flex items-center gap-1 mb-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {t('maintenance.resolutionLabel')}
+                    </span>
+                    <p className="text-foreground/90 font-medium">{ticket.resolution}</p>
+                </div>
             )}
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border/40">
                 <Select
                     value={ticket.assigned_staff_uid ?? 'unassigned'}
                     onValueChange={(v) => onAssign(v)}
                     disabled={!isGM}
                 >
                     <SelectTrigger
-                        className="h-8 w-44 bg-background text-xs"
+                        className="h-8 w-48 bg-background/80 text-xs border-border/70"
                         aria-label={t('maintenance.assign')}
                     >
                         <SelectValue />
@@ -409,7 +415,7 @@ function TicketRow({
 
                 {ticket.status === 'active' ? (
                     isGM ? (
-                        <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs" onClick={onStartResolving}>
+                        <Button size="sm" variant="outline" className="h-8 gap-1.5 text-xs font-semibold border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10" onClick={onStartResolving}>
                             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                             {t('maintenance.resolve')}
                         </Button>
@@ -417,7 +423,7 @@ function TicketRow({
                         <span className="text-[11px] italic text-muted-foreground">{t('maintenance.gmOnly')}</span>
                     )
                 ) : (
-                    <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-xs" onClick={onReopen}>
+                    <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground" onClick={onReopen}>
                         <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                         {t('maintenance.reopen')}
                     </Button>
@@ -425,8 +431,8 @@ function TicketRow({
             </div>
 
             {resolving && (
-                <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
-                    <Label htmlFor={`resolution-${ticket.id}`} className="text-xs text-muted-foreground">
+                <div className="space-y-2 rounded-xl border border-primary/30 bg-primary/5 p-3.5">
+                    <Label htmlFor={`resolution-${ticket.id}`} className="text-xs font-bold text-foreground">
                         {t('maintenance.resolutionLabel')}
                     </Label>
                     <Textarea
@@ -440,7 +446,7 @@ function TicketRow({
                         <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={onCancelResolving}>
                             {t('common.cancel')}
                         </Button>
-                        <Button size="sm" className="h-8 text-xs" onClick={onResolve}>
+                        <Button size="sm" className="h-8 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold" onClick={onResolve}>
                             {t('maintenance.confirmResolve')}
                         </Button>
                     </div>
