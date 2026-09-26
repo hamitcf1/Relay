@@ -284,6 +284,11 @@ export function SalesPanel() {
             date: saleDate,
             sale_date: recordedSaleDate,
             pickup_time: formData.pickup_time,
+            ...(isTransfer ? {
+                pickup_location: transferData.pickupLocation.trim() || undefined,
+                dropoff_location: transferData.destination.trim() || undefined,
+                flight_number: transferData.flightNumber.trim() || undefined,
+            } : {}),
             total_price: totalPrice,
             currency: isLaundry ? 'TRY' : formData.currency,
             notes: finalNotes,

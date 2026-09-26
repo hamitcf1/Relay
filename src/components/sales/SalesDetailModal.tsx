@@ -71,11 +71,14 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                 pax: sale.pax,
                 notes: sale.notes || '',
                 pickup_time: sale.pickup_time || '',
+                pickup_location: sale.pickup_location || '',
+                dropoff_location: sale.dropoff_location || '',
+                flight_number: sale.flight_number || '',
                 ticket_number: sale.ticket_number || '',
                 date: sale.date,
                 sale_date: sale.sale_date || sale.created_at,
                 name: sale.name,
-                room_number: sale.room_number,
+                room_number: sale.room_number || '',
                 customer_name: sale.customer_name,
                 currency: sale.currency,
                 status: sale.status || 'waiting'
@@ -290,14 +293,75 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                             </label>
                         </div>
 
-                        {isEditing && <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="space-y-1 text-xs font-semibold">Misafir adı
-                                <Input value={editForm.customer_name || ''} onChange={e => setEditForm(prev => ({ ...prev, customer_name: e.target.value }))} placeholder="Misafir adı" />
-                            </label>
-                            <label className="space-y-1 text-xs font-semibold">Oda numarası (varsa)
-                                <Input value={editForm.room_number || ''} onChange={e => setEditForm(prev => ({ ...prev, room_number: e.target.value }))} placeholder="Otel dışıysa boş bırakın" />
-                            </label>
-                        </div>}
+                        {isEditing ? (
+                            <div className="space-y-3">
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <label className="space-y-1 text-xs font-semibold">Misafir adı
+                                        <Input value={editForm.customer_name || ''} onChange={e => setEditForm(prev => ({ ...prev, customer_name: e.target.value }))} placeholder="Misafir adı" />
+                                    </label>
+                                    <label className="space-y-1 text-xs font-semibold">Oda numarası (varsa)
+                                        <Input value={editForm.room_number || ''} onChange={e => setEditForm(prev => ({ ...prev, room_number: e.target.value }))} placeholder="Otel dışıysa boş bırakın" />
+                                    </label>
+                                </div>
+                                {sale.type === 'transfer' && (
+                                    <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-3">
+                                        <h4 className="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                                            🚐 Transfer Güzergah & Konum Bilgileri
+                                        </h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <label className="space-y-1 text-xs font-semibold">📍 Alınış Yeri (Nereden)
+                                                <Input
+                                                    value={editForm.pickup_location || ''}
+                                                    onChange={e => setEditForm(prev => ({ ...prev, pickup_location: e.target.value }))}
+                                                    placeholder="Örn: Otel Resepsiyon veya AYT T1"
+                                                    className="h-8 bg-background border-border text-xs"
+                                                />
+                                            </label>
+                                            <label className="space-y-1 text-xs font-semibold">🏁 Bırakılış Yeri (Nereye)
+                                                <Input
+                                                    value={editForm.dropoff_location || ''}
+                                                    onChange={e => setEditForm(prev => ({ ...prev, dropoff_location: e.target.value, name: e.target.value }))}
+                                                    placeholder="Örn: Antalya Havalimanı T1"
+                                                    className="h-8 bg-background border-border text-xs"
+                                                />
+                                            </label>
+                                            <label className="space-y-1 text-xs font-semibold">✈️ Uçuş Kodu
+                                                <Input
+                                                    value={editForm.flight_number || ''}
+                                                    onChange={e => setEditForm(prev => ({ ...prev, flight_number: e.target.value }))}
+                                                    placeholder="Örn: TK 2411"
+                                                    className="h-8 bg-background border-border text-xs font-mono"
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : sale.type === 'transfer' && (
+                            <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-3">
+                                <h4 className="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    🚐 Transfer Güzergah & Konum Bilgileri
+                                </h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                    <div className="bg-background/60 p-2.5 rounded-lg border border-amber-500/20">
+                                        <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider">📍 Alınış Yeri (Nereden)</span>
+                                        <span className="font-bold text-foreground text-sm">{sale.pickup_location || 'Otel / Resepsiyon'}</span>
+                                    </div>
+                                    <div className="bg-background/60 p-2.5 rounded-lg border border-amber-500/20">
+                                        <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider">🏁 Bırakılış Yeri (Nereye)</span>
+                                        <span className="font-bold text-foreground text-sm">{sale.dropoff_location || sale.name}</span>
+                                    </div>
+                                    <div className="bg-background/60 p-2.5 rounded-lg border border-amber-500/20">
+                                        <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider">🔑 Oda Numarası</span>
+                                        <span className="font-bold text-foreground text-sm">{sale.room_number ? `#${sale.room_number}` : 'Otel Dışı / —'}</span>
+                                    </div>
+                                    <div className="bg-background/60 p-2.5 rounded-lg border border-amber-500/20">
+                                        <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider">✈️ Uçuş Kodu</span>
+                                        <span className="font-bold text-foreground text-sm font-mono">{sale.flight_number || '—'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Details Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

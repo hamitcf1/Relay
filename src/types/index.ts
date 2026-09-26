@@ -637,6 +637,9 @@ export interface Sale {
     date: Date                // Date of service
     sale_date?: Date          // Date of sale, distinct from service date
     pickup_time?: string | null      // HH:MM
+    pickup_location?: string  // Nereden (Alınış Yeri)
+    dropoff_location?: string // Nereye (Bırakılış Yeri)
+    flight_number?: string    // Uçuş Kodu (Flight Number)
     ticket_number?: string    // External ticket #
     total_price: number
     collected_amount: number

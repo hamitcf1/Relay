@@ -239,31 +239,48 @@ export function VoucherPage() {
                         {/* Category Specific Custom Callouts & Grids */}
                         {data.type === 'transfer' ? (
                             <div className="space-y-3 my-2">
-                                <div className={cn("flex items-center justify-between p-3 rounded-xl border border-amber-500/30", isDark ? "bg-amber-500/10" : "bg-amber-50")}>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-2xl">🚐</span>
-                                        <div>
-                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-amber-300" : "text-amber-800")}>Transfer Alış Saati / Pickup Time</p>
-                                            <p className={cn("text-xl font-black tracking-tight", isDark ? "text-amber-200" : "text-amber-900")}>{data.pickup_time || '--:--'}</p>
+                                {/* Transfer Route Banner */}
+                                <div className={cn("p-3 rounded-xl border border-amber-500/30 flex items-center justify-between gap-4", isDark ? "bg-amber-500/10" : "bg-amber-50")}>
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <span className="text-2xl shrink-0">🚐</span>
+                                        <div className="min-w-0 flex-1">
+                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-amber-300" : "text-amber-800")}>
+                                                Transfer Güzergahı / Route
+                                            </p>
+                                            <div className="flex items-center gap-2 text-sm font-black truncate">
+                                                <span className={cn(isDark ? "text-amber-200" : "text-amber-900")}>
+                                                    📍 {data.pickup_location || 'Otel / Resepsiyon'}
+                                                </span>
+                                                <span className="opacity-50">➔</span>
+                                                <span className={cn(isDark ? "text-amber-200" : "text-amber-900")}>
+                                                    🏁 {data.dropoff_location || data.name}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>Pax / Yolcu</p>
-                                        <p className={cn("text-base font-bold", textValue)}>{data.pax} Person</p>
+                                    <div className="text-right shrink-0">
+                                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-amber-300" : "text-amber-800")}>Alış Saati / Time</p>
+                                        <p className={cn("text-xl font-black tracking-tight", isDark ? "text-amber-200" : "text-amber-900")}>{data.pickup_time || '--:--'}</p>
                                     </div>
                                 </div>
-                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
+
+                                {/* Transfer Logistics Grid */}
+                                <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl p-3 border", bgGrid)}>
                                     <div>
                                         <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
                                         <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest}</p>
                                     </div>
                                     <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{data.room || '—'}</p>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>🔑 {t('common.room')}</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{data.room ? `#${data.room}` : 'Otel Dışı / —'}</p>
                                     </div>
                                     <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Transfer Tarihi</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{formatDisplayDate(new Date(data.date))}</p>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>✈️ Uçuş Kodu / Flight</p>
+                                        <p className={cn("text-xs font-bold font-mono", textValue)}>{data.flight_number || '—'}</p>
+                                    </div>
+                                    <div>
+                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Pax / Yolcu</p>
+                                        <p className={cn("text-xs font-bold", textValue)}>{data.pax} Person</p>
                                     </div>
                                 </div>
                             </div>
