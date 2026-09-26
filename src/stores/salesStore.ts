@@ -50,6 +50,13 @@ export const paymentStatusInfo: Record<PaymentStatus, { label: string; color: st
 interface SalesState {
     sales: Sale[]
     loading: boolean
+    /**
+     * True once a subscription has actually delivered a result, which is not the same as
+     * `loading` being false: that is also the state before anything has been subscribed, and the
+     * two look identical to a caller. Anything that has to tell "there is nothing here" from
+     * "we have not looked yet" needs this instead, or it will act on the empty starting array.
+     */
+    loaded: boolean
     error: string | null
 }
 
@@ -75,16 +82,33 @@ const convertTimestamp = (timestamp: any): Date => {
     return new Date()
 }
 
+/**
+ * Sales that have not been paid in full and are still live.
+ *
+ * Exported as a pure function so a caller that already holds the list does not have to go back
+ * through the store for it, which keeps the definition of "owed" in one place.
+ */
+export function filterDueSales(sales: Sale[]): Sale[] {
+    return sales.filter(sale =>
+        sale.status !== 'cancelled' &&
+        sale.payment_status !== 'paid' &&
+        sale.payment_status !== 'cancelled' &&
+        sale.payment_status !== 'refunded'
+    )
+}
+
 export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     sales: [],
     loading: false,
+    loaded: false,
     error: null,
 
     subscribeToSales: (hotelId) => {
-        set({ loading: true, error: null })
+        set({ loading: true, loaded: false, error: null })
 
         if (hotelId === 'demo-hotel-id') {
             set({
+                loaded: true,
                 sales: [{
                     id: 'demo-sale-transfer', hotel_id: hotelId, type: 'transfer', name: 'Airport transfer', customer_name: 'Demo Guest', room_number: '305', pax: 2,
                     date: new Date(), pickup_time: '06:30', total_price: 45, collected_amount: 0, currency: 'EUR', payment_status: 'pending', status: 'confirmed',
@@ -133,9 +157,11 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                 }
             })
 
-            set({ sales: salesList, loading: false })
+            set({ sales: salesList, loading: false, loaded: true })
         }, (error) => {
             console.error('Sales subscription error:', error)
+            // A failed subscription has not told us anything about the sales, so `loaded` stays
+            // false on purpose. Reporting it as loaded would make an empty list look authoritative.
             set({ error: error.message, loading: false })
         })
 
@@ -498,14 +524,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         }
     },
 
-    getDueSales: () => {
-        return get().sales.filter(sale =>
-            sale.status !== 'cancelled' &&
-            sale.payment_status !== 'paid' &&
-            sale.payment_status !== 'cancelled' &&
-            sale.payment_status !== 'refunded'
-        )
-    },
+    getDueSales: () => filterDueSales(get().sales),
 
     getSalesByType: (type) => {
         return get().sales.filter(sale => sale.type === type)

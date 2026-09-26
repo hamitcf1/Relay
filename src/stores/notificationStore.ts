@@ -75,7 +75,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
             demoAudience = { uid, role }
             const mockNotifications: Notification[] = [
                 {
-                    id: 'note-1',
+                    id: 'demo-fixture-welcome',
                     type: 'system',
                     title: 'Welcome to Relay Demo',
                     content: 'This is a simulated environment. Feel free to explore!',
@@ -83,7 +83,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
                     is_read: false
                 },
                 {
-                    id: 'note-2',
+                    id: 'demo-fixture-housekeeping',
                     type: 'message',
                     title: 'New Message from Housekeeping',
                     content: 'Room 204 is ready for inspection.',
@@ -93,11 +93,33 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
                 }
             ]
 
-            set({
-                notifications: mockNotifications,
-                unreadCount: 1,
-                loading: false,
-                error: null
+            set((state) => {
+                // Merge rather than replace. In production a notification written through
+                // addNotification comes back on the next snapshot, so a wholesale set is harmless
+                // there. The demo has no server, so a locally added notification only exists in
+                // this array, and replacing the array destroyed it.
+                //
+                // That was not cosmetic. The unpaid-sale reminder writes here on mount, and the
+                // notification dropdown subscribes immediately afterwards, so every demo login
+                // created the reminder and then threw it away, while the "already reported" record
+                // said it had been dealt with and it never came back.
+                //
+                // Fixture entries are re-applied each time this runs, so a fixture deleted earlier
+                // reappears on the next subscribe. That is acceptable for demo content and is the
+                // behaviour that was there before.
+                const fixtureIds = new Set(mockNotifications.map((n) => n.id))
+                const created = state.notifications.filter((n) => !fixtureIds.has(n.id))
+                const merged = [...mockNotifications, ...created]
+                    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+
+                return {
+                    notifications: merged,
+                    // Counted rather than pinned to 1, so a notification added at runtime is
+                    // reflected in the badge instead of being overwritten by the fixture count.
+                    unreadCount: merged.filter((n) => !n.is_read).length,
+                    loading: false,
+                    error: null
+                }
             })
             return () => { }
         }

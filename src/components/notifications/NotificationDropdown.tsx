@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck, X, Trash2 } from 'lucide-react'
+import { Bell, CheckCheck, MessageCircle, AlertCircle, Info, UserCheck, X, Trash2, CreditCard } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -25,6 +25,9 @@ const notificationIcons: Record<NotificationType, any> = {
     message: MessageCircle,
     announcement: Info,
     off_day: UserCheck,
+    // Money owed is the one category a manager acts on from another screen, so it gets its own
+    // mark rather than borrowing the compliance alert's.
+    payment: CreditCard,
     system: Bell
 }
 
@@ -33,6 +36,7 @@ const notificationColors: Record<NotificationType, string> = {
     message: 'text-indigo-500 bg-indigo-500/10 dark:text-indigo-400',
     announcement: 'text-amber-500 bg-amber-500/10 dark:text-amber-400',
     off_day: 'text-emerald-500 bg-emerald-500/10 dark:text-emerald-400',
+    payment: 'text-amber-600 bg-amber-500/15 dark:text-amber-300 dark:bg-amber-500/20',
     system: 'text-muted-foreground bg-muted'
 }
 
