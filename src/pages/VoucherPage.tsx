@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
 import { saleTypeInfo, saleStatusInfo } from '@/stores/salesStore'
-import { cn, formatDisplayDate, parseGuestNames } from '@/lib/utils'
+import { cn, formatDisplayDate, parseGuestNames, isTRYCurrency } from '@/lib/utils'
 
 // Since this is a public page and doesn't load the full store/i18n by default,
 // we will rely on English for now or add a mini-translator if needed.
@@ -105,6 +105,12 @@ export function VoucherPage() {
     const cutoutBg = 'bg-background print:bg-white' 
     const qrWrapper = isDark ? 'bg-white' : 'bg-white border border-zinc-200'
 
+    const paymentStatus = data.payment || 'unpaid'
+    const totalPrice = data.total_price || (data.total ? parseFloat(data.total) : 0)
+    const currencyStr = data.currency || (data.total ? data.total.split(' ')[1] : '') || 'EUR'
+    const collectedAmount = data.collected_amount ?? (paymentStatus === 'paid' ? totalPrice : 0)
+    const remainingAmount = Math.max(0, totalPrice - collectedAmount)
+
     return (
         <div className="min-h-screen bg-background flex flex-col items-center py-6 sm:py-12 px-4 overflow-x-hidden">
             <div className="max-w-[850px] w-full flex flex-col sm:flex-row justify-between items-center mb-8 print:hidden gap-4">
@@ -178,17 +184,19 @@ export function VoucherPage() {
                     </div>
 
                     {/* RIGHT MAIN */}
-                    <div className="flex-1 relative p-6 sm:p-8 flex flex-col justify-between z-10 gap-6 sm:gap-0">
+                    <div className="flex-1 relative p-6 sm:p-8 flex flex-col justify-between z-10 gap-4 sm:gap-0">
                         {/* Header */}
                         <div className="flex justify-between items-start">
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider", 
-                                        data.payment === 'paid' 
+                                        paymentStatus === 'paid' 
                                             ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-100 text-emerald-700") 
-                                            : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
+                                            : paymentStatus === 'cancelled' || paymentStatus === 'refunded'
+                                                ? (isDark ? "bg-zinc-500/20 text-zinc-300" : "bg-zinc-200 text-zinc-600")
+                                                : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
                                     )}>
-                                        {data.payment}
+                                        {paymentStatus}
                                     </span>
                                     <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
                                         isDark ? "bg-white/10 text-white/70" : "bg-zinc-200 text-zinc-600"
@@ -197,17 +205,17 @@ export function VoucherPage() {
                                     </span>
                                     {data.type === 'transfer' && (
                                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                                            🚐 VIP Transfer Pass
+                                            VIP Transfer Pass
                                         </span>
                                     )}
                                     {data.type === 'tour' && (
                                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                                            🗺️ Guided Excursion Pass
+                                            Guided Excursion Pass
                                         </span>
                                     )}
                                     {data.type === 'laundry' && (
                                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                                            🧺 Laundry Service Ticket
+                                            Laundry Service Ticket
                                         </span>
                                     )}
                                 </div>
@@ -222,12 +230,12 @@ export function VoucherPage() {
                                 <p className={cn("text-2xl font-black", textValue)}>{data.total}</p>
                                 {(() => {
                                     if (!data.total) return null;
-                                    const [amountStr, currency] = data.total.split(' ');
+                                    const [amountStr, curr] = data.total.split(' ');
                                     const amount = parseFloat(amountStr);
-                                    if (currency && currency !== 'TRY' && rates?.[currency as keyof typeof rates]) {
+                                    if (curr && !isTRYCurrency(curr) && rates?.[curr as keyof typeof rates]) {
                                         return (
                                             <p className={cn("text-xs mt-1 font-medium", textMuted)}>
-                                                ≈ {(amount * rates[currency as keyof typeof rates]!.selling).toFixed(2)} ₺
+                                                ≈ {(amount * rates[curr as keyof typeof rates]!.selling).toFixed(2)} ₺
                                             </p>
                                         );
                                     }
@@ -235,6 +243,50 @@ export function VoucherPage() {
                                 })()}
                             </div>
                         </div>
+
+                        {/* Payment Status & Collection Callout */}
+                        <div className={cn(
+                            "p-3 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs my-2 backdrop-blur-sm",
+                            paymentStatus === 'paid'
+                                ? (isDark ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300" : "bg-emerald-50 border-emerald-300 text-emerald-900")
+                                : paymentStatus === 'partial'
+                                    ? (isDark ? "bg-amber-500/15 border-amber-500/40 text-amber-300" : "bg-amber-50 border-amber-300 text-amber-900")
+                                    : (isDark ? "bg-rose-500/15 border-rose-500/40 text-rose-300" : "bg-rose-50 border-rose-300 text-rose-900")
+                        )}>
+                            <div className="flex items-center gap-2.5 font-bold">
+                                <span className="text-xl">
+                                    {paymentStatus === 'paid' ? '🟢' : paymentStatus === 'partial' ? '🟡' : '🔴'}
+                                </span>
+                                <div>
+                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "opacity-70" : "text-zinc-600")}>Ödeme Durumu / Payment Status</p>
+                                    <p className="text-sm font-black tracking-tight">
+                                        {paymentStatus === 'paid' && 'ÖDEME ALINDI (PAID)'}
+                                        {paymentStatus === 'unpaid' && 'ÖDEME ALINACAK (UNPAID / PENDING)'}
+                                        {paymentStatus === 'partial' && 'KISMİ ÖDEME ALINDI (PARTIAL)'}
+                                        {paymentStatus === 'refunded' && 'İADE EDİLDİ (REFUNDED)'}
+                                        {paymentStatus === 'cancelled' && 'İPTAL EDİLDİ (CANCELLED)'}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-4 text-right self-end sm:self-center">
+                                <div>
+                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "opacity-70" : "text-zinc-600")}>Tahsil Edilen</p>
+                                    <p className="text-sm font-black">
+                                        {collectedAmount} {currencyStr}
+                                    </p>
+                                </div>
+                                {paymentStatus !== 'paid' && paymentStatus !== 'refunded' && paymentStatus !== 'cancelled' && (
+                                    <div>
+                                        <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "opacity-70" : "text-zinc-600")}>Kalan Bakiye</p>
+                                        <p className="text-sm font-black text-rose-400">
+                                            {remainingAmount} {currencyStr}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
 
                         {/* Category Specific Custom Callouts & Grids */}
                         {data.type === 'transfer' ? (

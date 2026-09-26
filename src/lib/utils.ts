@@ -55,3 +55,10 @@ export function parseGuestNames(nameStr?: string | null): string[] {
         .map(n => n.trim())
         .filter(Boolean)
 }
+
+export function isTRYCurrency(curr?: string | null): boolean {
+    if (!curr) return true
+    const c = curr.trim().toUpperCase()
+    return c === 'TRY' || c === 'TL' || c === '₺' || c === 'TRY/TL'
+}
+

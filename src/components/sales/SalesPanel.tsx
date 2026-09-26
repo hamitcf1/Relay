@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
-import { cn, formatDisplayDate, parseGuestNames } from '@/lib/utils'
+import { cn, formatDisplayDate, parseGuestNames, isTRYCurrency } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
 import { SalesDetailModal } from './SalesDetailModal'
@@ -717,7 +717,7 @@ export function SalesPanel() {
                                                 </Select>
                                             )}
                                         </div>
-                                        {formData.total_price && formData.currency !== 'TRY' && rates?.[formData.currency as keyof typeof rates] && (
+                                        {formData.total_price && !isTRYCurrency(formData.currency) && rates?.[formData.currency as keyof typeof rates] && (
                                             <div className="text-[10px] text-muted-foreground mt-1 text-right">
                                                 ≈ {(parseFloat(formData.total_price) * rates[formData.currency as keyof typeof rates]!.selling).toFixed(2)} ₺
                                             </div>
@@ -925,7 +925,7 @@ export function SalesPanel() {
                                             <div className="text-sm font-bold text-foreground">
                                                 {sale.currency === 'EUR' ? '€' : (sale.currency === 'TRY' ? '₺' : '$')}
                                                 {sale.total_price}
-                                                {sale.currency !== 'TRY' && rates?.[sale.currency as keyof typeof rates] && (
+                                                {!isTRYCurrency(sale.currency) && rates?.[sale.currency as keyof typeof rates] && (
                                                     <span className="text-[10px] text-muted-foreground ml-1 font-normal whitespace-nowrap">
                                                         (₺{(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)})
                                                     </span>
