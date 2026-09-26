@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket, Trash2, Archive, User } from 'lucide-react'
+import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket, Trash2, Archive, User, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -139,11 +139,26 @@ export function SalesPanel() {
         }
     }, [laundryData.colors, laundryData.whites, laundryData.ironingPieces, laundryData.service, activeTab, hotelInfo])
 
+    const [searchQuery, setSearchQuery] = useState('')
+
     const filteredSales = sales.filter(s => {
         if (s.type !== activeTab) return false
         const saleLifecycle = s.lifecycle_status || 'active'
         if (saleLifecycle !== filterLifecycle) return false
         if (filterPriority !== 'all' && (s.priority || 'medium') !== filterPriority) return false
+
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().trim()
+            const resCode = (s.reservation_code || ('RES-' + s.id.slice(0, 6))).toLowerCase()
+            const nameMatch = s.name?.toLowerCase().includes(q)
+            const customerMatch = s.customer_name?.toLowerCase().includes(q)
+            const phoneMatch = s.customer_phone?.toLowerCase().includes(q)
+            const roomMatch = s.room_number?.toLowerCase().includes(q)
+            const flightMatch = s.flight_number?.toLowerCase().includes(q)
+            const codeMatch = resCode.includes(q)
+            return codeMatch || nameMatch || customerMatch || phoneMatch || roomMatch || flightMatch
+        }
+
         return true
     })
 
@@ -215,7 +230,7 @@ export function SalesPanel() {
     }
 
     const handleBulkDelete = async () => {
-        if (!hotel?.id || selectedSaleIds.length === 0) return
+        if (!hotel?.id || user?.role !== 'gm' || selectedSaleIds.length === 0) return
         const confirmed = await confirm({
             title: 'Seçili Satışları Kalıcı Olarak Sil',
             description: `${selectedSaleIds.length} satışı veritabanından kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`,
@@ -229,7 +244,7 @@ export function SalesPanel() {
     }
 
     const handleEmptyTrash = async () => {
-        if (!hotel?.id) return
+        if (!hotel?.id || user?.role !== 'gm') return
         const confirmed = await confirm({
             title: 'Çöp Kutusu Temizlensin mi?',
             description: 'Çöp kutusundaki TÜM satışlar kalıcı olarak silinecek (30 günü beklemeden). Emin misiniz?',
@@ -430,6 +445,26 @@ export function SalesPanel() {
                             </Button>
                         )}
                     </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative mt-3">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        type="text"
+                        placeholder="Rezervasyon No (#RES-...), Misafir Adı, Telefon, Oda veya Uçuş Kodu..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 h-8 text-xs bg-background/70 border-border/60 focus:bg-background shadow-xs"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs p-0.5 rounded-full hover:bg-muted"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                        </button>
+                    )}
                 </div>
             </CardHeader>
 
@@ -890,6 +925,9 @@ export function SalesPanel() {
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span className="text-lg group-hover:scale-110 transition-transform">{saleTypeInfo[sale.type].icon}</span>
                                                 <span className="font-semibold text-foreground truncate">{sale.name}</span>
+                                                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
+                                                    #{sale.reservation_code || ('RES-' + sale.id.slice(0, 6).toUpperCase())}
+                                                </span>
                                                 {sale.priority && sale.priority !== 'low' && (
                                                     <span className={cn(
                                                         "inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase",

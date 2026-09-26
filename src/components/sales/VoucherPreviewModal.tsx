@@ -25,7 +25,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-import { useSalesStore, saleTypeInfo, saleStatusInfo } from '@/stores/salesStore'
+import { useSalesStore, saleTypeInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useCurrencyStore } from '@/stores/currencyStore'
@@ -82,6 +82,8 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
 
     if (!sale) return null
 
+    const reservationCode = sale.reservation_code || (`RES-${sale.id.slice(0, 6).toUpperCase()}`)
+
     const handleSaveEdit = async () => {
         if (!hotel?.id || !sale.id) return
         try {
@@ -117,6 +119,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
     // Generate QR Code payload (compact to fit in URL query param)
     const compactData = {
         id: sale.id,
+        reservation_code: reservationCode,
         hotelName: hotel?.info.name || 'AETHERIUS',
         name: sale.name,
         type: sale.type,
@@ -158,7 +161,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
             await new Promise(resolve => setTimeout(resolve, 100))
             const dataUrl = await toPng(voucherRef.current, { quality: 1, pixelRatio: 2 })
             const link = document.createElement('a')
-            link.download = `Voucher-${sale.room_number || 'guest'}-${sale.name.replace(/\s+/g, '-')}.png`
+            link.download = `Voucher-${reservationCode}-${sale.name.replace(/\s+/g, '-')}.png`
             link.href = dataUrl
             link.click()
         } catch (error) {
@@ -238,6 +241,9 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
                     <div className="flex items-center gap-2">
                         <h2 className="text-xl font-bold tracking-tight">Digital Voucher</h2>
+                        <span className="text-xs font-mono font-bold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-md">
+                            {reservationCode}
+                        </span>
                         <Button 
                             variant={isEditing ? "destructive" : "outline"}
                             size="sm"
@@ -307,16 +313,21 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                     </div>
                 </div>
 
-                {/* INLINE EDIT FORM */}
+                {/* INLINE EDIT FORM - DYNAMIC PER SALE TYPE */}
                 {isEditing && (
                     <div className="p-4 sm:p-5 rounded-2xl border border-primary/30 bg-primary/5 space-y-4 animate-in fade-in slide-in-from-top-2">
                         <div className="flex items-center justify-between border-b border-primary/20 pb-2">
                             <h3 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-2">
-                                <Edit3 className="w-4 h-4" /> Voucher & Satış Bilgilerini Güncelle
+                                <Edit3 className="w-4 h-4" />
+                                {sale.type === 'transfer' ? '🚐 Transfer Voucher Bilgilerini Güncelle' :
+                                 sale.type === 'tour' ? '🗺️ Tur Bilet Bilgilerini Güncelle' :
+                                 sale.type === 'laundry' ? '🧺 Çamaşırhane Fiş Bilgilerini Güncelle' :
+                                 '✨ Hizmet Bilgilerini Güncelle'}
                             </h3>
-                            <span className="text-[11px] text-muted-foreground font-medium">Yapacağınız değişiklikler bilet üzerinde ve sistem kaydında anında güncellenir.</span>
+                            <span className="text-[11px] text-muted-foreground font-medium">Satış tipine uygun özel alanlar gösterilmektedir.</span>
                         </div>
 
+                        {/* Common Guest & Room Info */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div className="space-y-1">
                                 <label className="text-xs font-semibold">Misafir Adı / İsimleri (virgülle ayırın)</label>
@@ -347,54 +358,111 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                            <div className="space-y-1 sm:col-span-2">
-                                <label className="text-xs font-semibold">Hizmet / Bilet Adı</label>
-                                <Input 
-                                    value={editForm.name || ''} 
-                                    onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
-                                    className="h-8 text-xs bg-background"
-                                />
+                        {/* TYPE SPECIFIC FIELDS */}
+                        {sale.type === 'transfer' ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">📍 Alınış Yeri (Nereden)</label>
+                                    <Input 
+                                        value={editForm.pickup_location || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, pickup_location: e.target.value }))}
+                                        placeholder="Resepsiyon / AYT T1"
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">🏁 Bırakılış Yeri (Nereye)</label>
+                                    <Input 
+                                        value={editForm.dropoff_location || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, dropoff_location: e.target.value, name: e.target.value }))}
+                                        placeholder="Otogar / Havalimanı T2"
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">✈️ Uçuş Kodu</label>
+                                    <Input 
+                                        value={editForm.flight_number || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, flight_number: e.target.value }))}
+                                        placeholder="TK 2411"
+                                        className="h-8 text-xs bg-background font-mono"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">Alış Saati</label>
+                                    <Input 
+                                        type="time"
+                                        value={editForm.pickup_time || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, pickup_time: e.target.value }))}
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold">📍 Alınış Yeri (Nereden)</label>
-                                <Input 
-                                    value={editForm.pickup_location || ''} 
-                                    onChange={e => setEditForm(p => ({ ...p, pickup_location: e.target.value }))}
-                                    placeholder="Resepsiyon / AYT T1"
-                                    className="h-8 text-xs bg-background"
-                                />
+                        ) : sale.type === 'tour' ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="space-y-1 sm:col-span-2">
+                                    <label className="text-xs font-semibold">🗺️ Tur / Gezi Adı</label>
+                                    <Input 
+                                        value={editForm.name || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">Kalkış Saati</label>
+                                    <Input 
+                                        type="time"
+                                        value={editForm.pickup_time || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, pickup_time: e.target.value }))}
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold">🏁 Bırakılış Yeri (Nereye)</label>
-                                <Input 
-                                    value={editForm.dropoff_location || ''} 
-                                    onChange={e => setEditForm(p => ({ ...p, dropoff_location: e.target.value }))}
-                                    placeholder="Otogar / Havalimanı T2"
-                                    className="h-8 text-xs bg-background"
-                                />
+                        ) : sale.type === 'laundry' ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">🧺 Teslim Saati</label>
+                                    <Input 
+                                        type="time"
+                                        value={editForm.pickup_time || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, pickup_time: e.target.value }))}
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">Parça / Servis Sayısı</label>
+                                    <Input 
+                                        type="number"
+                                        value={editForm.pax ?? 1} 
+                                        onChange={e => setEditForm(p => ({ ...p, pax: parseInt(e.target.value) || 1 }))}
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="space-y-1 sm:col-span-2">
+                                    <label className="text-xs font-semibold">Hizmet / Satış Adı</label>
+                                    <Input 
+                                        value={editForm.name || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold">Saat</label>
+                                    <Input 
+                                        type="time"
+                                        value={editForm.pickup_time || ''} 
+                                        onChange={e => setEditForm(p => ({ ...p, pickup_time: e.target.value }))}
+                                        className="h-8 text-xs bg-background"
+                                    />
+                                </div>
+                            </div>
+                        )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold">✈️ Uçuş Kodu</label>
-                                <Input 
-                                    value={editForm.flight_number || ''} 
-                                    onChange={e => setEditForm(p => ({ ...p, flight_number: e.target.value }))}
-                                    placeholder="TK 2411"
-                                    className="h-8 text-xs bg-background font-mono"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold">Alış Saati</label>
-                                <Input 
-                                    type="time"
-                                    value={editForm.pickup_time || ''} 
-                                    onChange={e => setEditForm(p => ({ ...p, pickup_time: e.target.value }))}
-                                    className="h-8 text-xs bg-background"
-                                />
-                            </div>
+                        {/* Financials & Status */}
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <div className="space-y-1">
                                 <label className="text-xs font-semibold">Toplam Tutar</label>
                                 <Input 
@@ -422,18 +490,6 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                 </Select>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold">Pax (Kişi Sayısı)</label>
-                                <Input 
-                                    type="number"
-                                    value={editForm.pax ?? 1} 
-                                    onChange={e => setEditForm(p => ({ ...p, pax: parseInt(e.target.value) || 1 }))}
-                                    className="h-8 text-xs bg-background"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div className="space-y-1">
                                 <label className="text-xs font-semibold">Ödeme Durumu</label>
                                 <Select 
                                     value={editForm.payment_status || 'pending'} 
@@ -444,7 +500,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="paid">🟢 Ödeme Alındı (Paid)</SelectItem>
-                                        <SelectItem value="pending">🔴 Ödeme Alınacak (Unpaid / Pending)</SelectItem>
+                                        <SelectItem value="pending">🔴 Ödeme Alınacak (Unpaid)</SelectItem>
                                         <SelectItem value="partial">🟡 Kısmi Ödeme (Partial)</SelectItem>
                                         <SelectItem value="refunded">⚪ İade Edildi (Refunded)</SelectItem>
                                         <SelectItem value="cancelled">⚪ İptal Edildi (Cancelled)</SelectItem>
@@ -467,7 +523,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                             <Input 
                                 value={editForm.notes || ''} 
                                 onChange={e => setEditForm(p => ({ ...p, notes: e.target.value }))}
-                                placeholder="Örn: Çocuk koltuğu gerekli, bagaj sayısı..."
+                                placeholder="Örn: Özel istekler, hatırlatmalar..."
                                 className="h-8 text-xs bg-background"
                             />
                         </div>
@@ -491,11 +547,9 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                             "w-full sm:w-[30%] border-b sm:border-b-0 sm:border-r border-dashed border-white/20 relative flex flex-col justify-between p-6 sm:p-7 gap-6 backdrop-blur-md z-10",
                             bgStub
                         )}>
-                            {/* Decorative Semicircle Cutouts */}
                             <div className={cn("hidden sm:block absolute -top-4 -right-4 w-8 h-8 rounded-full z-20", cutoutBg)} />
                             <div className={cn("hidden sm:block absolute -bottom-4 -right-4 w-8 h-8 rounded-full z-20", cutoutBg)} />
                             
-                            {/* Brand Header */}
                             <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="text-lg">✨</span>
@@ -508,7 +562,6 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                 </p>
                             </div>
 
-                            {/* Centered High-Contrast QR Code Box */}
                             <div className="flex flex-col items-center justify-center my-auto">
                                 <div className={qrWrapper}>
                                     <QRCode 
@@ -525,12 +578,11 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                 </div>
                             </div>
                             
-                            {/* Ticket Hash & Seal */}
                             <div className="pt-2 border-t border-dashed border-white/10 text-center sm:text-left flex items-center justify-between">
                                 <div>
-                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider", textLabel)}>BİLET / TICKET NO</p>
+                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider", textLabel)}>REZ. NO / BOOKING CODE</p>
                                     <p className={cn("text-xs font-mono font-bold tracking-widest", isDark ? 'text-amber-400' : 'text-zinc-900')}>
-                                        #{sale.id.split('-')[0].toUpperCase()}
+                                        {reservationCode}
                                     </p>
                                 </div>
                                 <div className={cn("text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white/80" : "bg-zinc-200 border-zinc-300 text-zinc-800")}>
@@ -556,10 +608,10 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                             {sale.payment_status === 'paid' ? '🟢 ÖDEME ALINDI / PAID' : sale.payment_status === 'partial' ? '🟡 KISMİ / PARTIAL' : '🔴 ÖDEME ALINACAK / UNPAID'}
                                         </span>
 
-                                        <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                                        <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border font-mono",
                                             isDark ? "bg-white/10 text-white/80 border-white/20" : "bg-zinc-100 text-zinc-700 border-zinc-300"
                                         )}>
-                                            {t(saleStatusInfo[sale.status || 'waiting'].label as any)}
+                                            {reservationCode}
                                         </span>
 
                                         <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", typeInfo.color)}>
@@ -572,7 +624,6 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                     </h1>
                                 </div>
                                 
-                                {/* Price Badge Box */}
                                 <div className="text-right sm:text-right self-end sm:self-center shrink-0 bg-white/5 p-3 rounded-2xl border border-white/10 min-w-[140px]">
                                     <p className={cn("text-[9px]", textLabel)}>TOPLAM TUTAR / TOTAL PRICE</p>
                                     <p className={cn("text-2xl font-black tracking-tight text-emerald-400", isDark ? 'text-emerald-400' : 'text-emerald-600')}>
@@ -634,7 +685,6 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                             {/* CATEGORY SPECIFIC LOGISTICS & GUEST DETAILS */}
                             {sale.type === 'transfer' ? (
                                 <div className="space-y-3">
-                                    {/* Transfer Route Banner */}
                                     <div className={cn("p-4 rounded-2xl border border-amber-500/40 flex items-center justify-between gap-4", isDark ? "bg-amber-500/10" : "bg-amber-50/80")}>
                                         <div className="flex items-center gap-3.5 flex-1 min-w-0">
                                             <span className="text-3xl shrink-0">🚐</span>
@@ -659,7 +709,6 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                         </div>
                                     </div>
 
-                                    {/* Transfer Logistics Grid */}
                                     <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl p-4 border", bgGrid)}>
                                         <div className="col-span-2">
                                             <p className={cn("text-[9px]", textLabel)}>MİSAFİR ADI / GUEST NAME(S)</p>

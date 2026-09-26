@@ -629,6 +629,7 @@ export interface ActivityLog {
 export interface Sale {
     id: string
     hotel_id: string
+    reservation_code?: string // Unique Reservation / Booking Code (e.g. RES-849201)
     type: SaleType
     name: string              // Tour name, Transfer destination, etc.
     customer_name: string     // Guest name

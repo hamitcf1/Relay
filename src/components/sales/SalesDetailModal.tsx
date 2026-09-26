@@ -224,8 +224,11 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
                         </div>
 
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
                             <span className="text-3xl">{saleTypeInfo[sale.type].icon}</span>
+                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 font-mono font-bold text-xs">
+                                #{sale.reservation_code || ('RES-' + sale.id.slice(0, 6).toUpperCase())}
+                            </Badge>
                             <Badge variant="outline" className={cn(saleTypeInfo[sale.type].color)}>
                                 {t(saleTypeInfo[sale.type].label as any)}
                             </Badge>

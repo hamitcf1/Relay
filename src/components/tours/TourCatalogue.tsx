@@ -43,6 +43,7 @@ export function TourCatalogue() {
     const [bookingType, setBookingType] = useState<'adult' | 'child_3_7' | 'child_0_3'>('adult')
     const [bookingForm, setBookingForm] = useState({
         guest_name: '',
+        guest_phone: '',
         room_number: '',
         pax: 1,
         date: format(new Date(), 'yyyy-MM-dd'),
@@ -91,6 +92,7 @@ export function TourCatalogue() {
         setBookingType(type)
         setBookingForm({
             guest_name: '',
+            guest_phone: '',
             room_number: '',
             pax: 1,
             date: format(new Date(), 'yyyy-MM-dd'),
@@ -112,6 +114,7 @@ export function TourCatalogue() {
                 type: 'tour',
                 name: `${bookingTour.name} (${bookingType === 'adult' ? t('tours.form.adultPrice') : bookingType === 'child_3_7' ? t('tours.form.child37Price') : t('tours.form.child03Price')})`,
                 customer_name: bookingForm.guest_name,
+                customer_phone: bookingForm.guest_phone || undefined,
                 room_number: bookingForm.room_number,
                 pax: bookingForm.pax,
                 date: new Date(bookingForm.date),
@@ -362,10 +365,10 @@ export function TourCatalogue() {
                                 {t('tours.book.desc')}
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-4 py-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground">{t('tours.book.guestName')}</label>
+                                    <label className="text-xs font-semibold text-muted-foreground">{t('tours.book.guestName')}</label>
                                     <Input
                                         value={bookingForm.guest_name}
                                         onChange={e => setBookingForm(p => ({ ...p, guest_name: e.target.value }))}
@@ -374,7 +377,16 @@ export function TourCatalogue() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground">{t('tours.book.room')}</label>
+                                    <label className="text-xs font-semibold text-muted-foreground">Misafir Tel No</label>
+                                    <Input
+                                        value={bookingForm.guest_phone}
+                                        onChange={e => setBookingForm(p => ({ ...p, guest_phone: e.target.value }))}
+                                        className="bg-background border-border"
+                                        placeholder="+90 532 ..."
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-muted-foreground">{t('tours.book.room')}</label>
                                     <Input
                                         value={bookingForm.room_number}
                                         onChange={e => setBookingForm(p => ({ ...p, room_number: e.target.value }))}
@@ -383,7 +395,7 @@ export function TourCatalogue() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground">{t('tours.book.pax')}</label>
+                                    <label className="text-xs font-semibold text-muted-foreground">{t('tours.book.pax')}</label>
                                     <Input
                                         type="number"
                                         value={bookingForm.pax}
@@ -393,7 +405,7 @@ export function TourCatalogue() {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs text-muted-foreground">{t('tours.book.date')}</label>
+                                    <label className="text-xs font-semibold text-muted-foreground">{t('tours.book.date')}</label>
                                     <Input
                                         type="date"
                                         value={bookingForm.date}
@@ -401,15 +413,25 @@ export function TourCatalogue() {
                                         className="bg-background border-border"
                                     />
                                 </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-muted-foreground">Kalkış Saati</label>
+                                    <Input
+                                        type="time"
+                                        value={bookingForm.pickup_time}
+                                        onChange={e => setBookingForm(p => ({ ...p, pickup_time: e.target.value }))}
+                                        className="bg-background border-border"
+                                    />
+                                </div>
                             </div>
-                            <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
-                                <p className="text-xs text-primary">
-                                    {t('tours.book.totalPrice')}: <span className="font-bold text-foreground">€{bookingTour ? (
-                                        (bookingType === 'adult' ? bookingTour.adult_price :
-                                            bookingType === 'child_3_7' ? bookingTour.child_3_7_price :
-                                                bookingTour.child_0_3_price) * bookingForm.pax
-                                    ) : 0}</span>
-                                </p>
+                            <div className="p-3 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-between">
+                                <span className="text-xs font-semibold text-primary">
+                                    {t('tours.book.totalPrice')}
+                                </span>
+                                <span className="text-lg font-black text-foreground">€{bookingTour ? (
+                                    (bookingType === 'adult' ? bookingTour.adult_price :
+                                        bookingType === 'child_3_7' ? bookingTour.child_3_7_price :
+                                            bookingTour.child_0_3_price) * bookingForm.pax
+                                ) : 0}</span>
                             </div>
                         </div>
                         <DialogFooter>

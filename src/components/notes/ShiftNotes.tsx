@@ -125,6 +125,7 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     }
 
     const handleEmptyTrash = async () => {
+        if (!hotelId || user?.role !== 'gm') return
         const confirmed = await confirm({
             title: 'Çöp Kutusu Temizlensin mi?',
             description: 'Çöp kutusundaki tüm notlar kalıcı olarak silinecek. Bu işlem geri alınamaz.',
@@ -185,7 +186,7 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                         {selectedNoteIds.length > 0 && selectedNoteIds.length === visibleNotes.length ? <CheckSquare className="w-3.5 h-3.5 text-primary" /> : <Square className="w-3.5 h-3.5 text-muted-foreground" />}
                         {selectedNoteIds.length > 0 ? `${selectedNoteIds.length} / ${visibleNotes.length} Seçildi` : 'Tümünü Seç'}
                     </Button>
-                    {statusFilter === 'trash' && (
+                    {statusFilter === 'trash' && user?.role === 'gm' && (
                         <Button variant="destructive" size="sm" onClick={handleEmptyTrash} className="h-8 text-xs gap-1.5">
                             <Trash2 className="w-3.5 h-3.5" />
                             Çöp Kutusunu Temizle

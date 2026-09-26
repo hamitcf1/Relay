@@ -193,9 +193,9 @@ export function VoucherPage() {
                         
                         <div className="pt-2 border-t border-dashed border-white/10 text-center sm:text-left flex items-center justify-between">
                             <div>
-                                <p className={cn("text-[9px] font-bold uppercase tracking-wider", textLabel)}>BİLET / TICKET NO</p>
+                                <p className={cn("text-[9px] font-bold uppercase tracking-wider", textLabel)}>REZ. NO / BOOKING CODE</p>
                                 <p className={cn("text-xs font-mono font-bold tracking-widest", isDark ? 'text-amber-400' : 'text-zinc-900')}>
-                                    #{data.id?.split('-')[0].toUpperCase()}
+                                    {data.reservation_code || (`RES-${data.id?.split('-')[0].toUpperCase()}`)}
                                 </p>
                             </div>
                             <div className={cn("text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white/80" : "bg-zinc-200 border-zinc-300 text-zinc-800")}>

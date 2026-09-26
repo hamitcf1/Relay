@@ -134,9 +134,11 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                 return {
                     id: doc.id,
                     hotel_id: hotelId,
+                    reservation_code: data.reservation_code || (`RES-${doc.id.slice(0, 6).toUpperCase()}`),
                     type: data.type as SaleType,
                     name: data.name,
                     customer_name: data.customer_name,
+                    customer_phone: data.customer_phone,
                     room_number: data.room_number,
                     pax: data.pax || 1,
                     date: convertTimestamp(data.date),
@@ -194,10 +196,12 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 
     addSale: async (hotelId, saleData) => {
         const isDemo = hotelId === 'demo-hotel-id'
+        const generatedResCode = saleData.reservation_code || (`RES-${Math.floor(100000 + Math.random() * 900000)}`)
 
         // 1. Prepare Sale Data
         const saleDocData = {
             ...saleData,
+            reservation_code: generatedResCode,
             collected_amount: 0,
             payment_status: 'pending' as PaymentStatus,
             date: Timestamp.fromDate(saleData.date),
@@ -216,6 +220,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     ...saleData,
                     id: saleId,
                     hotel_id: hotelId,
+                    reservation_code: generatedResCode,
                     sale_date: saleData.sale_date || new Date(),
                     created_at: new Date(),
                     collected_amount: 0,
