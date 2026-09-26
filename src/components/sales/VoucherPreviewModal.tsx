@@ -29,7 +29,7 @@ import { useSalesStore, saleTypeInfo } from '@/stores/salesStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useCurrencyStore } from '@/stores/currencyStore'
-import { cn, formatDisplayDate, isTRYCurrency } from '@/lib/utils'
+import { cn, formatDisplayDate, parseGuestNames, isTRYCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
 import type { Sale, Currency, PaymentStatus } from '@/types'
 
@@ -124,14 +124,14 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                 v: 2,
                 id: sale.id,
                 r: reservationCode,
-                hn: (hotel?.info?.name || 'AETHERIUS').slice(0, 25),
-                n: (sale.name || '').slice(0, 35),
+                hn: (hotel?.info?.name || 'AETHERIUS').slice(0, 30),
+                n: (sale.name || '').slice(0, 45),
                 t: sale.type,
-                g: (sale.customer_name || '').slice(0, 30),
-                p: (sale.customer_phone || '').slice(0, 18),
+                g: (sale.customer_name || '').slice(0, 60),
+                p: (sale.customer_phone || '').slice(0, 20),
                 rm: sale.room_number || '',
-                pu: (sale.pickup_location || '').slice(0, 25),
-                fl: (sale.flight_number || '').slice(0, 12),
+                pu: (sale.pickup_location || '').slice(0, 30),
+                fl: (sale.flight_number || '').slice(0, 15),
                 d: sale.date ? (sale.date instanceof Date ? sale.date.toISOString().slice(0, 10) : String(sale.date).slice(0, 10)) : undefined,
                 pt: sale.pickup_time || '',
                 px: sale.pax,
@@ -140,8 +140,8 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                 ca: collected,
                 tp: sale.total_price,
                 c: sale.currency,
-                nt: sale.notes ? (sale.notes || '').slice(0, 35) : undefined,
-                by: (sale.created_by_name || '').slice(0, 18),
+                nt: sale.notes ? (sale.notes || '').slice(0, 40) : undefined,
+                by: (sale.created_by_name || '').slice(0, 20),
                 th: theme
             }
 
@@ -619,106 +619,132 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                             📅 {formatDisplayDate(sale.date)} {sale.pickup_time ? `· 🕒 ${sale.pickup_time}` : ''}
                                         </span>
                                     </div>
-                                    <h1 className={cn("text-2xl sm:text-3xl font-black tracking-tight uppercase leading-tight truncate", isDark ? 'text-white' : 'text-zinc-900')}>
-                                        {sale.name}
-                                    </h1>
-                                </div>
-                                
-                                {/* SINGLE UNIFIED PRICE & PAYMENT BADGE */}
-                                <div className={cn(
-                                    "p-3 rounded-2xl border text-right shrink-0 min-w-[170px] shadow-sm backdrop-blur-md",
-                                    sale.payment_status === 'paid'
-                                        ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" : "bg-emerald-50 border-emerald-300 text-emerald-950")
-                                        : sale.payment_status === 'partial'
-                                            ? (isDark ? "bg-amber-500/15 border-amber-500/30 text-amber-300" : "bg-amber-50 border-amber-300 text-amber-950")
-                                            : (isDark ? "bg-rose-500/15 border-rose-500/30 text-rose-300" : "bg-rose-50 border-rose-300 text-rose-950")
+                                    <h1 className={cn("text-2xl sm:text-3xl font-black tracking-tight uppercase leading-tight break-words", isDark ? 'text-white' : 'text-zinc-900')}>
+                                         {sale.name}
+                                     </h1>
+                                 </div>
+                                 
+                                 {/* SINGLE UNIFIED PRICE & PAYMENT BADGE */}
+                                 <div className={cn(
+                                     "p-3 rounded-2xl border text-right shrink-0 min-w-[170px] shadow-sm backdrop-blur-md",
+                                     sale.payment_status === 'paid'
+                                         ? (isDark ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" : "bg-emerald-50 border-emerald-300 text-emerald-950")
+                                         : sale.payment_status === 'partial'
+                                             ? (isDark ? "bg-amber-500/15 border-amber-500/30 text-amber-300" : "bg-amber-50 border-amber-300 text-amber-950")
+                                             : (isDark ? "bg-rose-500/15 border-rose-500/30 text-rose-300" : "bg-rose-50 border-rose-300 text-rose-950")
                                 )}>
-                                    <p className="text-[9px] font-bold uppercase tracking-wider opacity-75">
-                                        {sale.payment_status === 'paid' ? '🟢 ÖDEME ALINDI / PAID' : sale.payment_status === 'partial' ? '🟡 KISMİ / PARTIAL' : '🔴 ÖDEME ALINACAK / UNPAID'}
-                                    </p>
-                                    <p className="text-2xl font-black tracking-tight mt-0.5">
-                                        {sale.total_price} <span className="text-base font-bold">{sale.currency}</span>
-                                    </p>
-                                    {sale.payment_status !== 'paid' && remaining > 0 && (
-                                        <p className="text-[10px] font-semibold text-rose-400 mt-0.5">
-                                            Kalan Bakiye: {remaining} {sale.currency}
-                                        </p>
-                                    )}
-                                    {!isTRYCurrency(sale.currency) && rates?.[sale.currency as keyof typeof rates] && (
-                                        <p className={cn("text-[10px] opacity-75 font-semibold mt-0.5", textMuted)}>
-                                            ≈ {(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)} ₺
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
+                                     <p className="text-[9px] font-bold uppercase tracking-wider opacity-75">
+                                         {sale.payment_status === 'paid' ? '🟢 ÖDEME ALINDI / PAID' : sale.payment_status === 'partial' ? '🟡 KISMİ / PARTIAL' : '🔴 ÖDEME ALINACAK / UNPAID'}
+                                     </p>
+                                     <p className="text-2xl font-black tracking-tight mt-0.5">
+                                         {sale.total_price} <span className="text-base font-bold">{sale.currency}</span>
+                                     </p>
+                                     {sale.payment_status !== 'paid' && remaining > 0 && (
+                                         <p className="text-[10px] font-semibold text-rose-400 mt-0.5">
+                                             Kalan Bakiye: {remaining} {sale.currency}
+                                         </p>
+                                     )}
+                                     {!isTRYCurrency(sale.currency) && rates?.[sale.currency as keyof typeof rates] && (
+                                         <p className={cn("text-[10px] opacity-75 font-semibold mt-0.5", textMuted)}>
+                                             ≈ {(sale.total_price * rates[sale.currency as keyof typeof rates]!.selling).toFixed(2)} ₺
+                                         </p>
+                                     )}
+                                 </div>
+                             </div>
 
-                            {/* MAIN DETAILS GRID (SPACIOUS 2-COLUMN LAYOUT) */}
-                            <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl border backdrop-blur-sm", bgCard)}>
-                                {/* COLUMN 1: ROUTE & LOGISTICS */}
-                                <div className="space-y-2.5">
-                                    <p className={cn("text-[9px]", textLabel)}>HİZMET & GÜZERGAH / SERVICE LOGISTICS</p>
-                                    
-                                    {sale.type === 'transfer' ? (
-                                        <div className="space-y-1.5 text-xs font-semibold">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-base shrink-0">📍</span>
-                                                <span className={textMuted}>Nereden:</span>
-                                                <span className={cn("font-bold truncate", textValue)}>{sale.pickup_location || 'Otel Resepsiyon'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-base shrink-0">🏁</span>
-                                                <span className={textMuted}>Nereye:</span>
-                                                <span className={cn("font-bold truncate", textValue)}>{sale.dropoff_location || sale.name}</span>
-                                            </div>
-                                            {sale.flight_number && (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-base shrink-0">✈️</span>
-                                                    <span className={textMuted}>Uçuş:</span>
-                                                    <span className={cn("font-mono font-bold", textValue)}>{sale.flight_number}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-1.5 text-xs font-semibold">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-base shrink-0">✨</span>
-                                                <span className={textMuted}>Hizmet:</span>
-                                                <span className={cn("font-bold truncate", textValue)}>{sale.name}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-base shrink-0">🕒</span>
-                                                <span className={textMuted}>Saat / Time:</span>
-                                                <span className={cn("font-bold", textValue)}>{sale.pickup_time || '--:--'}</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                             {/* MAIN DETAILS GRID (SPACIOUS 2-COLUMN LAYOUT) */}
+                             <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl border backdrop-blur-sm", bgCard)}>
+                                 {/* COLUMN 1: ROUTE & LOGISTICS */}
+                                 <div className="space-y-2.5">
+                                     <p className={cn("text-[9px]", textLabel)}>HİZMET & GÜZERGAH / SERVICE LOGISTICS</p>
+                                     
+                                     {sale.type === 'transfer' ? (
+                                         <div className="space-y-1.5 text-xs font-semibold">
+                                             <div className="flex items-start gap-2">
+                                                 <span className="text-base shrink-0 mt-0.5">📍</span>
+                                                 <div className="min-w-0 flex-1">
+                                                     <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereden / From:</span>
+                                                     <span className={cn("font-bold break-words block", textValue)}>{sale.pickup_location || 'Otel Resepsiyon'}</span>
+                                                 </div>
+                                             </div>
+                                             <div className="flex items-start gap-2">
+                                                 <span className="text-base shrink-0 mt-0.5">🏁</span>
+                                                 <div className="min-w-0 flex-1">
+                                                     <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereye / To:</span>
+                                                     <span className={cn("font-bold break-words block", textValue)}>{sale.dropoff_location || sale.name}</span>
+                                                 </div>
+                                             </div>
+                                             {sale.flight_number && (
+                                                 <div className="flex items-center gap-2">
+                                                     <span className="text-base shrink-0">✈️</span>
+                                                     <span className={textMuted}>Uçuş:</span>
+                                                     <span className={cn("font-mono font-bold", textValue)}>{sale.flight_number}</span>
+                                                 </div>
+                                             )}
+                                         </div>
+                                     ) : (
+                                         <div className="space-y-1.5 text-xs font-semibold">
+                                             <div className="flex items-start gap-2">
+                                                 <span className="text-base shrink-0 mt-0.5">✨</span>
+                                                 <div className="min-w-0 flex-1">
+                                                     <span className={cn("text-[10px] block opacity-75", textMuted)}>Hizmet / Service:</span>
+                                                     <span className={cn("font-bold break-words block", textValue)}>{sale.name}</span>
+                                                 </div>
+                                             </div>
+                                             <div className="flex items-center gap-2">
+                                                 <span className="text-base shrink-0">🕒</span>
+                                                 <span className={textMuted}>Saat / Time:</span>
+                                                 <span className={cn("font-bold", textValue)}>{sale.pickup_time || '--:--'}</span>
+                                             </div>
+                                         </div>
+                                     )}
+                                 </div>
 
-                                {/* COLUMN 2: GUEST & ROOM DETAILS */}
-                                <div className="space-y-2.5 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
-                                    <p className={cn("text-[9px]", textLabel)}>MİSAFİR BİLGİLERİ / GUEST DETAILS</p>
-                                    
-                                    <div className="space-y-1.5 text-xs font-semibold">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-base shrink-0">👤</span>
-                                            <span className={textMuted}>Misafir:</span>
-                                            <span className={cn("font-bold truncate", textValue)}>{sale.customer_name || '—'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-base shrink-0">📞</span>
-                                            <span className={textMuted}>Telefon:</span>
-                                            <span className={cn("font-bold truncate", textValue)}>{sale.customer_phone || '—'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-base shrink-0">🔑</span>
-                                            <span className={textMuted}>Oda / Pax:</span>
-                                            <span className={cn("font-bold", textValue)}>
-                                                {sale.room_number ? `#${sale.room_number}` : '—'} · {sale.pax} Person
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                 {/* COLUMN 2: GUEST & ROOM DETAILS */}
+                                 <div className="space-y-2.5 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
+                                     <p className={cn("text-[9px]", textLabel)}>MİSAFİR BİLGİLERİ / GUEST DETAILS</p>
+                                     
+                                     <div className="space-y-2 text-xs font-semibold">
+                                         <div className="flex items-start gap-2">
+                                             <span className="text-base shrink-0 mt-0.5">👤</span>
+                                             <div className="min-w-0 flex-1">
+                                                 <span className={cn("text-[10px] block opacity-75", textMuted)}>Misafir / Guest(s):</span>
+                                                 {(() => {
+                                                     const guests = parseGuestNames(sale.customer_name)
+                                                     if (guests.length > 1) {
+                                                         return (
+                                                             <div className="flex flex-wrap gap-1 mt-1">
+                                                                 {guests.map((g, i) => (
+                                                                     <span key={i} className={cn("text-xs font-bold px-2 py-0.5 rounded-md border leading-tight", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                                         {g}
+                                                                     </span>
+                                                                 ))}
+                                                             </div>
+                                                         )
+                                                     }
+                                                     return (
+                                                         <span className={cn("font-bold text-xs leading-snug break-words block mt-0.5", textValue)}>
+                                                             {sale.customer_name || '—'}
+                                                         </span>
+                                                     )
+                                                 })()}
+                                             </div>
+                                         </div>
+                                         <div className="flex items-center gap-2">
+                                             <span className="text-base shrink-0">📞</span>
+                                             <span className={textMuted}>Telefon:</span>
+                                             <span className={cn("font-bold break-all", textValue)}>{sale.customer_phone || '—'}</span>
+                                         </div>
+                                         <div className="flex items-center gap-2">
+                                             <span className="text-base shrink-0">🔑</span>
+                                             <span className={textMuted}>Oda / Pax:</span>
+                                             <span className={cn("font-bold", textValue)}>
+                                                 {sale.room_number ? `#${sale.room_number}` : '—'} · {sale.pax} Person
+                                             </span>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
 
                             {/* FOOTER ROW: NOTES & ISSUER */}
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3 border-t border-white/10 text-xs">

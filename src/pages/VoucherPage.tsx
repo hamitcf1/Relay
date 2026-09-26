@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
 import { saleTypeInfo } from '@/stores/salesStore'
-import { cn, formatDisplayDate, isTRYCurrency } from '@/lib/utils'
+import { cn, formatDisplayDate, parseGuestNames, isTRYCurrency } from '@/lib/utils'
 
 import { useLanguageStore } from '@/stores/languageStore'
 import { useCurrencyStore } from '@/stores/currencyStore'
@@ -253,7 +253,7 @@ export function VoucherPage() {
                                         📅 {formatDisplayDate(new Date(data.date))} {data.pickup_time ? `· 🕒 ${data.pickup_time}` : ''}
                                     </span>
                                 </div>
-                                <h1 className={cn("text-2xl sm:text-3xl font-black tracking-tight uppercase leading-tight truncate", isDark ? 'text-white' : 'text-zinc-900')}>
+                                <h1 className={cn("text-2xl sm:text-3xl font-black tracking-tight uppercase leading-tight break-words", isDark ? 'text-white' : 'text-zinc-900')}>
                                     {data.name}
                                 </h1>
                             </div>
@@ -294,15 +294,19 @@ export function VoucherPage() {
                                 
                                 {data.type === 'transfer' ? (
                                     <div className="space-y-1.5 text-xs font-semibold">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-base shrink-0">📍</span>
-                                            <span className={textMuted}>Nereden:</span>
-                                            <span className={cn("font-bold truncate", textValue)}>{data.pickup_location || 'Otel Resepsiyon'}</span>
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-base shrink-0 mt-0.5">📍</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereden / From:</span>
+                                                <span className={cn("font-bold break-words block", textValue)}>{data.pickup_location || 'Otel Resepsiyon'}</span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-base shrink-0">🏁</span>
-                                            <span className={textMuted}>Nereye:</span>
-                                            <span className={cn("font-bold truncate", textValue)}>{data.dropoff_location || data.name}</span>
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-base shrink-0 mt-0.5">🏁</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className={cn("text-[10px] block opacity-75", textMuted)}>Nereye / To:</span>
+                                                <span className={cn("font-bold break-words block", textValue)}>{data.dropoff_location || data.name}</span>
+                                            </div>
                                         </div>
                                         {data.flight_number && (
                                             <div className="flex items-center gap-2">
@@ -314,10 +318,12 @@ export function VoucherPage() {
                                     </div>
                                 ) : (
                                     <div className="space-y-1.5 text-xs font-semibold">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-base shrink-0">✨</span>
-                                            <span className={textMuted}>Hizmet:</span>
-                                            <span className={cn("font-bold truncate", textValue)}>{data.name}</span>
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-base shrink-0 mt-0.5">✨</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className={cn("text-[10px] block opacity-75", textMuted)}>Hizmet / Service:</span>
+                                                <span className={cn("font-bold break-words block", textValue)}>{data.name}</span>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-base shrink-0">🕒</span>
@@ -332,16 +338,37 @@ export function VoucherPage() {
                             <div className="space-y-2.5 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
                                 <p className={cn("text-[9px]", textLabel)}>MİSAFİR BİLGİLERİ / GUEST DETAILS</p>
                                 
-                                <div className="space-y-1.5 text-xs font-semibold">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-base shrink-0">👤</span>
-                                        <span className={textMuted}>Misafir:</span>
-                                        <span className={cn("font-bold truncate", textValue)}>{data.customer_name || data.guest || '—'}</span>
+                                <div className="space-y-2 text-xs font-semibold">
+                                    <div className="flex items-start gap-2">
+                                        <span className="text-base shrink-0 mt-0.5">👤</span>
+                                        <div className="min-w-0 flex-1">
+                                            <span className={cn("text-[10px] block opacity-75", textMuted)}>Misafir / Guest(s):</span>
+                                            {(() => {
+                                                const guestRaw = data.customer_name || data.guest
+                                                const guests = parseGuestNames(guestRaw)
+                                                if (guests.length > 1) {
+                                                    return (
+                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                            {guests.map((g, i) => (
+                                                                <span key={i} className={cn("text-xs font-bold px-2 py-0.5 rounded-md border leading-tight", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                                    {g}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )
+                                                }
+                                                return (
+                                                    <span className={cn("font-bold text-xs leading-snug break-words block mt-0.5", textValue)}>
+                                                        {guestRaw || '—'}
+                                                    </span>
+                                                )
+                                            })()}
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-base shrink-0">📞</span>
                                         <span className={textMuted}>Telefon:</span>
-                                        <span className={cn("font-bold truncate", textValue)}>{data.customer_phone || data.phone || '—'}</span>
+                                        <span className={cn("font-bold break-all", textValue)}>{data.customer_phone || data.phone || '—'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-base shrink-0">🔑</span>
