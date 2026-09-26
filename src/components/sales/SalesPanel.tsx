@@ -68,6 +68,7 @@ export function SalesPanel() {
     const [formData, setFormData] = useState({
         name: '',
         customer_name: '',
+        customer_phone: '',
         room_number: '',
         pax: 1,
         date: format(new Date(), 'yyyy-MM-dd'),
@@ -150,6 +151,7 @@ export function SalesPanel() {
         setFormData({
             name: '',
             customer_name: '',
+            customer_phone: '',
             room_number: '',
             pax: 1,
             date: format(new Date(), 'yyyy-MM-dd'),
@@ -586,6 +588,16 @@ export function SalesPanel() {
                                                 ))}
                                             </div>
                                         )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] text-muted-foreground font-bold uppercase">Misafir Tel No</label>
+                                        <Input
+                                            value={formData.customer_phone}
+                                            onChange={e => setFormData(p => ({ ...p, customer_phone: e.target.value }))}
+                                            className="h-8 text-xs bg-background border-border"
+                                            placeholder="+90 532 ..."
+                                        />
                                     </div>
 
                                     <div className="space-y-1">

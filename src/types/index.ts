@@ -632,6 +632,7 @@ export interface Sale {
     type: SaleType
     name: string              // Tour name, Transfer destination, etc.
     customer_name: string     // Guest name
+    customer_phone?: string    // Guest phone number
     room_number: string
     pax: number               // Number of people
     date: Date                // Date of service

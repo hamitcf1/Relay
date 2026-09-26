@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toPng } from 'html-to-image'
 import QRCode from 'react-qr-code'
-import { Printer, Download, Globe, Share2 } from 'lucide-react'
+import { Printer, Download, Globe, Share2, ShieldCheck } from 'lucide-react'
 
 import {
     DropdownMenu,
@@ -14,9 +14,6 @@ import { Button } from '@/components/ui/button'
 import { saleTypeInfo, saleStatusInfo } from '@/stores/salesStore'
 import { cn, formatDisplayDate, parseGuestNames, isTRYCurrency } from '@/lib/utils'
 
-// Since this is a public page and doesn't load the full store/i18n by default,
-// we will rely on English for now or add a mini-translator if needed.
-// But for exact consistency with the app, we can use the translation store if it's available.
 import { useLanguageStore } from '@/stores/languageStore'
 import { useCurrencyStore } from '@/stores/currencyStore'
 
@@ -58,14 +55,13 @@ export function VoucherPage() {
         return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>
     }
 
-    // Determine theme colors based on type
     const typeInfo = saleTypeInfo[data.type as keyof typeof saleTypeInfo] || saleTypeInfo['other']
     const themeColor = typeInfo.color.split(' ')[0]
     
-    const isDark = data.th !== 'light' // Default to dark if not provided
+    const isDark = data.th !== 'light'
     const gradientFrom = isDark 
-        ? themeColor.replace('text-', 'from-').replace('400', '900/40')
-        : themeColor.replace('text-', 'from-').replace('400', '200/40')
+        ? themeColor.replace('text-', 'from-').replace('400', '950/60')
+        : themeColor.replace('text-', 'from-').replace('400', '100/60')
 
     const qrData = window.location.href
 
@@ -96,16 +92,16 @@ export function VoucherPage() {
         }
     }
 
-    const bgContainer = isDark ? 'bg-[#111318] text-white' : 'bg-white text-zinc-900 border border-zinc-200'
-    const bgStub = isDark ? 'bg-black/40 border-white/20' : 'bg-zinc-50 border-zinc-200'
-    const textLabel = isDark ? 'text-white/40' : 'text-zinc-500'
-    const textValue = isDark ? 'text-white' : 'text-zinc-900'
-    const textMuted = isDark ? 'text-white/50' : 'text-zinc-600'
-    const bgGrid = isDark ? 'bg-white/5 border-white/10' : 'bg-zinc-50 border-zinc-200'
+    const bgContainer = isDark ? 'bg-[#0E1015] text-white border border-white/10' : 'bg-white text-zinc-900 border border-zinc-200'
+    const bgStub = isDark ? 'bg-black/50 border-white/15' : 'bg-zinc-50/90 border-zinc-200'
+    const textLabel = isDark ? 'text-white/45 font-bold uppercase tracking-wider' : 'text-zinc-500 font-bold uppercase tracking-wider'
+    const textValue = isDark ? 'text-white font-semibold' : 'text-zinc-900 font-semibold'
+    const textMuted = isDark ? 'text-white/60' : 'text-zinc-600'
+    const bgGrid = isDark ? 'bg-white/[0.04] border-white/10' : 'bg-zinc-50 border-zinc-200'
     const cutoutBg = 'bg-background print:bg-white' 
-    const qrWrapper = isDark ? 'bg-white' : 'bg-white border border-zinc-200'
+    const qrWrapper = 'bg-white p-3 rounded-2xl shadow-xl border border-zinc-200/80 flex flex-col items-center justify-center gap-1.5'
 
-    const paymentStatus = data.payment || 'unpaid'
+    const paymentStatus = data.payment || 'pending'
     const totalPrice = data.total_price || (data.total ? parseFloat(data.total) : 0)
     const currencyStr = data.currency || (data.total ? data.total.split(' ')[1] : '') || 'EUR'
     const collectedAmount = data.collected_amount ?? (paymentStatus === 'paid' ? totalPrice : 0)
@@ -113,8 +109,9 @@ export function VoucherPage() {
 
     return (
         <div className="min-h-screen bg-background flex flex-col items-center py-6 sm:py-12 px-4 overflow-x-hidden">
-            <div className="max-w-[850px] w-full flex flex-col sm:flex-row justify-between items-center mb-8 print:hidden gap-4">
-                <h1 className="text-2xl font-bold">Digital Voucher</h1>
+            {/* PUBLIC HEADER ACTIONS */}
+            <div className="max-w-[880px] w-full flex flex-col sm:flex-row justify-between items-center mb-8 print:hidden gap-4">
+                <h1 className="text-2xl font-bold tracking-tight">Digital Voucher</h1>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -124,161 +121,172 @@ export function VoucherPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setLanguage('en')} className="cursor-pointer">
-                                English
-                                {language === 'en' && <span className="ml-2 text-primary">✓</span>}
+                                English {language === 'en' && <span className="ml-2 text-primary">✓</span>}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setLanguage('tr')} className="cursor-pointer">
-                                Türkçe
-                                {language === 'tr' && <span className="ml-2 text-primary">✓</span>}
+                                Türkçe {language === 'tr' && <span className="ml-2 text-primary">✓</span>}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setLanguage('ru')} className="cursor-pointer">
-                                Русский
-                                {language === 'ru' && <span className="ml-2 text-primary">✓</span>}
+                                Русский {language === 'ru' && <span className="ml-2 text-primary">✓</span>}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button variant="outline" onClick={handleShare}><Share2 className="w-4 h-4 mr-2" />Paylaş / bağlantıyı kopyala</Button>
+                    <Button variant="outline" onClick={handleShare}><Share2 className="w-4 h-4 mr-2" />Paylaş / Kopyala</Button>
                     <Button variant="outline" onClick={handlePrint} className="shrink-0">
-                        <Printer className="w-4 h-4 mr-2" />
-                        Print
+                        <Printer className="w-4 h-4 mr-2" /> Yazdır
                     </Button>
-                    <Button onClick={handleDownload} disabled={isGenerating} className="shrink-0">
+                    <Button onClick={handleDownload} disabled={isGenerating} className="shrink-0 font-semibold">
                         <Download className="w-4 h-4 mr-2" />
-                        {isGenerating ? 'Generating...' : 'Download Image'}
+                        {isGenerating ? 'Hazırlanıyor...' : 'Görsel İndir'}
                     </Button>
                 </div>
             </div>
 
-            {/* Voucher Canvas Container */}
-            <div className="w-full max-w-[850px] flex justify-center print:m-0 print:p-0">
+            {/* VOUCHER CANVAS CONTAINER */}
+            <div className="w-full max-w-[880px] flex justify-center print:m-0 print:p-0">
                 <div 
                     id="voucher-canvas"
-                    className={cn("relative flex flex-col sm:flex-row w-full sm:w-[850px] sm:min-h-[380px] rounded-2xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[850px] print:min-h-[380px] print:flex-row", bgContainer)}
-                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    className={cn(
+                        "relative flex flex-col sm:flex-row w-full sm:w-[880px] sm:min-h-[440px] rounded-3xl overflow-hidden shadow-2xl shrink-0 print:shadow-none print:w-[880px] print:min-h-[440px] print:flex-row",
+                        bgContainer
+                    )}
+                    style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
                 >
-                    <div className={cn("absolute inset-0 bg-gradient-to-br opacity-30", gradientFrom, isDark ? "to-[#111318]" : "to-white")} />
+                    <div className={cn("absolute inset-0 bg-gradient-to-br opacity-40 pointer-events-none", gradientFrom, isDark ? "to-[#0E1015]" : "to-white")} />
                     
-                    {/* LEFT STUB */}
-                    <div className={cn("w-full sm:w-[28%] border-b sm:border-b-0 sm:border-r border-dashed relative flex flex-col sm:justify-between p-6 sm:p-6 gap-6 sm:gap-0 backdrop-blur-sm z-10", bgStub)}>
-                        <div className={cn("hidden sm:block absolute -top-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
-                        <div className={cn("hidden sm:block absolute -bottom-4 -right-4 w-8 h-8 rounded-full", cutoutBg)} />
+                    {/* LEFT STUB (BRANDING & HIGH-CONTRAST QR CODE AREA) */}
+                    <div className={cn(
+                        "w-full sm:w-[30%] border-b sm:border-b-0 sm:border-r border-dashed border-white/20 relative flex flex-col justify-between p-6 sm:p-7 gap-6 backdrop-blur-md z-10",
+                        bgStub
+                    )}>
+                        <div className={cn("hidden sm:block absolute -top-4 -right-4 w-8 h-8 rounded-full z-20", cutoutBg)} />
+                        <div className={cn("hidden sm:block absolute -bottom-4 -right-4 w-8 h-8 rounded-full z-20", cutoutBg)} />
                         
-                        <div className="flex sm:flex-col justify-between items-center sm:items-start">
-                            <h3 className={cn("text-sm font-bold tracking-widest uppercase mb-4", textMuted)}>{data.hotelName || 'AETHERIUS'}</h3>
-                            <div className={cn("p-3 rounded-xl inline-block", qrWrapper)}>
+                        <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-lg">✨</span>
+                                <h3 className={cn("text-sm font-black tracking-[0.25em] uppercase", isDark ? 'text-white/90' : 'text-zinc-900')}>
+                                    {data.hotelName || 'AETHERIUS'}
+                                </h3>
+                            </div>
+                            <p className={cn("text-[9px] uppercase tracking-widest font-semibold", isDark ? 'text-white/40' : 'text-zinc-500')}>
+                                LUXURY CONCIERGE VOUCHER
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col items-center justify-center my-auto">
+                            <div className={qrWrapper}>
                                 <QRCode 
                                     value={qrData} 
-                                    size={160} 
+                                    size={155} 
                                     bgColor="#ffffff"
-                                    fgColor="#000000"
-                                    level="L"
+                                    fgColor="#0A0B0E"
+                                    level="H"
                                 />
+                                <div className="flex items-center gap-1.5 mt-1 pt-1.5 border-t border-zinc-200/60 text-[9px] font-bold uppercase tracking-wider text-zinc-700">
+                                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                                    <span>TARA VE DOĞRULA / SCAN VERIFY</span>
+                                </div>
                             </div>
                         </div>
                         
-                        <div className="mt-0 sm:mt-4 text-center sm:text-left">
-                            <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>{t('sales.details.ticket')}</p>
-                            <p className={cn("text-xs font-mono truncate", isDark ? 'text-white/80' : 'text-zinc-700')}>{data.id?.split('-')[0]}</p>
+                        <div className="pt-2 border-t border-dashed border-white/10 text-center sm:text-left flex items-center justify-between">
+                            <div>
+                                <p className={cn("text-[9px] font-bold uppercase tracking-wider", textLabel)}>BİLET / TICKET NO</p>
+                                <p className={cn("text-xs font-mono font-bold tracking-widest", isDark ? 'text-amber-400' : 'text-zinc-900')}>
+                                    #{data.id?.split('-')[0].toUpperCase()}
+                                </p>
+                            </div>
+                            <div className={cn("text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white/80" : "bg-zinc-200 border-zinc-300 text-zinc-800")}>
+                                OFFICIAL
+                            </div>
                         </div>
                     </div>
 
-                    {/* RIGHT MAIN */}
-                    <div className="flex-1 relative p-6 sm:p-8 flex flex-col justify-between z-10 gap-4 sm:gap-0">
-                        {/* Header */}
-                        <div className="flex justify-between items-start">
+                    {/* RIGHT MAIN (SPACIOUS & BILINGUAL CONTENT AREA) */}
+                    <div className="flex-1 relative p-6 sm:p-8 flex flex-col justify-between z-10 gap-5">
+                        
+                        {/* Header Row: Title & Total Price */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-white/10">
                             <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider", 
+                                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                                    <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm",
                                         paymentStatus === 'paid' 
-                                            ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-100 text-emerald-700") 
+                                            ? (isDark ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" : "bg-emerald-100 text-emerald-800 border-emerald-300") 
                                             : paymentStatus === 'cancelled' || paymentStatus === 'refunded'
-                                                ? (isDark ? "bg-zinc-500/20 text-zinc-300" : "bg-zinc-200 text-zinc-600")
-                                                : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
+                                                ? (isDark ? "bg-zinc-500/20 text-zinc-300 border-zinc-500/40" : "bg-zinc-200 text-zinc-700 border-zinc-300")
+                                                : (isDark ? "bg-rose-500/20 text-rose-300 border-rose-500/40" : "bg-rose-100 text-rose-800 border-rose-300")
                                     )}>
-                                        {paymentStatus}
+                                        {paymentStatus === 'paid' ? '🟢 ÖDEME ALINDI / PAID' : paymentStatus === 'partial' ? '🟡 KISMİ / PARTIAL' : '🔴 ÖDEME ALINACAK / UNPAID'}
                                     </span>
-                                    <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-                                        isDark ? "bg-white/10 text-white/70" : "bg-zinc-200 text-zinc-600"
+
+                                    <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                                        isDark ? "bg-white/10 text-white/80 border-white/20" : "bg-zinc-100 text-zinc-700 border-zinc-300"
                                     )}>
                                         {t(saleStatusInfo[(data.status || 'waiting') as keyof typeof saleStatusInfo]?.label as any) || data.status}
                                     </span>
-                                    {data.type === 'transfer' && (
-                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                                            VIP Transfer Pass
-                                        </span>
-                                    )}
-                                    {data.type === 'tour' && (
-                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                                            Guided Excursion Pass
-                                        </span>
-                                    )}
-                                    {data.type === 'laundry' && (
-                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                                            Laundry Service Ticket
-                                        </span>
-                                    )}
+
+                                    <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border", typeInfo.color)}>
+                                        {typeInfo.icon} {t(typeInfo.label as any)}
+                                    </span>
                                 </div>
-                                <h1 className={cn("text-3xl font-black tracking-tight uppercase", isDark ? 'text-white/90' : 'text-zinc-900')}>{data.name}</h1>
-                                <p className={cn("text-sm font-medium uppercase tracking-widest mt-1", textMuted)}>
-                                    {t(typeInfo.label as any)}
-                                </p>
+
+                                <h1 className={cn("text-2xl sm:text-3xl font-black tracking-tight uppercase leading-tight", isDark ? 'text-white' : 'text-zinc-900')}>
+                                    {data.name}
+                                </h1>
                             </div>
                             
-                            <div className="text-right">
-                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.total')}</p>
-                                <p className={cn("text-2xl font-black", textValue)}>{data.total}</p>
-                                {(() => {
-                                    if (!data.total) return null;
-                                    const [amountStr, curr] = data.total.split(' ');
-                                    const amount = parseFloat(amountStr);
-                                    if (curr && !isTRYCurrency(curr) && rates?.[curr as keyof typeof rates]) {
-                                        return (
-                                            <p className={cn("text-xs mt-1 font-medium", textMuted)}>
-                                                ≈ {(amount * rates[curr as keyof typeof rates]!.selling).toFixed(2)} ₺
-                                            </p>
-                                        );
-                                    }
-                                    return null;
-                                })()}
+                            <div className="text-right sm:text-right self-end sm:self-center shrink-0 bg-white/5 p-3 rounded-2xl border border-white/10 min-w-[140px]">
+                                <p className={cn("text-[9px]", textLabel)}>TOPLAM TUTAR / TOTAL PRICE</p>
+                                <p className={cn("text-2xl font-black tracking-tight text-emerald-400", isDark ? 'text-emerald-400' : 'text-emerald-600')}>
+                                    {totalPrice} <span className="text-base font-bold">{currencyStr}</span>
+                                </p>
+                                {!isTRYCurrency(currencyStr) && rates?.[currencyStr as keyof typeof rates] && (
+                                    <p className={cn("text-[11px] font-bold mt-0.5", textMuted)}>
+                                        ≈ {(totalPrice * rates[currencyStr as keyof typeof rates]!.selling).toFixed(2)} ₺
+                                    </p>
+                                )}
                             </div>
                         </div>
 
-                        {/* Payment Status & Collection Callout */}
+                        {/* BILINGUAL PAYMENT STATUS & COLLECTION BANNER */}
                         <div className={cn(
-                            "p-3 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs my-2 backdrop-blur-sm",
+                            "p-3.5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md shadow-sm",
                             paymentStatus === 'paid'
-                                ? (isDark ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300" : "bg-emerald-50 border-emerald-300 text-emerald-900")
+                                ? (isDark ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-200" : "bg-emerald-50 border-emerald-300 text-emerald-950")
                                 : paymentStatus === 'partial'
-                                    ? (isDark ? "bg-amber-500/15 border-amber-500/40 text-amber-300" : "bg-amber-50 border-amber-300 text-amber-900")
-                                    : (isDark ? "bg-rose-500/15 border-rose-500/40 text-rose-300" : "bg-rose-50 border-rose-300 text-rose-900")
+                                    ? (isDark ? "bg-amber-500/15 border-amber-500/40 text-amber-200" : "bg-amber-50 border-amber-300 text-amber-950")
+                                    : (isDark ? "bg-rose-500/15 border-rose-500/40 text-rose-200" : "bg-rose-50 border-rose-300 text-rose-950")
                         )}>
-                            <div className="flex items-center gap-2.5 font-bold">
-                                <span className="text-xl">
-                                    {paymentStatus === 'paid' ? '🟢' : paymentStatus === 'partial' ? '🟡' : '🔴'}
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">
+                                    {paymentStatus === 'paid' ? '💳' : paymentStatus === 'partial' ? '⏳' : '⚠️'}
                                 </span>
                                 <div>
-                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "opacity-70" : "text-zinc-600")}>Ödeme Durumu / Payment Status</p>
-                                    <p className="text-sm font-black tracking-tight">
-                                        {paymentStatus === 'paid' && 'ÖDEME ALINDI (PAID)'}
-                                        {paymentStatus === 'unpaid' && 'ÖDEME ALINACAK (UNPAID / PENDING)'}
-                                        {paymentStatus === 'partial' && 'KISMİ ÖDEME ALINDI (PARTIAL)'}
-                                        {paymentStatus === 'refunded' && 'İADE EDİLDİ (REFUNDED)'}
-                                        {paymentStatus === 'cancelled' && 'İPTAL EDİLDİ (CANCELLED)'}
+                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider opacity-80")}>
+                                        ÖDEME DURUMU / PAYMENT STATUS
+                                    </p>
+                                    <p className="text-sm font-black tracking-wide">
+                                        {paymentStatus === 'paid' && '🟢 ÖDEME ALINDI / PAYMENT RECEIVED'}
+                                        {paymentStatus === 'pending' && '🔴 ÖDEME ALINACAK / PAYMENT DUE AT PICKUP'}
+                                        {paymentStatus === 'partial' && '🟡 KISMİ ÖDEME ALINDI / PARTIAL PAYMENT'}
+                                        {paymentStatus === 'refunded' && '⚪ İADE EDİLDİ / REFUNDED'}
+                                        {paymentStatus === 'cancelled' && '⚪ İPTAL EDİLDİ / CANCELLED'}
                                     </p>
                                 </div>
                             </div>
                             
-                            <div className="flex items-center gap-4 text-right self-end sm:self-center">
+                            <div className="flex items-center gap-6 text-right self-end sm:self-center font-mono">
                                 <div>
-                                    <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "opacity-70" : "text-zinc-600")}>Tahsil Edilen</p>
+                                    <p className="text-[9px] font-bold uppercase tracking-wider opacity-80">TAHSİL EDİLEN / COLLECTED</p>
                                     <p className="text-sm font-black">
                                         {collectedAmount} {currencyStr}
                                     </p>
                                 </div>
                                 {paymentStatus !== 'paid' && paymentStatus !== 'refunded' && paymentStatus !== 'cancelled' && (
                                     <div>
-                                        <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "opacity-70" : "text-zinc-600")}>Kalan Bakiye</p>
+                                        <p className="text-[9px] font-bold uppercase tracking-wider opacity-80">KALAN BAKİYE / BALANCE DUE</p>
                                         <p className="text-sm font-black text-rose-400">
                                             {remainingAmount} {currencyStr}
                                         </p>
@@ -287,206 +295,152 @@ export function VoucherPage() {
                             </div>
                         </div>
 
-
-                        {/* Category Specific Custom Callouts & Grids */}
+                        {/* CATEGORY SPECIFIC LOGISTICS & GUEST DETAILS */}
                         {data.type === 'transfer' ? (
-                            <div className="space-y-3 my-2">
+                            <div className="space-y-3">
                                 {/* Transfer Route Banner */}
-                                <div className={cn("p-3 rounded-xl border border-amber-500/30 flex items-center justify-between gap-4", isDark ? "bg-amber-500/10" : "bg-amber-50")}>
-                                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <span className="text-2xl shrink-0">🚐</span>
+                                <div className={cn("p-4 rounded-2xl border border-amber-500/40 flex items-center justify-between gap-4", isDark ? "bg-amber-500/10" : "bg-amber-50/80")}>
+                                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                                        <span className="text-3xl shrink-0">🚐</span>
                                         <div className="min-w-0 flex-1">
                                             <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-amber-300" : "text-amber-800")}>
-                                                Transfer Güzergahı / Route
+                                                TRANSFER GÜZERGAHI / ROUTE DETAILS
                                             </p>
-                                            <div className="flex items-center gap-2 text-sm font-black truncate">
-                                                <span className={cn(isDark ? "text-amber-200" : "text-amber-900")}>
+                                            <div className="flex flex-wrap items-center gap-2 text-base font-black truncate mt-0.5">
+                                                <span className={cn(isDark ? "text-amber-100" : "text-amber-950")}>
                                                     📍 {data.pickup_location || 'Otel / Resepsiyon'}
                                                 </span>
-                                                <span className="opacity-50">➔</span>
-                                                <span className={cn(isDark ? "text-amber-200" : "text-amber-900")}>
+                                                <span className="opacity-60 text-lg">➔</span>
+                                                <span className={cn(isDark ? "text-amber-100" : "text-amber-950")}>
                                                     🏁 {data.dropoff_location || data.name}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-right shrink-0">
-                                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-amber-300" : "text-amber-800")}>Alış Saati / Time</p>
-                                        <p className={cn("text-xl font-black tracking-tight", isDark ? "text-amber-200" : "text-amber-900")}>{data.pickup_time || '--:--'}</p>
+                                    <div className="text-right shrink-0 bg-amber-500/20 px-3 py-1.5 rounded-xl border border-amber-500/30">
+                                        <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "text-amber-300" : "text-amber-800")}>ALIŞ SAATİ / TIME</p>
+                                        <p className={cn("text-xl font-black tracking-tight", isDark ? "text-amber-200" : "text-amber-950")}>{data.pickup_time || '--:--'}</p>
                                     </div>
                                 </div>
 
                                 {/* Transfer Logistics Grid */}
-                                <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl p-3 border", bgGrid)}>
-                                    {(() => {
-                                        const guests = parseGuestNames(data.guest)
-                                        if (guests.length > 1) {
-                                            return (
-                                                <div className="col-span-2">
-                                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')} ({guests.length} Misafir)</p>
-                                                    <div className="flex flex-wrap gap-1">
+                                <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl p-4 border", bgGrid)}>
+                                    <div className="col-span-2">
+                                        <p className={cn("text-[9px]", textLabel)}>MİSAFİR ADI / GUEST NAME(S)</p>
+                                        {(() => {
+                                            const guests = parseGuestNames(data.guest)
+                                            if (guests.length > 1) {
+                                                return (
+                                                    <div className="flex flex-wrap gap-1 mt-1">
                                                         {guests.map((g, i) => (
-                                                            <span key={i} className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                            <span key={i} className={cn("text-xs font-bold px-2 py-0.5 rounded-md border", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
                                                                 👤 {g}
                                                             </span>
                                                         ))}
                                                     </div>
-                                                </div>
-                                            )
-                                        }
-                                        return (
-                                            <div>
-                                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                                <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest || '—'}</p>
-                                            </div>
-                                        )
-                                    })()}
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>🔑 {t('common.room')}</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{data.room ? `#${data.room}` : 'Otel Dışı / —'}</p>
+                                                )
+                                            }
+                                            return <p className={cn("text-sm font-bold truncate mt-0.5", textValue)}>{data.guest || '—'}</p>
+                                        })()}
                                     </div>
+
                                     <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>✈️ Uçuş Kodu / Flight</p>
-                                        <p className={cn("text-xs font-bold font-mono", textValue)}>{data.flight_number || '—'}</p>
+                                        <p className={cn("text-[9px]", textLabel)}>TELEFON / PHONE</p>
+                                        <p className={cn("text-xs font-bold truncate mt-1 flex items-center gap-1", textValue)}>
+                                            {data.phone ? <>📞 {data.phone}</> : '—'}
+                                        </p>
                                     </div>
-                                    {parseGuestNames(data.guest).length <= 1 && (
-                                        <div>
-                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Pax / Yolcu</p>
-                                            <p className={cn("text-xs font-bold", textValue)}>{data.pax} Person</p>
-                                        </div>
-                                    )}
+
+                                    <div>
+                                        <p className={cn("text-[9px]", textLabel)}>ODA / ROOM & UÇUŞ / FLIGHT</p>
+                                        <p className={cn("text-xs font-bold truncate mt-1", textValue)}>
+                                            🔑 {data.room ? `#${data.room}` : '—'} {data.flight_number ? `· ✈️ ${data.flight_number}` : ''}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         ) : data.type === 'tour' ? (
-                            <div className="space-y-3 my-2">
-                                <div className={cn("flex items-center justify-between p-3 rounded-xl border border-indigo-500/30", isDark ? "bg-indigo-500/10" : "bg-indigo-50")}>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-2xl">🗺️</span>
+                            <div className="space-y-3">
+                                <div className={cn("flex items-center justify-between p-4 rounded-2xl border border-indigo-500/40", isDark ? "bg-indigo-500/10" : "bg-indigo-50/80")}>
+                                    <div className="flex items-center gap-3.5">
+                                        <span className="text-3xl">🗺️</span>
                                         <div>
-                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-indigo-300" : "text-indigo-800")}>Tur & Gezi Bilet Detayı</p>
-                                            <p className={cn("text-sm font-bold truncate", isDark ? "text-indigo-200" : "text-indigo-900")}>{data.name}</p>
+                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-indigo-300" : "text-indigo-800")}>TUR & GEZİ BİLET DETAYI / EXCURSION PASS</p>
+                                            <p className={cn("text-base font-black truncate", isDark ? "text-indigo-100" : "text-indigo-950")}>{data.name}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>Kalkış Saati</p>
-                                        <p className={cn("text-base font-bold", isDark ? "text-indigo-200" : "text-indigo-900")}>{data.pickup_time || '--:--'}</p>
+                                    <div className="text-right bg-indigo-500/20 px-3 py-1.5 rounded-xl border border-indigo-500/30">
+                                        <p className={cn("text-[9px] font-bold uppercase tracking-wider", isDark ? "text-indigo-300" : "text-indigo-800")}>KALKIŞ / TIME</p>
+                                        <p className={cn("text-lg font-black", isDark ? "text-indigo-200" : "text-indigo-950")}>{data.pickup_time || '--:--'}</p>
                                     </div>
                                 </div>
-                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
-                                    {(() => {
-                                        const guests = parseGuestNames(data.guest)
-                                        if (guests.length > 1) {
-                                            return (
-                                                <div className="col-span-2 sm:col-span-3">
-                                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')} ({guests.length} Misafir)</p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {guests.map((g, i) => (
-                                                            <span key={i} className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
-                                                                👤 {g}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )
-                                        }
-                                        return (
-                                            <div>
-                                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                                <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest || '—'}</p>
-                                            </div>
-                                        )
-                                    })()}
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{data.room || '—'}</p>
+
+                                <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl p-4 border", bgGrid)}>
+                                    <div className="col-span-2">
+                                        <p className={cn("text-[9px]", textLabel)}>MİSAFİR ADI / GUEST NAME(S)</p>
+                                        <p className={cn("text-sm font-bold truncate mt-0.5", textValue)}>{data.guest}</p>
                                     </div>
                                     <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Katılımcı (Pax)</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{data.pax} Katılımcı</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : data.type === 'laundry' ? (
-                            <div className="space-y-3 my-2">
-                                <div className={cn("flex items-center justify-between p-3 rounded-xl border border-emerald-500/30", isDark ? "bg-emerald-500/10" : "bg-emerald-50")}>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-2xl">🧺</span>
-                                        <div>
-                                            <p className={cn("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-emerald-300" : "text-emerald-800")}>Çamaşırhane Oda No</p>
-                                            <p className={cn("text-xl font-black tracking-tight", isDark ? "text-emerald-200" : "text-emerald-900")}>Oda {data.room || '—'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className={cn("text-[10px] uppercase tracking-wider", textLabel)}>Teslim Saati</p>
-                                        <p className={cn("text-base font-bold", isDark ? "text-emerald-200" : "text-emerald-900")}>{data.pickup_time || '--:--'}</p>
-                                    </div>
-                                </div>
-                                <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                        <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest}</p>
+                                        <p className={cn("text-[9px]", textLabel)}>TELEFON / PHONE</p>
+                                        <p className={cn("text-xs font-bold truncate mt-1", textValue)}>{data.phone || '—'}</p>
                                     </div>
                                     <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Teslim Tarihi</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{formatDisplayDate(new Date(data.date))}</p>
-                                    </div>
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Parça / Servis</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{data.pax} Parça</p>
+                                        <p className={cn("text-[9px]", textLabel)}>ODA / ROOM & PAX</p>
+                                        <p className={cn("text-xs font-bold mt-1", textValue)}>🔑 {data.room || '—'} · 👥 {data.pax} Person</p>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mt-0 sm:mt-4 rounded-xl p-4 border", bgGrid)}>
-                                <div>
-                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                    <p className={cn("text-sm font-bold truncate", textValue)}>{data.guest}</p>
+                            <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl p-4 border", bgGrid)}>
+                                <div className="col-span-2">
+                                    <p className={cn("text-[9px]", textLabel)}>MİSAFİR ADI / GUEST NAME(S)</p>
+                                    <p className={cn("text-sm font-bold truncate mt-0.5", textValue)}>{data.guest}</p>
                                 </div>
                                 <div>
-                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
-                                    <p className={cn("text-sm font-bold", textValue)}>{data.room || '—'}</p>
+                                    <p className={cn("text-[9px]", textLabel)}>TELEFON / PHONE</p>
+                                    <p className={cn("text-xs font-bold truncate mt-1", textValue)}>{data.phone || '—'}</p>
                                 </div>
                                 <div>
-                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pax')}</p>
-                                    <p className={cn("text-sm font-bold", textValue)}>{data.pax}</p>
+                                    <p className={cn("text-[9px]", textLabel)}>ODA / ROOM & PAX</p>
+                                    <p className={cn("text-xs font-bold mt-1", textValue)}>🔑 {data.room || '—'} · 👥 {data.pax} Item/Pax</p>
                                 </div>
                             </div>
                         )}
 
-                        {/* Logistics & Notes */}
-                        <div className="flex flex-col sm:flex-row items-start justify-between mt-0 sm:mt-4 gap-4 sm:gap-0">
-                            <div className="space-y-4 w-full sm:w-auto">
-                                <div className="flex flex-wrap gap-4 sm:gap-8">
-                                        {data.sale_date && <div><p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Satış tarihi</p><p className={cn("text-sm font-semibold", textValue)}>{formatDisplayDate(new Date(data.sale_date))}</p></div>}
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Hizmet tarihi</p>
-                                        <p className={cn("text-base font-bold", textValue)}>{formatDisplayDate(new Date(data.date))}</p>
-                                    </div>
-                                    {(data.pickup_time || data.type === 'transfer') && (
+                        {/* LOGISTICS FOOTER & NOTES */}
+                        <div className="flex flex-col sm:flex-row items-start justify-between gap-4 pt-3 border-t border-white/10 text-xs">
+                            <div className="space-y-2 flex-1">
+                                <div className="flex flex-wrap gap-6 sm:gap-8">
+                                    {data.sale_date && (
                                         <div>
-                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.pickup')}</p>
-                                            <p className={cn("text-base font-bold", textValue)}>{data.pickup_time || '--:--'}</p>
+                                            <p className={cn("text-[9px]", textLabel)}>SATIŞ TARİHİ / BOOKED DATE</p>
+                                            <p className={cn("text-xs font-semibold mt-0.5", textValue)}>{formatDisplayDate(new Date(data.sale_date))}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className={cn("text-[9px]", textLabel)}>HİZMET TARİHİ / SERVICE DATE</p>
+                                        <p className={cn("text-xs font-bold text-amber-400 mt-0.5", isDark ? 'text-amber-400' : 'text-amber-700')}>{formatDisplayDate(new Date(data.date))}</p>
+                                    </div>
+                                    {data.pickup_time && (
+                                        <div>
+                                            <p className={cn("text-[9px]", textLabel)}>SAAT / TIME</p>
+                                            <p className={cn("text-xs font-bold mt-0.5", textValue)}>{data.pickup_time}</p>
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 {data.notes && (
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('sales.details.notes')}</p>
-                                        <p className={cn("text-xs max-w-[400px] whitespace-pre-wrap break-words", isDark ? 'text-white/80' : 'text-zinc-600')}>{data.notes}</p>
+                                    <div className="mt-2 p-2.5 rounded-xl border border-white/10 bg-white/5">
+                                        <p className={cn("text-[9px]", textLabel)}>NOTLAR & TALİMATLAR / NOTES & SPECIAL REQUESTS</p>
+                                        <p className={cn("text-xs whitespace-pre-wrap break-words mt-0.5", isDark ? 'text-white/80' : 'text-zinc-700')}>{data.notes}</p>
                                     </div>
                                 )}
                             </div>
                             
-                            <div className="flex flex-col items-end justify-end h-full mt-auto text-right gap-4">
-                                <div className={cn("w-12 h-12 rounded-full border-2 flex items-center justify-center opacity-50", isDark ? 'border-white/20' : 'border-zinc-300')}>
-                                    <span className="text-xl">{typeInfo.icon}</span>
-                                </div>
-                                {data.by && (
-                                    <p className={cn("text-[9px] uppercase tracking-widest mt-auto", isDark ? 'text-white/30' : 'text-zinc-400')}>
-                                        {t('sales.soldBy', { name: data.by })}
-                                    </p>
-                                )}
+                            <div className="text-right shrink-0 self-end sm:self-center">
+                                <p className={cn("text-[9px]", textLabel)}>SATAN / ISSUED BY</p>
+                                <p className={cn("text-xs font-semibold", textValue)}>{data.by || 'Reception'}</p>
+                                <p className={cn("text-[9px] mt-0.5", textMuted)}>Aetherius Concierge Network</p>
                             </div>
                         </div>
                     </div>
@@ -497,7 +451,7 @@ export function VoucherPage() {
                 @media print {
                     @page { size: landscape; margin: 0; }
                     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
-                    #voucher-canvas { transform: scale(0.9); transform-origin: top center; margin-top: 1cm; }
+                    #voucher-canvas { transform: scale(0.95); transform-origin: top center; margin-top: 1cm; }
                 }
             `}</style>
         </div>

@@ -288,6 +288,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                     </span>
                                 )
                             })()}
+                            {sale.customer_phone && <span className="flex items-center gap-1"><span className="text-xs">📞</span> {sale.customer_phone}</span>}
                             {sale.room_number && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {t('common.room')} {sale.room_number}</span>}
                             <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Hizmet: {formatDisplayDate(sale.date)}</span>
                         </div>
@@ -310,7 +311,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
 
                         {isEditing ? (
                             <div className="space-y-3">
-                                <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="grid gap-3 sm:grid-cols-3">
                                     <div className="space-y-1">
                                         <div className="flex items-center justify-between">
                                             <label className="text-xs font-semibold">Misafir İsmi / İsimleri</label>
@@ -331,6 +332,9 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                                             </div>
                                         )}
                                     </div>
+                                    <label className="space-y-1 text-xs font-semibold">Misafir Tel No
+                                        <Input value={editForm.customer_phone || ''} onChange={e => setEditForm(prev => ({ ...prev, customer_phone: e.target.value }))} placeholder="+90 532 ..." />
+                                    </label>
                                     <label className="space-y-1 text-xs font-semibold">Oda numarası (varsa)
                                         <Input value={editForm.room_number || ''} onChange={e => setEditForm(prev => ({ ...prev, room_number: e.target.value }))} placeholder="Otel dışıysa boş bırakın" />
                                     </label>
