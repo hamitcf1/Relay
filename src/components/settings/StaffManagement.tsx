@@ -69,6 +69,8 @@ export function StaffManagement() {
     }
 
     const handleToggleStatus = async (uid: string, currentStatus: string | undefined) => {
+        // Staff are real user documents, so there is nothing to toggle in the demo
+        if (hotel?.id === 'demo-hotel-id') { toast.info(t('staffManagement.demoBlocked')); return }
         const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive'
         const action = newStatus === 'inactive' ? 'Deactivated' : 'Reactivated'
         try {

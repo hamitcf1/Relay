@@ -60,6 +60,11 @@ export const useBlacklistStore = create<BlacklistState>((set) => ({
     },
 
     addBlacklistedGuest: async (hotelId: string, data: Omit<BlacklistedGuest, 'id' | 'created_at'>) => {
+        if (hotelId === 'demo-hotel-id') {
+            const guest = { ...data, id: `demo-blacklist-${Date.now()}`, created_at: new Date() } as BlacklistedGuest
+            set((state) => ({ blacklistedGuests: [guest, ...state.blacklistedGuests] }))
+            return
+        }
         try {
             const blacklistRef = collection(db, 'hotels', hotelId, 'blacklists')
             const newDocRef = doc(blacklistRef)
@@ -74,6 +79,12 @@ export const useBlacklistStore = create<BlacklistState>((set) => ({
     },
 
     updateBlacklistedGuest: async (hotelId: string, guestId: string, data: Partial<Omit<BlacklistedGuest, 'id' | 'created_at'>>) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                blacklistedGuests: state.blacklistedGuests.map(g => g.id === guestId ? { ...g, ...data } : g)
+            }))
+            return
+        }
         try {
             const guestRef = doc(db, 'hotels', hotelId, 'blacklists', guestId)
             await updateDoc(guestRef, {
@@ -86,6 +97,10 @@ export const useBlacklistStore = create<BlacklistState>((set) => ({
     },
 
     removeBlacklistedGuest: async (hotelId: string, guestId: string) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ blacklistedGuests: state.blacklistedGuests.filter(g => g.id !== guestId) }))
+            return
+        }
         try {
             const guestRef = doc(db, 'hotels', hotelId, 'blacklists', guestId)
             await deleteDoc(guestRef)

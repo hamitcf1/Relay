@@ -731,6 +731,9 @@ const tr: Translations = {
         'personalNotes.purgeConfirm': 'Bu not kalıcı olarak silinsin mi?',
         'personalNotes.untitled': 'Başlıksız not',
 
+        // Staff Management
+        'staffManagement.demoBlocked': 'Demo modunda personel durumu değiştirilemez.',
+
         // Sales
         'sales.tracker': 'Satış Takibi',
         'sales.new': 'Yeni Satış',

@@ -786,6 +786,9 @@ export type Translations = {
     'personalNotes.purgeConfirm': string
     'personalNotes.untitled': string
 
+    // Staff Management
+    'staffManagement.demoBlocked': string
+
     // Sales
     'sales.tracker': string
     'sales.new': string

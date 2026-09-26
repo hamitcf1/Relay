@@ -235,6 +235,10 @@ export const useHotelStore = create<HotelStore>((set, get) => ({
     },
 
     updateHotelInfo: async (hotelId: string, info: Partial<HotelInfo>) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => state.hotel ? { hotel: { ...state.hotel, info: { ...state.hotel.info, ...info } } } : state)
+            return
+        }
         try {
             const hotelRef = doc(db, 'hotels', hotelId)
             await setDoc(hotelRef, {

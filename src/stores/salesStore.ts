@@ -19,6 +19,8 @@ import { db } from '@/lib/firebase'
 import type { Sale, SaleType, PaymentStatus, Currency, PaymentEntry, SaleStatus } from '@/types'
 import { useAuthStore } from './authStore'
 import { useActivityStore } from './activityStore'
+import { useCalendarStore } from './calendarStore'
+import { useNotesStore } from './notesStore'
 
 // Helper to get display info for sale types
 export const saleTypeInfo: Record<SaleType, { label: string; icon: string; color: string }> = {
@@ -141,7 +143,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     },
 
     addSale: async (hotelId, saleData) => {
-        const salesRef = collection(db, 'hotels', hotelId, 'sales')
+        const isDemo = hotelId === 'demo-hotel-id'
 
         // 1. Prepare Sale Data
         const saleDocData = {
@@ -154,14 +156,30 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         }
 
         // 2. Add Sale First to get ID
-        const docRef = await addDoc(salesRef, saleDocData)
-        const saleId = docRef.id
+        const saleId = isDemo
+            ? `demo-sale-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+            : (await addDoc(collection(db, 'hotels', hotelId, 'sales'), saleDocData)).id
+
+        if (isDemo) {
+            set((state) => ({
+                sales: [{
+                    ...saleData,
+                    id: saleId,
+                    hotel_id: hotelId,
+                    sale_date: saleData.sale_date || new Date(),
+                    created_at: new Date(),
+                    collected_amount: 0,
+                    payment_status: 'pending',
+                    payments: [],
+                }, ...state.sales],
+            }))
+        }
+
         toast.success(`Sale added: ${saleData.name}`)
 
         // 3. If Tour/Transfer, create Calendar Event automatically
         if (saleData.type === 'tour' || saleData.type === 'transfer') {
             try {
-                const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
                 const eventData = {
                     type: saleData.type,
                     title: `${saleTypeInfo[saleData.type].icon} ${saleData.name}${saleData.room_number ? ` - Oda ${saleData.room_number}` : ''}`,
@@ -177,10 +195,29 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
                     sale_id: saleId, // Link back to sale
                     created_at: serverTimestamp()
                 }
-                const eventRef = await addDoc(eventsRef, eventData)
 
                 // 4. Update Sale with Event ID
-                await updateDoc(docRef, { calendar_event_id: eventRef.id })
+                if (isDemo) {
+                    const eventId = await useCalendarStore.getState().addEvent(hotelId, {
+                        type: eventData.type,
+                        title: eventData.title,
+                        description: eventData.description,
+                        date: saleData.date,
+                        time: eventData.time,
+                        room_number: eventData.room_number,
+                        total_price: eventData.total_price,
+                        collected_amount: 0,
+                        currency: eventData.currency,
+                        created_by: eventData.created_by,
+                        created_by_name: eventData.created_by_name,
+                    })
+                    set((state) => ({
+                        sales: state.sales.map(s => s.id === saleId ? { ...s, calendar_event_id: eventId } : s)
+                    }))
+                } else {
+                    const eventRef = await addDoc(collection(db, 'hotels', hotelId, 'calendar_events'), eventData)
+                    await updateDoc(doc(db, 'hotels', hotelId, 'sales', saleId), { calendar_event_id: eventRef.id })
+                }
             } catch (error) {
                 console.error("Failed to auto-create calendar event:", error)
             }
@@ -199,21 +236,17 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     },
 
     updateSale: async (hotelId, saleId, updates) => {
+        const isDemo = hotelId === 'demo-hotel-id'
         const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
-        const updateData: any = { ...updates }
+        const localPatch: any = { ...updates }
         const currentSale = get().sales.find(s => s.id === saleId)
-
-        if (updates.date) {
-            updateData.date = Timestamp.fromDate(updates.date)
-        }
-        if (updates.sale_date) updateData.sale_date = Timestamp.fromDate(updates.sale_date)
 
         // Recalculate payment status if amounts changed
         if (updates.total_price !== undefined) {
             if (currentSale) {
                 const collected = currentSale.collected_amount
                 const total = updates.total_price
-                updateData.payment_status =
+                localPatch.payment_status =
                     collected >= total ? 'paid' :
                         collected > 0 ? 'partial' : 'pending'
             }
@@ -223,7 +256,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         if (updates.status === 'cancelled' && currentSale) {
             // No money was taken -> mark the payment as cancelled (not received)
             if (currentSale.collected_amount === 0 && !(currentSale.payments || []).length) {
-                updateData.payment_status = 'cancelled'
+                localPatch.payment_status = 'cancelled'
             }
             // If money was already collected, keep payment_status as-is so the
             // user can decide to refund it or keep it as received.
@@ -233,22 +266,30 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         if (updates.status && updates.status !== 'cancelled' && currentSale?.status === 'cancelled') {
             const total = updates.total_price ?? currentSale.total_price
             const collected = currentSale.collected_amount
-            updateData.payment_status =
+            localPatch.payment_status =
                 collected >= total ? 'paid' :
                     collected > 0 ? 'partial' : 'pending'
         }
 
-        updateData.updated_at = serverTimestamp()
-        await updateDoc(saleRef, updateData)
+        localPatch.updated_at = new Date()
+        if (isDemo) {
+            set((state) => ({ sales: state.sales.map(s => s.id === saleId ? { ...s, ...localPatch } : s) }))
+        } else {
+            const updateData: any = { ...localPatch, updated_at: serverTimestamp() }
+            if (updates.date) updateData.date = Timestamp.fromDate(updates.date)
+            if (updates.sale_date) updateData.sale_date = Timestamp.fromDate(updates.sale_date)
+            await updateDoc(saleRef, updateData)
+        }
+
         if (currentSale && (updates.total_price !== undefined || updates.name !== undefined || updates.date !== undefined || updates.pickup_time !== undefined || updates.room_number !== undefined || updates.customer_name !== undefined || updates.notes !== undefined || updates.sale_date !== undefined)) {
-            await syncLinkedNotes(hotelId, saleId, currentSale.collected_amount, updates.total_price ?? currentSale.total_price, updateData.payment_status || currentSale.payment_status, { ...currentSale, ...updates })
+            await syncLinkedNotes(hotelId, saleId, currentSale.collected_amount, updates.total_price ?? currentSale.total_price, localPatch.payment_status || currentSale.payment_status, { ...currentSale, ...updates })
         }
         toast.success('Sale updated')
 
         // Sync to calendar if critical fields changed
         if (currentSale?.calendar_event_id) {
             const syncUpdates: any = {}
-            if (updates.date) syncUpdates.date = Timestamp.fromDate(updates.date)
+            if (updates.date) syncUpdates.date = updates.date
             if (updates.pickup_time) syncUpdates.time = updates.pickup_time
             if (updates.total_price !== undefined) syncUpdates.total_price = updates.total_price
             if (updates.name || updates.room_number !== undefined) syncUpdates.title = `${saleTypeInfo[currentSale.type].icon} ${updates.name || currentSale.name}${(updates.room_number ?? currentSale.room_number) ? ` - Oda ${updates.room_number ?? currentSale.room_number}` : ''}`
@@ -257,8 +298,15 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 
             if (Object.keys(syncUpdates).length > 0) {
                 try {
-                    const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', currentSale.calendar_event_id)
-                    await updateDoc(eventRef, syncUpdates)
+                    if (isDemo) {
+                        await useCalendarStore.getState().updateEvent(hotelId, currentSale.calendar_event_id, syncUpdates)
+                    } else {
+                        const firestoreSync: any = syncUpdates.date
+                            ? { ...syncUpdates, date: Timestamp.fromDate(syncUpdates.date) }
+                            : { ...syncUpdates }
+                        const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', currentSale.calendar_event_id)
+                        await updateDoc(eventRef, firestoreSync)
+                    }
                 } catch (err) {
                     console.error("Failed to sync calendar event:", err)
                 }
@@ -276,23 +324,36 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     },
 
     deleteSale: async (hotelId, saleId) => {
+        const isDemo = hotelId === 'demo-hotel-id'
         const sale = get().sales.find(s => s.id === saleId)
-        const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
-        await deleteDoc(saleRef)
-        try {
-            const linked = await getDocs(query(collection(db, 'hotels', hotelId, 'shift_notes'), where('sale_id', '==', saleId)))
-            await Promise.all(linked.docs.map(note => deleteDoc(note.ref)))
-        } catch (error) {
-            console.error('Linked shift note deletion failed:', error)
-            toast.error('Satış silindi ancak bağlı nöbet notu silinemedi.')
+
+        if (isDemo) {
+            set((state) => ({ sales: state.sales.filter(s => s.id !== saleId) }))
+            useNotesStore.setState((state) => ({
+                notes: state.notes.filter(n => n.sale_id !== saleId),
+            }))
+        } else {
+            const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
+            await deleteDoc(saleRef)
+            try {
+                const linked = await getDocs(query(collection(db, 'hotels', hotelId, 'shift_notes'), where('sale_id', '==', saleId)))
+                await Promise.all(linked.docs.map(note => deleteDoc(note.ref)))
+            } catch (error) {
+                console.error('Linked shift note deletion failed:', error)
+                toast.error('Satış silindi ancak bağlı nöbet notu silinemedi.')
+            }
         }
         toast.success('Sale deleted')
 
         // Also delete calendar event if exists
         if (sale?.calendar_event_id) {
             try {
-                const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
-                await deleteDoc(eventRef)
+                if (isDemo) {
+                    await useCalendarStore.getState().deleteEvent(hotelId, sale.calendar_event_id)
+                } else {
+                    const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
+                    await deleteDoc(eventRef)
+                }
             } catch (err) {
                 console.error("Failed to delete calendar event:", err)
             }
@@ -300,8 +361,10 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     },
 
     collectPayment: async (hotelId: string, saleId: string, amount: number, currency?: Currency, targetAmount?: number) => {
+        const isDemo = hotelId === 'demo-hotel-id'
         let sale = get().sales.find(s => s.id === saleId)
         if (!sale) {
+            if (isDemo) throw new Error('Sale not found')
             const snapshot = await getDoc(doc(db, 'hotels', hotelId, 'sales', saleId))
             if (!snapshot.exists()) throw new Error('Sale not found')
             const data = snapshot.data()
@@ -314,7 +377,7 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             ? targetAmount
             : (paymentCurrency === sale.currency ? amount : 0) // Fallback: if no target amount and mismatch, don't increment (or handle differently)
 
-        // Safety check: if no target amount and currency differs, we can't calculate balance update accurately without a rate. 
+        // Safety check: if no target amount and currency differs, we can't calculate balance update accurately without a rate.
         // For now, we assume if targetAmount is missing, currency matches OR user didn't specify exchange value (which is bad).
         // But the UI will ensure targetAmount is passed if currencies differ.
 
@@ -332,34 +395,46 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
             newTotalCollected >= sale.total_price ? 'paid' :
                 newTotalCollected > 0 ? 'partial' : 'pending'
 
-        const sanitizedPayments = payments.map(p => {
-            const entry: any = {
-                amount: p.amount,
-                currency: p.currency,
-                timestamp: Timestamp.fromDate(p.timestamp)
-            }
-            if (p.method) entry.method = p.method
-            if (p.recorded_by) entry.recorded_by = p.recorded_by
-            return entry
-        })
+        if (isDemo) {
+            set((state) => ({
+                sales: state.sales.map(s => s.id === saleId
+                    ? { ...s, collected_amount: newTotalCollected, payment_status: paymentStatus, payments }
+                    : s)
+            }))
+        } else {
+            const sanitizedPayments = payments.map(p => {
+                const entry: any = {
+                    amount: p.amount,
+                    currency: p.currency,
+                    timestamp: Timestamp.fromDate(p.timestamp)
+                }
+                if (p.method) entry.method = p.method
+                if (p.recorded_by) entry.recorded_by = p.recorded_by
+                return entry
+            })
 
-        const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
-        await updateDoc(saleRef, {
-            collected_amount: newTotalCollected,
-            payment_status: paymentStatus,
-            payments: sanitizedPayments
-        })
+            const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
+            await updateDoc(saleRef, {
+                collected_amount: newTotalCollected,
+                payment_status: paymentStatus,
+                payments: sanitizedPayments
+            })
+        }
         await syncLinkedNotes(hotelId, saleId, newTotalCollected, sale.total_price, paymentStatus)
         toast.success(paymentStatus === 'paid' ? 'Fully paid! ✓' : `Payment collected: ${amount} ${paymentCurrency}`)
 
         // Sync to calendar
         if (sale.calendar_event_id) {
             try {
-                const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
-                await updateDoc(eventRef, {
-                    collected_amount: newTotalCollected,
-                    updated_at: serverTimestamp()
-                })
+                if (isDemo) {
+                    await useCalendarStore.getState().updateEvent(hotelId, sale.calendar_event_id, { collected_amount: newTotalCollected })
+                } else {
+                    const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
+                    await updateDoc(eventRef, {
+                        collected_amount: newTotalCollected,
+                        updated_at: serverTimestamp()
+                    })
+                }
             } catch (error) {
                 console.error('Error updating calendar event for sale:', error)
             }
@@ -367,11 +442,19 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
     },
 
     markPaymentCancelled: async (hotelId: string, saleId: string) => {
-        const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
-        await updateDoc(saleRef, {
-            payment_status: 'cancelled',
-            updated_at: serverTimestamp()
-        })
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                sales: state.sales.map(s => s.id === saleId
+                    ? { ...s, payment_status: 'cancelled', updated_at: new Date() }
+                    : s)
+            }))
+        } else {
+            const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
+            await updateDoc(saleRef, {
+                payment_status: 'cancelled',
+                updated_at: serverTimestamp()
+            })
+        }
         await syncLinkedNotes(hotelId, saleId, 0, get().sales.find(s => s.id === saleId)?.total_price || 0, 'cancelled')
         toast.success('Payment cancelled')
     },
@@ -380,23 +463,35 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
         const sale = get().sales.find(s => s.id === saleId)
         if (!sale) return
 
-        const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
-        await updateDoc(saleRef, {
-            payment_status: 'refunded',
-            collected_amount: 0,
-            updated_at: serverTimestamp()
-        })
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                sales: state.sales.map(s => s.id === saleId
+                    ? { ...s, payment_status: 'refunded', collected_amount: 0, updated_at: new Date() }
+                    : s)
+            }))
+        } else {
+            const saleRef = doc(db, 'hotels', hotelId, 'sales', saleId)
+            await updateDoc(saleRef, {
+                payment_status: 'refunded',
+                collected_amount: 0,
+                updated_at: serverTimestamp()
+            })
+        }
         await syncLinkedNotes(hotelId, saleId, 0, sale.total_price, 'refunded')
         toast.success('Payment refunded')
 
         // Sync to calendar
         if (sale.calendar_event_id) {
             try {
-                const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
-                await updateDoc(eventRef, {
-                    collected_amount: 0,
-                    updated_at: serverTimestamp()
-                })
+                if (hotelId === 'demo-hotel-id') {
+                    await useCalendarStore.getState().updateEvent(hotelId, sale.calendar_event_id, { collected_amount: 0 })
+                } else {
+                    const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', sale.calendar_event_id)
+                    await updateDoc(eventRef, {
+                        collected_amount: 0,
+                        updated_at: serverTimestamp()
+                    })
+                }
             } catch (error) {
                 console.error('Error updating calendar event for refund:', error)
             }
@@ -418,9 +513,24 @@ export const useSalesStore = create<SalesState & SalesActions>((set, get) => ({
 }))
 
 async function syncLinkedNotes(hotelId: string, saleId: string, collected: number, total: number, status: PaymentStatus, sale?: Sale) {
+    const isDemo = hotelId === 'demo-hotel-id'
+    const content = sale ? [saleTypeInfo[sale.type]?.icon, sale.name, sale.customer_name && `Misafir: ${sale.customer_name}`, sale.room_number && `Oda: ${sale.room_number}`, `Satış: ${(sale.sale_date || sale.created_at).toLocaleDateString('tr-TR')}`, `Hizmet: ${sale.date.toLocaleDateString('tr-TR')}`, sale.pickup_time && `Alış saati: ${sale.pickup_time}`, `${total} ${sale.currency}`, sale.notes].filter(Boolean).join(' · ') : undefined
+
+    if (isDemo) {
+        const patch = {
+            ...(content ? { content, room_number: sale?.room_number || null, guest_name: sale?.customer_name || null } : {}),
+            amount_due: Math.max(0, total - collected),
+            is_paid: status === 'paid',
+            updated_at: new Date(),
+        }
+        useNotesStore.setState((state) => ({
+            notes: state.notes.map(n => n.sale_id === saleId ? { ...n, ...patch } : n)
+        }))
+        return
+    }
+
     try {
         const notes = await getDocs(query(collection(db, 'hotels', hotelId, 'shift_notes'), where('sale_id', '==', saleId)))
-        const content = sale ? [saleTypeInfo[sale.type]?.icon, sale.name, sale.customer_name && `Misafir: ${sale.customer_name}`, sale.room_number && `Oda: ${sale.room_number}`, `Satış: ${(sale.sale_date || sale.created_at).toLocaleDateString('tr-TR')}`, `Hizmet: ${sale.date.toLocaleDateString('tr-TR')}`, sale.pickup_time && `Alış saati: ${sale.pickup_time}`, `${total} ${sale.currency}`, sale.notes].filter(Boolean).join(' · ') : undefined
         await Promise.all(notes.docs.map(note => updateDoc(note.ref, {
             ...(content ? { content, room_number: sale?.room_number || null, guest_name: sale?.customer_name || null } : {}),
             amount_due: Math.max(0, total - collected),
