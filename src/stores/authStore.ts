@@ -7,7 +7,7 @@ import {
     type User as FirebaseUser
 } from 'firebase/auth'
 import { doc, getDoc, updateDoc, type DocumentData, type UpdateData } from 'firebase/firestore'
-import { auth, db } from '@/lib/firebase'
+import { auth, db, clearLocalFirestoreCache } from '@/lib/firebase'
 import type { User, UserRole } from '@/types'
 import { useActivityStore } from './activityStore'
 import { resetAllStores } from './resetAllStores'
@@ -197,6 +197,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
             // by the next account that signs in on this device. This also sweeps the hotel
             // scoped localStorage keys; device preferences like language and theme survive.
             resetAllStores()
+
+            // Firestore keeps a persistent on device cache so the app stays readable while the
+            // wifi is down. That cache outlives sign out, so the previous hotel's notes, prices
+            // and messages would sit in IndexedDB for whoever opens the app next. Hotel hardware
+            // is shared between shifts, so the local copy goes with the session.
+            await clearLocalFirestoreCache()
 
             set({ user: null, firebaseUser: null, loading: false, isBooted: false })
             toast.success('Logged out')

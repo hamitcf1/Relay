@@ -1358,6 +1358,17 @@ const en: Translations = {
         'download.title': 'Download Aetherius Relay',
         'download.subtitle': 'Get the power of Relay on all your devices.',
         'community.title': 'Relay Community',
+
+        'error.boundary.title': 'Something went wrong',
+        'error.boundary.body': 'This screen stopped working. You can try again, and your data has not been lost.',
+        'error.boundary.staleTitle': 'The app was updated',
+        'error.boundary.staleBody': 'A newer version is available. Reload the page to continue where you left off.',
+        'error.boundary.retry': 'Try again',
+        'error.boundary.reload': 'Reload page',
+        'error.boundary.details': 'Technical details',
+        'error.notFound.title': 'Page not found',
+        'error.notFound.body': 'This link does not lead anywhere.',
+        'error.notFound.back': 'Back to home',
         'community.subtitle': 'Connect with other hospitality professionals.',
 
         // Учёт рабочего времени
