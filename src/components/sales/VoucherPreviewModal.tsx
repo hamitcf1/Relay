@@ -21,7 +21,7 @@ import { useSalesStore, saleTypeInfo, saleStatusInfo } from '@/stores/salesStore
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useCurrencyStore } from '@/stores/currencyStore'
-import { cn, formatDisplayDate } from '@/lib/utils'
+import { cn, formatDisplayDate, parseGuestNames } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface VoucherPreviewModalProps {
@@ -340,10 +340,29 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
 
                                     {/* Transfer Logistics Grid */}
                                     <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl p-3 border", bgGrid)}>
-                                        <div>
-                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                            <p className={cn("text-xs font-bold truncate", textValue)}>{sale.customer_name}</p>
-                                        </div>
+                                        {(() => {
+                                            const guests = parseGuestNames(sale.customer_name)
+                                            if (guests.length > 1) {
+                                                return (
+                                                    <div className="col-span-2">
+                                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')} ({guests.length} Misafir)</p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {guests.map((g, i) => (
+                                                                <span key={i} className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                                    👤 {g}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+                                            return (
+                                                <div>
+                                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                                    <p className={cn("text-xs font-bold truncate", textValue)}>{sale.customer_name || '—'}</p>
+                                                </div>
+                                            )
+                                        })()}
                                         <div>
                                             <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>🔑 {t('common.room')}</p>
                                             <p className={cn("text-xs font-bold", textValue)}>{sale.room_number ? `#${sale.room_number}` : 'Otel Dışı / —'}</p>
@@ -352,10 +371,12 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                             <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>✈️ Uçuş Kodu / Flight</p>
                                             <p className={cn("text-xs font-bold font-mono", textValue)}>{sale.flight_number || '—'}</p>
                                         </div>
-                                        <div>
-                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Pax / Yolcu</p>
-                                            <p className={cn("text-xs font-bold", textValue)}>{sale.pax} Person</p>
-                                        </div>
+                                        {parseGuestNames(sale.customer_name).length <= 1 && (
+                                            <div>
+                                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Pax / Yolcu</p>
+                                                <p className={cn("text-xs font-bold", textValue)}>{sale.pax} Person</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ) : sale.type === 'tour' ? (
@@ -374,10 +395,29 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                                         </div>
                                     </div>
                                     <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
-                                        <div>
-                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                            <p className={cn("text-xs font-bold truncate", textValue)}>{sale.customer_name}</p>
-                                        </div>
+                                        {(() => {
+                                            const guests = parseGuestNames(sale.customer_name)
+                                            if (guests.length > 1) {
+                                                return (
+                                                    <div className="col-span-2 sm:col-span-3">
+                                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')} ({guests.length} Misafir)</p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {guests.map((g, i) => (
+                                                                <span key={i} className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                                    👤 {g}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+                                            return (
+                                                <div>
+                                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                                    <p className={cn("text-xs font-bold truncate", textValue)}>{sale.customer_name || '—'}</p>
+                                                </div>
+                                            )
+                                        })()}
                                         <div>
                                             <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
                                             <p className={cn("text-xs font-bold", textValue)}>{sale.room_number || '—'}</p>

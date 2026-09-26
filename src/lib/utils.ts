@@ -47,3 +47,11 @@ export function cleanAuthError(error: any, t: (key: any) => string) {
             return error.message?.replace('Firebase: ', '').replace(/\(auth\/.*\)/, '').trim() || t('auth.error.generic')
     }
 }
+
+export function parseGuestNames(nameStr?: string | null): string[] {
+    if (!nameStr) return []
+    return nameStr
+        .split(/[,;\n\/]+/)
+        .map(n => n.trim())
+        .filter(Boolean)
+}

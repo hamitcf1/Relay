@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
 import { saleTypeInfo, saleStatusInfo } from '@/stores/salesStore'
-import { cn, formatDisplayDate } from '@/lib/utils'
+import { cn, formatDisplayDate, parseGuestNames } from '@/lib/utils'
 
 // Since this is a public page and doesn't load the full store/i18n by default,
 // we will rely on English for now or add a mini-translator if needed.
@@ -266,10 +266,29 @@ export function VoucherPage() {
 
                                 {/* Transfer Logistics Grid */}
                                 <div className={cn("grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl p-3 border", bgGrid)}>
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                        <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest}</p>
-                                    </div>
+                                    {(() => {
+                                        const guests = parseGuestNames(data.guest)
+                                        if (guests.length > 1) {
+                                            return (
+                                                <div className="col-span-2">
+                                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')} ({guests.length} Misafir)</p>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {guests.map((g, i) => (
+                                                            <span key={i} className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                                👤 {g}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+                                        return (
+                                            <div>
+                                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                                <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest || '—'}</p>
+                                            </div>
+                                        )
+                                    })()}
                                     <div>
                                         <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>🔑 {t('common.room')}</p>
                                         <p className={cn("text-xs font-bold", textValue)}>{data.room ? `#${data.room}` : 'Otel Dışı / —'}</p>
@@ -278,10 +297,12 @@ export function VoucherPage() {
                                         <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>✈️ Uçuş Kodu / Flight</p>
                                         <p className={cn("text-xs font-bold font-mono", textValue)}>{data.flight_number || '—'}</p>
                                     </div>
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Pax / Yolcu</p>
-                                        <p className={cn("text-xs font-bold", textValue)}>{data.pax} Person</p>
-                                    </div>
+                                    {parseGuestNames(data.guest).length <= 1 && (
+                                        <div>
+                                            <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>Pax / Yolcu</p>
+                                            <p className={cn("text-xs font-bold", textValue)}>{data.pax} Person</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : data.type === 'tour' ? (
@@ -300,10 +321,29 @@ export function VoucherPage() {
                                     </div>
                                 </div>
                                 <div className={cn("grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-xl p-3 border", bgGrid)}>
-                                    <div>
-                                        <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
-                                        <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest}</p>
-                                    </div>
+                                    {(() => {
+                                        const guests = parseGuestNames(data.guest)
+                                        if (guests.length > 1) {
+                                            return (
+                                                <div className="col-span-2 sm:col-span-3">
+                                                    <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')} ({guests.length} Misafir)</p>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {guests.map((g, i) => (
+                                                            <span key={i} className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded border", isDark ? "bg-white/10 border-white/20 text-white" : "bg-zinc-100 border-zinc-300 text-zinc-900")}>
+                                                                👤 {g}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+                                        return (
+                                            <div>
+                                                <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('tours.book.guestName')}</p>
+                                                <p className={cn("text-xs font-bold truncate", textValue)}>{data.guest || '—'}</p>
+                                            </div>
+                                        )
+                                    })()}
                                     <div>
                                         <p className={cn("text-[10px] uppercase tracking-wider mb-1", textLabel)}>{t('common.room')}</p>
                                         <p className={cn("text-xs font-bold", textValue)}>{data.room || '—'}</p>

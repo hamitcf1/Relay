@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket, Trash2, Archive } from 'lucide-react'
+import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket, Trash2, Archive, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
-import { cn, formatDisplayDate } from '@/lib/utils'
+import { cn, formatDisplayDate, parseGuestNames } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
 import { useTourStore } from '@/stores/tourStore'
 import { SalesDetailModal } from './SalesDetailModal'
@@ -567,13 +567,25 @@ export function SalesPanel() {
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-[10px] text-zinc-500 font-bold uppercase">{t('tours.book.guestName')}</label>
+                                            <span className="text-[9px] text-muted-foreground">Birden fazla ise virgül ile ayırın</span>
+                                        </div>
                                         <Input
                                             value={formData.customer_name}
                                             onChange={e => setFormData(p => ({ ...p, customer_name: e.target.value }))}
                                             className="h-8 text-xs bg-background border-border"
-                                            placeholder="John Doe"
+                                            placeholder="Örn: Ahmet Yılmaz, Ayşe Yılmaz"
                                         />
+                                        {parseGuestNames(formData.customer_name).length > 1 && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {parseGuestNames(formData.customer_name).map((name, idx) => (
+                                                    <span key={idx} className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                                                        <User className="w-2.5 h-2.5" /> {name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="space-y-1">
@@ -891,7 +903,17 @@ export function SalesPanel() {
 
                                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
                                                 {sale.room_number && <span className="bg-muted px-1.5 py-0.5 rounded border border-border">Oda {sale.room_number}</span>}
-                                                <span>{sale.customer_name}</span>
+                                                {(() => {
+                                                    const guests = parseGuestNames(sale.customer_name)
+                                                    if (guests.length > 1) {
+                                                        return (
+                                                            <span className="font-medium text-foreground bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded text-[10px] inline-flex items-center gap-1">
+                                                                👥 {guests.join(', ')} ({guests.length} Misafir)
+                                                            </span>
+                                                        )
+                                                    }
+                                                    return <span>{sale.customer_name || 'Misafir İsimsiz'}</span>
+                                                })()}
                                                 <span className="text-muted-foreground/50">•</span>
                                                 <span>{formatDisplayDate(sale.date)}</span>
                                                 <span className="text-muted-foreground/50">•</span>

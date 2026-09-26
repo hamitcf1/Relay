@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
     Calendar, Users, MapPin,
-    MessageSquare, Edit3, Check, Trash2, Clock, Ticket, RotateCcw, XCircle
+    MessageSquare, Edit3, Check, Trash2, Clock, Ticket, RotateCcw, XCircle, User
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
 import type { Sale, Currency, SaleStatus } from '@/types'
-import { cn, formatDisplayDate, getDateLocale } from '@/lib/utils'
+import { cn, formatDisplayDate, getDateLocale, parseGuestNames } from '@/lib/utils'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import {
     Select,
@@ -271,8 +271,23 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                             <h2 className="text-2xl font-bold text-foreground mb-1">{sale.name}</h2>
                         )}
 
-                        <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                            <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {sale.customer_name}</span>
+                        <div className="flex flex-wrap items-center gap-4 text-muted-foreground text-sm">
+                            {(() => {
+                                const guests = parseGuestNames(sale.customer_name)
+                                if (guests.length > 1) {
+                                    return (
+                                        <span className="flex items-center gap-1.5 font-medium text-foreground bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md text-xs">
+                                            <Users className="w-3.5 h-3.5 text-primary" />
+                                            {guests.join(', ')} ({guests.length} Misafir)
+                                        </span>
+                                    )
+                                }
+                                return (
+                                    <span className="flex items-center gap-1">
+                                        <Users className="w-4 h-4" /> {sale.customer_name || 'Misafir İsimsiz'}
+                                    </span>
+                                )
+                            })()}
                             {sale.room_number && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {t('common.room')} {sale.room_number}</span>}
                             <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Hizmet: {formatDisplayDate(sale.date)}</span>
                         </div>
@@ -296,9 +311,26 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                         {isEditing ? (
                             <div className="space-y-3">
                                 <div className="grid gap-3 sm:grid-cols-2">
-                                    <label className="space-y-1 text-xs font-semibold">Misafir adı
-                                        <Input value={editForm.customer_name || ''} onChange={e => setEditForm(prev => ({ ...prev, customer_name: e.target.value }))} placeholder="Misafir adı" />
-                                    </label>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-xs font-semibold">Misafir İsmi / İsimleri</label>
+                                            <span className="text-[10px] text-muted-foreground font-normal">Virgülle ayırın</span>
+                                        </div>
+                                        <Input
+                                            value={editForm.customer_name || ''}
+                                            onChange={e => setEditForm(prev => ({ ...prev, customer_name: e.target.value }))}
+                                            placeholder="Örn: Ahmet Yılmaz, Ayşe Yılmaz"
+                                        />
+                                        {parseGuestNames(editForm.customer_name).length > 1 && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {parseGuestNames(editForm.customer_name).map((g, i) => (
+                                                    <span key={i} className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                                                        <User className="w-2.5 h-2.5" /> {g}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                     <label className="space-y-1 text-xs font-semibold">Oda numarası (varsa)
                                         <Input value={editForm.room_number || ''} onChange={e => setEditForm(prev => ({ ...prev, room_number: e.target.value }))} placeholder="Otel dışıysa boş bırakın" />
                                     </label>
