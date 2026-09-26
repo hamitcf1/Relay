@@ -229,12 +229,14 @@ export interface Shift {
 
 export interface Incident {
     id: string
+    hotel_id?: string
     type: IncidentType
     room: string
     item: string
     cost: number
     status: IncidentStatus
     photo_url: string
+    created_at?: Date
 }
 
 export interface VaultEntry {
