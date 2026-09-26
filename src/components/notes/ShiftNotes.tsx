@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { format } from 'date-fns'
-import { AlertTriangle, ArrowLeftRight, CheckCircle2, Clock3, Pin, Plus, Trash2, Archive, CheckSquare, Square, RotateCcw, Check } from 'lucide-react'
+import { AlertTriangle, ArrowLeftRight, CheckCircle2, Clock3, Pin, Plus, Trash2, Archive, CheckSquare, Square, RotateCcw, Check, Printer } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { useNotesStore, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -13,6 +13,7 @@ import { useConfirm } from '@/components/ui/confirm-dialog'
 import { NoteFilters } from './NoteFilters'
 import { NoteForm } from './NoteForm'
 import { NoteList } from './NoteList'
+import { ShiftHandoverPdfModal } from './ShiftHandoverPdfModal'
 
 interface ShiftNotesProps {
     hotelId: string
@@ -39,6 +40,7 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     const [filter, setFilter] = useState<NoteCategory | 'all'>('all')
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([])
+    const [showPdfModal, setShowPdfModal] = useState(false)
 
     useEffect(() => {
         if (initialAddOpen) setIsAdding(true)
@@ -186,6 +188,10 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                         {selectedNoteIds.length > 0 && selectedNoteIds.length === visibleNotes.length ? <CheckSquare className="w-3.5 h-3.5 text-primary" /> : <Square className="w-3.5 h-3.5 text-muted-foreground" />}
                         {selectedNoteIds.length > 0 ? `${selectedNoteIds.length} / ${visibleNotes.length} Seçildi` : 'Tümünü Seç'}
                     </Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowPdfModal(true)} className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+                        <Printer className="w-3.5 h-3.5" />
+                        Devir Tutanağı Yazdır
+                    </Button>
                     {statusFilter === 'trash' && user?.role === 'gm' && (
                         <Button variant="destructive" size="sm" onClick={handleEmptyTrash} className="h-8 text-xs gap-1.5">
                             <Trash2 className="w-3.5 h-3.5" />
@@ -228,6 +234,12 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                     onToggleSelectNote={handleToggleSelectNote}
                 />
             </div>
+
+            <ShiftHandoverPdfModal
+                isOpen={showPdfModal}
+                onClose={() => setShowPdfModal(false)}
+                notes={visibleNotes}
+            />
         </section>
     )
 }

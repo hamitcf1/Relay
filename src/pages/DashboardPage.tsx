@@ -15,6 +15,8 @@ import { useShiftAutomator } from '@/hooks/useShiftAutomator'
 import { useDuePaymentNotifier } from '@/hooks/useDuePaymentNotifier'
 import { AnnouncementBanner } from '@/components/announcements/AnnouncementBanner'
 import { TourOverlay } from '@/components/onboarding/TourOverlay'
+import { CommandPalette } from '@/components/ui/CommandPalette'
+import { OfficialRecordModal } from '@/components/incidents/OfficialRecordModal'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -74,6 +76,8 @@ export function DashboardPage() {
     const [compactShiftTarget, setCompactShiftTarget] = useState<string | null>(null)
     const [compactNoteComposerOpen, setCompactNoteComposerOpen] = useState(false)
     const [lastCompactShiftModule, setLastCompactShiftModule] = useState('overview')
+    const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+    const [officialRecordOpen, setOfficialRecordOpen] = useState(false)
     const previousWorkspaceMode = useRef(workspaceMode)
     const previousUserId = useRef(user?.uid)
     const clearWorkspaceEdits = useWorkspaceEditStore((state) => state.clear)
@@ -340,10 +344,10 @@ export function DashboardPage() {
                         <span><strong>{shiftName}</strong><small>{shiftStart}–{shiftEnd}</small></span>
                     </div>
 
-                    <label className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-card/55 px-4 text-muted-foreground md:flex">
-                        <Search className="h-4 w-4" />
-                        <input aria-label={t('common.search') as string} placeholder={t('common.search') as string} className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
-                        <kbd className="rounded border border-border/80 px-1.5 py-0.5 text-[10px] text-muted-foreground">⌘K</kbd>
+                    <label onClick={() => setCommandPaletteOpen(true)} className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-card/55 px-4 text-muted-foreground md:flex cursor-pointer hover:border-primary/40 transition-colors">
+                        <Search className="h-4 w-4 text-primary" />
+                        <input aria-label={t('common.search') as string} placeholder="Hızlı komut veya arama yapın (⌘K)..." readOnly className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none cursor-pointer placeholder:text-muted-foreground" />
+                        <kbd className="rounded border border-border/80 px-1.5 py-0.5 text-[10px] text-muted-foreground bg-muted font-mono">⌘K</kbd>
                     </label>
 
                     <div className="flex items-center gap-2">
@@ -469,6 +473,29 @@ export function DashboardPage() {
             <QuickActionMenu onAction={handleQuickAction} />
             <AnnouncementModal />
 
+            <CommandPalette
+                isOpen={commandPaletteOpen}
+                onClose={() => setCommandPaletteOpen(false)}
+                onNavigateTab={(tabId) => {
+                    setActiveTab('operations')
+                    setOperationTab(tabId)
+                }}
+                onOpenNewSale={() => {
+                    setActiveTab('operations')
+                    setOperationTab('sales')
+                }}
+                onOpenNewNote={() => {
+                    setActiveTab('overview')
+                    setOpenNewNote(true)
+                    setOverviewTab('notes')
+                }}
+                onOpenOfficialRecord={() => setOfficialRecordOpen(true)}
+            />
+
+            <OfficialRecordModal
+                isOpen={officialRecordOpen}
+                onClose={() => setOfficialRecordOpen(false)}
+            />
         </div>
     )
 }

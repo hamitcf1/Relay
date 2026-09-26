@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket, Trash2, Archive, User, Search } from 'lucide-react'
+import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Check, Receipt, Ticket, Trash2, Archive, User, Search, Download } from 'lucide-react'
+import { exportToCsv } from '@/lib/exportCsv'
+import { playChimeSound } from '@/lib/soundEffects'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -257,6 +259,30 @@ export function SalesPanel() {
         }
     }
 
+    const handleExportCsv = () => {
+        if (filteredSales.length === 0) {
+            toast.info('Dışa aktarılacak satış kaydı bulunmuyor.')
+            return
+        }
+        const rows = filteredSales.map(s => ({
+            'Rezervasyon No': s.reservation_code || `RES-${s.id.slice(0, 6).toUpperCase()}`,
+            'Satış Tipi': t(saleTypeInfo[s.type].label as any),
+            'Satış Kalemi': s.name,
+            'Misafir Adı': s.customer_name || '',
+            'Telefon': s.customer_phone || '',
+            'Oda No': s.room_number || '',
+            'Hizmet Tarihi': s.date || '',
+            'Alınış Saati': s.pickup_time || '',
+            'Toplam Tutar': s.total_price,
+            'Döviz': s.currency,
+            'Tahsil Edilen': s.collected_amount,
+            'Ödeme Durumu': t(paymentStatusInfo[s.payment_status].label as any),
+            'Satışı Yapan': s.created_by_name || ''
+        }))
+        exportToCsv(`Satış_Raporu_${format(new Date(), 'yyyy-MM-dd')}.csv`, rows)
+        toast.success(`${rows.length} satış kaydı Excel/CSV olarak indirildi!`)
+    }
+
     const handleAddSale = async () => {
         const isLaundry = activeTab === 'laundry'
         const isTransfer = activeTab === 'transfer'
@@ -346,6 +372,7 @@ export function SalesPanel() {
         }
 
         resetForm()
+        playChimeSound()
         } catch (error) {
             console.error('Sale creation failed:', error)
             toast.error('Satış kaydedilemedi. Lütfen tekrar deneyin.')
@@ -368,16 +395,28 @@ export function SalesPanel() {
                         <CreditCard className="w-5 h-5 text-primary" />
                         {t('sales.tracker')}
                     </CardTitle>
-                    {!isAdding && (
+                    <div className="flex items-center gap-2">
                         <Button
                             size="sm"
-                            onClick={() => setIsAdding(true)}
-                            className="bg-primary hover:bg-primary/90 gap-1 h-8 text-xs"
+                            variant="outline"
+                            onClick={handleExportCsv}
+                            className="h-8 text-xs gap-1 border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted"
+                            title="Satış Listesini CSV / Excel Olarak İndir"
                         >
-                            <Plus className="w-3.5 h-3.5" />
-                            {t('sales.new')}
+                            <Download className="w-3.5 h-3.5 text-primary" />
+                            Excel / CSV İndir
                         </Button>
-                    )}
+                        {!isAdding && (
+                            <Button
+                                size="sm"
+                                onClick={() => setIsAdding(true)}
+                                className="bg-primary hover:bg-primary/90 gap-1 h-8 text-xs"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                {t('sales.new')}
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Tabs */}
