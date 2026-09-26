@@ -231,7 +231,8 @@ export const useNotesStore = create<NotesStore>((set) => ({
                 updates.resolved_at = updates.resolved_at || new Date()
             }
 
-            updates.updated_at = serverTimestamp() as any
+            // Firestore gets a server sentinel; the demo store holds real Dates
+            updates.updated_at = (hotelId === 'demo-hotel-id' ? new Date() : serverTimestamp()) as any
 
             // Build a diff entry for fields users can edit on the card. We log the
             // PREVIOUS value so GMs can see what got rewritten. Compare with === —
@@ -271,17 +272,27 @@ export const useNotesStore = create<NotesStore>((set) => ({
             if (Object.keys(changes).length > 0) {
                 const user = useAuthStore.getState().user
                 const entry = {
-                    edited_at: Timestamp.now(),
+                    edited_at: new Date(),
                     edited_by: user?.uid || 'system',
                     edited_by_name: user?.name || 'System',
                     changes,
                 }
-                cleanUpdates.edit_history = arrayUnion(entry)
+                if (hotelId === 'demo-hotel-id') {
+                    cleanUpdates.edit_history = [...(currentNote?.edit_history ?? []), entry]
+                } else {
+                    // arrayUnion appends server-side, so concurrent editors can't clobber each other
+                    cleanUpdates.edit_history = arrayUnion(entry)
+                }
             }
 
-            await updateDoc(noteRef, cleanUpdates)
+            if (hotelId === 'demo-hotel-id') {
+                set((state) => ({
+                    notes: state.notes.map(n => n.id === noteId ? { ...n, ...cleanUpdates } : n)
+                }))
+            } else {
+                await updateDoc(noteRef, cleanUpdates)
+            }
 
-            // Re-sync with calendar
             const note = useNotesStore.getState().notes.find(n => n.id === noteId)
             if (note && (note.is_relevant || updates.is_relevant)) {
                 // Merge current note with updates for sync
@@ -295,10 +306,11 @@ export const useNotesStore = create<NotesStore>((set) => ({
 
     updateNoteStatus: async (hotelId, noteId, status, resolvedBy) => {
         try {
+            const isDemo = hotelId === 'demo-hotel-id'
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
             const updates: any = { status }
             if (status === 'resolved' || status === 'archived') {
-                updates.resolved_at = serverTimestamp()
+                updates.resolved_at = isDemo ? new Date() : serverTimestamp()
                 if (resolvedBy) updates.resolved_by = resolvedBy
                 await removeNoteFromCalendar(hotelId, noteId)
             } else if (status === 'active') {
@@ -310,7 +322,13 @@ export const useNotesStore = create<NotesStore>((set) => ({
                     await syncNoteToCalendar(hotelId, { ...note, status: 'active' })
                 }
             }
-            await updateDoc(noteRef, updates)
+            if (isDemo) {
+                set((state) => ({
+                    notes: state.notes.map(n => n.id === noteId ? { ...n, ...updates } : n)
+                }))
+            } else {
+                await updateDoc(noteRef, updates)
+            }
         } catch (error) {
             console.error('Error updating note status:', error)
             throw error
@@ -319,13 +337,25 @@ export const useNotesStore = create<NotesStore>((set) => ({
 
     toggleRelevance: async (hotelId, noteId, isRelevant) => {
         try {
+            const isDemo = hotelId === 'demo-hotel-id'
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
-            const status = isRelevant ? 'active' : 'resolved'
-            await updateDoc(noteRef, {
+            const status: NoteStatus = isRelevant ? 'active' : 'resolved'
+            const localPatch: Partial<ShiftNote> = {
                 is_relevant: isRelevant,
                 status,
-                resolved_at: isRelevant ? null : serverTimestamp(),
-            })
+                resolved_at: isRelevant ? null : new Date(),
+            }
+
+            if (isDemo) {
+                set((state) => ({
+                    notes: state.notes.map(n => n.id === noteId ? { ...n, ...localPatch } : n)
+                }))
+            } else {
+                await updateDoc(noteRef, {
+                    ...localPatch,
+                    resolved_at: isRelevant ? null : serverTimestamp(),
+                })
+            }
 
             if (isRelevant) {
                 const note = useNotesStore.getState().notes.find(n => n.id === noteId)
@@ -341,12 +371,20 @@ export const useNotesStore = create<NotesStore>((set) => ({
 
     markPaid: async (hotelId, noteId) => {
         try {
+            const isDemo = hotelId === 'demo-hotel-id'
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
-            await updateDoc(noteRef, {
+            const localPatch: Partial<ShiftNote> = {
                 is_paid: true,
                 status: 'resolved',
-                resolved_at: serverTimestamp(),
-            })
+                resolved_at: new Date(),
+            }
+            if (isDemo) {
+                set((state) => ({
+                    notes: state.notes.map(n => n.id === noteId ? { ...n, ...localPatch } : n)
+                }))
+            } else {
+                await updateDoc(noteRef, { ...localPatch, resolved_at: serverTimestamp() })
+            }
             await removeNoteFromCalendar(hotelId, noteId)
             toast.success('Marked as paid ✓')
         } catch (error) {
@@ -359,7 +397,11 @@ export const useNotesStore = create<NotesStore>((set) => ({
     deleteNote: async (hotelId, noteId) => {
         try {
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
-            await deleteDoc(noteRef)
+            if (hotelId === 'demo-hotel-id') {
+                set((state) => ({ notes: state.notes.filter(n => n.id !== noteId) }))
+            } else {
+                await deleteDoc(noteRef)
+            }
             await removeNoteFromCalendar(hotelId, noteId)
 
             // Log activity
@@ -385,19 +427,22 @@ export const useNotesStore = create<NotesStore>((set) => ({
             const note = useNotesStore.getState().notes.find(n => n.id === noteId)
             if (!note) throw new Error("Note not found")
 
-            const logsRef = collection(db, 'hotels', hotelId, 'logs')
-            await addDoc(logsRef, {
-                type: 'system', // or based on category
-                content: `[Promoted from Note] ${note.content}`,
-                room_number: note.room_number,
-                urgency: 'low',
-                status: 'open',
-                created_at: serverTimestamp(),
-                created_by: note.created_by === 'anonymous' ? 'system' : note.created_by,
-                created_by_name: note.created_by_name,
-                is_pinned: false,
-                guest_name: note.guest_name || undefined
-            })
+            // The demo has no logs surface to write into, so only the note state changes
+            if (hotelId !== 'demo-hotel-id') {
+                const logsRef = collection(db, 'hotels', hotelId, 'logs')
+                await addDoc(logsRef, {
+                    type: 'system', // or based on category
+                    content: `[Promoted from Note] ${note.content}`,
+                    room_number: note.room_number,
+                    urgency: 'low',
+                    status: 'open',
+                    created_at: serverTimestamp(),
+                    created_by: note.created_by === 'anonymous' ? 'system' : note.created_by,
+                    created_by_name: note.created_by_name,
+                    is_pinned: false,
+                    guest_name: note.guest_name || undefined
+                })
+            }
 
             // Optionally mark note as resolved/archived?
             // "Add 'Convert to Log' button/feature for notes"
@@ -413,11 +458,16 @@ export const useNotesStore = create<NotesStore>((set) => ({
 
     togglePin: async (hotelId, noteId, isPinned) => {
         try {
+            const isDemo = hotelId === 'demo-hotel-id'
             const noteRef = doc(db, 'hotels', hotelId, 'shift_notes', noteId)
-            await updateDoc(noteRef, {
-                is_pinned: isPinned,
-                updated_at: serverTimestamp()
-            })
+            const localPatch: Partial<ShiftNote> = { is_pinned: isPinned, updated_at: new Date() }
+            if (isDemo) {
+                set((state) => ({
+                    notes: state.notes.map(n => n.id === noteId ? { ...n, ...localPatch } : n)
+                }))
+            } else {
+                await updateDoc(noteRef, { ...localPatch, updated_at: serverTimestamp() })
+            }
             toast.success(isPinned ? 'Note pinned to Sticky Board' : 'Note unpinned')
         } catch (error) {
             console.error('Error toggling pin:', error)

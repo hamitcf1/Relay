@@ -106,6 +106,21 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
         const today = date || new Date().toLocaleDateString('sv-SE')
         const shiftId = `${today}_SHIFT_${type}`
 
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                currentShift: {
+                    shift_id: shiftId,
+                    date: today,
+                    type,
+                    staff_ids: staffIds,
+                    compliance: { kbs_checked: false, agency_msg_checked_count: 0 },
+                    handover_note: '',
+                    status: 'active',
+                }
+            })
+            return
+        }
+
         try {
             const shiftRef = doc(db, 'hotels', hotelId, 'shifts', shiftId)
             const snap = await getDoc(shiftRef)
@@ -147,6 +162,11 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
             throw new Error('No active shift')
         }
 
+        if (hotelId === 'demo-hotel-id') {
+            set({ currentShift: { ...currentShift, handover_note: handoverNote, status: 'closed' } })
+            return
+        }
+
         try {
             const shiftRef = doc(db, 'hotels', hotelId, 'shifts', currentShift.shift_id)
 
@@ -176,6 +196,16 @@ export const useShiftStore = create<ShiftStore>((set, get) => ({
 
         if (!currentShift) {
             throw new Error('No active shift')
+        }
+
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                currentShift: {
+                    ...currentShift,
+                    compliance: { ...currentShift.compliance, [field]: value },
+                }
+            })
+            return
         }
 
         try {

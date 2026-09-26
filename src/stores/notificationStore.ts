@@ -204,6 +204,14 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
         if (unreadIds.length === 0) return
 
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                notifications: notifications.map(n => (n.is_read ? n : { ...n, is_read: true })),
+                unreadCount: 0,
+            })
+            return
+        }
+
         try {
             const batch = writeBatch(db)
             unreadIds.forEach(id => {
@@ -233,6 +241,11 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     clearAllNotifications: async (hotelId) => {
         const { notifications } = get()
         if (notifications.length === 0) return
+
+        if (hotelId === 'demo-hotel-id') {
+            set({ notifications: [], unreadCount: 0 })
+            return
+        }
 
         try {
             const batch = writeBatch(db)

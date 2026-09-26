@@ -17,6 +17,8 @@ export function ActivityTracker() {
 
     const flushData = async () => {
         if (!user || !hotel || !sessionStartRef.current) return
+        // The live demo has no Firebase session, so there is nowhere to record this
+        if (user.is_demo || hotel.id === 'demo-hotel-id') return
 
         const now = new Date()
         const start = sessionStartRef.current

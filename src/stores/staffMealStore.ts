@@ -80,8 +80,24 @@ export const useStaffMealStore = create<StaffMealStore>((set) => ({
     },
 
     updateMenu: async (hotelId: string, menu: string, userId: string, userName: string) => {
+        const today = new Date().toLocaleDateString('sv-SE')
+
+        if (hotelId === 'demo-hotel-id') {
+            set({
+                todayMenu: {
+                    id: 'demo-menu',
+                    hotel_id: 'demo-hotel-id',
+                    date: today,
+                    menu,
+                    updated_at: new Date(),
+                    updated_by: userId,
+                    updated_by_name: userName,
+                }
+            })
+            return
+        }
+
         try {
-            const today = new Date().toLocaleDateString('sv-SE')
             const menuRef = doc(db, 'hotels', hotelId, 'daily_menu', today)
 
             await setDoc(menuRef, {

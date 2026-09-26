@@ -918,6 +918,9 @@ const en: Translations = {
         'personalNotes.purgeConfirm': 'Permanently delete this note?',
         'personalNotes.untitled': 'Untitled note',
 
+        // Staff Management
+        'staffManagement.demoBlocked': 'Staff status cannot be changed in demo mode.',
+
         // Sales
         'sales.tracker': 'Sales Tracker',
         'sales.new': 'New Sale',

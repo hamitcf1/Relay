@@ -1,5 +1,6 @@
 import { collection, addDoc, updateDoc, doc, query, where, getDocs, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { useCalendarStore, type CalendarEventType } from '@/stores/calendarStore'
 import type { ShiftNote } from '@/types'
 
 /**
@@ -9,6 +10,44 @@ import type { ShiftNote } from '@/types'
 export async function syncNoteToCalendar(hotelId: string, note: ShiftNote) {
     if (!note.is_relevant || note.status !== 'active') return
 
+    // Parse time if available, otherwise use created_at
+    const eventDate = note.created_at instanceof Timestamp ? note.created_at.toDate() : new Date(note.created_at)
+    if (note.time) {
+        const [hours, minutes] = note.time.split(':').map(Number)
+        eventDate.setHours(hours, minutes, 0, 0)
+    }
+
+    const staffAssignee = note.assigned_staff_name ? ` → ${note.assigned_staff_name}` : ''
+    const guestInfo = note.guest_name ? ` [Guest: ${note.guest_name}]` : ''
+
+    const title = `[${note.category.toUpperCase()}] ${note.room_number ? `#${note.room_number}: ` : ''}${note.content.substring(0, 30)}...${staffAssignee}${guestInfo}`
+    const description = `Guest: ${note.guest_name || 'N/A'}\nAssigned: ${note.assigned_staff_name || 'N/A'}\n\n${note.content}`
+    const type = (note.category === 'damage' ? 'financial' : 'reminder') as CalendarEventType
+
+    // The live demo has no Firebase session, so mirror the write into the store
+    // instead. Deterministic ids keep the create/update branch working.
+    if (hotelId === 'demo-hotel-id') {
+        const demoId = `demo-note-event-${note.id}`
+        const { events, addEvent, updateEvent } = useCalendarStore.getState()
+        if (events.some(e => e.id === demoId)) {
+            await updateEvent(hotelId, demoId, { title, description, date: eventDate })
+        } else {
+            await addEvent(hotelId, {
+                type,
+                title,
+                description,
+                date: eventDate,
+                time: note.time ?? null,
+                room_number: note.room_number ?? null,
+                total_price: null,
+                collected_amount: null,
+                created_by: note.created_by,
+                created_by_name: note.created_by_name,
+            }, demoId)
+        }
+        return
+    }
+
     try {
         const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
 
@@ -16,24 +55,13 @@ export async function syncNoteToCalendar(hotelId: string, note: ShiftNote) {
         const q = query(eventsRef, where('note_id', '==', note.id))
         const querySnapshot = await getDocs(q)
 
-        // Parse time if available, otherwise use created_at
-        const eventDate = note.created_at instanceof Timestamp ? note.created_at.toDate() : note.created_at
-
-        if (note.time) {
-            const [hours, minutes] = note.time.split(':').map(Number)
-            eventDate.setHours(hours, minutes, 0, 0)
-        }
-
-        const staffAssignee = note.assigned_staff_name ? ` → ${note.assigned_staff_name}` : ''
-        const guestInfo = note.guest_name ? ` [Guest: ${note.guest_name}]` : ''
-
         const eventData = {
-            title: `[${note.category.toUpperCase()}] ${note.room_number ? `#${note.room_number}: ` : ''}${note.content.substring(0, 30)}...${staffAssignee}${guestInfo}`,
-            description: `Guest: ${note.guest_name || 'N/A'}\nAssigned: ${note.assigned_staff_name || 'N/A'}\n\n${note.content}`,
+            title,
+            description,
             start_date: eventDate,
             end_date: eventDate, // Logic: For now, same as start (point in time)
             all_day: true,
-            type: note.category === 'damage' ? 'financial' : 'reminder',
+            type,
             status: 'confirmed',
             note_id: note.id,
             updated_at: serverTimestamp(),
@@ -59,6 +87,11 @@ export async function syncNoteToCalendar(hotelId: string, note: ShiftNote) {
  * Removes a calendar event associated with a note.
  */
 export async function removeNoteFromCalendar(hotelId: string, noteId: string) {
+    if (hotelId === 'demo-hotel-id') {
+        await useCalendarStore.getState().deleteEvent(hotelId, `demo-note-event-${noteId}`)
+        return
+    }
+
     try {
         const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
         const q = query(eventsRef, where('note_id', '==', noteId))
@@ -86,6 +119,33 @@ export async function syncRosterToCalendar(
     dateStr: string, // YYYY-MM-DD
     shift: string
 ) {
+    const targetDate = new Date(dateStr)
+    targetDate.setHours(0, 0, 0, 0) // Start of day
+
+    // Live demo: mirror into the store with a deterministic id per user+date
+    if (hotelId === 'demo-hotel-id') {
+        const demoId = `demo-offday-${userId}-${dateStr}`
+        const { events, addEvent, deleteEvent } = useCalendarStore.getState()
+        const existing = events.some(e => e.id === demoId)
+        if (shift === 'OFF' && !existing) {
+            await addEvent(hotelId, {
+                type: 'off_day',
+                title: `Off Day: ${userName}`,
+                description: `Scheduled Off Day for ${userName}\nUser ID: ${userId}`,
+                date: targetDate,
+                time: null,
+                room_number: null,
+                total_price: null,
+                collected_amount: null,
+                created_by: 'system',
+                created_by_name: 'System',
+            }, demoId)
+        } else if (shift !== 'OFF' && existing) {
+            await deleteEvent(hotelId, demoId)
+        }
+        return
+    }
+
     try {
         const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
 
@@ -95,9 +155,6 @@ export async function syncRosterToCalendar(
         // Actually, let's verify if we can add a 'user_id' field to events schema? 
         // Based on previous code, we can just use the note_id field or add a new one. 
         // Let's rely on type='off_day' and check the start_date matching the roster date.
-
-        const targetDate = new Date(dateStr)
-        targetDate.setHours(0, 0, 0, 0) // Start of day
 
         // This query might be broad if multiple people are off, so we filter in memory if needed
         // or better, let's look for events created by system for this user

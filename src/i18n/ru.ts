@@ -918,6 +918,9 @@ const en: Translations = {
         'personalNotes.purgeConfirm': 'Удалить заметку навсегда?',
         'personalNotes.untitled': 'Без названия',
 
+        // Staff Management
+        'staffManagement.demoBlocked': 'Статус сотрудников нельзя изменить в демо-режиме.',
+
         // Sales
         'sales.tracker': 'Sales Tracker',
         'sales.new': 'New Sale',

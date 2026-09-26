@@ -116,12 +116,16 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
     },
 
     setBasePrices: async (hotelId, prices, userId) => {
-        const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config')
-        await setDoc(docRef, {
-            prices,
-            updated_at: Timestamp.now(),
-            updated_by: userId,
-        }, { merge: true })
+        if (hotelId === 'demo-hotel-id') {
+            set({ basePrices: { prices, updated_at: new Date(), updated_by: userId } })
+        } else {
+            const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config')
+            await setDoc(docRef, {
+                prices,
+                updated_at: Timestamp.now(),
+                updated_by: userId,
+            }, { merge: true })
+        }
 
         // Log activity
         const user = useAuthStore.getState().user
@@ -134,17 +138,36 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
     },
 
     setBaseOverride: async (hotelId, override) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                baseOverrides: [...state.baseOverrides.filter(o => o.id !== override.id), override]
+            }))
+            return
+        }
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'base_overrides', override.id)
         await setDoc(docRef, { ...override, updated_at: Timestamp.now() }, { merge: true })
     },
 
     removeBaseOverride: async (hotelId, overrideId) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ baseOverrides: state.baseOverrides.filter(o => o.id !== overrideId) }))
+            return
+        }
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'base_overrides', overrideId)
         await deleteDoc(docRef)
     },
 
     addAgency: async (hotelId, name) => {
         const id = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') + '_' + Date.now()
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                agencies: [
+                    ...state.agencies,
+                    { id, name, base_prices: {}, overrides: [], updated_at: new Date() },
+                ].sort((a, b) => a.name.localeCompare(b.name)),
+            }))
+            return id
+        }
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', id)
         await setDoc(docRef, {
             name,
@@ -155,6 +178,10 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
     },
 
     removeAgency: async (hotelId, agencyId) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ agencies: state.agencies.filter(a => a.id !== agencyId) }))
+            return
+        }
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', agencyId)
         await deleteDoc(docRef)
     },
@@ -165,6 +192,14 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
         if (!agency) throw new Error('Agency not found')
         const existingOverrides = agency.overrides.filter(o => o.id !== override.id)
         const newOverrides = [...existingOverrides, override]
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                agencies: state.agencies.map(a => a.id === agencyId
+                    ? { ...a, overrides: newOverrides, updated_at: new Date() }
+                    : a)
+            }))
+            return
+        }
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', agencyId)
         await setDoc(docRef, { overrides: newOverrides, updated_at: Timestamp.now() }, { merge: true })
     },
@@ -174,13 +209,29 @@ export const usePricingStore = create<PricingStore>((set, get) => ({
         const agency = agencies.find(a => a.id === agencyId)
         if (!agency) throw new Error('Agency not found')
         const newOverrides = agency.overrides.filter(o => o.id !== overrideId)
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                agencies: state.agencies.map(a => a.id === agencyId
+                    ? { ...a, overrides: newOverrides, updated_at: new Date() }
+                    : a)
+            }))
+            return
+        }
         const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', agencyId)
         await setDoc(docRef, { overrides: newOverrides, updated_at: Timestamp.now() }, { merge: true })
     },
 
     updateAgencyBasePrices: async (hotelId, agencyId, base_prices) => {
-        const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', agencyId)
-        await updateDoc(docRef, { base_prices, updated_at: Timestamp.now() })
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                agencies: state.agencies.map(a => a.id === agencyId
+                    ? { ...a, base_prices, updated_at: new Date() }
+                    : a)
+            }))
+        } else {
+            const docRef = doc(db, 'hotels', hotelId, 'pricing', 'config', 'agencies', agencyId)
+            await updateDoc(docRef, { base_prices, updated_at: Timestamp.now() })
+        }
 
         // Log activity
         const user = useAuthStore.getState().user

@@ -10,6 +10,7 @@ import {
     orderBy,
     onSnapshot,
     serverTimestamp,
+    setDoc,
     Timestamp
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -52,7 +53,18 @@ interface CalendarState {
 
 interface CalendarActions {
     subscribeToEvents: (hotelId: string, startDate: Date, endDate: Date) => () => void
-    addEvent: (hotelId: string, event: Omit<CalendarEvent, 'id' | 'created_at' | 'is_completed'>) => Promise<void>
+    /**
+     * Creates an event and resolves to its id.
+     *
+     * `explicitId` is for callers that need to find the event again later. src/lib/calendar-sync
+     * keeps a note's event under a fixed id so that resolving the note can take it back out; if
+     * the id were generated here, the removal path would have nothing to match on.
+     */
+    addEvent: (
+        hotelId: string,
+        event: Omit<CalendarEvent, 'id' | 'created_at' | 'is_completed'>,
+        explicitId?: string
+    ) => Promise<string>
     updateEvent: (hotelId: string, eventId: string, updates: Partial<CalendarEvent>) => Promise<void>
     deleteEvent: (hotelId: string, eventId: string) => Promise<void>
     toggleComplete: (hotelId: string, eventId: string, isCompleted: boolean) => Promise<void>
@@ -120,15 +132,27 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
         return unsubscribe
     },
 
-    addEvent: async (hotelId, eventData) => {
+    addEvent: async (hotelId, eventData, explicitId) => {
+        if (hotelId === 'demo-hotel-id') {
+            const id = explicitId ?? `demo-event-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+            const event = { ...eventData, id, created_at: new Date(), is_completed: false } as CalendarEvent
+            set((state) => ({ events: [...state.events, event] }))
+            return id
+        }
         try {
             const eventsRef = collection(db, 'hotels', hotelId, 'calendar_events')
-            await addDoc(eventsRef, {
+            const payload = {
                 ...eventData,
                 date: Timestamp.fromDate(eventData.date),
                 created_at: serverTimestamp(),
                 is_completed: false,
-            })
+            }
+            if (explicitId) {
+                await setDoc(doc(eventsRef, explicitId), payload)
+                return explicitId
+            }
+            const docRef = await addDoc(eventsRef, payload)
+            return docRef.id
         } catch (error) {
             console.error('Error adding event:', error)
             throw error
@@ -136,6 +160,10 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
     },
 
     updateEvent: async (hotelId, eventId, updates) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ events: state.events.map(e => e.id === eventId ? { ...e, ...updates } : e) }))
+            return
+        }
         try {
             const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', eventId)
             const updateData: any = { ...updates }
@@ -154,6 +182,10 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
     },
 
     deleteEvent: async (hotelId, eventId) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ events: state.events.filter(e => e.id !== eventId) }))
+            return
+        }
         try {
             const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', eventId)
             await deleteDoc(eventRef)
@@ -164,6 +196,10 @@ export const useCalendarStore = create<CalendarStore>((set) => ({
     },
 
     toggleComplete: async (hotelId, eventId, isCompleted) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ events: state.events.map(e => e.id === eventId ? { ...e, is_completed: isCompleted } : e) }))
+            return
+        }
         try {
             const eventRef = doc(db, 'hotels', hotelId, 'calendar_events', eventId)
             await updateDoc(eventRef, { is_completed: isCompleted })

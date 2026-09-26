@@ -127,6 +127,12 @@ export const useOffDayStore = create<OffDayStore>((set, get) => ({
     },
 
     updateRequest: async (hotelId, requestId, updates) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                requests: state.requests.map(r => r.id === requestId ? { ...r, ...updates, updated_at: new Date() } : r)
+            }))
+            return
+        }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'off_day_requests', requestId)
             await updateDoc(docRef, cleanObject({
@@ -140,6 +146,14 @@ export const useOffDayStore = create<OffDayStore>((set, get) => ({
     },
 
     updateRequestStatus: async (hotelId, requestId, status, gmUid) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({
+                requests: state.requests.map(r => r.id === requestId
+                    ? { ...r, status, processed_at: new Date(), processed_by: gmUid }
+                    : r)
+            }))
+            return
+        }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'off_day_requests', requestId)
             await updateDoc(docRef, {
@@ -168,6 +182,10 @@ export const useOffDayStore = create<OffDayStore>((set, get) => ({
     },
 
     deleteRequest: async (hotelId, requestId) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ requests: state.requests.filter(r => r.id !== requestId) }))
+            return
+        }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'off_day_requests', requestId)
             await deleteDoc(docRef)
@@ -178,6 +196,10 @@ export const useOffDayStore = create<OffDayStore>((set, get) => ({
     },
 
     cancelRequest: async (hotelId, requestId) => {
+        if (hotelId === 'demo-hotel-id') {
+            set((state) => ({ requests: state.requests.filter(r => r.id !== requestId) }))
+            return
+        }
         try {
             const docRef = doc(db, 'hotels', hotelId, 'off_day_requests', requestId)
             // We delete it if it's just a cancel, or we COULD mark it as cancelled.
