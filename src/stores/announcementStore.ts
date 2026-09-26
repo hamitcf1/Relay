@@ -111,6 +111,15 @@ let demoReceipts: Record<string, Record<string, AnnouncementReceipt>> = {
 }
 let demoViewer = ''
 
+/**
+ * Clears the module scoped demo viewer. Without this the previous account's uid stays in
+ * `demoViewer`, and a later writeDemoReceipt would record a read against someone who has
+ * already signed out.
+ */
+export function clearAnnouncementDemoViewer() {
+    demoViewer = ''
+}
+
 const receiptsFor = (announcementId: string) => demoReceipts[announcementId] || {}
 
 function myDemoReceipts(uid: string) {

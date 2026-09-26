@@ -11,7 +11,8 @@
         "preview": "vite preview",
         "test:e2e": "playwright test",
         "test:e2e:ui": "playwright test --ui",
-        "test:e2e:report": "playwright show-report"
+        "test:e2e:report": "playwright show-report",
+        "test:rules": "firebase emulators:exec --only firestore --project relay-rules-test \"node tests/rules/firestore.rules.test.mjs\""
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
@@ -48,6 +49,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.21.0",
+        "@firebase/rules-unit-testing": "^4.0.1",
         "@playwright/test": "^1.61.1",
         "@types/node": "^25.2.0",
         "@types/react": "^19.0.10",
@@ -57,6 +59,7 @@
         "eslint": "^9.21.0",
         "eslint-plugin-react-hooks": "^5.0.0",
         "eslint-plugin-react-refresh": "^0.4.19",
+        "firebase-tools": "^13.35.1",
         "globals": "^15.15.0",
         "postcss": "^8.5.6",
         "tailwindcss": "^3.4.19",
