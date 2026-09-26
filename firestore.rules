@@ -34,6 +34,14 @@ service cloud.firestore {
       return userDoc.hotel_id == hotelId && (!('status' in userDoc) || userDoc.status != 'inactive');
     }
     
+    // A manager acting on one specific hotel's data.
+    // The null check is what belongsToHotel alone cannot do: two accounts that both have no
+    // hotel yet would otherwise satisfy (null == null) and be able to reach each other.
+    // Used for every privileged write so a manager can only ever touch their own hotel.
+    function managesHotel(hotelId) {
+      return isGM() && getUserDoc().hotel_id != null && belongsToHotel(hotelId);
+    }
+    
     // ==========================================
     // USERS COLLECTION
     // ==========================================
@@ -42,26 +50,31 @@ service cloud.firestore {
       // GMs can read any user in their hotel
       allow read: if isAuthenticated() && (
         request.auth.uid == userId ||
-        isGM() ||
+        (managesHotel(resource.data.hotel_id)) ||
         (resource != null && resource.data.hotel_id == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotel_id)
       );
       
-      // Users can only be created during registration (by themselves) OR by GMs
+      // Users can only be created during registration (by themselves) OR by GMs.
+      // A manager registering their own hotel has no hotel yet, so a self-created GM is
+      // allowed only with a null hotel_id. That combination is inert: belongsToHotel fails
+      // for every hotel, so it cannot be used to reach anyone else's data.
       allow create: if isAuthenticated() && (
         (request.auth.uid == userId && request.resource.data.role in ['receptionist', 'housekeeping']) ||
-        isGM()
+        (request.auth.uid == userId && request.resource.data.role == 'gm' && request.resource.data.hotel_id == null) ||
+        (managesHotel(request.resource.data.hotel_id))
       );
       
       // Users can update their own non-role fields
-      // Only GMs can update role field
+      // Only GMs can update role field, and only for staff in their own hotel.
+      // Without the hotel scope a manager could promote or demote staff of a different hotel.
       allow update: if isAuthenticated() && (
         (request.auth.uid == userId && 
          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
-        isGM()
+        (managesHotel(resource.data.hotel_id))
       );
       
       // Only GMs can delete users
-      allow delete: if isGM();
+      allow delete: if managesHotel(resource.data.hotel_id);
     }
     
     // ==========================================
@@ -71,17 +84,20 @@ service cloud.firestore {
       // Anyone authenticated can read hotel info
       allow read: if isAuthenticated();
       
-      // Anyone can create a hotel (during registration)
-      allow create: if isAuthenticated();
+      // Anyone can create a hotel (during registration), but only under their own ownership.
+      // Without the owner_id check any signed-in user could stamp someone else's uid on a
+      // document and inherit that account's update rights.
+      allow create: if isAuthenticated() && request.resource.data.owner_id == request.auth.uid;
       
-      // Only GM or hotel creator can update hotel
+      // Only GM or hotel creator can update hotel.
+      // The creator is identified by owner_id, which is the field createNewHotel actually writes.
       allow update: if isAuthenticated() && (
-        (isGM() && belongsToHotel(hotelId)) ||
-        resource.data.created_by == request.auth.uid
+        (managesHotel(hotelId)) ||
+        resource.data.owner_id == request.auth.uid
       );
       
-      // Only GMs can delete hotels
-      allow delete: if isGM();
+      // Only GMs of that hotel can delete hotels
+      allow delete: if managesHotel(hotelId);
       
       // ----------------------------------------
       // HOTEL SUBCOLLECTIONS
@@ -92,7 +108,7 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow delete: if managesHotel(hotelId);
       }
       
       // SHIFTS - Shift records
@@ -100,18 +116,18 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow delete: if managesHotel(hotelId);
       }
       
       // ROSTER - Weekly schedules (GM can edit, all can read)
       match /roster/{weekId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM() && belongsToHotel(hotelId);
+        allow write: if managesHotel(hotelId);
       }
 
       // Shared planning drafts are visible only to roster administrators.
       match /roster_drafts/{weekId} {
-        allow read, write: if isGM() && belongsToHotel(hotelId);
+        allow read, write: if managesHotel(hotelId);
       }
       
       // INCIDENTS - Incident reports
@@ -119,7 +135,7 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow delete: if managesHotel(hotelId);
       }
       
       // Personal notes: only the owner and explicitly invited collaborators can read.
@@ -148,7 +164,7 @@ service cloud.firestore {
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
         allow delete: if isAuthenticated() && (
-          isGM() ||
+          (managesHotel(hotelId)) ||
           resource.data.created_by == request.auth.uid
         );
       }
@@ -156,7 +172,7 @@ service cloud.firestore {
       // SETTINGS - Hotel settings (GM only write)
       match /settings/{settingId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow write: if managesHotel(hotelId);
       }
       
       // ACTIVITY_LOGS - Staff activity audit trail
@@ -194,19 +210,19 @@ service cloud.firestore {
       // DAILY_MENU
       match /daily_menu/{menuId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow write: if managesHotel(hotelId);
       }
 
       // TOURS
       match /tours/{tourId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow write: if managesHotel(hotelId);
       }
 
       // ROOMS
       match /rooms/{roomId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow write: if managesHotel(hotelId);
       }
 
       // SALES
@@ -214,7 +230,7 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow delete: if managesHotel(hotelId);
       }
 
       // CALENDAR_EVENTS
@@ -228,7 +244,8 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM() || (isAuthenticated() && resource.data.staff_id == request.auth.uid);
+        allow delete: if (managesHotel(hotelId)) ||
+          (isAuthenticated() && belongsToHotel(hotelId) && resource.data.staff_id == request.auth.uid);
       }
 
       // MESSAGES - Private messaging
@@ -236,7 +253,7 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM();
+        allow delete: if managesHotel(hotelId);
       }
 
       // ANNOUNCEMENTS - one record per management announcement.
@@ -245,12 +262,12 @@ service cloud.firestore {
       match /announcements/{announcementId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
 
-        allow create: if isGM() && belongsToHotel(hotelId) &&
+        allow create: if managesHotel(hotelId) &&
           request.resource.data.createdBy == request.auth.uid;
         // Withdrawing and restoring an announcement are the only permitted edits.
-        allow update: if isGM() && belongsToHotel(hotelId) &&
+        allow update: if managesHotel(hotelId) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['recalledAt', 'recalledByName']);
-        allow delete: if isGM() && belongsToHotel(hotelId);
+        allow delete: if managesHotel(hotelId);
 
         match /receipts/{uid} {
           // A person may read their own receipt; only GMs may read the whole audience.
@@ -264,9 +281,9 @@ service cloud.firestore {
 
       // ANONYMOUS_FEEDBACK
       match /anonymous_feedback/{feedbackId} {
-        allow read: if isGM() && belongsToHotel(hotelId);
+        allow read: if managesHotel(hotelId);
         allow create: if isAuthenticated(); // Allow any staff to submit anonymously
-        allow update, delete: if isGM();
+        allow update, delete: if managesHotel(hotelId);
       }
 
       // BLACKLISTS
@@ -274,18 +291,19 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
         allow update: if isAuthenticated() && belongsToHotel(hotelId);
-        allow delete: if isGM() || (isAuthenticated() && resource.data.created_by == request.auth.uid);
+        allow delete: if (managesHotel(hotelId)) ||
+          (isAuthenticated() && belongsToHotel(hotelId) && resource.data.created_by == request.auth.uid);
       }
 
       // PRICING - Complex nested structure
       match /pricing/{configId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
-        allow write: if isGM();
+        allow write: if managesHotel(hotelId);
         
         // Handle sub-subcollections under pricing
         match /{allChildren=**} {
            allow read: if isAuthenticated() && belongsToHotel(hotelId);
-           allow write: if isGM();
+           allow write: if managesHotel(hotelId);
         }
       }
 
@@ -293,7 +311,7 @@ service cloud.firestore {
       match /scores/{scoreId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);
         allow create: if isAuthenticated() && belongsToHotel(hotelId);
-        allow update, delete: if isGM();
+        allow update, delete: if managesHotel(hotelId);
       }
     }
   }

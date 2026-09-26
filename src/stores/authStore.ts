@@ -9,10 +9,8 @@ import {
 import { doc, getDoc, updateDoc, type DocumentData, type UpdateData } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import type { User, UserRole } from '@/types'
-import { useHotelStore } from './hotelStore'
-import { useNotificationStore } from './notificationStore'
-import { useShiftStore } from './shiftStore'
 import { useActivityStore } from './activityStore'
+import { resetAllStores } from './resetAllStores'
 import { cleanAuthError } from '@/lib/utils'
 import { useLanguageStore } from './languageStore'
 import { buildUserSettingsPatch } from '@/lib/workspace'
@@ -195,13 +193,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
             }
             await firebaseSignOut(auth)
 
-            // Clear all stores to prevent data leaks between users
-            useHotelStore.setState({ hotel: null, error: null, loading: true })
-            useNotificationStore.setState({ notifications: [], unreadCount: 0, error: null, loading: true })
-            useShiftStore.setState({ currentShift: null, loading: true, error: null })
-
-            // Clear localStorage to prevent stale data on next login
-            localStorage.clear()
+            // Clear every store that holds hotel data. Anything left behind here is readable
+            // by the next account that signs in on this device. This also sweeps the hotel
+            // scoped localStorage keys; device preferences like language and theme survive.
+            resetAllStores()
 
             set({ user: null, firebaseUser: null, loading: false, isBooted: false })
             toast.success('Logged out')

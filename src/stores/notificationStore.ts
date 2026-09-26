@@ -18,6 +18,11 @@ import type { Notification, NotificationType, UserRole } from '@/types'
 
 let demoAudience: { uid: string; role: UserRole } | null = null
 
+/** Clears the module scoped demo audience so a signed out account stops being addressed. */
+export function clearNotificationDemoAudience() {
+    demoAudience = null
+}
+
 interface NotificationState {
     notifications: Notification[]
     unreadCount: number
