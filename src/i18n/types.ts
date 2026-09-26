@@ -593,6 +593,14 @@ export type Translations = {
     'notifications.allRead': string
     'notifications.day.today': string
     'notifications.day.yesterday': string
+    'settings.desktopNotifications.title': string
+    'settings.desktopNotifications.label': string
+    'settings.desktopNotifications.on': string
+    'settings.desktopNotifications.off': string
+    'settings.desktopNotifications.willAsk': string
+    'settings.desktopNotifications.blocked': string
+    'settings.desktopNotifications.blockedHint': string
+    'settings.desktopNotifications.unsupported': string
     'notifications.duePayments.title': string
     'notifications.duePayments.room': string
     'notifications.duePayments.amount': string

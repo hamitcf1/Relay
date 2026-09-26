@@ -176,3 +176,28 @@ Bu doküman, Aetherius Relay projesi için yazılan tüm E2E (End-to-End) test s
   1. `/notifications` sayfasını aç.
   2. `main` ve `header` içindeki tüm butonlar için `aria-label`, `title` veya metin içeriği var mı doğrula.
 - **Beklenen Sonuç**: Adı olmayan buton bulunmaz.
+
+### `TC-NOTIF-005`: Masaüstü Bildirimi Anahtarı
+- **Modül**: Notifications / Desktop
+- **Neyi Test Ediyoruz?**: Kişisel tercihler panelindeki masaüstü bildirimi anahtarı: izni soruyor, tarayıcı reddederse açılmıyor ve nedenini söylüyor.
+- **Niye Test Ediyoruz?**: Tarayıcı izni yalnızca kullanıcı bir şeye tıklarken verir; ilk bildirim geldiğinde sorulması reddedilir. Ayrıca anahtar "açık" görünüp hiçbir şey gelmiyorsa kullanıcı nedenini anlayamıyor.
+- **Ön Koşullar**: Demo oturumu, Yönetici (GM) personası.
+- **Test Adımları**:
+  1. Avatar menüsünden "Görünüm" panelini aç.
+  2. "Masaüstü Bildirimleri" bölümündeki anahtarı bul.
+  3. Tarayıcı izin veriyorsa anahtarı aç, kapat, tekrar aç.
+  4. Tarayıcı reddediyorsa anahtarı açmayı dene.
+  5. Tarayıcı bildirimleri hiç desteklemiyorsa aynı bölümü aç.
+- **Beklenen Sonuç**: Anahtar varsayılan olarak kapalı. İzin verilirse açılır ve tercih hesaba yazılır. Reddedilirse açılmaz, kapalı kalır ve "tarayıcı izin vermiyor" ile tarayıcı ayarlarındaki adresi gösterir. Desteklenmiyorsa anahtar pasif olur ve bunu söyler.
+
+### `TC-NOTIF-006`: Masaüstü Bildiriminin Zamanlaması
+- **Modül**: Notifications / Desktop
+- **Neyi Test Ediyoruz?**: Uygulama açılırken ekranda olan bildirimler için toast çıkmadığını, sonradan gelenler için çıktığını.
+- **Niye Test Ediyoruz?**: Bildirimler bir abonelikten gelir; uygulama açıldığında ilk gelen pakette önceki ziyaretten kalan her şey vardır. Hepsini duyurmak, uygulamayı açan kişiye açılışta bir sürü bildirim göndermek demek ve bu da ayarın kapatılıp bir daha açılmamasının en hızlı yolu.
+- **Ön Koşullar**: Demo oturumu, Yönetici (GM) personası, masaüstü bildirimleri açık.
+- **Test Adımları**:
+  1. Masaüstü bildirimlerini aç.
+  2. Bildirimler sayfasına git, sonra geri dön.
+  3. Uygulamayı yeniden aç (oturum düşerse tekrar demo gir).
+  4. Yeni bir bildirim oluşmasını sağla.
+- **Beklenen Sonuç**: Adım 3'te hiçbir toast çıkmaz, listede zaten bulunanlar için de çıkmaz. Adım 4'te yalnızca yeni bildirim için bir toast çıkar. Ödeme bildirimi ekranda kalıcı görünür, mesaj bildirimi bir bakışta kaybolur. Anahtar kapatıldığında hiçbir şey çıkmaz.
