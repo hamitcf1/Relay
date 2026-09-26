@@ -90,6 +90,18 @@ export function DashboardPage() {
         return saved !== 'false' // default: true
     })
 
+    // Global Ctrl+K / Cmd+K Command Palette Shortcut Listener
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === 'k' || e.code === 'KeyK')) {
+                e.preventDefault()
+                setCommandPaletteOpen(prev => !prev)
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown, true)
+        return () => window.removeEventListener('keydown', handleKeyDown, true)
+    }, [])
+
     // Persist showDateTime changes to localStorage
     useEffect(() => {
         localStorage.setItem('relay_show_datetime', String(showDateTime))
@@ -476,6 +488,7 @@ export function DashboardPage() {
             <CommandPalette
                 isOpen={commandPaletteOpen}
                 onClose={() => setCommandPaletteOpen(false)}
+                onOpen={() => setCommandPaletteOpen(true)}
                 onNavigateTab={(tabId) => {
                     setActiveTab('operations')
                     setOperationTab(tabId)

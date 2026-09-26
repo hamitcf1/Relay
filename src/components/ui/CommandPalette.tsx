@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 interface CommandPaletteProps {
     isOpen: boolean
     onClose: () => void
+    onOpen?: () => void
     onNavigateTab?: (tabId: string) => void
     onOpenNewSale?: () => void
     onOpenNewNote?: () => void
@@ -20,6 +21,7 @@ interface CommandPaletteProps {
 export function CommandPalette({
     isOpen,
     onClose,
+    onOpen,
     onNavigateTab,
     onOpenNewSale,
     onOpenNewNote,
@@ -32,18 +34,22 @@ export function CommandPalette({
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            if ((e.metaKey || e.ctrlKey) && (e.key.toLowerCase() === 'k' || e.code === 'KeyK')) {
                 e.preventDefault()
-                if (isOpen) onClose()
-                else setQuery('')
+                if (isOpen) {
+                    onClose()
+                } else {
+                    setQuery('')
+                    onOpen?.()
+                }
             }
             if (e.key === 'Escape' && isOpen) {
                 onClose()
             }
         }
-        window.addEventListener('keydown', handleKeyDown)
-        return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [isOpen, onClose])
+        window.addEventListener('keydown', handleKeyDown, true)
+        return () => window.removeEventListener('keydown', handleKeyDown, true)
+    }, [isOpen, onClose, onOpen])
 
     if (!isOpen) return null
 
@@ -138,11 +144,12 @@ export function CommandPalette({
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-start justify-center pt-16 px-4">
+            <div onClick={onClose} className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-start justify-center pt-16 px-4">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: -20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                    onClick={(e) => e.stopPropagation()}
                     className="w-full max-w-xl bg-card border border-primary/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
                 >
                     {/* Header Input */}
