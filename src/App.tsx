@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { MotionConfig, AnimatePresence } from 'framer-motion'
 
@@ -8,6 +8,7 @@ import { TabNotifications } from '@/components/ui/TabNotifications'
 import { UpdateNotifier } from '@/components/layout/UpdateNotifier'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { ConfirmProvider } from '@/components/ui/confirm-dialog'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { PageSkeleton } from '@/components/ui/skeleton'
 
 import { useThemeStore } from '@/stores/themeStore'
@@ -35,6 +36,7 @@ const PrivacyPage = lazy(() => import('@/pages/legal/PrivacyPage').then(m => ({ 
 const TermsPage = lazy(() => import('@/pages/legal/TermsPage').then(m => ({ default: m.TermsPage })))
 const StatusPage = lazy(() => import('@/pages/legal/StatusPage').then(m => ({ default: m.StatusPage })))
 const VoucherPage = lazy(() => import('@/pages/VoucherPage').then(m => ({ default: m.VoucherPage })))
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
 function ProtectedDashboardShell() {
     const user = useAuthStore(s => s.user)
@@ -54,6 +56,22 @@ function ProtectedDashboardShell() {
                 </AnimatePresence>
             </div>
         </ProtectedRoute>
+    )
+}
+
+/**
+ * Route level boundary.
+ *
+ * Keyed by pathname so navigating away from a page that threw clears the error. Without this the
+ * user would be stuck: the boundary shows a retry button, but retrying a genuinely broken page
+ * just fails again and there is no way back into the app.
+ */
+function RouteErrorBoundary({ children }: { children: React.ReactNode }) {
+    const location = useLocation()
+    return (
+        <ErrorBoundary resetKeys={[location.pathname]}>
+            {children}
+        </ErrorBoundary>
     )
 }
 
@@ -92,41 +110,44 @@ function App() {
                         closeButton
                     />
 
-                    <Suspense fallback={<PageSkeleton />}>
-                        <Routes>
-                            <Route element={<PublicLayout />}>
-                                <Route path="/" element={<LandingPage />} />
-                                <Route path="/legal/privacy" element={<PrivacyPage />} />
-                                <Route path="/legal/terms" element={<TermsPage />} />
-                                <Route path="/legal/status" element={<StatusPage />} />
-                                <Route path="/download" element={<DownloadPage onBack={() => window.history.back()} />} />
-                                <Route path="/community" element={<CommunityPage onBack={() => window.history.back()} />} />
-                                <Route path="/pricing" element={<PricingPage />} />
-                                <Route path="/how-it-works" element={<HowItWorksPage />} />
-                                <Route path="/blog" element={<BlogPage />} />
-                                <Route path="/blog/:id" element={<BlogPostPage />} />
-                                <Route path="/updates" element={<UpdatesPage />} />
-                                <Route path="/features" element={<FeaturesPage />} />
-                                <Route path="/contact" element={<ContactPage />} />
-                            </Route>
+                    <RouteErrorBoundary>
+                        <Suspense fallback={<PageSkeleton />}>
+                            <Routes>
+                                <Route element={<PublicLayout />}>
+                                    <Route path="/" element={<LandingPage />} />
+                                    <Route path="/legal/privacy" element={<PrivacyPage />} />
+                                    <Route path="/legal/terms" element={<TermsPage />} />
+                                    <Route path="/legal/status" element={<StatusPage />} />
+                                    <Route path="/download" element={<DownloadPage onBack={() => window.history.back()} />} />
+                                    <Route path="/community" element={<CommunityPage onBack={() => window.history.back()} />} />
+                                    <Route path="/pricing" element={<PricingPage />} />
+                                    <Route path="/how-it-works" element={<HowItWorksPage />} />
+                                    <Route path="/blog" element={<BlogPage />} />
+                                    <Route path="/blog/:id" element={<BlogPostPage />} />
+                                    <Route path="/updates" element={<UpdatesPage />} />
+                                    <Route path="/features" element={<FeaturesPage />} />
+                                    <Route path="/contact" element={<ContactPage />} />
+                                </Route>
 
-                            <Route path="/login" element={<LoginPage />} />
-                            <Route path="/register" element={<RegisterPage />} />
-                            <Route path="/live-demo" element={<LiveDemoPage />} />
-                            <Route path="/voucher" element={<VoucherPage />} />
+                                <Route path="/login" element={<LoginPage />} />
+                                <Route path="/register" element={<RegisterPage />} />
+                                <Route path="/live-demo" element={<LiveDemoPage />} />
+                                <Route path="/voucher" element={<VoucherPage />} />
 
-                            <Route
-                                path="/setup-hotel"
-                                element={
-                                    <ProtectedRoute>
-                                        <SetupHotelPage />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route path="/dashboard" element={<ProtectedDashboardShell />} />
-                            <Route path="/operations" element={<ProtectedDashboardShell />} />
-                        </Routes>
-                    </Suspense>
+                                <Route
+                                    path="/setup-hotel"
+                                    element={
+                                        <ProtectedRoute>
+                                            <SetupHotelPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
+                                <Route path="/dashboard" element={<ProtectedDashboardShell />} />
+                                <Route path="/operations" element={<ProtectedDashboardShell />} />
+                                <Route path="*" element={<NotFoundPage />} />
+                            </Routes>
+                        </Suspense>
+                    </RouteErrorBoundary>
                 </BrowserRouter>
             </MotionConfig>
         </ConfirmProvider>

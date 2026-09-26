@@ -1288,6 +1288,17 @@ const tr: Translations = {
         'download.title': "Aetherius Relay'i İndirin",
         'download.subtitle': 'Relay gücünü tüm cihazlarınıza taşıyın.',
         'community.title': 'Relay Topluluğu',
+
+        'error.boundary.title': 'Bir şeyler ters gitti',
+        'error.boundary.body': 'Bu ekran çalışmayı bıraktı. Tekrar deneyebilirsiniz; verileriniz kaybolmadı.',
+        'error.boundary.staleTitle': 'Uygulama güncellendi',
+        'error.boundary.staleBody': 'Daha yeni bir sürüm var. Kaldığınız yerden devam etmek için sayfayı yenileyin.',
+        'error.boundary.retry': 'Tekrar dene',
+        'error.boundary.reload': 'Sayfayı yenile',
+        'error.boundary.details': 'Teknik detaylar',
+        'error.notFound.title': 'Sayfa bulunamadı',
+        'error.notFound.body': 'Bu bağlantı hiçbir yere gitmiyor.',
+        'error.notFound.back': 'Ana sayfaya dön',
         'community.subtitle': 'Diğer konaklama profesyonelleriyle bağlantı kurun.',
 
         // Pricing Page

@@ -999,6 +999,18 @@ export type Translations = {
     'download.title': string
     'download.subtitle': string
     'community.title': string
+
+    // Error boundary
+    'error.boundary.title': string
+    'error.boundary.body': string
+    'error.boundary.staleTitle': string
+    'error.boundary.staleBody': string
+    'error.boundary.retry': string
+    'error.boundary.reload': string
+    'error.boundary.details': string
+    'error.notFound.title': string
+    'error.notFound.body': string
+    'error.notFound.back': string
     'community.subtitle': string
 
     // Landing Page Navbar
