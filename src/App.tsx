@@ -37,6 +37,7 @@ const TermsPage = lazy(() => import('@/pages/legal/TermsPage').then(m => ({ defa
 const StatusPage = lazy(() => import('@/pages/legal/StatusPage').then(m => ({ default: m.StatusPage })))
 const VoucherPage = lazy(() => import('@/pages/VoucherPage').then(m => ({ default: m.VoucherPage })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
+const NotificationsPage = lazy(() => import('@/pages/NotificationsPage').then(m => ({ default: m.NotificationsPage })))
 
 function ProtectedDashboardShell() {
     const user = useAuthStore(s => s.user)
@@ -144,6 +145,14 @@ function App() {
                                 />
                                 <Route path="/dashboard" element={<ProtectedDashboardShell />} />
                                 <Route path="/operations" element={<ProtectedDashboardShell />} />
+                                <Route
+                                    path="/notifications"
+                                    element={
+                                        <ProtectedRoute>
+                                            <NotificationsPage />
+                                        </ProtectedRoute>
+                                    }
+                                />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>
                         </Suspense>

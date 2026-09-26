@@ -588,6 +588,11 @@ export type Translations = {
     'notifications.markAllRead': string
     'notifications.noNotifications': string
     'notifications.viewAll': string
+    'notifications.unreadCount': string
+    'notifications.unreadBadge': string
+    'notifications.allRead': string
+    'notifications.day.today': string
+    'notifications.day.yesterday': string
     'notifications.duePayments.title': string
     'notifications.duePayments.room': string
     'notifications.duePayments.amount': string
