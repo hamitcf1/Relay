@@ -29,9 +29,11 @@ import { db } from '@/lib/firebase'
 import type { SaleType, Currency, SaleStatus } from '@/types'
 import { toast } from 'sonner'
 import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
+import { useSearchParams } from 'react-router-dom'
 
 export function SalesPanel() {
     const { t } = useLanguageStore()
+    const [searchParams, setSearchParams] = useSearchParams()
     const { sales, loading, subscribeToSales, addSale, updateSale } = useSalesStore()
     const { tours, subscribeToTours } = useTourStore()
     const { hotel } = useHotelStore()
@@ -42,6 +44,30 @@ export function SalesPanel() {
     const [isAdding, setIsAdding] = useState(false)
     const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
     const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null)
+
+    // An unpaid-sale reminder links straight at the sale it is about
+    // ("/operations?tab=sales&sale=ID"), so which sale to open can arrive in the URL. The id is
+    // read from the URL rather than baked into the initial state because the panel is already
+    // mounted when a reminder is clicked from another tab, and a useState initialiser would not
+    // run again. SalesDetailModal looks the id up in the store and renders nothing until the
+    // subscription delivers it, so holding the id is enough: the modal appears on its own once the
+    // data lands, and there is no separate check for whether the id referred to a real sale.
+    const saleParam = searchParams.get('sale')
+
+    useEffect(() => {
+        if (saleParam) setSelectedSaleId(saleParam)
+    }, [saleParam])
+
+    const closeDetail = () => {
+        setSelectedSaleId(null)
+        // Drop the param as well, so a reload does not reopen the sale that was just dismissed.
+        // Replaces the entry rather than pushing one, otherwise the back button would bring the
+        // modal back after it was closed.
+        if (!saleParam) return
+        const next = new URLSearchParams(searchParams)
+        next.delete('sale')
+        setSearchParams(next, { replace: true })
+    }
 
     // Form state
     const [formData, setFormData] = useState({
@@ -764,7 +790,7 @@ export function SalesPanel() {
 
             <SalesDetailModal
                 saleId={selectedSaleId}
-                onClose={() => setSelectedSaleId(null)}
+                onClose={closeDetail}
             />
             
             <VoucherPreviewModal

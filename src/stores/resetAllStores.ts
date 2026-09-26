@@ -61,7 +61,9 @@ export const STORES_WITHOUT_TENANT_DATA = new Set([
  * of these prefixes is both sufficient and safe.
  */
 const HOTEL_SCOPED_STORAGE_PREFIXES = [
-    'last_payment_check_', // useDuePaymentNotifier, keyed by hotel id
+    'last_payment_check_', // useDuePaymentNotifier, keyed by hotel id. Holds the last reported
+                            // outstanding amount per sale, so wiping it makes the next session
+                            // announce the current debts again.
 ]
 
 function clearHotelScopedStorage() {
@@ -91,7 +93,7 @@ export function resetAllStores() {
     useWorkspaceEditStore.getState().clear()
 
     useNotesStore.setState({ notes: [], error: null, loading: true })
-    useSalesStore.setState({ sales: [], error: null, loading: true })
+    useSalesStore.setState({ sales: [], error: null, loading: true, loaded: false })
     useRoomStore.setState({ rooms: [], error: null, loading: true })
     useCalendarStore.setState({ events: [], error: null, loading: true })
     useOffDayStore.setState({ requests: [], error: null, loading: true })

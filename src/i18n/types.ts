@@ -589,7 +589,8 @@ export type Translations = {
     'notifications.noNotifications': string
     'notifications.viewAll': string
     'notifications.duePayments.title': string
-    'notifications.duePayments.content': string
+    'notifications.duePayments.room': string
+    'notifications.duePayments.amount': string
     'notifications.clearAll': string
     'notifications.clearAllConfirm': string
     'notifications.clearAllDescription': string

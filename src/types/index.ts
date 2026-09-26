@@ -412,7 +412,7 @@ export interface AnnouncementReceipt {
 }
 
 // Notification types
-export type NotificationType = 'compliance' | 'message' | 'announcement' | 'off_day' | 'system'
+export type NotificationType = 'compliance' | 'message' | 'announcement' | 'off_day' | 'system' | 'payment'
 
 export interface Notification {
     id: string
