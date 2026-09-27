@@ -150,7 +150,7 @@ export function PricingPanel() {
                             )}
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                            Genel otel oda fiyatlarını, acente bazlı özel anlaşmaları ve dönemsel fiyat kampanyalarını yönetin.
+                            Genel acente fiyat tarifelerini, özel anlaşmalı acenteleri ve dönemsel fiyat kampanyalarını yönetin.
                         </p>
                     </div>
 
@@ -275,7 +275,7 @@ export function PricingPanel() {
                             } else {
                                 await updateAgencyBasePrices(hotelId, editPricesTarget.id, newPrices)
                             }
-                            toast.success(`${editPricesTarget.name} fiyatları kaydedildi.`)
+                            toast.success(`${editPricesTarget.name} kaydedildi.`)
                             setEditPricesTarget(null)
                         } catch (err) {
                             console.error(err)
@@ -294,7 +294,7 @@ export function PricingPanel() {
                             {t('pricing.agencies.add')}
                         </DialogTitle>
                         <DialogDescription>
-                            Oteliniz ile anlaşmalı yeni bir seyahat acentesi tanımlayın.
+                            Oteliniz ile özel anlaşması olan yeni bir seyahat acentesi tanımlayın.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 space-y-3">
@@ -386,10 +386,10 @@ function RateMatrixView({
                     <div>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <TableIcon className="w-5 h-5 text-primary" />
-                            Oda Fiyat Matrisi
+                            Acente Fiyat Matrisi
                         </CardTitle>
                         <CardDescription className="text-xs">
-                            Otelinizin standart taban fiyatları ve acente özel anlaşma tarifeleri.
+                            Genel acente fiyat tarifesi ve özel anlaşmalı acentelerin oda fiyatları.
                         </CardDescription>
                     </div>
 
@@ -418,7 +418,7 @@ function RateMatrixView({
                     <table className="w-full text-xs text-left border-collapse">
                         <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/30">
                             <tr>
-                                <th className="p-3.5 pl-6 min-w-[200px]">Kaynak / Acente</th>
+                                <th className="p-3.5 pl-6 min-w-[220px]">Kaynak / Acente</th>
                                 {ROOM_TYPES.map((room) => (
                                     <th key={room} className="p-3.5 text-center capitalize min-w-[110px]">
                                         {t(`room.${room}`)}
@@ -428,7 +428,7 @@ function RateMatrixView({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/20">
-                            {/* ===== ROW 1: HOTEL DEFAULT BASE PRICE ===== */}
+                            {/* ===== ROW 1: GENERAL AGENCY DEFAULT RATE ===== */}
                             <tr className="bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors group/row">
                                 <td className="p-3.5 pl-6">
                                     <div className="flex items-center gap-2.5">
@@ -442,7 +442,7 @@ function RateMatrixView({
                                                     Varsayılan
                                                 </Badge>
                                             </div>
-                                            <div className="text-[10px] text-muted-foreground">Tüm acenteler için geçerli alt sınır</div>
+                                            <div className="text-[10px] text-muted-foreground">Özel fiyatı olmayan tüm acenteler için geçerli tarife</div>
                                         </div>
                                     </div>
                                 </td>
@@ -471,7 +471,7 @@ function RateMatrixView({
                                             variant="secondary"
                                             size="sm"
                                             className="h-8 text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 gap-1.5"
-                                            onClick={() => onEditPrices('global', 'Otel Genel Taban Fiyatları', globalPrices)}
+                                            onClick={() => onEditPrices('global', 'Genel Acenta Fiyatları', globalPrices)}
                                         >
                                             <Pencil className="w-3 h-3" />
                                             Düzenle
@@ -497,7 +497,7 @@ function RateMatrixView({
                                                             {agency.overrides.length} Özel Sezon Tanımlı
                                                         </span>
                                                     ) : (
-                                                        'Standart Tarife'
+                                                        'Özel Anlaşmalı Acente'
                                                     )}
                                                 </div>
                                             </div>
@@ -523,7 +523,7 @@ function RateMatrixView({
                                                             {displayPrice.amount.toFixed(2)}
                                                         </span>
                                                         <span className="text-[8px] opacity-60 uppercase font-medium">
-                                                            {displayPrice.currency || 'EUR'} {inheritsGlobal && '(Taban)'}
+                                                            {displayPrice.currency || 'EUR'} {inheritsGlobal && '(Genel)'}
                                                         </span>
                                                     </div>
                                                 ) : (
@@ -539,7 +539,7 @@ function RateMatrixView({
                                                     variant="outline"
                                                     size="sm"
                                                     className="h-8 text-xs border-border/50 hover:bg-primary/10"
-                                                    onClick={() => onEditPrices(agency.id, `${agency.name} Fiyatları`, agency.base_prices || {})}
+                                                    onClick={() => onEditPrices(agency.id, `${agency.name} Özel Fiyatları`, agency.base_prices || {})}
                                                 >
                                                     <Pencil className="w-3 h-3 mr-1 text-muted-foreground" />
                                                     Düzenle
@@ -563,7 +563,7 @@ function RateMatrixView({
                             {filteredAgencies.length === 0 && (
                                 <tr>
                                     <td colSpan={ROOM_TYPES.length + 2} className="p-8 text-center text-muted-foreground text-xs italic">
-                                        {searchQuery ? 'Aramanızla eşleşen acente bulunamadı.' : 'Henüz özel fiyat tanımlı acente eklenmedi. Yukarıdaki "Acente Ekle" butonunu kullanabilirsiniz.'}
+                                        {searchQuery ? 'Aramanızla eşleşen acente bulunamadı.' : 'Henüz özel fiyatlı acente eklenmedi. Yukarıdaki "Acente Ekle" butonunu kullanabilirsiniz.'}
                                     </td>
                                 </tr>
                             )}
@@ -576,7 +576,7 @@ function RateMatrixView({
 }
 
 /* ============================================================================
- * EDIT PRICES MODAL (For GM to edit base or agency rates cleanly)
+ * EDIT PRICES MODAL (For GM to edit general or agency rates cleanly)
  * ============================================================================ */
 function EditPricesModal({
     target,
@@ -618,8 +618,8 @@ function EditPricesModal({
                     </DialogTitle>
                     <DialogDescription>
                         {isGlobal
-                            ? 'Tüm otel için varsayılan oda fiyatlarını ve para birimlerini belirleyin.'
-                            : 'Bu acenteye özel standart oda fiyatlarını girin. Boş bırakılan oda türü Otel Taban Fiyatını kullanacaktır.'}
+                            ? 'Özel anlaşma fiyatı tanımlanmamış tüm seyahat acenteleri için geçerli olacak genel acente oda fiyatlarını belirleyin.'
+                            : 'Bu acenteye özel anlaşma oda fiyatlarını girin. Boş bırakılan oda türü Genel Acenta Fiyatını kullanacaktır.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -635,7 +635,7 @@ function EditPricesModal({
                                         type="number"
                                         step="0.01"
                                         min="0"
-                                        placeholder={isGlobal ? "Fiyat" : "Taban fiyatı kullan"}
+                                        placeholder={isGlobal ? "Genel Fiyat" : "Genel fiyatı kullan"}
                                         value={prices[room]?.amount ?? ''}
                                         onChange={(e) => {
                                             const val = e.target.value
@@ -742,7 +742,7 @@ function SpecialPeriodsCampaignsView({
             list.push({
                 id: `global_${bo.id}`,
                 targetId: 'global',
-                targetName: 'Genel (Tüm Herkes)',
+                targetName: 'Genel Acentalar (Tüm Herkes)',
                 override: bo,
                 isGlobal: true
             })
@@ -791,7 +791,7 @@ function SpecialPeriodsCampaignsView({
                         Özel Dönemler & Kampanya Sezonları
                     </h2>
                     <p className="text-xs text-muted-foreground">
-                        Bayram, yaz sezonu, fuar vb. özel tarih aralıklarında standart fiyatları ezmek için tanımlanan kurallar.
+                        Bayram, yaz sezonu, fuar vb. özel tarih aralıklarında acente tarifelerini ezmek için tanımlanan kurallar.
                     </p>
                 </div>
 
@@ -842,12 +842,12 @@ function SpecialPeriodsCampaignsView({
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Hedef:</span>
                     <Select value={targetFilter} onValueChange={setTargetFilter}>
-                        <SelectTrigger className="h-8 w-44 text-xs bg-background">
+                        <SelectTrigger className="h-8 w-48 text-xs bg-background">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Tüm Özel Dönemler ({allOverrides.length})</SelectItem>
-                            <SelectItem value="global">Genel Kampanyalar (Herkes)</SelectItem>
+                            <SelectItem value="global">Genel Acentalar (Tüm Herkes)</SelectItem>
                             {agencies.map((a) => (
                                 <SelectItem key={a.id} value={a.id}>
                                     {a.name} ({a.overrides?.length || 0})
@@ -1272,7 +1272,7 @@ function OverrideEditorModal({
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="global">Genel (Herkes)</SelectItem>
+                                    <SelectItem value="global">Genel Acentalar (Tüm Herkes)</SelectItem>
                                     {agencies.map((a) => (
                                         <SelectItem key={a.id} value={a.id}>
                                             {a.name}
@@ -1419,7 +1419,7 @@ function PriceCalculatorView({
                 const formattedDate = format(currentDay, 'dd MMMM yyyy, EEEE', { locale: dateLocale })
 
                 // Determine rule source manually for audit transparency
-                let ruleName = 'Otel Genel Taban Fiyatı'
+                let ruleName = 'Genel Acenta Fiyatı'
                 let ruleType: 'agency_override' | 'global_override' | 'agency_base' | 'global_base' | 'none' = 'global_base'
 
                 if (agencyIdArg && agencyObj) {
@@ -1430,7 +1430,7 @@ function PriceCalculatorView({
                         ruleName = `${agencyObj.name} Özel Sezon Kampanyası`
                         ruleType = 'agency_override'
                     } else if (agencyObj.base_prices?.[selectedRoomType]?.amount) {
-                        ruleName = `${agencyObj.name} Standart Anlaşma Fiyatı`
+                        ruleName = `${agencyObj.name} Özel Anlaşma Fiyatı`
                         ruleType = 'agency_base'
                     }
                 }
@@ -1440,7 +1440,7 @@ function PriceCalculatorView({
                         (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[selectedRoomType]?.amount
                     )
                     if (globalOverride) {
-                        ruleName = 'Genel Özel Dönem Kampanyası'
+                        ruleName = 'Genel Acenta Özel Dönemi'
                         ruleType = 'global_override'
                     }
                 }
@@ -1526,10 +1526,10 @@ function PriceCalculatorView({
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="base">Otel Genel Taban Fiyatı (Münferit)</SelectItem>
+                                <SelectItem value="base">Genel Acentalar (Varsayılan Tarife)</SelectItem>
                                 {agencies.map((a) => (
                                     <SelectItem key={a.id} value={a.id}>
-                                        {a.name}
+                                        {a.name} (Özel Anlaşma)
                                     </SelectItem>
                                 ))}
                             </SelectContent>
