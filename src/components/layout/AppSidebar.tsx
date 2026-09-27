@@ -51,16 +51,16 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
     return (
         <TooltipProvider>
             <motion.aside initial={false} animate={{ width: sidebarCollapsed ? 72 : 248 }} className="relative z-50 hidden shrink-0 select-none flex-col border-r border-border/60 bg-gradient-to-b from-[hsl(var(--surface-deep))] via-[hsl(var(--surface-deep))/95] to-[hsl(var(--card))/80] backdrop-blur-xl md:flex">
-                <button onClick={toggleSidebar} aria-label="Toggle sidebar" className="absolute -right-3 top-[66px] z-50 grid h-6 w-6 place-items-center rounded-full border border-border/80 bg-card text-muted-foreground shadow-md transition-transform hover:scale-110 hover:text-primary">
+                <button onClick={toggleSidebar} aria-label="Toggle sidebar" className="absolute -right-3 top-[24px] z-50 grid h-6 w-6 place-items-center rounded-full border border-border/80 bg-card text-muted-foreground shadow-md transition-all hover:scale-110 hover:text-primary hover:border-primary/50">
                     <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform', sidebarCollapsed && 'rotate-180')} />
                 </button>
 
-                <div className={cn('flex h-[84px] shrink-0 items-center border-b border-border/60', sidebarCollapsed ? 'justify-center' : 'px-5')}>
+                <div className={cn('flex h-[72px] shrink-0 items-center border-b border-border/60', sidebarCollapsed ? 'justify-center' : 'px-5')}>
                     <div className="relative flex items-center gap-2.5">
-                        <RelayMark className="h-8 w-8 text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.4)]" />
+                        <RelayMark className="h-7 w-7 text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.4)]" />
                         {!sidebarCollapsed && (
                             <div className="flex items-center gap-1.5">
-                                <span className="text-xl font-bold tracking-[-0.035em] bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">Relay</span>
+                                <span className="text-lg font-bold tracking-[-0.03em] bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">Relay</span>
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
                             </div>
                         )}

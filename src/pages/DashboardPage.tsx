@@ -346,9 +346,9 @@ export function DashboardPage() {
 
             {/* Main Content Pane */}
             <div className="flex flex-col flex-1 relative min-w-0 overflow-hidden">
-                <header className="relay-commandbar safe-header relative z-40 flex h-[84px] shrink-0 items-center justify-between border-b border-border/70 bg-background/95 px-5 backdrop-blur-xl md:px-7">
+                <header className="relay-commandbar safe-header relative z-40 flex h-[72px] shrink-0 items-center justify-between border-b border-border/60 bg-background/80 px-5 backdrop-blur-xl md:px-7">
                     <div className="flex items-center md:hidden">
-                        <RelayMark className="h-10 w-10 text-primary" />
+                        <RelayMark className="h-9 w-9 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />
                     </div>
 
                     <div className="relay-mobile-shift md:hidden">
@@ -356,10 +356,10 @@ export function DashboardPage() {
                         <span><strong>{shiftName}</strong><small>{shiftStart}–{shiftEnd}</small></span>
                     </div>
 
-                    <label onClick={() => setCommandPaletteOpen(true)} className="relay-command-search hidden h-11 w-full max-w-[470px] items-center gap-3 rounded-lg border border-border bg-card/55 px-4 text-muted-foreground md:flex cursor-pointer hover:border-primary/40 transition-colors">
-                        <Search className="h-4 w-4 text-primary" />
-                        <input aria-label={t('common.search') as string} placeholder="Hızlı komut veya arama yapın (⌘K)..." readOnly className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none cursor-pointer placeholder:text-muted-foreground" />
-                        <kbd className="rounded border border-border/80 px-1.5 py-0.5 text-[10px] text-muted-foreground bg-muted font-mono">⌘K</kbd>
+                    <label onClick={() => setCommandPaletteOpen(true)} className="relay-command-search hidden h-10 w-full max-w-[440px] items-center gap-3 rounded-xl border border-border/60 bg-card/60 px-4 text-muted-foreground md:flex cursor-pointer hover:border-primary/40 hover:bg-card/90 transition-all shadow-xs backdrop-blur-md">
+                        <Search className="h-4 w-4 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.4)]" />
+                        <input aria-label={t('common.search') as string} placeholder="Hızlı komut veya arama yapın (⌘K)..." readOnly className="min-w-0 flex-1 bg-transparent text-xs font-medium text-foreground outline-none cursor-pointer placeholder:text-muted-foreground/80" />
+                        <kbd className="rounded-md border border-border/70 px-1.5 py-0.5 text-[10px] text-muted-foreground bg-muted/80 font-mono shadow-2xs">⌘K</kbd>
                     </label>
 
                     <div className="flex items-center gap-2">
