@@ -16,7 +16,8 @@ import {
     KeyRound,
     Pizza,
     Eye,
-    EyeOff
+    EyeOff,
+    Search
 } from 'lucide-react'
 import { PasswordReveal } from '@/components/ui/PasswordReveal'
 import { useAuthStore } from '@/stores/authStore'
@@ -70,6 +71,7 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
     const [editInfo, setEditInfo] = useState<HotelInfoData>(defaultInfo)
     const [isVaultUnlocked, setIsVaultUnlocked] = useState(false)
     const [passwordInput, setPasswordInput] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [showNewPassword, setShowNewPassword] = useState(false)
 
@@ -214,7 +216,17 @@ export function HotelInfoPanel({ hotelId, canEdit }: HotelInfoPanelProps) {
                 )
             }
         >
-            <div className="pt-2">
+            <div className="pt-2 space-y-4">
+                <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-primary" />
+                    <Input
+                        placeholder="Hızlı bilgi ara (IBAN, WiFi, transfer, dahili hatlar...)"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 bg-card/60 border-border/60 text-xs h-9 rounded-xl focus-visible:ring-primary/30"
+                    />
+                </div>
+
                 {isEditing ? (
                     <motion.div
                         initial={{ opacity: 0 }}

@@ -54,11 +54,12 @@ export function CommandPalette({
     if (!isOpen) return null
 
     const navigationItems = [
-        { id: 'operations', label: 'Operasyon Paneli (Shift Handovers)', icon: ArrowLeftRight, category: 'Navigasyon' },
-        { id: 'sales', label: 'Satış & Bilet Yönetimi (Sales & Vouchers)', icon: CreditCard, category: 'Navigasyon' },
-        { id: 'roster', label: 'Personel Vardiya Matrisi (Staff Roster)', icon: Clock, category: 'Navigasyon' },
-        { id: 'maintenance', label: 'Arıza & Bakım Kuyruğu (Maintenance)', icon: ShieldAlert, category: 'Navigasyon' },
-        { id: 'settings', label: 'Otel Ayarları & Ayarlar (Settings)', icon: Settings, category: 'Navigasyon' },
+        { id: 'notes', label: 'Vardiya Devri & Notlar (Shift Handover & Notes)', icon: ArrowLeftRight, category: 'Navigasyon' },
+        { id: 'sales', label: 'Satışlar & Tur Kataloğu (Sales & Tours)', icon: CreditCard, category: 'Navigasyon' },
+        { id: 'roster', label: 'Haftalık Vardiya Matrisi (Roster)', icon: Clock, category: 'Navigasyon' },
+        { id: 'asset-management', label: 'Bakım & Kayıp Eşya Yönetimi (Asset & Maintenance)', icon: ShieldAlert, category: 'Navigasyon' },
+        { id: 'hotel-tools', label: 'Otel Rehberi & Araçları (Hotel Tools)', icon: Globe, category: 'Navigasyon' },
+        { id: 'team', label: 'Ekip & İzin Günleri Planlayıcı (Team & Off-Days)', icon: Settings, category: 'Navigasyon' },
     ]
 
     const actionItems = [
@@ -75,6 +76,20 @@ export function CommandPalette({
             icon: FileText,
             category: 'Hızlı Aksiyon',
             run: () => { onOpenNewNote?.(); onClose() }
+        },
+        {
+            id: 'action-personal-notes',
+            label: 'Kişisel Notlarıma Geç',
+            icon: FileText,
+            category: 'Hızlı Aksiyon',
+            run: () => { onNavigateTab?.('personal-notes'); onClose() }
+        },
+        {
+            id: 'action-hotel-info',
+            label: 'Otel Rehberi & Dahili Telefonlar',
+            icon: Globe,
+            category: 'Hızlı Aksiyon',
+            run: () => { onNavigateTab?.('hotel-info'); onClose() }
         },
         {
             id: 'action-official-record',
