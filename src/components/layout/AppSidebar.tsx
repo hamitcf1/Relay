@@ -50,20 +50,27 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
 
     return (
         <TooltipProvider>
-            <motion.aside initial={false} animate={{ width: sidebarCollapsed ? 72 : 248 }} className="relative z-50 hidden shrink-0 select-none flex-col border-r border-border bg-[hsl(var(--surface-deep))] md:flex">
-                <button onClick={toggleSidebar} aria-label="Toggle sidebar" className="absolute -right-3 top-[66px] z-50 grid h-6 w-6 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:text-primary">
+            <motion.aside initial={false} animate={{ width: sidebarCollapsed ? 72 : 248 }} className="relative z-50 hidden shrink-0 select-none flex-col border-r border-border/60 bg-gradient-to-b from-[hsl(var(--surface-deep))] via-[hsl(var(--surface-deep))/95] to-[hsl(var(--card))/80] backdrop-blur-xl md:flex">
+                <button onClick={toggleSidebar} aria-label="Toggle sidebar" className="absolute -right-3 top-[66px] z-50 grid h-6 w-6 place-items-center rounded-full border border-border/80 bg-card text-muted-foreground shadow-md transition-transform hover:scale-110 hover:text-primary">
                     <ChevronLeft className={cn('h-3.5 w-3.5 transition-transform', sidebarCollapsed && 'rotate-180')} />
                 </button>
 
-                <div className={cn('flex h-[84px] shrink-0 items-center border-b border-border', sidebarCollapsed ? 'justify-center' : 'px-5')}>
-                    <RelayMark className="h-8 w-8 text-primary" />
-                    {!sidebarCollapsed && <span className="ml-2.5 text-xl font-semibold tracking-[-0.035em]">Relay</span>}
+                <div className={cn('flex h-[84px] shrink-0 items-center border-b border-border/60', sidebarCollapsed ? 'justify-center' : 'px-5')}>
+                    <div className="relative flex items-center gap-2.5">
+                        <RelayMark className="h-8 w-8 text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.4)]" />
+                        {!sidebarCollapsed && (
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-xl font-bold tracking-[-0.035em] bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">Relay</span>
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <nav className="custom-scrollbar flex flex-1 flex-col overflow-y-auto px-3 py-4" aria-label="Primary navigation">
                     <div className="mb-2 flex items-center justify-between gap-1">
-                        {!sidebarCollapsed && <p className="px-3 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground">{labels.primary}</p>}
-                        <button type="button" onClick={() => setPersonalizeOpen(true)} title={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} aria-label={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-primary"><SlidersHorizontal className="h-4 w-4" /></button>
+                        {!sidebarCollapsed && <p className="px-3 text-[10px] font-bold tracking-[0.16em] uppercase text-muted-foreground/80">{labels.primary}</p>}
+                        <button type="button" onClick={() => setPersonalizeOpen(true)} title={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} aria-label={language === 'tr' ? 'Yan panelimi düzenle' : 'Customize sidebar'} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted/80 hover:text-primary transition-colors"><SlidersHorizontal className="h-4 w-4" /></button>
                     </div>
                     <div className="space-y-1">
                         {navigation.primary.map((item) => <NavItem key={item.id} item={item} label={getModuleLabel(item, language, navigationConfig)} active={isActive(item)} collapsed={sidebarCollapsed} onClick={() => navigate(item)} />)}
@@ -91,7 +98,7 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
                     <div className="mt-auto pt-4"><NavItem item={{ id: 'overview', icon: Sparkles } as ModuleDefinition} label={labels.assistant} active={false} collapsed={sidebarCollapsed} onClick={toggleChat} /></div>
                 </nav>
 
-                <div className="border-t border-border p-3"><UserMenu collapsed={sidebarCollapsed} user={user} t={t} language={language} setLanguage={setLanguage} signOut={signOut} /></div>
+                <div className="border-t border-border/60 p-3"><UserMenu collapsed={sidebarCollapsed} user={user} t={t} language={language} setLanguage={setLanguage} signOut={signOut} /></div>
             </motion.aside>
             <PersonalSidebarEditor open={personalizeOpen} onOpenChange={setPersonalizeOpen} />
         </TooltipProvider>
@@ -101,10 +108,10 @@ export function AppSidebar({ activeTab, operationTab, overviewTab, onNavigate, u
 function NavItem({ item, label, active, collapsed, onClick }: { item: ModuleDefinition; label: string; active: boolean; collapsed: boolean; onClick: () => void }) {
     const Icon = item.icon
     const content = (
-        <button onClick={onClick} aria-current={active ? 'page' : undefined} className={cn('relative flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-[13px] font-medium text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60', active && 'bg-card text-foreground shadow-sm', collapsed && 'mx-auto h-10 w-10 justify-center px-0')}>
-            <Icon className={cn('h-4 w-4 shrink-0', active && 'text-primary')} />
+        <button onClick={onClick} aria-current={active ? 'page' : undefined} className={cn('relative flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-muted-foreground outline-none transition-all duration-200 hover:bg-muted/70 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60', active && 'bg-card/90 border border-primary/25 text-foreground shadow-md backdrop-blur-md shadow-primary/5 font-semibold', collapsed && 'mx-auto h-10 w-10 justify-center px-0')}>
+            <Icon className={cn('h-4 w-4 shrink-0 transition-colors', active ? 'text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]' : 'group-hover:text-foreground')} />
             {!collapsed && <span className="truncate">{label}</span>}
-            {active && !collapsed && <motion.span layoutId="sidebar-active" className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
+            {active && !collapsed && <motion.span layoutId="sidebar-active" className="ml-auto h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]" />}
         </button>
     )
     return collapsed ? <Tooltip delayDuration={0}><TooltipTrigger asChild>{content}</TooltipTrigger><TooltipContent side="right">{label}</TooltipContent></Tooltip> : content

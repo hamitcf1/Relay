@@ -96,28 +96,28 @@ export function ShiftTimer() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                    "flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-colors group select-none",
+                    "flex items-center gap-2.5 px-3 py-1.5 rounded-full border transition-all duration-300 group select-none shadow-sm backdrop-blur-md",
                     timeLeft === null
-                        ? "bg-muted/40 border-border text-muted-foreground"
+                        ? "bg-card/40 border-border/60 text-muted-foreground"
                         : isCritical
-                            ? "bg-destructive/10 border-destructive/30 text-destructive"
-                            : "bg-muted/40 border-border text-foreground"
+                            ? "bg-destructive/15 border-destructive/40 text-destructive shadow-[0_0_14px_rgba(239,68,68,0.25)] animate-pulse"
+                            : "bg-card/60 border-primary/25 text-foreground hover:border-primary/40 shadow-[0_0_12px_hsl(var(--primary)/0.1)]"
                 )}
             >
                 <div className="relative">
                     {timeLeft === null ? (
                         <Clock className="w-3.5 h-3.5 opacity-40" aria-hidden="true" />
                     ) : isCritical ? (
-                        <Hourglass className="w-3.5 h-3.5 animate-pulse" aria-hidden="true" />
+                        <Hourglass className="w-3.5 h-3.5 animate-spin text-destructive drop-shadow-[0_0_6px_rgba(239,68,68,0.8)]" aria-hidden="true" />
                     ) : (
-                        <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+                        <Clock className="w-3.5 h-3.5 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]" aria-hidden="true" />
                     )}
                 </div>
                 <div className="flex flex-col items-start leading-none gap-0.5">
-                    <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/80">
                         {t('shift.timeLeft') || 'Shift'}
                     </span>
-                    <span className="text-xs font-mono font-semibold tabular-nums">
+                    <span className="text-xs font-mono font-bold tabular-nums tracking-tight">
                         {timeLeft === null ? (
                             '--:--'
                         ) : (

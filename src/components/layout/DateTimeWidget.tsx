@@ -53,18 +53,18 @@ export function DateTimeWidget({ className }: DateTimeWidgetProps) {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             className={cn(
-                "flex items-center gap-3 px-3 py-1.5 rounded-full glass",
+                "flex items-center gap-3 px-3.5 py-1.5 rounded-full border border-border/60 bg-card/60 backdrop-blur-md shadow-sm",
                 className
             )}
         >
             <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Calendar className="w-3 h-3 text-primary" />
-                <span className="text-[10px] uppercase font-bold tracking-wider">{formatDate(time)}</span>
+                <Calendar className="w-3.5 h-3.5 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
+                <span className="text-[10px] uppercase font-bold tracking-wider text-foreground/80">{formatDate(time)}</span>
             </div>
-            <div className="w-[1px] h-3 bg-border" />
+            <div className="w-[1px] h-3.5 bg-border/80" />
             <div className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-primary" />
-                <span className="text-xs font-mono font-medium text-foreground tabular-nums">
+                <Clock className="w-3.5 h-3.5 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
+                <span className="text-xs font-mono font-bold text-foreground tabular-nums tracking-tight">
                     {formatTime(time)}
                 </span>
             </div>
