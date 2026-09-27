@@ -59,6 +59,7 @@ export function SalesPanel({ initialTab = 'sales' }: SalesPanelProps = {}) {
     const [selectedSaleIds, setSelectedSaleIds] = useState<string[]>([])
     const [filterPriority, setFilterPriority] = useState<NotePriority | 'all'>('all')
     const [filterLifecycle, setFilterLifecycle] = useState<'active' | 'archived' | 'trash'>('active')
+    const [searchQuery, setSearchQuery] = useState('')
 
     const saleParam = searchParams.get('sale')
 
@@ -121,8 +122,6 @@ export function SalesPanel({ initialTab = 'sales' }: SalesPanelProps = {}) {
             </div>
         )
     }
-
-    const [searchQuery, setSearchQuery] = useState('')
 
     const filteredSales = sales.filter(s => {
         if (s.type !== activeTab) return false

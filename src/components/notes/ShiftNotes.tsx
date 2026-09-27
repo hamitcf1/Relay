@@ -62,30 +62,6 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
             ? { title: 'Передача смены', subtitle: 'Примите открытые задачи, обновите их и передайте следующей смене.', add: 'Добавить запись', active: 'Открыто', critical: 'Срочно', pinned: 'Закреплено', completed: 'Завершено сегодня' }
             : { title: 'Shift handover', subtitle: 'Take over open work, update it, and pass it to the next shift.', add: 'Add handover record', active: 'Open', critical: 'Critical', pinned: 'Pinned', completed: 'Completed today' }
 
-    if (mainTab === 'personal') {
-        return (
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b border-border/60 pb-3">
-                    <button
-                        onClick={() => setMainTab('handover')}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
-                    >
-                        <ArrowLeftRight className="w-4 h-4" />
-                        <span>{language === 'tr' ? 'Ortak Vardiya Devri' : language === 'ru' ? 'Смена' : 'Shift Handover'}</span>
-                    </button>
-                    <button
-                        onClick={() => setMainTab('personal')}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground shadow-md transition-colors"
-                    >
-                        <NotebookPen className="w-4 h-4" />
-                        <span>{language === 'tr' ? 'Kişisel Notlarım' : language === 'ru' ? 'Личные заметки' : 'Personal Notes'}</span>
-                    </button>
-                </div>
-                <PersonalNotes hotelId={hotelId} />
-            </div>
-        )
-    }
-
     const { visibleNotes, counts, metrics } = useMemo(() => {
         const searchLower = searchQuery.trim().toLowerCase()
         const matches = notes.filter((note) => {
@@ -120,6 +96,30 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
             },
         }
     }, [filter, notes, searchQuery, statusFilter])
+
+    if (mainTab === 'personal') {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+                    <button
+                        onClick={() => setMainTab('handover')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
+                    >
+                        <ArrowLeftRight className="w-4 h-4" />
+                        <span>{language === 'tr' ? 'Ortak Vardiya Devri' : language === 'ru' ? 'Смена' : 'Shift Handover'}</span>
+                    </button>
+                    <button
+                        onClick={() => setMainTab('personal')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground shadow-md transition-colors"
+                    >
+                        <NotebookPen className="w-4 h-4" />
+                        <span>{language === 'tr' ? 'Kişisel Notlarım' : language === 'ru' ? 'Личные заметки' : 'Personal Notes'}</span>
+                    </button>
+                </div>
+                <PersonalNotes hotelId={hotelId} />
+            </div>
+        )
+    }
 
     const handleToggleSelectAll = () => {
         if (selectedNoteIds.length === visibleNotes.length) {
