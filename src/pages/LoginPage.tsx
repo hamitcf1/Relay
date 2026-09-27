@@ -79,6 +79,15 @@ export function LoginPage() {
 
                 let hotelId: string | null = null
 
+                if (hSnap.empty) {
+                    const rawCode = hotelCode.trim()
+                    hSnap = await getDocs(query(hotelsRef, where('code', '==', rawCode)))
+                }
+                if (hSnap.empty) {
+                    const lowerCode = hotelCode.trim().toLowerCase()
+                    hSnap = await getDocs(query(hotelsRef, where('code', '==', lowerCode)))
+                }
+
                 if (!hSnap.empty) {
                     hotelId = hSnap.docs[0].id
                 } else {
@@ -88,6 +97,12 @@ export function LoginPage() {
                         const directDoc = await getDoc(directDocRef)
                         if (directDoc.exists()) {
                             hotelId = directDoc.id
+                        } else {
+                            const rawDocRef = doc(db, 'hotels', hotelCode.trim())
+                            const rawDoc = await getDoc(rawDocRef)
+                            if (rawDoc.exists()) {
+                                hotelId = rawDoc.id
+                            }
                         }
                     } catch (e) {
                         // ignore direct lookup error
