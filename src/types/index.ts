@@ -44,6 +44,7 @@ export type ActivityAction =
 export interface User {
     uid: string
     email: string
+    password?: string
     name: string
     role: UserRole
     hotel_id?: string | null
@@ -95,6 +96,8 @@ export interface UserSettings {
 export interface StaffMember {
     uid: string
     name: string
+    email?: string
+    password?: string
     role?: string
     is_hidden_in_roster?: boolean
     settings?: UserSettings

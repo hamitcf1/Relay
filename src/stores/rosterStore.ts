@@ -68,12 +68,12 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
 
             set({
                 staff: [
-                    { uid: 'demo-user-gm', name: 'Demo Manager', role: 'gm', status: 'active' },
-                    { uid: 'demo-user-staff', name: 'Demo Staff', role: 'receptionist', status: 'active' }
+                    { uid: 'demo-user-gm', name: 'Demo Manager', email: 'demo.gm@relay.app', password: '123456', role: 'gm', status: 'active' },
+                    { uid: 'demo-user-staff', name: 'Demo Staff', email: 'demo.receptionist@relay.app', password: '123456', role: 'receptionist', status: 'active' }
                 ],
                 activeStaff: [
-                    { uid: 'demo-user-gm', name: 'Demo Manager', role: 'gm', status: 'active' },
-                    { uid: 'demo-user-staff', name: 'Demo Staff', role: 'receptionist', status: 'active' }
+                    { uid: 'demo-user-gm', name: 'Demo Manager', email: 'demo.gm@relay.app', password: '123456', role: 'gm', status: 'active' },
+                    { uid: 'demo-user-staff', name: 'Demo Staff', email: 'demo.receptionist@relay.app', password: '123456', role: 'receptionist', status: 'active' }
                 ],
                 schedule: mockSchedule,
                 loading: false,
@@ -94,6 +94,8 @@ export const useRosterStore = create<RosterStore>((set, get) => ({
                     staffList.push({
                         uid: uDoc.id,
                         name: uData.name,
+                        email: uData.email,
+                        password: uData.password,
                         role: uData.role,
                         is_hidden_in_roster: uData.is_hidden_in_roster,
                         settings: uData.settings,

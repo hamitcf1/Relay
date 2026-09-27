@@ -38,6 +38,7 @@ export async function createSecondaryUser(params: {
         // 3. Create the user document in Firestore using the primary app (db)
         await setDoc(doc(db, 'users', newUid), {
             email: params.email,
+            password: params.password,
             name: params.name.trim(),
             role: params.role,
             current_shift_type: null,
@@ -57,4 +58,24 @@ export async function createSecondaryUser(params: {
         await signOut(secondaryAuth).catch(() => {})
         await deleteApp(secondaryApp).catch(() => {})
     }
+}
+
+export async function updateStaffCredentials(params: {
+    uid: string
+    email: string
+    password?: string
+    name: string
+    role: UserRole
+}) {
+    const userRef = doc(db, 'users', params.uid)
+    const updates: Record<string, any> = {
+        name: params.name.trim(),
+        email: params.email.trim(),
+        role: params.role,
+        updated_at: new Date().toISOString()
+    }
+    if (params.password) {
+        updates.password = params.password
+    }
+    await updateDoc(userRef, updates)
 }
