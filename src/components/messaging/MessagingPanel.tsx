@@ -26,6 +26,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 import { AnnouncementComposer } from './AnnouncementComposer'
 import { AnnouncementFeed } from './AnnouncementFeed'
+import { toast } from 'sonner'
 
 export function MessagingPanel() {
     const { user } = useAuthStore()
@@ -176,22 +177,29 @@ export function MessagingPanel() {
                 target_uid: activeConversation,
                 link: `/operations?chat=${user.uid}`
             })
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to send", error)
+            toast.error(error?.message || (language === 'tr' ? 'Mesaj gönderilemedi' : 'Failed to send message'))
         }
     }
 
     const handleAnnouncement = async ({ title, content, recipientIds, recipientNames, audience }: { title: string; content: string; recipientIds: string[]; recipientNames: string[]; audience: 'all' | 'selected' }) => {
         if (!hotel?.id || !user || user.role !== 'gm') return
-        await publishAnnouncement(hotel.id, {
-            title,
-            content,
-            audience,
-            recipientIds: audience === 'selected' ? recipientIds : undefined,
-            recipientNames: audience === 'selected' ? recipientNames : undefined,
-            createdBy: user.uid,
-            createdByName: user.name,
-        })
+        try {
+            await publishAnnouncement(hotel.id, {
+                title,
+                content,
+                audience,
+                recipientIds: audience === 'selected' ? recipientIds : undefined,
+                recipientNames: audience === 'selected' ? recipientNames : undefined,
+                createdBy: user.uid,
+                createdByName: user.name,
+            })
+            toast.success(language === 'tr' ? 'Duyuru yayınlandı' : 'Announcement published')
+        } catch (error: any) {
+            console.error("Failed to publish announcement", error)
+            toast.error(error?.message || (language === 'tr' ? 'Duyuru yayınlanamadı' : 'Failed to publish announcement'))
+        }
     }
 
     return (
