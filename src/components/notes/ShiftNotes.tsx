@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { format } from 'date-fns'
-import { AlertTriangle, ArrowLeftRight, CheckCircle2, Clock3, Pin, Plus, Trash2, Archive, CheckSquare, Square, RotateCcw, Check, Printer } from 'lucide-react'
+import { AlertTriangle, ArrowLeftRight, CheckCircle2, Clock3, Pin, Plus } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { useNotesStore, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -141,21 +141,35 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     }
 
     return (
-        <section className="handover-workspace">
-            <header className="handover-workspace__header">
-                <div className="handover-workspace__identity">
-                    <span className="handover-workspace__mark"><ArrowLeftRight /></span>
-                    <div><h2>{copy.title}</h2><p>{copy.subtitle}</p></div>
+        <div className="space-y-6">
+            {/* Top Header Card */}
+            <div className="cyber-card p-5 border border-border/60 bg-gradient-to-r from-card/90 via-card/75 to-card/90 backdrop-blur-xl shadow-lg">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3.5">
+                        <div className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary border border-primary/25 shadow-[0_0_15px_hsl(var(--primary)/0.2)]">
+                            <ArrowLeftRight className="size-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold tracking-tight text-foreground">{copy.title}</h2>
+                            <p className="text-xs text-muted-foreground mt-0.5">{copy.subtitle}</p>
+                        </div>
+                    </div>
+                    {showAddButton && (
+                        <Button
+                            onClick={() => setIsAdding((open) => !open)}
+                            aria-expanded={isAdding}
+                            className="h-10 px-4 text-xs font-bold gap-2 rounded-xl bg-primary text-primary-foreground shadow-[0_0_15px_hsl(var(--primary)/0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        >
+                            <Plus className="size-4" />
+                            <span>{copy.add}</span>
+                        </Button>
+                    )}
                 </div>
-                {showAddButton && (
-                    <button className="handover-workspace__add" onClick={() => setIsAdding((open) => !open)} aria-expanded={isAdding}>
-                        <Plus /><span>{copy.add}</span>
-                    </button>
-                )}
-            </header>
+            </div>
 
-            <div className="handover-workspace__metrics">
-                <HandoverMetric icon={Clock3} value={metrics.active} label={copy.active} />
+            {/* Metrics 4-Card Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <HandoverMetric icon={Clock3} value={metrics.active} label={copy.active} tone="sky" />
                 <HandoverMetric icon={AlertTriangle} value={metrics.critical} label={copy.critical} tone="critical" />
                 <HandoverMetric icon={Pin} value={metrics.pinned} label={copy.pinned} tone="amber" />
                 <HandoverMetric icon={CheckCircle2} value={metrics.completed} label={copy.completed} tone="success" />
@@ -163,13 +177,14 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
 
             <AnimatePresence>
                 {isAdding && (
-                    <div className="handover-workspace__compose">
+                    <div className="cyber-card p-4 border-primary/30 bg-primary/[0.02] backdrop-blur-xl">
                         <NoteForm hotelId={hotelId} hotel={hotel} staff={activeStaff} onCancel={() => setIsAdding(false)} />
                     </div>
                 )}
             </AnimatePresence>
 
-            <div className="handover-workspace__toolbar">
+            {/* Main Filters Toolbar Card */}
+            <div className="cyber-card p-4 sm:p-5">
                 <NoteFilters
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
@@ -178,77 +193,56 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     counts={counts}
+                    selectedCount={selectedNoteIds.length}
+                    totalCount={visibleNotes.length}
+                    onToggleSelectAll={handleToggleSelectAll}
+                    onPrintPdf={() => setShowPdfModal(true)}
+                    onEmptyTrash={handleEmptyTrash}
+                    isGM={user?.role === 'gm'}
+                    onBulkStatus={handleBulkStatusChange}
+                    onBulkDelete={handleBulkDelete}
                 />
             </div>
 
-            {/* Bulk Action Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-muted/40 rounded-xl border border-border/50 my-2">
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={handleToggleSelectAll} className="h-8 text-xs gap-1.5">
-                        {selectedNoteIds.length > 0 && selectedNoteIds.length === visibleNotes.length ? <CheckSquare className="w-3.5 h-3.5 text-primary" /> : <Square className="w-3.5 h-3.5 text-muted-foreground" />}
-                        {selectedNoteIds.length > 0 ? `${selectedNoteIds.length} / ${visibleNotes.length} Seçildi` : 'Tümünü Seç'}
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => setShowPdfModal(true)} className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
-                        <Printer className="w-3.5 h-3.5" />
-                        Devir Tutanağı Yazdır
-                    </Button>
-                    {statusFilter === 'trash' && user?.role === 'gm' && (
-                        <Button variant="destructive" size="sm" onClick={handleEmptyTrash} className="h-8 text-xs gap-1.5">
-                            <Trash2 className="w-3.5 h-3.5" />
-                            Çöp Kutusunu Temizle
-                        </Button>
-                    )}
-                </div>
-
-                {selectedNoteIds.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-semibold text-foreground mr-1">{selectedNoteIds.length} Not Seçildi:</span>
-                        <Button variant="outline" size="sm" onClick={() => handleBulkStatusChange('active')} className="h-8 text-xs gap-1 text-emerald-500 hover:bg-emerald-500/10">
-                            <RotateCcw className="w-3.5 h-3.5" /> Aktif Yap
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleBulkStatusChange('resolved')} className="h-8 text-xs gap-1 text-blue-500 hover:bg-blue-500/10">
-                            <Check className="w-3.5 h-3.5" /> Çözüldü Yap
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleBulkStatusChange('archived')} className="h-8 text-xs gap-1 text-amber-500 hover:bg-amber-500/10">
-                            <Archive className="w-3.5 h-3.5" /> Arşive Al
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleBulkStatusChange('trash')} className="h-8 text-xs gap-1 text-rose-500 hover:bg-rose-500/10">
-                            <Trash2 className="w-3.5 h-3.5" /> Çöp Kutusuna At
-                        </Button>
-                        {user?.role === 'gm' && (
-                            <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="h-8 text-xs gap-1">
-                                <Trash2 className="w-3.5 h-3.5" /> Kalıcı Sil
-                            </Button>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            <div className="handover-workspace__board">
-                <NoteList
-                    notes={visibleNotes}
-                    hotelId={hotelId}
-                    hotel={hotel}
-                    staff={activeStaff}
-                    selectedIds={selectedNoteIds}
-                    onToggleSelectNote={handleToggleSelectNote}
-                />
-            </div>
-
-            <ShiftHandoverPdfModal
-                isOpen={showPdfModal}
-                onClose={() => setShowPdfModal(false)}
+            {/* Note List */}
+            <NoteList
                 notes={visibleNotes}
+                hotelId={hotelId}
+                hotel={hotel}
+                staff={activeStaff}
+                selectedIds={selectedNoteIds}
+                onToggleSelectNote={handleToggleSelectNote}
             />
-        </section>
+
+            {showPdfModal && (
+                <ShiftHandoverPdfModal
+                    isOpen={showPdfModal}
+                    onClose={() => setShowPdfModal(false)}
+                    notes={visibleNotes}
+                />
+            )}
+        </div>
     )
 }
 
-function HandoverMetric({ icon: Icon, value, label, tone = 'neutral' }: {
-    icon: typeof Clock3
-    value: number
-    label: string
-    tone?: 'neutral' | 'critical' | 'amber' | 'success'
-}) {
-    return <div className={`handover-metric handover-metric--${tone}`}><span><Icon /></span><strong>{value}</strong><small>{label}</small></div>
+function HandoverMetric({ icon: Icon, value, label, tone }: { icon: any; value: number; label: string; tone?: 'critical' | 'amber' | 'success' | 'sky' }) {
+    const toneStyles = tone === 'critical'
+        ? 'text-rose-400 bg-rose-500/10 border-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
+        : tone === 'amber'
+            ? 'text-amber-400 bg-amber-500/10 border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.15)]'
+            : tone === 'success'
+                ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                : 'text-sky-400 bg-sky-500/10 border-sky-500/20 shadow-[0_0_12px_rgba(14,165,233,0.15)]'
+
+    return (
+        <div className="cyber-card-interactive p-4 flex items-center gap-3.5">
+            <span className={`grid size-10 place-items-center rounded-xl border shrink-0 ${toneStyles}`}>
+                <Icon className="size-5" />
+            </span>
+            <div className="flex flex-col">
+                <strong className="text-2xl font-bold font-mono tabular-nums leading-tight text-foreground">{value}</strong>
+                <span className="text-xs font-medium text-muted-foreground/80">{label}</span>
+            </div>
+        </div>
+    )
 }
