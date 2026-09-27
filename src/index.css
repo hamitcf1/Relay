@@ -835,7 +835,7 @@ body.disable-animations *::after {
 .handover-filters__categories button > span:first-child { width: 0.3rem; height: 0.3rem; border-radius: 999px; }
 
 .handover-workspace__board { padding: 0.7rem; }
-.handover-list { display: flex; max-height: min(61dvh, 42rem); flex-direction: column; gap: 0.4rem; overflow-y: auto; padding-right: 0.25rem; }
+.handover-list { display: flex; flex-direction: column; gap: 0.6rem; padding-bottom: 2rem; }
 .handover-note { border-color: hsl(var(--border) / 0.62) !important; border-radius: 0.65rem !important; background: hsl(var(--card) / 0.76) !important; box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.025); }
 .handover-note:hover { border-color: hsl(var(--primary) / 0.26) !important; background: hsl(var(--card) / 0.96) !important; }
 

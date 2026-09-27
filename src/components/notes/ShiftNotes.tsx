@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { format } from 'date-fns'
-import { AlertTriangle, ArrowLeftRight, CheckCircle2, Clock3, Pin, Plus } from 'lucide-react'
-import { AnimatePresence } from 'framer-motion'
+import { AlertTriangle, ArrowLeftRight, CheckCircle2, Clock3, Pin, Plus, ChevronDown, ChevronUp, BarChart2 } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useNotesStore, type NoteCategory, type NoteStatus } from '@/stores/notesStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useRosterStore } from '@/stores/rosterStore'
@@ -9,6 +9,7 @@ import { useHotelStore } from '@/stores/hotelStore'
 import { useAuthStore } from '@/stores/authStore'
 import { Button } from '@/components/ui/button'
 import { useConfirm } from '@/components/ui/confirm-dialog'
+import { cn } from '@/lib/utils'
 
 import { NoteFilters } from './NoteFilters'
 import { NoteForm } from './NoteForm'
@@ -41,6 +42,7 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([])
     const [showPdfModal, setShowPdfModal] = useState(false)
+    const [showMetricsGrid, setShowMetricsGrid] = useState(false)
 
     useEffect(() => {
         if (initialAddOpen) setIsAdding(true)
@@ -141,50 +143,126 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     }
 
     return (
-        <div className="space-y-6">
-            {/* Top Header Card */}
-            <div className="cyber-card p-5 border border-border/60 bg-gradient-to-r from-card/90 via-card/75 to-card/90 backdrop-blur-xl shadow-lg">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3.5">
-                        <div className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary border border-primary/25 shadow-[0_0_15px_hsl(var(--primary)/0.2)]">
-                            <ArrowLeftRight className="size-5" />
+        <div className="space-y-4">
+            {/* STICKY CONTROL BAR - STAYS FIXED AT TOP INSIDE PAGE SURFACE */}
+            <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/60 pb-3 pt-2 shadow-xs transition-all -mx-4 px-4 sm:-mx-6 sm:px-6">
+                {/* Row 1: Page Identity + Inline Metrics Strip + Action Buttons */}
+                <div className="flex flex-wrap items-center justify-between gap-2.5 mb-2.5">
+                    <div className="flex items-center gap-2.5">
+                        <div className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary border border-primary/25 shadow-[0_0_10px_hsl(var(--primary)/0.2)]">
+                            <ArrowLeftRight className="size-4" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold tracking-tight text-foreground">{copy.title}</h2>
-                            <p className="text-xs text-muted-foreground mt-0.5">{copy.subtitle}</p>
+                            <h2 className="text-base font-bold tracking-tight text-foreground leading-none">{copy.title}</h2>
+                            <p className="text-[11px] text-muted-foreground mt-0.5 hidden sm:block">{copy.subtitle}</p>
                         </div>
                     </div>
+
+                    {/* Inline Compact Metric Badges */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <button
+                            onClick={() => setStatusFilter('active')}
+                            className={cn(
+                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none",
+                                statusFilter === 'active'
+                                    ? "bg-sky-500/15 border-sky-500/40 text-sky-400 font-semibold"
+                                    : "bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                            )}
+                            title={copy.active}
+                        >
+                            <Clock3 className="size-3.5 text-sky-400" />
+                            <span className="font-bold tabular-nums text-foreground">{metrics.active}</span>
+                            <span className="text-[11px] text-muted-foreground hidden md:inline">{copy.active}</span>
+                        </button>
+
+                        <button
+                            onClick={() => setStatusFilter('active')}
+                            className={cn(
+                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none",
+                                metrics.critical > 0
+                                    ? "bg-rose-500/15 border-rose-500/40 text-rose-400 font-semibold animate-pulse"
+                                    : "bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted/80"
+                            )}
+                            title={copy.critical}
+                        >
+                            <AlertTriangle className="size-3.5 text-rose-400" />
+                            <span className="font-bold tabular-nums text-rose-400">{metrics.critical}</span>
+                            <span className="text-[11px] text-rose-400/80 hidden md:inline">{copy.critical}</span>
+                        </button>
+
+                        <button
+                            onClick={() => setStatusFilter('active')}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-border/40 bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all select-none"
+                            title={copy.pinned}
+                        >
+                            <Pin className="size-3.5 text-amber-400" />
+                            <span className="font-bold tabular-nums text-foreground">{metrics.pinned}</span>
+                            <span className="text-[11px] text-muted-foreground hidden md:inline">{copy.pinned}</span>
+                        </button>
+
+                        <button
+                            onClick={() => setStatusFilter('resolved')}
+                            className={cn(
+                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none",
+                                statusFilter === 'resolved'
+                                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 font-semibold"
+                                    : "bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                            )}
+                            title={copy.completed}
+                        >
+                            <CheckCircle2 className="size-3.5 text-emerald-400" />
+                            <span className="font-bold tabular-nums text-foreground">{metrics.completed}</span>
+                            <span className="text-[11px] text-muted-foreground hidden md:inline">{copy.completed}</span>
+                        </button>
+
+                        {/* Collapsible Stat Grid Toggle Button */}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowMetricsGrid(prev => !prev)}
+                            className="h-7 w-7 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            title={showMetricsGrid ? "İstatistikleri Gizle" : "İstatistikleri Genişlet"}
+                        >
+                            <BarChart2 className="size-3.5" />
+                            {showMetricsGrid ? <ChevronUp className="size-3 text-muted-foreground" /> : <ChevronDown className="size-3 text-muted-foreground" />}
+                        </Button>
+                    </div>
+
+                    {/* Add Note Button */}
                     {showAddButton && (
                         <Button
                             onClick={() => setIsAdding((open) => !open)}
                             aria-expanded={isAdding}
-                            className="h-10 px-4 text-xs font-bold gap-2 rounded-xl bg-primary text-primary-foreground shadow-[0_0_15px_hsl(var(--primary)/0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            size="sm"
+                            className="h-8 px-3 text-xs font-bold gap-1.5 rounded-lg bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all ml-auto sm:ml-0"
                         >
-                            <Plus className="size-4" />
+                            <Plus className="size-3.5" />
                             <span>{copy.add}</span>
                         </Button>
                     )}
                 </div>
-            </div>
 
-            {/* Metrics 4-Card Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                <HandoverMetric icon={Clock3} value={metrics.active} label={copy.active} tone="sky" />
-                <HandoverMetric icon={AlertTriangle} value={metrics.critical} label={copy.critical} tone="critical" />
-                <HandoverMetric icon={Pin} value={metrics.pinned} label={copy.pinned} tone="amber" />
-                <HandoverMetric icon={CheckCircle2} value={metrics.completed} label={copy.completed} tone="success" />
-            </div>
+                {/* Optional Expanded Stat Cards Grid */}
+                <AnimatePresence>
+                    {showMetricsGrid && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden mb-3"
+                        >
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1 pb-2">
+                                <HandoverMetric icon={Clock3} value={metrics.active} label={copy.active} tone="sky" />
+                                <HandoverMetric icon={AlertTriangle} value={metrics.critical} label={copy.critical} tone="critical" />
+                                <HandoverMetric icon={Pin} value={metrics.pinned} label={copy.pinned} tone="amber" />
+                                <HandoverMetric icon={CheckCircle2} value={metrics.completed} label={copy.completed} tone="success" />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-            <AnimatePresence>
-                {isAdding && (
-                    <div className="cyber-card p-4 border-primary/30 bg-primary/[0.02] backdrop-blur-xl">
-                        <NoteForm hotelId={hotelId} hotel={hotel} staff={activeStaff} onCancel={() => setIsAdding(false)} />
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* Main Filters Toolbar Card */}
-            <div className="cyber-card p-4 sm:p-5">
+                {/* Row 2: Integrated Filter & Search Toolbar */}
                 <NoteFilters
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
@@ -204,7 +282,21 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                 />
             </div>
 
-            {/* Note List */}
+            {/* Collapsible Add Note Form */}
+            <AnimatePresence>
+                {isAdding && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="cyber-card p-4 border-primary/30 bg-primary/[0.02] backdrop-blur-xl"
+                    >
+                        <NoteForm hotelId={hotelId} hotel={hotel} staff={activeStaff} onCancel={() => setIsAdding(false)} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Note List Container - Single Natural Scroll Flow */}
             <NoteList
                 notes={visibleNotes}
                 hotelId={hotelId}
@@ -235,14 +327,15 @@ function HandoverMetric({ icon: Icon, value, label, tone }: { icon: any; value: 
                 : 'text-sky-400 bg-sky-500/10 border-sky-500/20 shadow-[0_0_12px_rgba(14,165,233,0.15)]'
 
     return (
-        <div className="cyber-card-interactive p-4 flex items-center gap-3.5">
-            <span className={`grid size-10 place-items-center rounded-xl border shrink-0 ${toneStyles}`}>
-                <Icon className="size-5" />
+        <div className="cyber-card-interactive p-3 flex items-center gap-3">
+            <span className={`grid size-8 place-items-center rounded-lg border shrink-0 ${toneStyles}`}>
+                <Icon className="size-4" />
             </span>
             <div className="flex flex-col">
-                <strong className="text-2xl font-bold font-mono tabular-nums leading-tight text-foreground">{value}</strong>
-                <span className="text-xs font-medium text-muted-foreground/80">{label}</span>
+                <strong className="text-xl font-bold font-mono tabular-nums leading-tight text-foreground">{value}</strong>
+                <span className="text-[11px] font-medium text-muted-foreground/80">{label}</span>
             </div>
         </div>
     )
 }
+
