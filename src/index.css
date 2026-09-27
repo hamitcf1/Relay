@@ -864,26 +864,68 @@ body.disable-animations *::after {
    Print Media Styles
    ============================================ */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html, body {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
   body * {
     visibility: hidden;
   }
-  .printable-area, .printable-area * {
-    visibility: visible;
+
+  /* Reset Radix Dialog Overlay & Content positioning for print */
+  [role="dialog"],
+  [data-radix-portal],
+  div[data-state="open"] {
+    position: static !important;
+    transform: none !important;
+    max-height: none !important;
+    max-width: none !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
+
+  .printable-area,
+  .printable-area * {
+    visibility: visible !important;
+  }
+
   .printable-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
     color: black !important;
     box-shadow: none !important;
     border: none !important;
+    overflow: visible !important;
   }
-  .no-print {
+
+  .no-print,
+  .no-print * {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
   }
 }
 

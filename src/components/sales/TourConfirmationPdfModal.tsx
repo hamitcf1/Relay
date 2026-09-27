@@ -9,6 +9,7 @@ import { useLanguageStore } from '@/stores/languageStore'
 import { formatDisplayDate } from '@/lib/utils'
 import type { Sale } from '@/types'
 import { toast } from 'sonner'
+import { RelayMark } from '@/components/brand/RelayBrand'
 
 export type ConfirmationLanguage = 'tr' | 'en' | 'ru'
 
@@ -63,7 +64,7 @@ const CONFIRMATION_TEXTS: Record<ConfirmationLanguage, {
         policyHeader: '3. Değişiklik & İptal Şartları:',
         policyText: 'Tur saati veya tarihindeki olası değişiklik veya iptal taleplerinizi tur saatinden en az 24 saat önce resepsiyon / konsiyerj masamıza iletmeniz gerekmektedir.',
         supportHeader: '4. 7/24 Misafir Destek Hattı:',
-        supportText: 'Tur esnasında veya öncesinde her türlü acil durum, soru ve bilgi talepleriniz için otelimiz resepsiyonu ile anında iletişime geçebilirsiniz.',
+        supportText: 'Tur esnasında veya öncesinde her türlü acil durum, soru ve bilgi talepleriniz için otel iletişim numaramız +90 539 516 07 60 (WhatsApp & 7/24 Aramalar) üzerinden bizimle anında iletişime geçebilirsiniz.',
         voucherHeader: 'RESMİ TUR VOUCHER & GİRİŞ BİLETİ (TUR PASS)',
         labels: {
             guestName: 'Misafir Adı',
@@ -95,7 +96,7 @@ const CONFIRMATION_TEXTS: Record<ConfirmationLanguage, {
         policyHeader: '3. Cancellation & Modification Policy:',
         policyText: 'Any changes to your schedule or cancellations must be communicated to our front desk / concierge team at least 24 hours prior to departure.',
         supportHeader: '4. 24/7 Concierge Guest Support:',
-        supportText: 'For any immediate inquiries, adjustments, or assistance before or during your excursion, our front desk is available 24/7.',
+        supportText: 'For any immediate inquiries, questions, or assistance before or during your excursion, our hotel line +90 539 516 07 60 is open 24/7 for calls and WhatsApp messages.',
         voucherHeader: 'OFFICIAL TOUR VOUCHER & ENTRY PASS',
         labels: {
             guestName: 'Guest Name',
@@ -127,7 +128,7 @@ const CONFIRMATION_TEXTS: Record<ConfirmationLanguage, {
         policyHeader: '3. Изменение и Отмена:',
         policyText: 'Любые изменения даты/времени или отмена бронирования должны быть согласованы с ресепшеном не менее чем за 24 часа до выезда.',
         supportHeader: '4. Круглосуточная Служба Поддержки:',
-        supportText: 'По всем вопросам до или во время экскурсии вы можете обращаться на ресепшен отеля в любое время (24/7).',
+        supportText: 'По всем срочным вопросам или за помощью до и во время тура вы можете связаться с ресепшен отеля по телефону +90 539 516 07 60 (WhatsApp и звонки 24/7).',
         voucherHeader: 'ОФИЦИАЛЬНЫЙ ВАУЧЕР И ВХОДНОЙ БИЛЕТ',
         labels: {
             guestName: 'Имя Гостя',
@@ -232,7 +233,7 @@ export function TourConfirmationPdfModal({ isOpen, onClose, sale }: TourConfirma
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-5xl bg-card border-border text-foreground p-0 overflow-hidden max-h-[92vh] flex flex-col shadow-2xl">
+            <DialogContent className="max-w-5xl bg-card border-border text-foreground p-0 overflow-hidden max-h-[92vh] flex flex-col shadow-2xl [&>button:last-child]:hidden sm:[&>button:last-child]:hidden">
                 <DialogTitle className="sr-only">A4 Tur Rezervasyon Konfirme Belgesi (PDF & Voucher)</DialogTitle>
                 <DialogDescription className="sr-only">A4 Tour Booking Confirmation Document with Voucher Pass</DialogDescription>
 
@@ -285,12 +286,12 @@ export function TourConfirmationPdfModal({ isOpen, onClose, sale }: TourConfirma
                             <Printer className="w-4 h-4" /> Yazdır / A4 PDF
                         </Button>
                         <Button
-                            variant="ghost"
-                            size="icon"
+                            variant="outline"
+                            size="sm"
                             onClick={onClose}
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+                            className="h-8 text-xs gap-1 border-border/80 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="w-3.5 h-3.5" /> Kapat
                         </Button>
                     </div>
                 </div>
@@ -307,15 +308,15 @@ export function TourConfirmationPdfModal({ isOpen, onClose, sale }: TourConfirma
                         <div>
                             <div className="flex items-start justify-between border-b-2 border-zinc-900 pb-5">
                                 <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <div className="size-7 rounded-lg bg-zinc-950 text-white font-black flex items-center justify-center text-sm tracking-tighter">
-                                            AR
+                                    <div className="flex items-center gap-2.5 mb-1">
+                                        <div className="size-8 rounded-lg bg-zinc-950 p-1.5 flex items-center justify-center shrink-0 shadow-xs">
+                                            <RelayMark className="size-5 text-amber-400" />
                                         </div>
                                         <h1 className="text-xl font-black tracking-tight text-zinc-950 uppercase">
                                             {hotel?.info?.name || 'AETHERIUS RELAY CONCIERGE'}
                                         </h1>
                                     </div>
-                                    <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest pl-9">
+                                    <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest pl-10">
                                         {texts.subtitle}
                                     </p>
                                 </div>
@@ -475,29 +476,10 @@ export function TourConfirmationPdfModal({ isOpen, onClose, sale }: TourConfirma
 
                             {/* Verification Footer */}
                             <div className="flex items-center justify-between pt-3 text-[9px] text-zinc-400 font-mono">
-                                <span>{hotel?.info?.name || 'Aetherius Hotel Concierge Desk'}</span>
+                                <span>{hotel?.info?.name || 'Aetherius Hotel Concierge Desk'} · İletişim / Contact: +90 539 516 07 60 (WhatsApp & 7/24)</span>
                                 <span>Official Confirmation & Ticket Pass · Generated Version 2.0</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                {/* Bottom Control Toolbar */}
-                <div className="flex items-center justify-between p-3.5 bg-muted/90 backdrop-blur-md border-t border-border/60 shrink-0 no-print">
-                    <span className="text-xs text-muted-foreground hidden sm:inline">
-                        Seçili Dil: <strong className="text-foreground uppercase">{docLang}</strong> — A4 formatında yazdırılmaya hazır.
-                    </span>
-                    <div className="flex items-center gap-2 ml-auto">
-                        <Button variant="outline" size="sm" onClick={onClose} className="h-8 text-xs">
-                            Kapat
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={handlePrintA4}
-                            className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs font-bold gap-1.5 shadow-md"
-                        >
-                            <Printer className="w-4 h-4" /> Yazdır / PDF Olarak Kaydet
-                        </Button>
                     </div>
                 </div>
             </DialogContent>
