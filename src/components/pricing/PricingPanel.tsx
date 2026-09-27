@@ -539,37 +539,49 @@ function SpecialPeriodsCampaignsView({
                         const isUpcoming = today < item.override.start_date
                         const isPast = today > item.override.end_date
 
+                        let totalNights = 0
+                        try {
+                            const d1 = parseISO(item.override.start_date)
+                            const d2 = parseISO(item.override.end_date)
+                            if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
+                                totalNights = Math.max(1, Math.ceil((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)))
+                            }
+                        } catch (_e) {}
+
                         return (
                             <Card
                                 key={item.id}
                                 className={cn(
                                     "border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden transition-all duration-300 relative group shadow-md",
-                                    isCurrent && "border-amber-500/60 ring-1 ring-amber-500/40 shadow-lg shadow-amber-500/10"
+                                    isCurrent && "border-amber-500/60 ring-1 ring-amber-500/40 shadow-lg shadow-amber-500/10",
+                                    item.isGlobal ? "bg-gradient-to-r from-purple-500/5 via-background/50 to-background/50" : "bg-gradient-to-r from-blue-500/5 via-background/50 to-background/50"
                                 )}
                             >
-                                <div className="p-4 sm:p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                                    <div className="space-y-2 flex-1">
+                                <div className="p-4 sm:p-5 space-y-4">
+                                    {/* Top Bar: Target & Status & Actions */}
+                                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/20 pb-3">
                                         <div className="flex flex-wrap items-center gap-2">
                                             {/* Target Tag */}
                                             <Badge
                                                 variant={item.isGlobal ? 'default' : 'secondary'}
                                                 className={cn(
-                                                    "font-bold text-xs px-2.5 py-0.5",
-                                                    item.isGlobal && "bg-purple-600 text-white"
+                                                    "font-bold text-xs px-3 py-1 rounded-xl shadow-sm",
+                                                    item.isGlobal ? "bg-purple-600 text-white" : "bg-blue-600 text-white"
                                                 )}
                                             >
+                                                {item.isGlobal ? <Building2 className="w-3.5 h-3.5 mr-1 inline" /> : <Building2 className="w-3.5 h-3.5 mr-1 inline" />}
                                                 {item.targetName}
                                             </Badge>
 
                                             {/* Status Badge */}
                                             {isCurrent && (
-                                                <Badge variant="success" className="animate-pulse flex items-center gap-1">
+                                                <Badge variant="success" className="animate-pulse flex items-center gap-1 font-bold">
                                                     <Zap className="w-3 h-3" />
                                                     Şu An Aktif Sezon
                                                 </Badge>
                                             )}
                                             {isUpcoming && (
-                                                <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10">
+                                                <Badge variant="outline" className="text-amber-500 border-amber-500/40 bg-amber-500/10 font-bold">
                                                     Yaklaşan Sezon
                                                 </Badge>
                                             )}
@@ -579,84 +591,95 @@ function SpecialPeriodsCampaignsView({
                                                 </Badge>
                                             )}
 
-                                            {/* Date Range */}
-                                            <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary ml-auto lg:ml-0">
-                                                <CalendarIcon className="w-3.5 h-3.5" />
+                                            {/* Date Pill */}
+                                            <div className="flex items-center gap-2 font-mono text-xs font-bold text-primary bg-background/80 px-3 py-1 rounded-xl border border-border/40 shadow-inner">
+                                                <CalendarIcon className="w-3.5 h-3.5 text-amber-500" />
                                                 <span>{formatDisplayDate(item.override.start_date)}</span>
-                                                <span className="text-muted-foreground">→</span>
+                                                <span className="text-muted-foreground font-normal">→</span>
                                                 <span>{formatDisplayDate(item.override.end_date)}</span>
+                                                {totalNights > 0 && (
+                                                    <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0 font-mono bg-muted/60">
+                                                        {totalNights} Gece
+                                                    </Badge>
+                                                )}
                                             </div>
                                         </div>
 
-                                        {/* Room Prices Chips */}
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-2">
-                                            {ROOM_TYPES.map((room) => {
-                                                const p = item.override.prices?.[room]
-                                                return (
-                                                    <div
-                                                        key={room}
-                                                        className="p-2 rounded-xl bg-muted/20 border border-border/30 flex flex-col gap-0.5"
-                                                    >
-                                                        <span className="text-[10px] text-muted-foreground font-semibold truncate capitalize">
-                                                            {t(`room.${room}`)}
-                                                        </span>
-                                                        <span className="font-mono font-bold text-xs text-foreground">
-                                                            {p?.amount ? (
-                                                                <>
-                                                                    <span className="text-[9px] font-normal opacity-60 mr-1">{p.currency || 'EUR'}</span>
-                                                                    {p.amount.toFixed(2)}
-                                                                </>
-                                                            ) : (
-                                                                <span className="text-muted-foreground/30 font-light">---</span>
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
+                                        {/* GM Actions */}
+                                        {isGM && (
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 text-xs gap-1.5 bg-background/80 hover:bg-muted"
+                                                    onClick={() =>
+                                                        setEditingOverride({
+                                                            targetId: item.targetId,
+                                                            override: item.override
+                                                        })
+                                                    }
+                                                >
+                                                    <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                                                    Düzenle
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                    onClick={async () => {
+                                                        const confirmed = await confirm({
+                                                            title: 'Sezon / Tarih aralığı silinsin mi?',
+                                                            description: `${item.targetName} acentesine ait bu sezon kontratı kalıcı olarak silinecektir.`,
+                                                            variant: 'destructive',
+                                                            confirmLabel: t('common.delete')
+                                                        })
+                                                        if (confirmed) {
+                                                            if (item.isGlobal) {
+                                                                await removeBaseOverride(hotelId, item.override.id)
+                                                            } else {
+                                                                await removeAgencyOverride(hotelId, item.targetId, item.override.id)
+                                                            }
+                                                            toast.success('Tarihsel sezonsal kural silindi.')
+                                                        }
+                                                    }}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* GM Actions */}
-                                    {isGM && (
-                                        <div className="flex items-center justify-end gap-2 shrink-0 border-t border-border/20 pt-3 lg:border-0 lg:pt-0">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 text-xs gap-1.5"
-                                                onClick={() =>
-                                                    setEditingOverride({
-                                                        targetId: item.targetId,
-                                                        override: item.override
-                                                    })
-                                                }
-                                            >
-                                                <Pencil className="w-3.5 h-3.5" />
-                                                Düzenle
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                onClick={async () => {
-                                                    const confirmed = await confirm({
-                                                        title: 'Sezon / Tarih aralığı silinsin mi?',
-                                                        variant: 'destructive',
-                                                        confirmLabel: t('common.delete')
-                                                    })
-                                                    if (confirmed) {
-                                                        if (item.isGlobal) {
-                                                            await removeBaseOverride(hotelId, item.override.id)
-                                                        } else {
-                                                            await removeAgencyOverride(hotelId, item.targetId, item.override.id)
-                                                        }
-                                                        toast.success('Tarihsel sezonsal kural silindi.')
-                                                    }
-                                                }}
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
-                                        </div>
-                                    )}
+                                    {/* Room Prices Grid */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+                                        {ROOM_TYPES.map((room) => {
+                                            const p = item.override.prices?.[room]
+                                            return (
+                                                <div
+                                                    key={room}
+                                                    className={cn(
+                                                        "p-2.5 rounded-2xl border transition-all flex flex-col gap-1",
+                                                        p?.amount
+                                                            ? "bg-background/90 border-border/50 shadow-sm"
+                                                            : "bg-muted/10 border-border/20 opacity-50"
+                                                    )}
+                                                >
+                                                    <span className="text-[10px] text-muted-foreground font-bold truncate capitalize">
+                                                        {t(`room.${room}`)}
+                                                    </span>
+                                                    <span className="font-mono font-extrabold text-sm text-foreground">
+                                                        {p?.amount ? (
+                                                            <>
+                                                                <span className="text-[9px] font-medium text-amber-500 mr-1">{p.currency || 'EUR'}</span>
+                                                                {p.amount.toFixed(2)}
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-muted-foreground/30 font-light text-xs">Tanımsız</span>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
                                 </div>
                             </Card>
                         )
@@ -1230,13 +1253,60 @@ function OverrideEditorModal({
     const [startDate, setStartDate] = useState(initialData?.start_date || format(new Date(), 'yyyy-MM-dd'))
     const [endDate, setEndDate] = useState(initialData?.end_date || format(addDaysFns(new Date(), 7), 'yyyy-MM-dd'))
     const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>(initialData ? { ...initialData.prices } : {})
+    const [bulkPrice, setBulkPrice] = useState('')
+    const [bulkCurrency, setBulkCurrency] = useState<PricingCurrency>('EUR')
     const [isSaving, setIsSaving] = useState(false)
+
+    // Calculate nights for validation display
+    const calculatedNights = useMemo(() => {
+        try {
+            const d1 = parseISO(startDate)
+            const d2 = parseISO(endDate)
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return null
+            const diff = Math.ceil((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24))
+            return diff > 0 ? diff : null
+        } catch (_e) {
+            return null
+        }
+    }, [startDate, endDate])
+
+    const handleApplyBulkPrice = () => {
+        const val = parseFloat(bulkPrice)
+        if (isNaN(val) || val <= 0) {
+            toast.error('Lütfen geçerli bir toplu oda fiyatı girin.')
+            return
+        }
+        const updated: Record<string, RoomPriceEntry> = {}
+        ROOM_TYPES.forEach((r) => {
+            updated[r] = { amount: val, currency: bulkCurrency }
+        })
+        setPrices(updated)
+        toast.success(`Tüm oda tiplerine ${val} ${bulkCurrency} uygulandı.`)
+    }
 
     const handleSave = async () => {
         if (!startDate || !endDate) {
             toast.error('Lütfen başlangıç ve bitiş tarihlerini girin.')
             return
         }
+
+        const d1 = parseISO(startDate)
+        const d2 = parseISO(endDate)
+        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+            toast.error('Geçerli bir başlangıç ve bitiş tarihi girin.')
+            return
+        }
+
+        if (d1.getFullYear() < 2000 || d1.getFullYear() > 2100 || d2.getFullYear() < 2000 || d2.getFullYear() > 2100) {
+            toast.error('Yıl değeri 2000 - 2100 arasında olmalıdır.')
+            return
+        }
+
+        if (d2 <= d1) {
+            toast.error('Bitiş tarihi, başlangıç tarihinden sonra olmalıdır.')
+            return
+        }
+
         setIsSaving(true)
         try {
             await onSave(targetId, {
@@ -1252,31 +1322,31 @@ function OverrideEditorModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Zap className="w-5 h-5 text-amber-500" />
-                        {initialData ? 'Sezonu Düzenle' : 'Yeni Sezon / Tarih Aralığı Ekle'}
+                        {initialData ? 'Sezon Kontratını Düzenle' : 'Yeni Sezon / Tarih Aralığı Ekle'}
                     </DialogTitle>
                     <DialogDescription>
-                        Belirli tarih aralığında geçerli olacak sezonsal oda fiyat tarifesini girin.
+                        Belirli tarih aralığında geçerli olacak sezonsal oda fiyat kontratını tanımlayın.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="py-4 space-y-4">
+                <div className="py-4 space-y-5">
                     {/* Target & Dates */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-muted/20 border border-border/30">
                         <div className="space-y-1 sm:col-span-1">
-                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Hedef</label>
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Hedef Acente</label>
                             <Select value={targetId} onValueChange={setTargetId} disabled={Boolean(initialData)}>
-                                <SelectTrigger className="h-9 text-xs">
+                                <SelectTrigger className="h-9 text-xs bg-background font-semibold">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="global">Genel Acentalar (Tüm Herkes)</SelectItem>
                                     {agencies.map((a) => (
                                         <SelectItem key={a.id} value={a.id}>
-                                            {a.name}
+                                            {a.name} (Özel Anlaşmalı)
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -1284,17 +1354,58 @@ function OverrideEditorModal({
                         </div>
                         <div className="space-y-1">
                             <label className="text-[10px] font-bold text-muted-foreground uppercase">Başlangıç Tarihi</label>
-                            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs" />
+                            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs bg-background" />
                         </div>
                         <div className="space-y-1">
                             <label className="text-[10px] font-bold text-muted-foreground uppercase">Bitiş Tarihi</label>
-                            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9 text-xs" />
+                            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9 text-xs bg-background" />
+                        </div>
+                    </div>
+
+                    {/* Calculated Nights Info */}
+                    <div className="flex items-center justify-between text-xs px-1">
+                        {calculatedNights ? (
+                            <span className="text-emerald-500 font-bold flex items-center gap-1">
+                                <CheckCircle2 className="w-4 h-4" />
+                                Sezon Süresi: <span className="font-mono text-sm underline">{calculatedNights} Gece</span>
+                            </span>
+                        ) : (
+                            <span className="text-amber-500 font-medium">Lütfen geçerli bir başlangıç ve bitiş tarihi girin.</span>
+                        )}
+                    </div>
+
+                    {/* Bulk Price Application Helper */}
+                    <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="text-xs font-bold text-amber-500 flex items-center gap-1.5">
+                            <Sparkles className="w-4 h-4" />
+                            <span>Tüm Odalara Tek Fiyat Uygula:</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                type="number"
+                                placeholder="Fiyat"
+                                value={bulkPrice}
+                                onChange={(e) => setBulkPrice(e.target.value)}
+                                className="h-8 w-24 text-xs font-mono bg-background"
+                            />
+                            <Select value={bulkCurrency} onValueChange={(val) => setBulkCurrency(val as PricingCurrency)}>
+                                <SelectTrigger className="h-8 w-20 text-xs bg-background">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                                    <SelectItem value="USD">USD ($)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button size="sm" variant="secondary" onClick={handleApplyBulkPrice} className="h-8 text-xs font-bold">
+                                Uygula
+                            </Button>
                         </div>
                     </div>
 
                     {/* Prices Grid */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Oda Fiyatları</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Oda Fiyat Tarifeleri</label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {ROOM_TYPES.map((room) => (
                                 <div key={room} className="p-3 rounded-2xl bg-muted/20 border border-border/40 space-y-1.5">
@@ -1359,9 +1470,9 @@ function OverrideEditorModal({
                     <Button variant="ghost" onClick={onClose}>
                         İptal
                     </Button>
-                    <Button onClick={handleSave} disabled={isSaving} className="bg-amber-500 hover:bg-amber-600 text-white">
+                    <Button onClick={handleSave} disabled={isSaving} className="bg-amber-500 hover:bg-amber-600 text-white font-bold">
                         {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                        Sezonu Kaydet
+                        Sezon Kontratını Kaydet
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -1384,25 +1495,80 @@ function PriceCalculatorView({
     dateLocale: any
 }) {
     const { t } = useLanguageStore()
+    
+    // User Input States (No automatic calculation triggered on typing)
     const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
     const [endDate, setEndDate] = useState(format(addDaysFns(new Date(), 3), 'yyyy-MM-dd'))
     const [selectedAgencyId, setSelectedAgencyId] = useState<string>('base')
     const [selectedRoomType, setSelectedRoomType] = useState<RoomType>('standard')
 
-    const agencyIdArg = selectedAgencyId === 'base' ? undefined : selectedAgencyId
-    const agencyObj = agencies.find((a) => a.id === selectedAgencyId)
+    // Calculated Query State (Only updated when user explicitly clicks "Fiyat Sorgula / Hesapla")
+    const [calculatedParams, setCalculatedParams] = useState<{
+        startStr: string
+        endStr: string
+        agencyId: string
+        roomType: RoomType
+    } | null>({
+        startStr: format(new Date(), 'yyyy-MM-dd'),
+        endStr: format(addDaysFns(new Date(), 3), 'yyyy-MM-dd'),
+        agencyId: 'base',
+        roomType: 'standard'
+    })
 
-    // Calculate Nightly Breakdown
+    const handleRunCalculation = () => {
+        const start = parseISO(startDate)
+        const end = parseISO(endDate)
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            toast.error('Lütfen geçerli bir başlangıç ve bitiş tarihi girin.')
+            return
+        }
+
+        const startYear = start.getFullYear()
+        const endYear = end.getFullYear()
+        if (startYear < 2000 || startYear > 2100 || endYear < 2000 || endYear > 2100) {
+            toast.error('Yıl değeri 2000 ile 2100 arasında olmalıdır.')
+            return
+        }
+
+        if (!isBefore(start, end)) {
+            toast.error('Çıkış tarihi (Check-out), giriş tarihinden (Check-in) sonra olmalıdır.')
+            return
+        }
+
+        const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+        if (diffDays > 365) {
+            toast.error('Maksimum 365 gecelik konaklama hesaplanabilir.')
+            return
+        }
+
+        setCalculatedParams({
+            startStr: startDate,
+            endStr: endDate,
+            agencyId: selectedAgencyId,
+            roomType: selectedRoomType
+        })
+    }
+
+    // Perform calculation safely using calculatedParams
     const calculation = useMemo(() => {
+        if (!calculatedParams) return null
+
         try {
-            const start = parseISO(startDate)
-            const end = parseISO(endDate)
+            const { startStr, endStr, agencyId, roomType } = calculatedParams
+            const start = parseISO(startStr)
+            const end = parseISO(endStr)
 
             if (isNaN(start.getTime()) || isNaN(end.getTime()) || !isBefore(start, end)) {
                 return null
             }
 
             const nights = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)))
+            if (nights > 365) return null
+
+            const agencyIdArg = agencyId === 'base' ? undefined : agencyId
+            const agencyObj = agencies.find((a) => a.id === agencyId)
+
             const dailyBreakdown: Array<{
                 dateStr: string
                 formattedDate: string
@@ -1419,18 +1585,17 @@ function PriceCalculatorView({
                 const dateStr = format(currentDay, 'yyyy-MM-dd')
                 const formattedDate = format(currentDay, 'dd MMMM yyyy, EEEE', { locale: dateLocale })
 
-                // Determine rule source manually for audit transparency
                 let ruleName = 'Genel Acenta Fiyatı'
                 let ruleType: 'agency_override' | 'global_override' | 'agency_base' | 'global_base' | 'none' = 'global_base'
 
                 if (agencyIdArg && agencyObj) {
                     const agencyOverride = agencyObj.overrides?.find(
-                        (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[selectedRoomType]?.amount
+                        (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[roomType]?.amount
                     )
                     if (agencyOverride) {
                         ruleName = `${agencyObj.name} Özel Sezon Kontratı`
                         ruleType = 'agency_override'
-                    } else if (agencyObj.base_prices?.[selectedRoomType]?.amount) {
+                    } else if (agencyObj.base_prices?.[roomType]?.amount) {
                         ruleName = `${agencyObj.name} Standart Anlaşma Fiyatı`
                         ruleType = 'agency_base'
                     }
@@ -1438,7 +1603,7 @@ function PriceCalculatorView({
 
                 if (ruleType === 'global_base') {
                     const globalOverride = baseOverrides.find(
-                        (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[selectedRoomType]?.amount
+                        (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[roomType]?.amount
                     )
                     if (globalOverride) {
                         ruleName = 'Genel Acenta Sezon Tarifesi'
@@ -1446,7 +1611,7 @@ function PriceCalculatorView({
                     }
                 }
 
-                const price = getEffectivePrice(dateStr, selectedRoomType, agencyIdArg)
+                const price = getEffectivePrice(dateStr, roomType, agencyIdArg)
                 if (price?.amount) {
                     totalPrice += price.amount
                     primaryCurrency = price.currency || 'EUR'
@@ -1476,7 +1641,7 @@ function PriceCalculatorView({
         } catch (_e) {
             return null
         }
-    }, [startDate, endDate, selectedAgencyId, selectedRoomType, agencyIdArg, agencyObj, baseOverrides, getEffectivePrice, dateLocale])
+    }, [calculatedParams, agencies, baseOverrides, getEffectivePrice, dateLocale])
 
     return (
         <Card className="border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden shadow-2xl relative">
@@ -1488,70 +1653,82 @@ function PriceCalculatorView({
                         Fiyat Hesaplama & Gece Kırılımı
                     </CardTitle>
                     <CardDescription className="text-xs">
-                        Tarih aralığı, oda tipi ve acente seçerek konaklama tutarını ve gece gece hangi sezonsal kuralın uygulandığını sorgulayın.
+                        Tarih aralığı, oda tipi ve acente seçerek konaklama tutarını sorgulayın. Fiyatları görmek için tarihler seçildikten sonra <b>"Fiyatları Hesapla"</b> butonuna basın.
                     </CardDescription>
                 </div>
             </CardHeader>
 
             <CardContent className="p-6 space-y-6 relative z-10">
-                {/* Inputs Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-2xl bg-muted/20 border border-border/30">
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                            Giriş Tarihi (Check-in)
-                        </label>
-                        <Input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className="h-10 text-xs bg-background"
-                        />
+                {/* Inputs Grid + Explicit Search / Calculate Button */}
+                <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Giriş Tarihi (Check-in)
+                            </label>
+                            <Input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="h-10 text-xs bg-background font-semibold"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Çıkış Tarihi (Check-out)
+                            </label>
+                            <Input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="h-10 text-xs bg-background font-semibold"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Acente
+                            </label>
+                            <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
+                                <SelectTrigger className="h-10 text-xs bg-background font-semibold">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="base">Genel Acentalar (Varsayılan Sezonlar)</SelectItem>
+                                    {agencies.map((a) => (
+                                        <SelectItem key={a.id} value={a.id}>
+                                            {a.name} (Özel Anlaşmalı)
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Oda Tipi
+                            </label>
+                            <Select value={selectedRoomType} onValueChange={(val) => setSelectedRoomType(val as RoomType)}>
+                                <SelectTrigger className="h-10 text-xs bg-background font-semibold">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ROOM_TYPES.map((room) => (
+                                        <SelectItem key={room} value={room}>
+                                            {t(`room.${room}`)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                            Çıkış Tarihi (Check-out)
-                        </label>
-                        <Input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className="h-10 text-xs bg-background"
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                            Acente
-                        </label>
-                        <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
-                            <SelectTrigger className="h-10 text-xs bg-background">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="base">Genel Acentalar (Varsayılan Sezonlar)</SelectItem>
-                                {agencies.map((a) => (
-                                    <SelectItem key={a.id} value={a.id}>
-                                        {a.name} (Özel Anlaşmalı)
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                            Oda Tipi
-                        </label>
-                        <Select value={selectedRoomType} onValueChange={(val) => setSelectedRoomType(val as RoomType)}>
-                            <SelectTrigger className="h-10 text-xs bg-background">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {ROOM_TYPES.map((room) => (
-                                    <SelectItem key={room} value={room}>
-                                        {t(`room.${room}`)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+
+                    <div className="flex justify-end border-t border-border/20 pt-3">
+                        <Button
+                            onClick={handleRunCalculation}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 px-6 h-10 shadow-lg shadow-emerald-600/20"
+                        >
+                            <Search className="w-4 h-4" />
+                            Fiyatları Hesapla / Sorgula
+                        </Button>
                     </div>
                 </div>
 
@@ -1666,7 +1843,7 @@ function PriceCalculatorView({
                     </div>
                 ) : (
                     <div className="p-8 text-center text-muted-foreground text-xs italic">
-                        Geçerli bir tarih aralığı seçin (Giriş tarihi Çıkış tarihinden önce olmalıdır).
+                        Tarihleri ve kriterleri seçtikten sonra <b>"Fiyatları Hesapla / Sorgula"</b> butonuna basarak hesaplamayı başlatın.
                     </div>
                 )}
             </CardContent>
