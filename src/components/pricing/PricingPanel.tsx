@@ -1,24 +1,23 @@
-import { useState, useEffect, useRef } from 'react'
-import { format, addDays as addDaysFns } from 'date-fns'
+import { useState, useEffect, useMemo } from 'react'
+import { format, addDays as addDaysFns, parseISO, isBefore } from 'date-fns'
+import { tr, enUS, ru } from 'date-fns/locale'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-    Save,
     Loader2,
     Building2,
     Plus,
     Trash2,
-    Calendar,
+    Calendar as CalendarIcon,
     Search,
-    ChevronRight,
-    ArrowLeft,
-    CheckCircle2,
     Zap,
-    Users,
     Sparkles,
-    ArrowUpDown,
-    Table,
-    List,
-    Pencil
+    Table as TableIcon,
+    Pencil,
+    Calculator,
+    CheckCircle2,
+    CalendarDays,
+    Layers,
+    Sparkle
 } from 'lucide-react'
 import { usePricingStore } from '@/stores/pricingStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -27,6 +26,7 @@ import { cn, formatDisplayDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
     Select,
     SelectContent,
@@ -34,20 +34,34 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from '@/components/ui/dialog'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 import { toast } from 'sonner'
 import type { RoomType, PricingCurrency, RoomPriceEntry, Agency, AgencyOverride, BaseOverride } from '@/types'
-import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 
 const ROOM_TYPES: RoomType[] = ['standard', 'corner', 'corner_jacuzzi', 'triple', 'teras_suite']
 
 export function PricingPanel() {
     const { user } = useAuthStore()
-    const { t } = useLanguageStore()
+    const { t, language } = useLanguageStore()
     const confirm = useConfirm()
     const isGM = user?.role === 'gm'
     const hotelId = user?.hotel_id
+
+    const dateLocale = useMemo(() => {
+        if (language === 'tr') return tr
+        if (language === 'ru') return ru
+        return enUS
+    }, [language])
 
     const {
         basePrices,
@@ -58,13 +72,25 @@ export function PricingPanel() {
         subscribeToBaseOverrides,
         subscribeToAgencies,
         addAgency,
-        removeAgency
+        removeAgency,
+        setBasePrices,
+        updateAgencyBasePrices,
+        setBaseOverride,
+        setAgencyOverride,
+        removeBaseOverride,
+        removeAgencyOverride,
+        getEffectivePrice
     } = usePricingStore()
 
-    const [activeTab, setActiveTab] = useState<'generic' | 'special'>('generic')
-    const [selectedAgencyId, setSelectedAgencyId] = useState<string | null>(null)
-    const selectedAgency = agencies.find(a => a.id === selectedAgencyId)
+    const [activeTab, setActiveTab] = useState<'matrix' | 'campaigns' | 'calculator'>('matrix')
 
+    // Modal & Drawer States
+    const [editPricesTarget, setEditPricesTarget] = useState<{ id: string; name: string; prices: Record<string, RoomPriceEntry> } | null>(null)
+    const [addAgencyOpen, setAddAgencyOpen] = useState(false)
+    const [addAgencyName, setAddAgencyName] = useState('')
+    const [isAddingAgency, setIsAddingAgency] = useState(false)
+
+    // Subscriptions
     useEffect(() => {
         if (!hotelId) return
         const unsubBase = subscribeToBasePrices(hotelId)
@@ -76,6 +102,12 @@ export function PricingPanel() {
             unsubAgencies()
         }
     }, [hotelId, subscribeToBasePrices, subscribeToBaseOverrides, subscribeToAgencies])
+
+    const totalOverridesCount = useMemo(() => {
+        const globalCount = baseOverrides.length
+        const agencyCount = agencies.reduce((acc, a) => acc + (a.overrides?.length || 0), 0)
+        return globalCount + agencyCount
+    }, [baseOverrides, agencies])
 
     if (!user || !hotelId) {
         return (
@@ -93,217 +125,955 @@ export function PricingPanel() {
         )
     }
 
-    // Normal users only see price lookup
-    if (!isGM) {
-        return (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
-                <PriceLookup />
-            </div>
-        )
-    }
-
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
-            {/* Top Tab Switcher */}
-            <div className="flex justify-center">
-                <div className="bg-background/40 backdrop-blur-xl border border-border/50 p-1 rounded-2xl flex gap-1 shadow-2xl">
-                    <Button
-                        variant={activeTab === 'generic' ? 'secondary' : 'ghost'}
-                        onClick={() => setActiveTab('generic')}
-                        className={cn(
-                            "rounded-xl px-6 py-2 h-auto gap-2 transition-all duration-300",
-                            activeTab === 'generic' ? "shadow-lg bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        <Table className="w-4 h-4" />
-                        <div className="flex flex-col items-start leading-none">
-                            <span className="text-sm font-bold">Standard Rates</span>
-                            <span className="text-[10px] opacity-70">Generic Prices</span>
+            {/* Header & Priority Hierarchy Guide */}
+            <div className="relative overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-r from-background/80 via-background/40 to-primary/5 p-6 backdrop-blur-xl shadow-2xl">
+                <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+                <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+                                <Building2 className="h-5 w-5 text-primary" />
+                            </div>
+                            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                                {t('module.pricing_label')} & Sezon Yönetimi
+                            </h1>
+                            {isGM ? (
+                                <Badge variant="default" className="ml-2 font-mono text-[10px]">
+                                    Yönetici Erişimi
+                                </Badge>
+                            ) : (
+                                <Badge variant="outline" className="ml-2 font-mono text-[10px] text-muted-foreground">
+                                    Salt Okunur Görünüm
+                                </Badge>
+                            )}
                         </div>
-                    </Button>
-                    <Button
-                        variant={activeTab === 'special' ? 'secondary' : 'ghost'}
-                        onClick={() => setActiveTab('special')}
-                        className={cn(
-                            "rounded-xl px-6 py-2 h-auto gap-2 transition-all duration-300",
-                            activeTab === 'special' ? "shadow-lg bg-amber-500 text-white hover:bg-amber-600" : "text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        <Zap className="w-4 h-4" />
-                        <div className="flex flex-col items-start leading-none">
-                            <span className="text-sm font-bold">Special Periods</span>
-                            <span className="text-[10px] opacity-70">Overrides & AI</span>
+                        <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                            Genel otel oda fiyatlarını, acente bazlı özel anlaşmaları ve dönemsel fiyat kampanyalarını yönetin.
+                        </p>
+                    </div>
+
+                    {/* Priority Resolution Hierarchy Pills */}
+                    <div className="rounded-2xl border border-border/40 bg-background/50 p-3 backdrop-blur-md shrink-0">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            <Layers className="w-3.5 h-3.5 text-primary" />
+                            <span>{t('pricing.hierarchy.title')}</span>
                         </div>
-                    </Button>
+                        <div className="flex flex-wrap items-center gap-1 text-[11px] font-medium">
+                            <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 font-semibold">
+                                1. {t('pricing.hierarchy.step1')}
+                            </span>
+                            <span className="text-muted-foreground/60">→</span>
+                            <span className="px-2 py-0.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 font-semibold">
+                                2. {t('pricing.hierarchy.step2')}
+                            </span>
+                            <span className="text-muted-foreground/60">→</span>
+                            <span className="px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold">
+                                3. {t('pricing.hierarchy.step3')}
+                            </span>
+                            <span className="text-muted-foreground/60">→</span>
+                            <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">
+                                4. {t('pricing.hierarchy.step4')}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <AnimatePresence mode="wait">
-                {activeTab === 'generic' ? (
-                    <motion.div
-                        key="generic"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
-                        className="space-y-6"
-                    >
-                        <GenericAgencyPricingTable
-                            agencies={agencies}
-                            isGM={isGM}
-                            hotelId={hotelId}
-                            onAddAgency={async (name) => {
-                                if (hotelId) await addAgency(hotelId, name)
+            {/* Navigation Tabs */}
+            <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
+                <div className="flex justify-center">
+                    <TabsList className="bg-background/60 backdrop-blur-xl border border-border/50 p-1 rounded-2xl gap-1 shadow-2xl h-auto">
+                        <TabsTrigger
+                            value="matrix"
+                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
+                        >
+                            <TableIcon className="w-4 h-4" />
+                            <span>{t('pricing.tabs.matrix')}</span>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="campaigns"
+                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+                        >
+                            <CalendarIcon className="w-4 h-4" />
+                            <span>{t('pricing.tabs.campaigns')}</span>
+                            {totalOverridesCount > 0 && (
+                                <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0 h-4 bg-background/30 border-0">
+                                    {totalOverridesCount}
+                                </Badge>
+                            )}
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="calculator"
+                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+                        >
+                            <Calculator className="w-4 h-4" />
+                            <span>{t('pricing.tabs.calculator')}</span>
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
+
+                {/* TAB 1: RATE MATRIX */}
+                <TabsContent value="matrix" className="space-y-6 focus-visible:outline-none">
+                    <RateMatrixView
+                        agencies={agencies}
+                        basePrices={basePrices}
+                        isGM={isGM}
+                        onEditPrices={(id, name, prices) => setEditPricesTarget({ id, name, prices })}
+                        onOpenAddAgency={() => setAddAgencyOpen(true)}
+                        onRemoveAgency={async (agencyId, name) => {
+                            const confirmed = await confirm({
+                                title: `${name} acentesi silinsin mi?`,
+                                description: 'Bu acenteye tanımlı tüm özel fiyatlar silinecektir.',
+                                variant: 'destructive',
+                                confirmLabel: t('common.delete'),
+                            })
+                            if (confirmed) {
+                                await removeAgency(hotelId, agencyId)
+                                toast.success(`${name} silindi.`)
+                            }
+                        }}
+                    />
+                </TabsContent>
+
+                {/* TAB 2: SPECIAL PERIODS & CAMPAIGNS */}
+                <TabsContent value="campaigns" className="space-y-6 focus-visible:outline-none">
+                    <SpecialPeriodsCampaignsView
+                        agencies={agencies}
+                        baseOverrides={baseOverrides}
+                        isGM={isGM}
+                        hotelId={hotelId}
+                        setBaseOverride={setBaseOverride}
+                        setAgencyOverride={setAgencyOverride}
+                        removeBaseOverride={removeBaseOverride}
+                        removeAgencyOverride={removeAgencyOverride}
+                    />
+                </TabsContent>
+
+                {/* TAB 3: PRICE CALCULATOR */}
+                <TabsContent value="calculator" className="space-y-6 focus-visible:outline-none">
+                    <PriceCalculatorView
+                        agencies={agencies}
+                        baseOverrides={baseOverrides}
+                        getEffectivePrice={getEffectivePrice}
+                        dateLocale={dateLocale}
+                    />
+                </TabsContent>
+            </Tabs>
+
+            {/* EDIT BASE / AGENCY PRICES MODAL (For GM) */}
+            {editPricesTarget && (
+                <EditPricesModal
+                    target={editPricesTarget}
+                    isOpen={Boolean(editPricesTarget)}
+                    onClose={() => setEditPricesTarget(null)}
+                    onSave={async (newPrices) => {
+                        try {
+                            if (editPricesTarget.id === 'global') {
+                                await setBasePrices(hotelId, newPrices, user.uid)
+                            } else {
+                                await updateAgencyBasePrices(hotelId, editPricesTarget.id, newPrices)
+                            }
+                            toast.success(`${editPricesTarget.name} fiyatları kaydedildi.`)
+                            setEditPricesTarget(null)
+                        } catch (err) {
+                            console.error(err)
+                            toast.error('Fiyatlar kaydedilirken hata oluştu.')
+                        }
+                    }}
+                />
+            )}
+
+            {/* ADD AGENCY DIALOG (For GM) */}
+            <Dialog open={addAgencyOpen} onOpenChange={setAddAgencyOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-primary" />
+                            {t('pricing.agencies.add')}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Oteliniz ile anlaşmalı yeni bir seyahat acentesi tanımlayın.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            Acente Adı
+                        </label>
+                        <Input
+                            placeholder={t('pricing.agencies.placeholder')}
+                            value={addAgencyName}
+                            onChange={(e) => setAddAgencyName(e.target.value)}
+                            onKeyDown={async (e) => {
+                                if (e.key === 'Enter' && addAgencyName.trim()) {
+                                    setIsAddingAgency(true)
+                                    try {
+                                        await addAgency(hotelId, addAgencyName.trim())
+                                        toast.success(`${addAgencyName.trim()} eklendi.`)
+                                        setAddAgencyName('')
+                                        setAddAgencyOpen(false)
+                                    } finally {
+                                        setIsAddingAgency(false)
+                                    }
+                                }
                             }}
-                            onRemoveAgency={async (agencyId) => {
-                                if (hotelId) await removeAgency(hotelId, agencyId)
+                            autoFocus
+                        />
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="ghost" onClick={() => setAddAgencyOpen(false)}>
+                            İptal
+                        </Button>
+                        <Button
+                            disabled={!addAgencyName.trim() || isAddingAgency}
+                            onClick={async () => {
+                                setIsAddingAgency(true)
+                                try {
+                                    await addAgency(hotelId, addAgencyName.trim())
+                                    toast.success(`${addAgencyName.trim()} eklendi.`)
+                                    setAddAgencyName('')
+                                    setAddAgencyOpen(false)
+                                } finally {
+                                    setIsAddingAgency(false)
+                                }
                             }}
-                        />
-                        <PriceLookup />
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="special"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.3 }}
-                        className="space-y-6"
-                    >
-                        {/* Special Periods Content */}
-                        <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
-                            {isGM ? <BulkRateEditor hotelId={hotelId!} /> : <PriceLookup />}
-                        </div>
-
-                        {/* AI Agent Section (GM Only) */}
-                        {isGM && (
-                            <AIPricingAgent hotelId={hotelId!} />
-                        )}
-
-                        {/* Global Overrides (Everyone) */}
-                        <GlobalOverrideManager
-                            baseOverrides={baseOverrides}
-                            isGM={isGM}
-                            hotelId={hotelId!}
-                        />
-
-                        {/* Agencies Section */}
-                        <Card className="border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden">
-                            <CardHeader className="border-b border-border/50 bg-muted/30 relative z-10">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-xl flex items-center gap-2">
-                                            <Building2 className="w-6 h-6 text-primary" />
-                                            {t('pricing.agencies.title')}
-                                        </CardTitle>
-                                        <CardDescription>{t('pricing.agencies.desc')}</CardDescription>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        {isGM && !selectedAgencyId && (
-                                            <AddAgencyDialog dirtyId="pricing-new-special-agency" onAdd={async (name) => {
-                                                if (hotelId) await addAgency(hotelId, name)
-                                            }} />
-                                        )}
-                                        {selectedAgencyId && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => setSelectedAgencyId(null)}
-                                                className="gap-2 rounded-xl group/back hover:bg-primary/10"
-                                            >
-                                                <ArrowLeft className="w-4 h-4 transition-transform group-hover/back:-translate-x-1" />
-                                                Back to list
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-0 relative z-10">
-                                {selectedAgencyId ? (
-                                    <AgencyOverrideManager
-                                        agency={selectedAgency!}
-                                        isGM={isGM}
-                                        hotelId={hotelId}
-                                    />
-                                ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-                                        {agencies.map((agency) => (
-                                            <motion.div
-                                                key={agency.id}
-                                                whileHover={{ y: -5 }}
-                                                className="cursor-pointer"
-                                                onClick={() => setSelectedAgencyId(agency.id)}
-                                            >
-                                                <Card className="border-border/50 bg-muted/20 hover:bg-muted/40 transition-all border-l-4 border-l-primary group/agency overflow-hidden relative">
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-                                                    <CardHeader className="py-4">
-                                                        <div className="flex items-center justify-between">
-                                                            <CardTitle className="text-base flex items-center gap-2">
-                                                                <Building2 className="w-4 h-4 text-primary" />
-                                                                {agency.name}
-                                                            </CardTitle>
-                                                            <div className="flex items-center gap-2">
-                                                                {isGM && (
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        className="h-8 w-8 text-destructive opacity-0 group-hover/agency:opacity-100 transition-opacity hover:bg-destructive/10"
-                                                                        onClick={async (e) => {
-                                                                            e.stopPropagation()
-                                                                            const confirmed = await confirm({
-                                                                                title: `Delete ${agency.name}?`,
-                                                                                variant: 'destructive',
-                                                                                confirmLabel: t('common.delete'),
-                                                                            })
-                                                                            if (confirmed) {
-                                                                                removeAgency(hotelId, agency.id)
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </Button>
-                                                                )}
-                                                                <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover/agency:text-primary transition-colors" />
-                                                            </div>
-                                                        </div>
-                                                        <CardDescription className="flex items-center gap-2">
-                                                            <Zap className="w-3 h-3 text-amber-500" />
-                                                            {agency.overrides.length} Special Periods
-                                                        </CardDescription>
-                                                    </CardHeader>
-                                                </Card>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        >
+                            {isAddingAgency && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                            Acente Ekle
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
 
-function AIPricingAgent({ hotelId }: { hotelId: string }) {
+/* ============================================================================
+ * 1. RATE MATRIX VIEW (TAB 1)
+ * ============================================================================ */
+function RateMatrixView({
+    agencies,
+    basePrices,
+    isGM,
+    onEditPrices,
+    onOpenAddAgency,
+    onRemoveAgency
+}: {
+    agencies: Agency[]
+    basePrices: any
+    isGM: boolean
+    onEditPrices: (id: string, name: string, prices: Record<string, RoomPriceEntry>) => void
+    onOpenAddAgency: () => void
+    onRemoveAgency: (agencyId: string, name: string) => void
+}) {
     const { t } = useLanguageStore()
-    const { agencies, setBaseOverride, setAgencyOverride } = usePricingStore()
+    const [searchQuery, setSearchQuery] = useState('')
+
+    const globalPrices = useMemo(() => (basePrices?.prices || {}) as Record<string, RoomPriceEntry>, [basePrices])
+
+    const filteredAgencies = useMemo(() => {
+        if (!searchQuery.trim()) return agencies
+        const q = searchQuery.toLocaleLowerCase('tr')
+        return agencies.filter(a => a.name.toLocaleLowerCase('tr').includes(q))
+    }, [agencies, searchQuery])
+
+    return (
+        <Card className="border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden shadow-2xl relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+            <CardHeader className="border-b border-border/30 bg-muted/20 py-4 relative z-10">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <TableIcon className="w-5 h-5 text-primary" />
+                            Oda Fiyat Matrisi
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                            Otelinizin standart taban fiyatları ve acente özel anlaşma tarifeleri.
+                        </CardDescription>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative">
+                            <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
+                            <Input
+                                placeholder="Acente ara..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="h-9 pl-9 w-44 text-xs bg-background/80"
+                            />
+                        </div>
+                        {isGM && (
+                            <Button size="sm" onClick={onOpenAddAgency} className="gap-2 h-9 text-xs">
+                                <Plus className="w-4 h-4" />
+                                {t('pricing.agencies.add')}
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </CardHeader>
+
+            <CardContent className="p-0 relative z-10">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left border-collapse">
+                        <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/30">
+                            <tr>
+                                <th className="p-3.5 pl-6 min-w-[200px]">Kaynak / Acente</th>
+                                {ROOM_TYPES.map((room) => (
+                                    <th key={room} className="p-3.5 text-center capitalize min-w-[110px]">
+                                        {t(`room.${room}`)}
+                                    </th>
+                                ))}
+                                {isGM && <th className="p-3.5 text-right pr-6 min-w-[100px]">İşlem</th>}
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/20">
+                            {/* ===== ROW 1: HOTEL DEFAULT BASE PRICE ===== */}
+                            <tr className="bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors group/row">
+                                <td className="p-3.5 pl-6">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center ring-1 ring-emerald-500/30 shrink-0">
+                                            <Building2 className="w-4 h-4 text-emerald-500" />
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                                                <span>{t('pricing.matrix.baseLabel')}</span>
+                                                <Badge variant="success" className="text-[9px] px-1.5 py-0 h-4">
+                                                    Varsayılan
+                                                </Badge>
+                                            </div>
+                                            <div className="text-[10px] text-muted-foreground">Tüm acenteler için geçerli alt sınır</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                {ROOM_TYPES.map((room) => {
+                                    const price = globalPrices[room]
+                                    return (
+                                        <td key={room} className="p-3.5 text-center">
+                                            {price?.amount ? (
+                                                <div className="inline-flex flex-col items-center px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                                    <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                                                        {price.amount.toFixed(2)}
+                                                    </span>
+                                                    <span className="text-[8px] font-semibold text-emerald-500/70 uppercase">
+                                                        {price.currency || 'EUR'}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground/40 font-mono text-xs italic">Tanımsız</span>
+                                            )}
+                                        </td>
+                                    )
+                                })}
+                                {isGM && (
+                                    <td className="p-3.5 text-right pr-6">
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            className="h-8 text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 gap-1.5"
+                                            onClick={() => onEditPrices('global', 'Otel Genel Taban Fiyatları', globalPrices)}
+                                        >
+                                            <Pencil className="w-3 h-3" />
+                                            Düzenle
+                                        </Button>
+                                    </td>
+                                )}
+                            </tr>
+
+                            {/* ===== AGENCY ROWS ===== */}
+                            {filteredAgencies.map((agency) => (
+                                <tr key={agency.id} className="hover:bg-primary/5 transition-colors group/row">
+                                    <td className="p-3.5 pl-6">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20 shrink-0">
+                                                <Building2 className="w-4 h-4 text-primary" />
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-sm text-foreground">{agency.name}</div>
+                                                <div className="text-[10px] text-muted-foreground">
+                                                    {(agency.overrides?.length || 0) > 0 ? (
+                                                        <span className="text-amber-500 font-medium flex items-center gap-1">
+                                                            <Zap className="w-3 h-3 inline" />
+                                                            {agency.overrides.length} Özel Sezon Tanımlı
+                                                        </span>
+                                                    ) : (
+                                                        'Standart Tarife'
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {ROOM_TYPES.map((room) => {
+                                        const agencyPrice = agency.base_prices?.[room]
+                                        const inheritsGlobal = !agencyPrice || agencyPrice.amount <= 0
+                                        const displayPrice = inheritsGlobal ? globalPrices[room] : agencyPrice
+
+                                        return (
+                                            <td key={room} className="p-3.5 text-center">
+                                                {displayPrice?.amount ? (
+                                                    <div
+                                                        className={cn(
+                                                            "inline-flex flex-col items-center px-2.5 py-1 rounded-xl transition-colors",
+                                                            inheritsGlobal
+                                                                ? "bg-muted/30 border border-border/30 opacity-70"
+                                                                : "bg-primary/10 border border-primary/20 text-primary font-bold shadow-sm"
+                                                        )}
+                                                    >
+                                                        <span className="font-mono text-xs">
+                                                            {displayPrice.amount.toFixed(2)}
+                                                        </span>
+                                                        <span className="text-[8px] opacity-60 uppercase font-medium">
+                                                            {displayPrice.currency || 'EUR'} {inheritsGlobal && '(Taban)'}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-muted-foreground/30 font-mono text-xs">---</span>
+                                                )}
+                                            </td>
+                                        )
+                                    })}
+                                    {isGM && (
+                                        <td className="p-3.5 text-right pr-6">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 text-xs border-border/50 hover:bg-primary/10"
+                                                    onClick={() => onEditPrices(agency.id, `${agency.name} Fiyatları`, agency.base_prices || {})}
+                                                >
+                                                    <Pencil className="w-3 h-3 mr-1 text-muted-foreground" />
+                                                    Düzenle
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                    onClick={() => onRemoveAgency(agency.id, agency.name)}
+                                                    title={`${agency.name} sil`}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
+
+                            {/* EMPTY STATE */}
+                            {filteredAgencies.length === 0 && (
+                                <tr>
+                                    <td colSpan={ROOM_TYPES.length + 2} className="p-8 text-center text-muted-foreground text-xs italic">
+                                        {searchQuery ? 'Aramanızla eşleşen acente bulunamadı.' : 'Henüz özel fiyat tanımlı acente eklenmedi. Yukarıdaki "Acente Ekle" butonunu kullanabilirsiniz.'}
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+/* ============================================================================
+ * EDIT PRICES MODAL (For GM to edit base or agency rates cleanly)
+ * ============================================================================ */
+function EditPricesModal({
+    target,
+    isOpen,
+    onClose,
+    onSave
+}: {
+    target: { id: string; name: string; prices: Record<string, RoomPriceEntry> }
+    isOpen: boolean
+    onClose: () => void
+    onSave: (prices: Record<string, RoomPriceEntry>) => Promise<void>
+}) {
+    const { t } = useLanguageStore()
+    const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>({ ...target.prices })
+    const [isSaving, setIsSaving] = useState(false)
+
+    useEffect(() => {
+        setPrices({ ...target.prices })
+    }, [target])
+
+    const isGlobal = target.id === 'global'
+
+    const handleSave = async () => {
+        setIsSaving(true)
+        try {
+            await onSave(prices)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Pencil className="w-5 h-5 text-primary" />
+                        {target.name}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {isGlobal
+                            ? 'Tüm otel için varsayılan oda fiyatlarını ve para birimlerini belirleyin.'
+                            : 'Bu acenteye özel standart oda fiyatlarını girin. Boş bırakılan oda türü Otel Taban Fiyatını kullanacaktır.'}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="py-4 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {ROOM_TYPES.map((room) => (
+                            <div key={room} className="p-3 rounded-2xl bg-muted/20 border border-border/40 space-y-2">
+                                <label className="text-[11px] font-bold block truncate capitalize text-muted-foreground">
+                                    {t(`room.${room}`)}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder={isGlobal ? "Fiyat" : "Taban fiyatı kullan"}
+                                        value={prices[room]?.amount ?? ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value
+                                            if (val === '') {
+                                                setPrices((prev) => {
+                                                    const next = { ...prev }
+                                                    delete next[room]
+                                                    return next
+                                                })
+                                            } else {
+                                                setPrices((prev) => ({
+                                                    ...prev,
+                                                    [room]: {
+                                                        amount: parseFloat(val) || 0,
+                                                        currency: prev[room]?.currency || 'EUR'
+                                                    }
+                                                }))
+                                            }
+                                        }}
+                                        className="h-9 font-mono text-xs"
+                                    />
+                                    <Select
+                                        value={prices[room]?.currency || 'EUR'}
+                                        onValueChange={(curr) =>
+                                            setPrices((prev) => ({
+                                                ...prev,
+                                                [room]: {
+                                                    amount: prev[room]?.amount || 0,
+                                                    currency: curr as PricingCurrency
+                                                }
+                                            }))
+                                        }
+                                    >
+                                        <SelectTrigger className="h-9 w-20 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="EUR">EUR (€)</SelectItem>
+                                            <SelectItem value="USD">USD ($)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="ghost" onClick={onClose}>
+                        İptal
+                    </Button>
+                    <Button onClick={handleSave} disabled={isSaving}>
+                        {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                        Fiyatları Kaydet
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+/* ============================================================================
+ * 2. SPECIAL PERIODS & CAMPAIGNS VIEW (TAB 2)
+ * ============================================================================ */
+function SpecialPeriodsCampaignsView({
+    agencies,
+    baseOverrides,
+    isGM,
+    hotelId,
+    setBaseOverride,
+    setAgencyOverride,
+    removeBaseOverride,
+    removeAgencyOverride
+}: {
+    agencies: Agency[]
+    baseOverrides: BaseOverride[]
+    isGM: boolean
+    hotelId: string
+    setBaseOverride: (hotelId: string, override: BaseOverride) => Promise<void>
+    setAgencyOverride: (hotelId: string, agencyId: string, override: AgencyOverride) => Promise<void>
+    removeBaseOverride: (hotelId: string, overrideId: string) => Promise<void>
+    removeAgencyOverride: (hotelId: string, agencyId: string, overrideId: string) => Promise<void>
+}) {
+    const { t } = useLanguageStore()
+    const confirm = useConfirm()
+
+    const [targetFilter, setTargetFilter] = useState<'all' | 'global' | string>('all')
+    const [sortOrder, setSortOrder] = useState<'approaching' | 'newest'>('approaching')
+    const [showAIAssistant, setShowAIAssistant] = useState(false)
+    const [createModalOpen, setCreateModalOpen] = useState(false)
+    const [editingOverride, setEditingOverride] = useState<{ targetId: string; override: BaseOverride | AgencyOverride } | null>(null)
+
+    // Merge all overrides into a unified flat array
+    const allOverrides = useMemo(() => {
+        const list: Array<{
+            id: string
+            targetId: string // 'global' or agencyId
+            targetName: string
+            override: BaseOverride | AgencyOverride
+            isGlobal: boolean
+        }> = []
+
+        baseOverrides.forEach((bo) => {
+            list.push({
+                id: `global_${bo.id}`,
+                targetId: 'global',
+                targetName: 'Genel (Tüm Herkes)',
+                override: bo,
+                isGlobal: true
+            })
+        })
+
+        agencies.forEach((ag) => {
+            (ag.overrides || []).forEach((ao) => {
+                list.push({
+                    id: `${ag.id}_${ao.id}`,
+                    targetId: ag.id,
+                    targetName: ag.name,
+                    override: ao,
+                    isGlobal: false
+                })
+            })
+        })
+
+        return list
+    }, [baseOverrides, agencies])
+
+    const filteredOverrides = useMemo(() => {
+        let result = [...allOverrides]
+
+        if (targetFilter === 'global') {
+            result = result.filter((item) => item.isGlobal)
+        } else if (targetFilter !== 'all') {
+            result = result.filter((item) => item.targetId === targetFilter)
+        }
+
+        if (sortOrder === 'approaching') {
+            result.sort((a, b) => a.override.start_date.localeCompare(b.override.start_date))
+        } else {
+            result.sort((a, b) => b.override.start_date.localeCompare(a.override.start_date))
+        }
+
+        return result
+    }, [allOverrides, targetFilter, sortOrder])
+
+    return (
+        <div className="space-y-6">
+            {/* Header & Controls */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-lg font-bold flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-amber-500" />
+                        Özel Dönemler & Kampanya Sezonları
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                        Bayram, yaz sezonu, fuar vb. özel tarih aralıklarında standart fiyatları ezmek için tanımlanan kurallar.
+                    </p>
+                </div>
+
+                {isGM && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowAIAssistant(!showAIAssistant)}
+                            className={cn("gap-2 h-9 text-xs border-amber-500/30", showAIAssistant && "bg-amber-500/10 text-amber-500 border-amber-500")}
+                        >
+                            <Sparkle className="w-4 h-4 text-amber-500" />
+                            AI Asistanı {showAIAssistant ? 'Kapat' : 'Aç'}
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={() => setCreateModalOpen(true)}
+                            className="gap-2 h-9 text-xs bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Yeni Özel Dönem Ekle
+                        </Button>
+                    </div>
+                )}
+            </div>
+
+            {/* AI ASSISTANT COLLAPSIBLE CARD */}
+            <AnimatePresence>
+                {showAIAssistant && isGM && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <AIPricingAgentCard
+                            hotelId={hotelId}
+                            agencies={agencies}
+                            setBaseOverride={setBaseOverride}
+                            setAgencyOverride={setAgencyOverride}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* FILTERS TOOLBAR */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-muted/20 border border-border/40">
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Hedef:</span>
+                    <Select value={targetFilter} onValueChange={setTargetFilter}>
+                        <SelectTrigger className="h-8 w-44 text-xs bg-background">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Tüm Özel Dönemler ({allOverrides.length})</SelectItem>
+                            <SelectItem value="global">Genel Kampanyalar (Herkes)</SelectItem>
+                            {agencies.map((a) => (
+                                <SelectItem key={a.id} value={a.id}>
+                                    {a.name} ({a.overrides?.length || 0})
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Sıralama:</span>
+                    <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as any)}>
+                        <SelectTrigger className="h-8 w-40 text-xs bg-background">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="approaching">Tarihe Göre (Yaklaşan)</SelectItem>
+                            <SelectItem value="newest">Eklenme Tarihine Göre</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            {/* OVERRIDES LIST CARDS */}
+            <div className="grid grid-cols-1 gap-4">
+                {filteredOverrides.length === 0 ? (
+                    <Card className="border-dashed border-2 border-border/40 bg-muted/5 p-12 text-center text-muted-foreground">
+                        <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-30 text-amber-500" />
+                        <p className="text-sm font-semibold">Henüz özel tarih aralığı tanımlanmadı.</p>
+                        <p className="text-xs mt-1">Özel sezon veya kampanya eklemek için yukarıdaki butonu kullanabilirsiniz.</p>
+                    </Card>
+                ) : (
+                    filteredOverrides.map((item) => {
+                        const today = format(new Date(), 'yyyy-MM-dd')
+                        const isCurrent = today >= item.override.start_date && today <= item.override.end_date
+                        const isUpcoming = today < item.override.start_date
+                        const isPast = today > item.override.end_date
+
+                        return (
+                            <Card
+                                key={item.id}
+                                className={cn(
+                                    "border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden transition-all duration-300 relative group",
+                                    isCurrent && "border-amber-500/50 ring-1 ring-amber-500/30 shadow-lg shadow-amber-500/5"
+                                )}
+                            >
+                                <div className="p-4 sm:p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                    <div className="space-y-2 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {/* Target Tag */}
+                                            <Badge
+                                                variant={item.isGlobal ? 'default' : 'secondary'}
+                                                className={cn(
+                                                    "font-bold text-xs px-2.5 py-0.5",
+                                                    item.isGlobal && "bg-purple-600 text-white"
+                                                )}
+                                            >
+                                                {item.targetName}
+                                            </Badge>
+
+                                            {/* Status Badge */}
+                                            {isCurrent && (
+                                                <Badge variant="success" className="animate-pulse flex items-center gap-1">
+                                                    <Zap className="w-3 h-3" />
+                                                    Şu An Aktif
+                                                </Badge>
+                                            )}
+                                            {isUpcoming && (
+                                                <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10">
+                                                    Gelecek Dönem
+                                                </Badge>
+                                            )}
+                                            {isPast && (
+                                                <Badge variant="outline" className="text-muted-foreground opacity-60">
+                                                    Geçmiş
+                                                </Badge>
+                                            )}
+
+                                            {/* Date Range */}
+                                            <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary ml-auto lg:ml-0">
+                                                <CalendarIcon className="w-3.5 h-3.5" />
+                                                <span>{formatDisplayDate(item.override.start_date)}</span>
+                                                <span className="text-muted-foreground">→</span>
+                                                <span>{formatDisplayDate(item.override.end_date)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Room Prices Chips */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-2">
+                                            {ROOM_TYPES.map((room) => {
+                                                const p = item.override.prices?.[room]
+                                                return (
+                                                    <div
+                                                        key={room}
+                                                        className="p-2 rounded-xl bg-muted/20 border border-border/30 flex flex-col gap-0.5"
+                                                    >
+                                                        <span className="text-[10px] text-muted-foreground font-semibold truncate capitalize">
+                                                            {t(`room.${room}`)}
+                                                        </span>
+                                                        <span className="font-mono font-bold text-xs text-foreground">
+                                                            {p?.amount ? (
+                                                                <>
+                                                                    <span className="text-[9px] font-normal opacity-60 mr-1">{p.currency || 'EUR'}</span>
+                                                                    {p.amount.toFixed(2)}
+                                                                </>
+                                                            ) : (
+                                                                <span className="text-muted-foreground/30 font-light">---</span>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* GM Actions */}
+                                    {isGM && (
+                                        <div className="flex items-center justify-end gap-2 shrink-0 border-t border-border/20 pt-3 lg:border-0 lg:pt-0">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-8 text-xs gap-1.5"
+                                                onClick={() =>
+                                                    setEditingOverride({
+                                                        targetId: item.targetId,
+                                                        override: item.override
+                                                    })
+                                                }
+                                            >
+                                                <Pencil className="w-3.5 h-3.5" />
+                                                Düzenle
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                onClick={async () => {
+                                                    const confirmed = await confirm({
+                                                        title: 'Özel dönem silinsin mi?',
+                                                        variant: 'destructive',
+                                                        confirmLabel: t('common.delete')
+                                                    })
+                                                    if (confirmed) {
+                                                        if (item.isGlobal) {
+                                                            await removeBaseOverride(hotelId, item.override.id)
+                                                        } else {
+                                                            await removeAgencyOverride(hotelId, item.targetId, item.override.id)
+                                                        }
+                                                        toast.success('Özel dönem silindi.')
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </Card>
+                        )
+                    })
+                )}
+            </div>
+
+            {/* CREATE / EDIT OVERRIDE DIALOG */}
+            {(createModalOpen || editingOverride) && (
+                <OverrideEditorModal
+                    agencies={agencies}
+                    isOpen={createModalOpen || Boolean(editingOverride)}
+                    initialTargetId={editingOverride?.targetId || 'global'}
+                    initialData={editingOverride?.override}
+                    onClose={() => {
+                        setCreateModalOpen(false)
+                        setEditingOverride(null)
+                    }}
+                    onSave={async (targetId, overrideData) => {
+                        try {
+                            if (targetId === 'global') {
+                                await setBaseOverride(hotelId, overrideData)
+                            } else {
+                                await setAgencyOverride(hotelId, targetId, overrideData)
+                            }
+                            toast.success('Özel dönem kaydedildi.')
+                            setCreateModalOpen(false)
+                            setEditingOverride(null)
+                        } catch (err) {
+                            console.error(err)
+                            toast.error('Özel dönem kaydedilirken hata oluştu.')
+                        }
+                    }}
+                />
+            )}
+        </div>
+    )
+}
+
+/* ============================================================================
+ * AI PRICING AGENT CARD
+ * ============================================================================ */
+function AIPricingAgentCard({
+    hotelId,
+    agencies,
+    setBaseOverride,
+    setAgencyOverride
+}: {
+    hotelId: string
+    agencies: Agency[]
+    setBaseOverride: (hotelId: string, override: BaseOverride) => Promise<void>
+    setAgencyOverride: (hotelId: string, agencyId: string, override: AgencyOverride) => Promise<void>
+}) {
     const [input, setInput] = useState('')
     const [isProcessing, setIsProcessing] = useState(false)
     const [status, setStatus] = useState<string | null>(null)
-    useWorkspaceDirty('pricing-ai-instructions', Boolean(input.trim()))
 
     const parseAndApply = async () => {
         if (!input.trim()) return
         setIsProcessing(true)
-        setStatus('Analyzing input...')
+        setStatus('Girdi analiz ediliyor...')
 
         try {
-            const lines = input.split('\n').filter(l => l.trim())
+            const lines = input.split('\n').filter((l) => l.trim())
+            let count = 0
+
             for (const line of lines) {
-                let parts = line.split('|').map(p => p.trim())
+                let parts = line.split('|').map((p) => p.trim())
                 if (parts.length < 3 && line.includes('\t')) {
-                    parts = line.split('\t').map(p => p.trim())
+                    parts = line.split('\t').map((p) => p.trim())
                 }
 
                 if (parts.length < 3) continue
@@ -312,29 +1082,17 @@ function AIPricingAgent({ hotelId }: { hotelId: string }) {
                 const targetPart = parts[1]
                 const pricePart = parts[2]
 
-                // Robust Date Parsing
-                const rawDates = datePart.split(/to|\s-\s/).map(d => d.trim())
+                const rawDates = datePart.split(/to|\s-\s/).map((d) => d.trim())
                 const normalizeDate = (d: string) => {
-                    // Try YYYY-MM-DD
                     if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d
-
                     const now = new Date()
                     const year = now.getFullYear()
 
-                    // Try DD.MMM (e.g. 1.Jan)
-                    const dotMonthMatch = d.match(/^(\d{1,2})\.([A-Za-z]+)$/)
-                    if (dotMonthMatch) {
-                        const day = dotMonthMatch[1].padStart(2, '0')
-                        const monthStr = dotMonthMatch[2].toLowerCase()
-                        const monthMap: Record<string, string> = {
-                            jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
-                            jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
-                        }
-                        const month = monthMap[monthStr.substring(0, 3)]
-                        if (month) return `${year}-${month}-${day}`
+                    const dotMatch = d.match(/^(\d{1,2})\.(\d{1,2})$/)
+                    if (dotMatch) {
+                        return `${year}-${dotMatch[2].padStart(2, '0')}-${dotMatch[1].padStart(2, '0')}`
                     }
 
-                    // Fallback to JS Date parsing if possible
                     const parsed = new Date(d)
                     if (!isNaN(parsed.getTime())) {
                         return format(parsed, 'yyyy-MM-dd')
@@ -345,42 +1103,31 @@ function AIPricingAgent({ hotelId }: { hotelId: string }) {
                 const startDateStr = normalizeDate(rawDates[0])
                 const endDateStr = normalizeDate(rawDates[1] || rawDates[0])
 
-                if (!startDateStr || !endDateStr) {
-                    console.warn(`Could not parse dates: ${datePart}`)
-                    continue
-                }
+                if (!startDateStr || !endDateStr) continue
 
                 const prices: Record<string, RoomPriceEntry> = {}
-                pricePart.split(',').forEach(p => {
+                pricePart.split(',').forEach((p) => {
                     const colonIndex = p.indexOf(':')
                     if (colonIndex === -1) return
 
                     const roomRaw = p.substring(0, colonIndex).trim().toLowerCase()
                     const valRaw = p.substring(colonIndex + 1).trim()
 
-                    // Detect currency from symbols or text before stripping
-                    let detectedCurrency: PricingCurrency = 'EUR' // default
-                    if (valRaw.includes('$') || valRaw.toLowerCase().includes('usd')) {
-                        detectedCurrency = 'USD'
-                    } else if (valRaw.includes('€') || valRaw.toLowerCase().includes('eur')) {
-                        detectedCurrency = 'EUR'
-                    }
+                    let detectedCurrency: PricingCurrency = 'EUR'
+                    if (valRaw.includes('$') || valRaw.toLowerCase().includes('usd')) detectedCurrency = 'USD'
+                    else if (valRaw.includes('€') || valRaw.toLowerCase().includes('eur')) detectedCurrency = 'EUR'
 
-                    // Handle European decimals and strip non-numeric
                     const cleanVal = valRaw.replace(',', '.').replace(/[^0-9.]/g, '')
                     const amount = parseFloat(cleanVal)
 
                     if (roomRaw && !isNaN(amount)) {
-                        // Priority room matching (long strings first to avoid "Corner" matching "Corner Suite")
-                        const sortedRoomTypes = [...ROOM_TYPES].sort((a, b) => b.length - a.length)
-                        let matchedRoom = sortedRoomTypes.find(r => roomRaw.includes(r.replace('_', ' ')) || roomRaw.includes(r))
-
-                        // Alias matching
+                        let matchedRoom: RoomType | undefined = ROOM_TYPES.find(
+                            (r) => roomRaw.includes(r.replace('_', ' ')) || roomRaw.includes(r)
+                        )
                         if (!matchedRoom) {
-                            if (roomRaw.includes('terrace')) matchedRoom = 'teras_suite'
-                            if (roomRaw.includes('jacuzzi')) matchedRoom = 'corner_jacuzzi'
+                            if (roomRaw.includes('terrace') || roomRaw.includes('teras')) matchedRoom = 'teras_suite'
+                            if (roomRaw.includes('jacuzzi') || roomRaw.includes('jakuzi')) matchedRoom = 'corner_jacuzzi'
                         }
-
                         if (matchedRoom) {
                             prices[matchedRoom] = { amount, currency: detectedCurrency }
                         }
@@ -395,57 +1142,63 @@ function AIPricingAgent({ hotelId }: { hotelId: string }) {
                         prices
                     }
 
-                    if (targetPart.toLowerCase() === 'everyone') {
+                    if (targetPart.toLowerCase() === 'everyone' || targetPart.toLowerCase() === 'herkes') {
                         await setBaseOverride(hotelId, override)
+                        count++
                     } else {
-                        const agency = agencies.find(a => a.name.toLowerCase().includes(targetPart.toLowerCase()))
+                        const agency = agencies.find((a) => a.name.toLowerCase().includes(targetPart.toLowerCase()))
                         if (agency) {
                             await setAgencyOverride(hotelId, agency.id, override)
+                            count++
                         }
                     }
                 }
             }
-            setStatus('Prices applied successfully!')
+
+            setStatus(`${count} adet özel dönem başarıyla eklendi!`)
             setInput('')
-            setTimeout(() => setStatus(null), 3000)
+            setTimeout(() => setStatus(null), 4000)
         } catch (error) {
             console.error(error)
-            setStatus('Error parsing input. Please check format.')
+            setStatus('Format ayrıştırılırken hata oluştu.')
         } finally {
             setIsProcessing(false)
         }
     }
 
     return (
-        <Card className="border-primary/30 bg-primary/5 border-2">
+        <Card className="border-amber-500/30 bg-amber-500/5 border-2 shadow-xl">
             <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    {t('pricing.ai.title') || 'AI Pricing Agent'}
+                <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-amber-500" />
+                    AI Fiyat Asistanı (Metinden Hızlı Ekle)
                 </CardTitle>
-                <CardDescription>
-                    {t('pricing.ai.desc') || 'Paste date ranges and prices in text or table format. Example: 2024-07-01 to 2024-07-31 | Everyone | standard: 150, triple: 220'}
+                <CardDescription className="text-xs">
+                    Tarih ve fiyatları metin halinde yapıştırarak saniyeler içinde özel dönemler oluşturun. Örnek format:
+                    <code className="block mt-1 p-1 bg-background/50 rounded text-[10px] font-mono">
+                        2026-07-01 to 2026-07-31 | Herkes | standard: 150 EUR, triple: 220 EUR
+                    </code>
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
                 <Textarea
-                    placeholder="Enter prices here... (Format: Start to End | Agency | room:price, ...)"
+                    placeholder="Verileri buraya yapıştırın..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="min-h-[100px] font-mono text-sm bg-background/50"
+                    className="min-h-[90px] font-mono text-xs bg-background/60"
                 />
                 <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-muted-foreground italic">
-                        {status || 'Supports plain text lines or pipe-separated values.'}
+                    <p className="text-[11px] text-amber-500 font-medium">
+                        {status || 'Pipe (|) veya sekme ile ayrılmış metin satırları desteklenir.'}
                     </p>
                     <Button
                         size="sm"
                         onClick={parseAndApply}
                         disabled={isProcessing || !input.trim()}
-                        className="gap-2"
+                        className="gap-2 bg-amber-500 hover:bg-amber-600 text-white"
                     >
                         {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                        Apply with AI
+                        AI ile Uygula
                     </Button>
                 </div>
             </CardContent>
@@ -453,1041 +1206,40 @@ function AIPricingAgent({ hotelId }: { hotelId: string }) {
     )
 }
 
-function BulkRateEditor({ hotelId }: { hotelId: string }) {
-    const { t } = useLanguageStore()
-    const { agencies, setBaseOverride, setAgencyOverride } = usePricingStore()
-    const [target, setTarget] = useState<'everyone' | string>('everyone')
-    const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
-    const [endDate, setEndDate] = useState(format(addDaysFns(new Date(), 7), 'yyyy-MM-dd'))
-    const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>({})
-    const [isSaving, setIsSaving] = useState(false)
-    useWorkspaceDirty('pricing-bulk-rates', Object.keys(prices).length > 0)
-
-    const handleApply = async () => {
-        if (!startDate || !endDate) return
-        setIsSaving(true)
-        try {
-            const overrideData = {
-                id: `bulk_${Date.now()}`,
-                start_date: startDate,
-                end_date: endDate,
-                prices
-            }
-
-            if (target === 'everyone') {
-                await setBaseOverride(hotelId, overrideData)
-            } else {
-                await setAgencyOverride(hotelId, target, overrideData)
-            }
-            toast.success(t('pricing.save.success'))
-        } catch (_error) {
-            toast.error(t('pricing.save.error'))
-        } finally {
-            setIsSaving(false)
-        }
-    }
-
-    return (
-        <Card className="border-primary/20 bg-primary/5 backdrop-blur-md border-dashed group overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
-            <CardHeader className="pb-2 relative z-10">
-                <div>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-primary" />
-                        {t('pricing.bulk.title') || 'Bulk Rate Editor'}
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                        {t('pricing.bulk.desc') || 'Apply prices to a date range for everyone or an agency'}
-                    </CardDescription>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-4 relative z-10">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.lookup.agency')}</label>
-                        <Select value={target} onValueChange={setTarget}>
-                            <SelectTrigger className="h-10 bg-background/80 border-border/50 rounded-xl">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="everyone">{t('pricing.bulk.everyone') || 'Everyone'}</SelectItem>
-                                {agencies.map(a => (
-                                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.date.start')}</label>
-                        <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="h-10 bg-background/80 border-border/50 rounded-xl" />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.date.end')}</label>
-                        <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="h-10 bg-background/80 border-border/50 rounded-xl" />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-                    {ROOM_TYPES.map((room, idx) => (
-                        <motion.div
-                            key={room}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: idx * 0.03 }}
-                            className="p-3 rounded-2xl bg-background/40 border border-border/50 hover:border-primary/30 transition-all duration-300"
-                        >
-                            <label className="text-[10px] font-bold block mb-2 truncate capitalize text-muted-foreground">{t(`room.${room}`)}</label>
-                            <div className="flex gap-1.5">
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    className="h-9 text-xs text-right font-mono px-2 bg-background/60 border-border/40 rounded-lg"
-                                    placeholder="0"
-                                    value={prices[room]?.amount || ''}
-                                    onChange={e => setPrices(p => ({ ...p, [room]: { ...(p[room] || { currency: 'EUR' }), amount: parseFloat(e.target.value) || 0 } }))}
-                                />
-                                <Select
-                                    value={prices[room]?.currency || 'EUR'}
-                                    onValueChange={val => setPrices(p => ({ ...p, [room]: { ...(p[room] || { amount: 0 }), currency: val as PricingCurrency } }))}
-                                >
-                                    <SelectTrigger className="h-9 w-14 px-1 text-[10px] bg-background/60 border-border/40 rounded-lg">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="EUR">EUR</SelectItem>
-                                        <SelectItem value="USD">USD</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-
-                <Button className="w-full h-10 gap-2 rounded-xl bg-primary hover:brightness-110 shadow-lg shadow-primary/20 transition-all active:scale-[0.98]" size="sm" onClick={handleApply} disabled={isSaving}>
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    {t('pricing.bulk.apply') || 'Apply Range Prices'}
-                </Button>
-            </CardContent>
-        </Card>
-    )
-}
-
-function GlobalOverrideManager({ baseOverrides, isGM, hotelId }: { baseOverrides: BaseOverride[], isGM: boolean, hotelId: string }) {
-    const { t } = useLanguageStore()
-    const { removeBaseOverride, setBaseOverride } = usePricingStore()
-    const confirm = useConfirm()
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-    const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
-    const [editingOverride, setEditingOverride] = useState<BaseOverride | null>(null)
-    useWorkspaceDirty('pricing-global-override', Boolean(editingOverride))
-
-    const sortedOverrides = [...baseOverrides].sort((a, b) => {
-        return sortOrder === 'desc'
-            ? b.start_date.localeCompare(a.start_date)
-            : a.start_date.localeCompare(b.start_date)
-    })
-
-    return (
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl group overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent pointer-events-none" />
-            <CardHeader className="py-4 border-b border-border/30 bg-muted/20 relative z-10">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <Users className="w-5 h-5 text-amber-500" />
-                            {t('pricing.global_overrides.title') || 'Special Periods (Everyone)'}
-                        </CardTitle>
-                        <CardDescription className="text-xs">
-                            {t('pricing.global_overrides.desc') || 'Prices defined here apply to all agencies during the specified dates.'}
-                        </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center bg-background/50 rounded-lg p-0.5 border border-border/30 mr-2">
-                            <Button
-                                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                className="h-7 w-7 rounded-md"
-                                onClick={() => setViewMode('list')}
-                                title="List View"
-                            >
-                                <List className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                                variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                                size="icon"
-                                className="h-7 w-7 rounded-md"
-                                onClick={() => setViewMode('table')}
-                                title="Table View"
-                            >
-                                <Table className="w-3.5 h-3.5" />
-                            </Button>
-                        </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                            className="h-8 gap-2 text-xs font-medium"
-                        >
-                            <ArrowUpDown className="w-3.5 h-3.5" />
-                            {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
-                        </Button>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className="p-0 relative z-10">
-                {editingOverride && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="border-b border-border/30 bg-primary/5 p-6 relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent pointer-events-none" />
-                        <OverrideEditor
-                            initial={editingOverride}
-                            onSave={async (override) => {
-                                await setBaseOverride(hotelId, override)
-                                setEditingOverride(null)
-                            }}
-                            onCancel={() => setEditingOverride(null)}
-                        />
-                    </motion.div>
-                )}
-                <div className="divide-y divide-border/30">
-                    {sortedOverrides.length === 0 ? (
-                        <div className="p-12 text-center text-muted-foreground text-sm italic">
-                            No global overrides defined.
-                        </div>
-                    ) : viewMode === 'list' ? (
-                        <AnimatePresence initial={false}>
-                            {sortedOverrides.map((override, idx) => (
-                                <motion.div
-                                    key={override.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className="p-4 flex items-center justify-between group/item hover:bg-primary/5 transition-all duration-300"
-                                >
-                                    <div className="space-y-3 flex-1">
-                                        <div className="flex items-center gap-3">
-                                            <div className="px-2 py-1 rounded-md bg-primary/10 flex items-center gap-2 font-mono text-xs font-bold text-primary">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                {formatDisplayDate(override.start_date)}
-                                            </div>
-                                            <span className="text-muted-foreground">→</span>
-                                            <div className="px-2 py-1 rounded-md bg-primary/10 flex items-center gap-2 font-mono text-xs font-bold text-primary">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                {formatDisplayDate(override.end_date)}
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                                            {ROOM_TYPES.map(room => (
-                                                <div key={room} className="text-[10px] p-1.5 rounded-lg bg-background/40 border border-border/20 flex flex-col gap-0.5">
-                                                    <span className="text-muted-foreground capitalize truncate">{t(`room.${room}`)}</span>
-                                                    <span className="font-bold text-foreground flex items-center gap-0.5">
-                                                        <span className="opacity-50 text-[8px] font-normal">{override.prices[room]?.currency || 'EUR'}</span>
-                                                        {override.prices[room]?.amount?.toFixed(2) || '---'}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    {isGM && !editingOverride && (
-                                        <div className="flex items-center gap-1 ml-4 shrink-0">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="opacity-0 group-hover/item:opacity-100 transition-opacity hover:bg-primary/10 h-8 w-8"
-                                                onClick={() => setEditingOverride(override)}
-                                                title={t('pricing.overrides.edit')}
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="opacity-0 group-hover/item:opacity-100 transition-opacity text-destructive hover:bg-destructive/10 h-8 w-8"
-                                                onClick={async () => {
-                                                    const confirmed = await confirm({
-                                                        title: t('common.deleteConfirm'),
-                                                        variant: 'destructive',
-                                                        confirmLabel: t('common.delete'),
-                                                    })
-                                                    if (confirmed) {
-                                                        removeBaseOverride(hotelId, override.id)
-                                                    }
-                                                }}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-xs text-left border-collapse">
-                                <thead className="bg-muted/30 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/30">
-                                    <tr>
-                                        <th className="p-3 pl-4">Dates</th>
-                                        {ROOM_TYPES.map(room => (
-                                            <th key={room} className="p-3 text-center capitalize">{t(`room.${room}`)}</th>
-                                        ))}
-                                        {isGM && <th className="p-3 text-right">Actions</th>}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border/20">
-                                    <AnimatePresence initial={false}>
-                                        {sortedOverrides.map((override) => (
-                                            <motion.tr
-                                                key={override.id}
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="hover:bg-primary/5 transition-colors group/row"
-                                            >
-                                                <td className="p-3 pl-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-1 font-mono font-bold text-primary">
-                                                        {formatDisplayDate(override.start_date)}
-                                                        <span className="mx-1 text-muted-foreground font-light">→</span>
-                                                        {formatDisplayDate(override.end_date)}
-                                                    </div>
-                                                </td>
-                                                {ROOM_TYPES.map(room => (
-                                                    <td key={room} className="p-3 text-center">
-                                                        <div className="flex flex-col items-center">
-                                                            <span className="font-mono font-bold">
-                                                                {override.prices[room]?.amount?.toFixed(2) || '---'}
-                                                            </span>
-                                                            <span className="text-[8px] opacity-40 uppercase">
-                                                                {override.prices[room]?.currency || 'EUR'}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                ))}
-                                                {isGM && (
-                                                    <td className="p-3 text-right">
-                                                        {!editingOverride && (
-                                                            <div className="flex items-center justify-end gap-1">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-7 w-7 hover:bg-primary/10 opacity-0 group-hover/row:opacity-100 transition-opacity"
-                                                                    onClick={() => setEditingOverride(override)}
-                                                                    title={t('pricing.overrides.edit')}
-                                                                >
-                                                                    <Pencil className="w-3.5 h-3.5" />
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-7 w-7 text-destructive hover:bg-destructive/10 opacity-0 group-hover/row:opacity-100 transition-opacity"
-                                                                    onClick={async () => {
-                                                                        const confirmed = await confirm({
-                                                                            title: t('common.deleteConfirm'),
-                                                                            variant: 'destructive',
-                                                                            confirmLabel: t('common.delete'),
-                                                                        })
-                                                                        if (confirmed) {
-                                                                            removeBaseOverride(hotelId, override.id)
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                                </Button>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                )}
-                                            </motion.tr>
-                                        ))}
-                                    </AnimatePresence>
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
-
-function PriceLookup() {
-    const { t } = useLanguageStore()
-    const { agencies, getEffectivePrice } = usePricingStore()
-    const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
-    const [endDate, setEndDate] = useState(format(addDaysFns(new Date(), 1), 'yyyy-MM-dd'))
-    const [agencyId, setAgencyId] = useState<string>('base')
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const nights = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
-    const dates = Array.from({ length: nights }).map((_, i) => format(addDaysFns(start, i), 'yyyy-MM-dd'));
-
-    return (
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl group overflow-hidden relative shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-bl from-primary/5 via-transparent to-transparent pointer-events-none" />
-            <CardHeader className="relative z-10 border-b border-border/30 bg-muted/20">
-                <div>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Search className="w-5 h-5 text-primary" />
-                        {t('pricing.lookup.title')}
-                    </CardTitle>
-                    <CardDescription>{t('pricing.lookup.desc')}</CardDescription>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6 relative z-10">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.lookup.date')} (Giriş)</label>
-                        <Input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className="bg-background/80 border-border/50 rounded-xl h-10"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.lookup.date')} (Çıkış)</label>
-                        <Input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className="bg-background/80 border-border/50 rounded-xl h-10"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t('pricing.lookup.agency')}</label>
-                        <Select value={agencyId} onValueChange={setAgencyId}>
-                            <SelectTrigger className="bg-background/80 border-border/50 rounded-xl h-10">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="base">--- {t('pricing.base.title')} ---</SelectItem>
-                                {agencies.map(a => (
-                                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-
-                <div className="divide-y divide-border/20 rounded-[2rem] border border-border/30 bg-muted/30 overflow-hidden shadow-inner relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-                    {ROOM_TYPES.map((room, idx) => {
-                        const pricesForDates = dates.map(d => {
-                            const p = getEffectivePrice(d, room, agencyId === 'base' ? undefined : agencyId);
-                            const isOverride = agencyId !== 'base' && p !== getEffectivePrice(d, room);
-                            return { date: d, price: p, isOverride };
-                        });
-
-                        const totalAmount = pricesForDates.reduce((sum, item) => sum + (item.price?.amount || 0), 0);
-                        const averageAmount = totalAmount / dates.length;
-                        const currency = pricesForDates[0]?.price?.currency || 'EUR';
-                        
-                        const hasOverride = pricesForDates.some(item => item.isOverride);
-
-                        return (
-                            <motion.div
-                                key={room}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.04 }}
-                                className="flex flex-col p-5 group/item hover:bg-primary/5 transition-all duration-300 relative gap-4"
-                            >
-                                <div className="flex justify-between items-center">
-                                    <div className="space-y-2">
-                                        <div className="text-sm font-bold capitalize flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover/item:scale-150 transition-transform" />
-                                            {t(`room.${room}`)}
-                                        </div>
-                                        <div className={cn(
-                                            "text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5 px-2 py-1 rounded-full",
-                                            hasOverride ? "bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20" : "bg-emerald-500/10 text-emerald-500 ring-1 ring-emerald-500/20"
-                                        )}>
-                                            {hasOverride ? (
-                                                <><Sparkles className="w-2.5 h-2.5" /> {t('pricing.lookup.overrideUsed') || 'Özel Fiyat'}</>
-                                            ) : (
-                                                <><CheckCircle2 className="w-2.5 h-2.5" /> {t('pricing.lookup.basePriceUsed') || 'Standart Fiyat'}</>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="text-right flex items-center gap-6">
-                                        {dates.length > 1 && (
-                                            <div className="space-y-1 pr-6 border-r border-border/20">
-                                                <div className="text-xl font-bold font-mono tracking-tighter flex items-center justify-end text-primary/80 group-hover/item:text-primary transition-colors">
-                                                    <span className="text-[10px] font-medium text-muted-foreground mr-1 self-start mt-1.5">{currency}</span>
-                                                    {totalAmount.toFixed(2)}
-                                                </div>
-                                                <div className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest text-right">Toplam Fiyat</div>
-                                            </div>
-                                        )}
-                                        <div className="space-y-1">
-                                            <div className="text-2xl font-bold font-mono tracking-tighter flex items-center justify-end text-foreground group-hover/item:text-primary transition-colors">
-                                                <span className="text-xs font-medium text-muted-foreground mr-1 self-start mt-1.5">{currency}</span>
-                                                {averageAmount.toFixed(2)}
-                                            </div>
-                                            <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                                                {dates.length > 1 ? `Ortalama (${dates.length} Gece)` : t('pricing.perNight')}
-                                            </div>
-                                        </div>
-                                        <ChevronRight className="w-4 h-4 text-muted-foreground/30 group-hover/item:translate-x-1 transition-transform" />
-                                    </div>
-                                </div>
-                                
-                                {dates.length > 1 && (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-2 pt-4 border-t border-border/20">
-                                        {pricesForDates.map((item, i) => (
-                                            <div key={i} className="flex flex-col items-center p-2 rounded-lg bg-background/50 border border-border/30">
-                                                <span className="text-[9px] text-muted-foreground font-medium mb-1 truncate w-full text-center">
-                                                    {formatDisplayDate(item.date)}
-                                                </span>
-                                                <span className={cn(
-                                                    "text-sm font-mono font-bold",
-                                                    item.isOverride ? "text-amber-500" : "text-emerald-500"
-                                                )}>
-                                                    {item.price?.amount?.toFixed(2) || '---'}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </motion.div>
-                        )
-                    })}
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
-function AgencyOverrideManager({ agency, isGM, hotelId }: { agency: Agency, isGM: boolean, hotelId: string }) {
-    const { t } = useLanguageStore()
-    const { setAgencyOverride, removeAgencyOverride } = usePricingStore()
-    const confirm = useConfirm()
-    const [isAdding, setIsAdding] = useState(false)
-    const [editingOverride, setEditingOverride] = useState<AgencyOverride | null>(null)
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-    const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
-    const editorRef = useRef<HTMLDivElement>(null)
-    useWorkspaceDirty(`pricing-agency-override-${agency.id}`, isAdding || Boolean(editingOverride))
-
-    useEffect(() => {
-        if (isAdding || editingOverride) {
-            editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-        }
-    }, [isAdding, editingOverride])
-
-    const sortedOverrides = [...agency.overrides].sort((a, b) => {
-        return sortOrder === 'desc'
-            ? b.start_date.localeCompare(a.start_date)
-            : a.start_date.localeCompare(b.start_date)
-    })
-
-    return (
-        <div className="p-6 space-y-6 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="text-lg font-bold flex items-center gap-2 group">
-                        <Building2 className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                        {agency.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{t('pricing.overrides.title')} ({viewMode === 'list' ? 'Card' : 'Table'} View)</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center bg-background/50 rounded-lg p-0.5 border border-border/30 mr-2">
-                        <Button
-                            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                            size="icon"
-                            className="h-7 w-7 rounded-md"
-                            onClick={() => setViewMode('list')}
-                            title="List View"
-                        >
-                            <List className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                            variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                            size="icon"
-                            className="h-7 w-7 rounded-md"
-                            onClick={() => setViewMode('table')}
-                            title="Table View"
-                        >
-                            <Table className="w-3.5 h-3.5" />
-                        </Button>
-                    </div>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                        className="h-8 gap-2 text-xs font-medium border-border/50"
-                    >
-                        <ArrowUpDown className="w-3.5 h-3.5" />
-                        {sortOrder === 'desc' ? 'Newest' : 'Oldest'}
-                    </Button>
-                    {isGM && !isAdding && !editingOverride && (
-                        <Button size="sm" onClick={() => setIsAdding(true)} className="gap-2 h-8">
-                            <Plus className="w-4 h-4" />
-                            {t('pricing.overrides.add')}
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            <AnimatePresence>
-                {(isAdding || editingOverride) && (
-                    <motion.div
-                        ref={editorRef}
-                        key={editingOverride?.id ?? 'add'}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="border border-primary/30 bg-primary/5 rounded-3xl p-6 backdrop-blur-xl relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-                        <OverrideEditor
-                            initial={editingOverride || undefined}
-                            onSave={async (override) => {
-                                await setAgencyOverride(hotelId, agency.id, override)
-                                setIsAdding(false)
-                                setEditingOverride(null)
-                            }}
-                            onCancel={() => {
-                                setIsAdding(false)
-                                setEditingOverride(null)
-                            }}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <div className="grid grid-cols-1 gap-4">
-                {agency.overrides.length === 0 && !isAdding ? (
-                    <div className="text-center py-20 text-muted-foreground italic border-2 border-dashed border-border/30 rounded-3xl bg-muted/5">
-                        <Sparkles className="w-8 h-8 mx-auto mb-4 opacity-20" />
-                        {t('pricing.overrides.empty')}
-                    </div>
-                ) : viewMode === 'list' ? (
-                    sortedOverrides.map((override, idx) => (
-                        <motion.div
-                            key={override.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                        >
-                            <Card className="border-border/50 bg-background/40 hover:bg-background/60 transition-all duration-300 group/card overflow-hidden relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity pointer-events-none" />
-                                <CardHeader className="py-3 bg-muted/20 border-b border-border/30 relative z-10">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="px-2 py-1 rounded-lg bg-primary/10 flex items-center gap-2 font-mono text-xs font-bold text-primary">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                {formatDisplayDate(override.start_date)}
-                                            </div>
-                                            <span className="text-muted-foreground font-light shrink-0">→</span>
-                                            <div className="px-2 py-1 rounded-lg bg-primary/10 flex items-center gap-2 font-mono text-xs font-bold text-primary">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                {formatDisplayDate(override.end_date)}
-                                            </div>
-                                        </div>
-                                        {isGM && !editingOverride && (
-                                            <div className="flex items-center gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 opacity-0 group-hover/card:opacity-100 transition-all hover:bg-primary/10 hover:scale-110"
-                                                    onClick={() => setEditingOverride(override)}
-                                                    title={t('pricing.overrides.edit')}
-                                                >
-                                                    <Pencil className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-destructive opacity-0 group-hover/card:opacity-100 transition-all hover:bg-destructive/10 hover:scale-110"
-                                                    onClick={async () => {
-                                                        const confirmed = await confirm({
-                                                            title: t('common.deleteConfirm'),
-                                                            variant: 'destructive',
-                                                            confirmLabel: t('common.delete'),
-                                                        })
-                                                        if (confirmed) {
-                                                            removeAgencyOverride(hotelId, agency.id, override.id)
-                                                        }
-                                                    }}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="py-4 relative z-10">
-                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                        {ROOM_TYPES.map(room => (
-                                            <div key={room} className="p-2 rounded-xl bg-muted/10 border border-border/10 group/price hover:border-primary/30 transition-colors">
-                                                <div className="text-[10px] font-bold text-muted-foreground uppercase mb-1 tracking-wider truncate">
-                                                    {t(`room.${room}`)}
-                                                </div>
-                                                <div className="text-sm font-mono font-bold flex items-center gap-1 group-hover/price:text-primary transition-colors">
-                                                    <span className="opacity-50 text-[10px] font-normal">{override.prices[room]?.currency || 'EUR'}</span>
-                                                    {override.prices[room]?.amount?.toFixed(2) || '---'}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    ))
-                ) : (
-                    <div className="border border-border/30 rounded-2xl bg-background/40 backdrop-blur-md overflow-hidden shadow-xl">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-xs text-left border-collapse">
-                                <thead className="bg-muted/30 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/30">
-                                    <tr>
-                                        <th className="p-3 pl-6">Date Range</th>
-                                        {ROOM_TYPES.map(room => (
-                                            <th key={room} className="p-3 text-center capitalize min-w-[100px]">{t(`room.${room}`)}</th>
-                                        ))}
-                                        {isGM && <th className="p-3 text-right pr-6">Actions</th>}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border/20">
-                                    <AnimatePresence initial={false}>
-                                        {sortedOverrides.map((override) => (
-                                            <motion.tr
-                                                key={override.id}
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="hover:bg-primary/5 transition-colors group/row"
-                                            >
-                                                <td className="p-3 pl-6 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2 font-mono font-bold text-primary">
-                                                        <Calendar className="w-3 h-3 opacity-50" />
-                                                        {formatDisplayDate(override.start_date)}
-                                                        <span className="mx-1 text-muted-foreground font-light">→</span>
-                                                        {formatDisplayDate(override.end_date)}
-                                                    </div>
-                                                </td>
-                                                {ROOM_TYPES.map(room => (
-                                                    <td key={room} className="p-3 text-center">
-                                                        <div className="flex flex-col items-center">
-                                                            <span className="font-mono font-bold group-hover/row:text-primary transition-colors">
-                                                                {override.prices[room]?.amount?.toFixed(2) || '---'}
-                                                            </span>
-                                                            <span className="text-[8px] opacity-40 uppercase font-medium">
-                                                                {override.prices[room]?.currency || 'EUR'}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                ))}
-                                                {isGM && (
-                                                    <td className="p-3 text-right pr-6">
-                                                        {!editingOverride && (
-                                                            <div className="flex items-center justify-end gap-1">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8 opacity-0 group-hover/row:opacity-100 transition-all hover:bg-primary/10 hover:scale-110"
-                                                                    onClick={() => setEditingOverride(override)}
-                                                                    title={t('pricing.overrides.edit')}
-                                                                >
-                                                                    <Pencil className="w-3.5 h-3.5" />
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10 opacity-0 group-hover/row:opacity-100 transition-all hover:scale-110"
-                                                                    onClick={async () => {
-                                                                        const confirmed = await confirm({
-                                                                            title: t('common.deleteConfirm'),
-                                                                            variant: 'destructive',
-                                                                            confirmLabel: t('common.delete'),
-                                                                        })
-                                                                        if (confirmed) {
-                                                                            removeAgencyOverride(hotelId, agency.id, override.id)
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                                </Button>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                )}
-                                            </motion.tr>
-                                        ))}
-                                    </AnimatePresence>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    )
-}
-
-function GenericAgencyPricingTable({ agencies, isGM, hotelId, onAddAgency, onRemoveAgency }: {
-    agencies: Agency[], isGM: boolean, hotelId: string,
-    onAddAgency: (name: string) => Promise<void>,
-    onRemoveAgency: (agencyId: string) => Promise<void>
+/* ============================================================================
+ * OVERRIDE EDITOR MODAL (For creating / editing special period overrides)
+ * ============================================================================ */
+function OverrideEditorModal({
+    agencies,
+    isOpen,
+    initialTargetId,
+    initialData,
+    onClose,
+    onSave
+}: {
+    agencies: Agency[]
+    isOpen: boolean
+    initialTargetId: string
+    initialData?: BaseOverride | AgencyOverride
+    onClose: () => void
+    onSave: (targetId: string, override: BaseOverride | AgencyOverride) => Promise<void>
 }) {
     const { t } = useLanguageStore()
-    const { basePrices, setBasePrices, updateAgencyBasePrices } = usePricingStore()
-    const { user } = useAuthStore()
-    const confirm = useConfirm()
-    const [editingId, setEditingId] = useState<string | null>(null) // 'global' or agency id
-    const [editPrices, setEditPrices] = useState<Record<string, RoomPriceEntry>>({})
-    const [isSaving, setIsSaving] = useState(false)
-    const [agencySearch, setAgencySearch] = useState('')
-    useWorkspaceDirty('pricing-base-table', Boolean(editingId))
-
-    const startEditing = (id: string, prices: Record<string, RoomPriceEntry>) => {
-        setEditingId(id)
-        setEditPrices({ ...prices })
-    }
-
-    const saveChanges = async () => {
-        if (!editingId) return
-        setIsSaving(true)
-        try {
-            if (editingId === 'global') {
-                await setBasePrices(hotelId, editPrices, user?.uid || '')
-            } else {
-                await updateAgencyBasePrices(hotelId, editingId, editPrices)
-            }
-            setEditingId(null)
-            toast.success('Fiyatlar kaydedildi.')
-        } catch (error) {
-            console.error('Price save failed:', error)
-            toast.error('Fiyatlar kaydedilemedi.')
-        } finally {
-            setIsSaving(false)
-        }
-    }
-
-    const cancelEditing = () => {
-        setEditingId(null)
-        setEditPrices({})
-    }
-
-    const globalPrices = (basePrices?.prices || {}) as Record<string, RoomPriceEntry>
-
-    return (
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none" />
-            <CardHeader className="py-4 border-b border-border/30 bg-muted/20 relative z-10">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <Users className="w-5 h-5 text-primary" />
-                            {t('pricing.base.title')}
-                        </CardTitle>
-                        <CardDescription>Önce genel fiyatı belirleyin. Acentada boş bıraktığınız oda genel fiyatı kullanır.</CardDescription>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Input aria-label="Acenta ara" placeholder="Acenta ara..." value={agencySearch} onChange={e => setAgencySearch(e.target.value)} className="h-9 w-40" />
-                        {isGM && (
-                            <AddAgencyDialog dirtyId="pricing-new-base-agency" onAdd={onAddAgency} />
-                        )}
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className="p-0 relative z-10">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-left border-collapse">
-                        <thead className="bg-muted/30 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/30">
-                            <tr>
-                                <th className="p-3 pl-6 min-w-[160px]">Kaynak</th>
-                                {ROOM_TYPES.map(room => (
-                                    <th key={room} className="p-3 text-center capitalize min-w-[100px]">{t(`room.${room}`)}</th>
-                                ))}
-                                {isGM && <th className="p-3 text-right pr-6 min-w-[100px]">İşlem</th>}
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border/20">
-                            {/* ===== GENEL (HERKES) ROW ===== */}
-                            <motion.tr
-                                className={cn(
-                                    "transition-colors group/row",
-                                    editingId === 'global' ? "bg-primary/10" : "bg-primary/5 hover:bg-primary/10"
-                                )}
-                            >
-                                <td className="p-3 pl-6">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center ring-1 ring-emerald-500/20">
-                                            <Users className="w-3.5 h-3.5 text-emerald-500" />
-                                        </div>
-                                        <div>
-                                            <div className="font-bold text-sm text-foreground">Genel</div>
-                                            <div className="text-[9px] text-muted-foreground uppercase tracking-widest">Herkes</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                {ROOM_TYPES.map(room => (
-                                    <td key={room} className="p-3 text-center">
-                                        {editingId === 'global' ? (
-                                            <div className="flex min-w-28 flex-col gap-1"><Input aria-label={`${t(`room.${room}`)} genel fiyat`} type="number" min="0" step="0.01" className="h-9 text-center text-xs" value={editPrices[room]?.amount ?? ''} placeholder="Fiyat" onChange={e => setEditPrices(prev => ({ ...prev, [room]: { amount: Number(e.target.value), currency: prev[room]?.currency || 'EUR' } }))} /><select aria-label={`${t(`room.${room}`)} para birimi`} value={editPrices[room]?.currency || 'EUR'} onChange={e => setEditPrices(prev => ({ ...prev, [room]: { amount: prev[room]?.amount || 0, currency: e.target.value as PricingCurrency } }))} className="h-8 rounded-md border border-border bg-background px-1 text-xs"><option>EUR</option><option>TRY</option><option>USD</option><option>GBP</option></select></div>
-                                        ) : (
-                                            <div className="flex flex-col items-center">
-                                                <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
-                                                    {globalPrices[room]?.amount?.toFixed(2) || '---'}
-                                                </span>
-                                                <span className="text-[8px] opacity-40 uppercase">
-                                                    {globalPrices[room]?.currency || 'EUR'}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </td>
-                                ))}
-                                {isGM && (
-                                    <td className="p-3 text-right pr-6">
-                                        {editingId === 'global' ? (
-                                            <div className="flex items-center justify-end gap-1.5">
-                                                <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-destructive/10" onClick={cancelEditing}>
-                                                    <ArrowLeft className="w-3.5 h-3.5 text-muted-foreground" />
-                                                </Button>
-                                                <Button variant="secondary" size="icon" className="h-7 w-7 bg-emerald-500/10 hover:bg-emerald-500/20" onClick={saveChanges} disabled={isSaving}>
-                                                    {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5 text-emerald-500" />}
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <Button
-                                                variant="ghost" size="sm"
-                                                className="h-8 text-xs font-semibold bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                                onClick={() => startEditing('global', globalPrices)}
-                                            >
-                                                Düzenle
-                                            </Button>
-                                        )}
-                                    </td>
-                                )}
-                            </motion.tr>
-
-                            {/* ===== AGENCY ROWS ===== */}
-                            {agencies.filter(agency => agency.name.toLocaleLowerCase('tr').includes(agencySearch.toLocaleLowerCase('tr'))).map((agency) => (
-                                <motion.tr
-                                    key={agency.id}
-                                    className={cn(
-                                        "transition-colors group/row",
-                                        editingId === agency.id ? "bg-primary/10" : "hover:bg-primary/5"
-                                    )}
-                                >
-                                    <td className="p-3 pl-6">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
-                                                <Building2 className="w-3.5 h-3.5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-sm text-foreground">{agency.name}</div>
-                                                <div className="text-[9px] text-muted-foreground uppercase tracking-widest">Özel Fiyat</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    {ROOM_TYPES.map(room => {
-                                        const agencyPrice = agency.base_prices?.[room]
-                                        const inheritsGlobal = !agencyPrice
-                                        return (
-                                            <td key={room} className="p-3 text-center">
-                                                {editingId === agency.id ? (
-                                                    <div className="flex min-w-28 flex-col gap-1"><Input aria-label={`${agency.name} ${t(`room.${room}`)} fiyat`} type="number" min="0" step="0.01" className="h-9 text-center text-xs" value={editPrices[room]?.amount ?? ''} placeholder={globalPrices[room] ? `Genel ${globalPrices[room].amount}` : 'Genel fiyat yok'} onChange={e => setEditPrices(prev => { const next = { ...prev }; if (e.target.value === '') delete next[room]; else next[room] = { amount: Number(e.target.value), currency: prev[room]?.currency || globalPrices[room]?.currency || 'EUR' }; return next })} /><select aria-label={`${agency.name} ${t(`room.${room}`)} para birimi`} value={editPrices[room]?.currency || globalPrices[room]?.currency || 'EUR'} onChange={e => setEditPrices(prev => ({ ...prev, [room]: { amount: prev[room]?.amount || 0, currency: e.target.value as PricingCurrency } }))} className="h-8 rounded-md border border-border bg-background px-1 text-xs"><option>EUR</option><option>TRY</option><option>USD</option><option>GBP</option></select></div>
-                                                ) : (
-                                                    <div className="flex flex-col items-center">
-                                                        <span className={cn(
-                                                            "font-mono font-bold text-sm",
-                                                            inheritsGlobal ? "text-muted-foreground/40 italic" : "text-primary/80 group-hover/row:text-primary"
-                                                        )}>
-                                                            {inheritsGlobal
-                                                                ? (globalPrices[room]?.amount?.toFixed(2) || '---')
-                                                                : agencyPrice.amount.toFixed(2)
-                                                            }
-                                                        </span>
-                                                        <span className="text-[8px] opacity-40 uppercase">
-                                                            {inheritsGlobal
-                                                                ? (globalPrices[room]?.currency || 'EUR')
-                                                                : agencyPrice.currency
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </td>
-                                        )
-                                    })}
-                                    {isGM && (
-                                        <td className="p-3 text-right pr-6">
-                                            {editingId === agency.id ? (
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-destructive/10" onClick={cancelEditing}>
-                                                        <ArrowLeft className="w-3.5 h-3.5 text-muted-foreground" />
-                                                    </Button>
-                                                    <Button variant="secondary" size="icon" className="h-7 w-7 bg-emerald-500/10 hover:bg-emerald-500/20" onClick={saveChanges} disabled={isSaving}>
-                                                        {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5 text-emerald-500" />}
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    <Button
-                                                        variant="outline" size="sm"
-                                                        className="h-8 text-xs"
-                                                        onClick={() => startEditing(agency.id, agency.base_prices || {})}
-                                                    >
-                                                        Düzenle
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost" size="icon"
-                                                        aria-label={`${agency.name} acentasını sil`}
-                                                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                        onClick={async () => {
-                                                            const confirmed = await confirm({
-                                                                title: `${agency.name} silinsin mi?`,
-                                                                variant: 'destructive',
-                                                                confirmLabel: t('common.delete'),
-                                                            })
-                                                            if (confirmed) {
-                                                                onRemoveAgency(agency.id)
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </td>
-                                    )}
-                                </motion.tr>
-                            ))}
-
-                            {/* Empty state */}
-                            {agencies.length === 0 && (
-                                <tr>
-                                    <td colSpan={ROOM_TYPES.length + 2} className="p-6 text-center text-muted-foreground/60 text-xs italic">
-                                        Henüz özel fiyat tanımlı acenta yok. Yukarıdan acenta ekleyebilirsiniz.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
-function OverrideEditor({ onSave, onCancel, initial }: { onSave: (o: AgencyOverride) => Promise<void>, onCancel: () => void, initial?: AgencyOverride }) {
-    const { t } = useLanguageStore()
-    const [startDate, setStartDate] = useState(initial?.start_date || format(new Date(), 'yyyy-MM-dd'))
-    const [endDate, setEndDate] = useState(initial?.end_date || format(addDaysFns(new Date(), 7), 'yyyy-MM-dd'))
-    const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>(initial ? { ...initial.prices } : {})
+    const [targetId, setTargetId] = useState<string>(initialTargetId || 'global')
+    const [startDate, setStartDate] = useState(initialData?.start_date || format(new Date(), 'yyyy-MM-dd'))
+    const [endDate, setEndDate] = useState(initialData?.end_date || format(addDaysFns(new Date(), 7), 'yyyy-MM-dd'))
+    const [prices, setPrices] = useState<Record<string, RoomPriceEntry>>(initialData ? { ...initialData.prices } : {})
     const [isSaving, setIsSaving] = useState(false)
 
     const handleSave = async () => {
-        if (!startDate || !endDate) return
+        if (!startDate || !endDate) {
+            toast.error('Lütfen başlangıç ve bitiş tarihlerini girin.')
+            return
+        }
         setIsSaving(true)
         try {
-            await onSave({
-                id: initial?.id || `override_${Date.now()}`,
+            await onSave(targetId, {
+                id: initialData?.id || `override_${Date.now()}`,
                 start_date: startDate,
                 end_date: endDate,
                 prices
@@ -1498,89 +1250,425 @@ function OverrideEditor({ onSave, onCancel, initial }: { onSave: (o: AgencyOverr
     }
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('pricing.lookup.date')} (Start)</label>
-                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('pricing.lookup.date')} (End)</label>
-                    <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-                </div>
-            </div>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-amber-500" />
+                        {initialData ? 'Özel Dönemi Düzenle' : 'Yeni Özel Dönem / Sezon Ekle'}
+                    </DialogTitle>
+                    <DialogDescription>
+                        Belirli tarih aralığında geçerli olacak oda fiyat tarifesini girin.
+                    </DialogDescription>
+                </DialogHeader>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {ROOM_TYPES.map(room => (
-                    <div key={room} className="space-y-2 p-3 rounded-xl bg-background/50 border border-border/50">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase block">{t(`room.${room}`)}</label>
-                        <div className="flex items-center gap-2">
-                            <Input
-                                type="number"
-                                className="h-8 text-right font-mono"
-                                value={prices[room]?.amount || 0}
-                                onChange={e => setPrices(p => ({ ...p, [room]: { ...(p[room] || { currency: 'EUR' }), amount: parseFloat(e.target.value) || 0 } }))}
-                            />
-                            <Select
-                                value={prices[room]?.currency || 'EUR'}
-                                onValueChange={val => setPrices(p => ({ ...p, [room]: { ...(p[room] || { amount: 0 }), currency: val as PricingCurrency } }))}
-                            >
-                                <SelectTrigger className="h-8 w-16 px-2">
+                <div className="py-4 space-y-4">
+                    {/* Target & Dates */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="space-y-1 sm:col-span-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Hedef</label>
+                            <Select value={targetId} onValueChange={setTargetId} disabled={Boolean(initialData)}>
+                                <SelectTrigger className="h-9 text-xs">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="EUR">EUR</SelectItem>
-                                    <SelectItem value="USD">USD</SelectItem>
+                                    <SelectItem value="global">Genel (Herkes)</SelectItem>
+                                    {agencies.map((a) => (
+                                        <SelectItem key={a.id} value={a.id}>
+                                            {a.name}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Başlangıç Tarihi</label>
+                            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-9 text-xs" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Bitiş Tarihi</label>
+                            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-9 text-xs" />
+                        </div>
                     </div>
-                ))}
-            </div>
 
-            <div className="flex gap-2 justify-end">
-                <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-                <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                    {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                    Save Override
-                </Button>
-            </div>
-        </div>
+                    {/* Prices Grid */}
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Oda Fiyatları</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {ROOM_TYPES.map((room) => (
+                                <div key={room} className="p-3 rounded-2xl bg-muted/20 border border-border/40 space-y-1.5">
+                                    <label className="text-[11px] font-bold block truncate capitalize text-muted-foreground">
+                                        {t(`room.${room}`)}
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            placeholder="Fiyat"
+                                            value={prices[room]?.amount ?? ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value
+                                                if (val === '') {
+                                                    setPrices((prev) => {
+                                                        const next = { ...prev }
+                                                        delete next[room]
+                                                        return next
+                                                    })
+                                                } else {
+                                                    setPrices((prev) => ({
+                                                        ...prev,
+                                                        [room]: {
+                                                            amount: parseFloat(val) || 0,
+                                                            currency: prev[room]?.currency || 'EUR'
+                                                        }
+                                                    }))
+                                                }
+                                            }}
+                                            className="h-8 font-mono text-xs"
+                                        />
+                                        <Select
+                                            value={prices[room]?.currency || 'EUR'}
+                                            onValueChange={(curr) =>
+                                                setPrices((prev) => ({
+                                                    ...prev,
+                                                    [room]: {
+                                                        amount: prev[room]?.amount || 0,
+                                                        currency: curr as PricingCurrency
+                                                    }
+                                                }))
+                                            }
+                                        >
+                                            <SelectTrigger className="h-8 w-20 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="EUR">EUR (€)</SelectItem>
+                                                <SelectItem value="USD">USD ($)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="ghost" onClick={onClose}>
+                        İptal
+                    </Button>
+                    <Button onClick={handleSave} disabled={isSaving} className="bg-amber-500 hover:bg-amber-600 text-white">
+                        {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                        Özel Dönemi Kaydet
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }
 
-function AddAgencyDialog({ onAdd, dirtyId }: { onAdd: (name: string) => Promise<void>; dirtyId: string }) {
+/* ============================================================================
+ * 3. PRICE CALCULATOR VIEW (TAB 3)
+ * ============================================================================ */
+function PriceCalculatorView({
+    agencies,
+    baseOverrides,
+    getEffectivePrice,
+    dateLocale
+}: {
+    agencies: Agency[]
+    baseOverrides: BaseOverride[]
+    getEffectivePrice: (date: string, roomType: RoomType, agencyId?: string) => RoomPriceEntry | null
+    dateLocale: any
+}) {
     const { t } = useLanguageStore()
-    const [name, setName] = useState('')
-    const [isOpen, setIsOpen] = useState(false)
-    useWorkspaceDirty(dirtyId, isOpen && Boolean(name.trim()))
+    const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+    const [endDate, setEndDate] = useState(format(addDaysFns(new Date(), 3), 'yyyy-MM-dd'))
+    const [selectedAgencyId, setSelectedAgencyId] = useState<string>('base')
+    const [selectedRoomType, setSelectedRoomType] = useState<RoomType>('standard')
 
-    if (!isOpen) {
-        return (
-            <Button size="sm" onClick={() => setIsOpen(true)} className="gap-2">
-                <Plus className="w-4 h-4" />
-                {t('pricing.agencies.add')}
-            </Button>
-        )
-    }
+    const agencyIdArg = selectedAgencyId === 'base' ? undefined : selectedAgencyId
+    const agencyObj = agencies.find((a) => a.id === selectedAgencyId)
+
+    // Calculate Nightly Breakdown
+    const calculation = useMemo(() => {
+        try {
+            const start = parseISO(startDate)
+            const end = parseISO(endDate)
+
+            if (isNaN(start.getTime()) || isNaN(end.getTime()) || !isBefore(start, end)) {
+                return null
+            }
+
+            const nights = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)))
+            const dailyBreakdown: Array<{
+                dateStr: string
+                formattedDate: string
+                price: RoomPriceEntry | null
+                ruleName: string
+                ruleType: 'agency_override' | 'global_override' | 'agency_base' | 'global_base' | 'none'
+            }> = []
+
+            let totalPrice = 0
+            let primaryCurrency: PricingCurrency = 'EUR'
+
+            for (let i = 0; i < nights; i++) {
+                const currentDay = addDaysFns(start, i)
+                const dateStr = format(currentDay, 'yyyy-MM-dd')
+                const formattedDate = format(currentDay, 'dd MMMM yyyy, EEEE', { locale: dateLocale })
+
+                // Determine rule source manually for audit transparency
+                let ruleName = 'Otel Genel Taban Fiyatı'
+                let ruleType: 'agency_override' | 'global_override' | 'agency_base' | 'global_base' | 'none' = 'global_base'
+
+                if (agencyIdArg && agencyObj) {
+                    const agencyOverride = agencyObj.overrides?.find(
+                        (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[selectedRoomType]?.amount
+                    )
+                    if (agencyOverride) {
+                        ruleName = `${agencyObj.name} Özel Sezon Kampanyası`
+                        ruleType = 'agency_override'
+                    } else if (agencyObj.base_prices?.[selectedRoomType]?.amount) {
+                        ruleName = `${agencyObj.name} Standart Anlaşma Fiyatı`
+                        ruleType = 'agency_base'
+                    }
+                }
+
+                if (ruleType === 'global_base') {
+                    const globalOverride = baseOverrides.find(
+                        (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[selectedRoomType]?.amount
+                    )
+                    if (globalOverride) {
+                        ruleName = 'Genel Özel Dönem Kampanyası'
+                        ruleType = 'global_override'
+                    }
+                }
+
+                const price = getEffectivePrice(dateStr, selectedRoomType, agencyIdArg)
+                if (price?.amount) {
+                    totalPrice += price.amount
+                    primaryCurrency = price.currency || 'EUR'
+                } else {
+                    ruleType = 'none'
+                    ruleName = 'Fiyat Bulunamadı'
+                }
+
+                dailyBreakdown.push({
+                    dateStr,
+                    formattedDate,
+                    price,
+                    ruleName,
+                    ruleType
+                })
+            }
+
+            const avgPrice = nights > 0 ? totalPrice / nights : 0
+
+            return {
+                nights,
+                totalPrice,
+                avgPrice,
+                primaryCurrency,
+                dailyBreakdown
+            }
+        } catch (_e) {
+            return null
+        }
+    }, [startDate, endDate, selectedAgencyId, selectedRoomType, agencyIdArg, agencyObj, baseOverrides, getEffectivePrice, dateLocale])
 
     return (
-        <div className="flex items-center gap-2">
-            <Input
-                placeholder={t('pricing.agencies.placeholder')}
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="h-8 w-48 text-xs"
-                autoFocus
-            />
-            <Button size="sm" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
-            <Button size="sm" onClick={async () => {
-                if (name) {
-                    await onAdd(name)
-                    setName('')
-                    setIsOpen(false)
-                }
-            }}>Add</Button>
-        </div>
+        <Card className="border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden shadow-2xl relative">
+            <div className="absolute inset-0 bg-gradient-to-bl from-emerald-500/5 via-transparent to-transparent pointer-events-none" />
+            <CardHeader className="border-b border-border/30 bg-muted/20 py-4 relative z-10">
+                <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <Calculator className="w-5 h-5 text-emerald-500" />
+                        Fiyat Hesaplama & Gece Kırılımı
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                        Tarih aralığı, oda tipi ve acente seçerek konaklama tutarını ve gece gece hangi kuralın uygulandığını sorgulayın.
+                    </CardDescription>
+                </div>
+            </CardHeader>
+
+            <CardContent className="p-6 space-y-6 relative z-10">
+                {/* Inputs Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-2xl bg-muted/20 border border-border/30">
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Giriş Tarihi (Check-in)
+                        </label>
+                        <Input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className="h-10 text-xs bg-background"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Çıkış Tarihi (Check-out)
+                        </label>
+                        <Input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className="h-10 text-xs bg-background"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Acente
+                        </label>
+                        <Select value={selectedAgencyId} onValueChange={setSelectedAgencyId}>
+                            <SelectTrigger className="h-10 text-xs bg-background">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="base">Otel Genel Taban Fiyatı (Münferit)</SelectItem>
+                                {agencies.map((a) => (
+                                    <SelectItem key={a.id} value={a.id}>
+                                        {a.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Oda Tipi
+                        </label>
+                        <Select value={selectedRoomType} onValueChange={(val) => setSelectedRoomType(val as RoomType)}>
+                            <SelectTrigger className="h-10 text-xs bg-background">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {ROOM_TYPES.map((room) => (
+                                    <SelectItem key={room} value={room}>
+                                        {t(`room.${room}`)}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                {/* Calculation Summary Cards */}
+                {calculation ? (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {/* Total Stay Price */}
+                            <Card className="border-emerald-500/30 bg-emerald-500/10 p-4 flex flex-col justify-between">
+                                <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                    Toplam Konaklama Tutarı
+                                </div>
+                                <div className="mt-2 text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
+                                    <span className="text-sm font-normal mr-1">{calculation.primaryCurrency}</span>
+                                    {calculation.totalPrice.toFixed(2)}
+                                </div>
+                            </Card>
+
+                            {/* Nights */}
+                            <Card className="border-border/40 bg-background/60 p-4 flex flex-col justify-between">
+                                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    Gece Sayısı
+                                </div>
+                                <div className="mt-2 text-2xl font-extrabold font-mono text-foreground">
+                                    {calculation.nights} <span className="text-xs font-normal text-muted-foreground">Gece</span>
+                                </div>
+                            </Card>
+
+                            {/* Average Nightly Rate */}
+                            <Card className="border-border/40 bg-background/60 p-4 flex flex-col justify-between">
+                                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    Gecelik Ortalama Fiyat
+                                </div>
+                                <div className="mt-2 text-2xl font-extrabold font-mono text-foreground">
+                                    <span className="text-sm font-normal mr-1 text-muted-foreground">{calculation.primaryCurrency}</span>
+                                    {calculation.avgPrice.toFixed(2)}
+                                </div>
+                            </Card>
+                        </div>
+
+                        {/* Nightly Breakdown Table */}
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-bold flex items-center gap-2">
+                                <CalendarDays className="w-4 h-4 text-emerald-500" />
+                                Gecelik Fiyat Kırılımı ve Uygulanan Kurallar
+                            </h3>
+
+                            <div className="border border-border/40 rounded-2xl overflow-hidden bg-background/60">
+                                <table className="w-full text-xs text-left border-collapse">
+                                    <thead className="bg-muted/30 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/30">
+                                        <tr>
+                                            <th className="p-3 pl-4">Tarih</th>
+                                            <th className="p-3 text-center">Gecelik Fiyat</th>
+                                            <th className="p-3 pl-4">Uygulanan Fiyat Mantığı / Kural</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/20">
+                                        {calculation.dailyBreakdown.map((row, idx) => (
+                                            <tr key={idx} className="hover:bg-muted/20 transition-colors">
+                                                <td className="p-3 pl-4 font-semibold text-foreground">
+                                                    {row.formattedDate}
+                                                </td>
+                                                <td className="p-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                                                    {row.price?.amount ? (
+                                                        <>
+                                                            <span className="text-[9px] font-normal opacity-60 mr-1">
+                                                                {row.price.currency || 'EUR'}
+                                                            </span>
+                                                            {row.price.amount.toFixed(2)}
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-destructive font-normal">Fiyat Yok</span>
+                                                    )}
+                                                </td>
+                                                <td className="p-3 pl-4">
+                                                    {row.ruleType === 'agency_override' && (
+                                                        <Badge variant="default" className="bg-amber-500 text-white font-medium text-[11px]">
+                                                            <Zap className="w-3 h-3 mr-1" />
+                                                            {row.ruleName}
+                                                        </Badge>
+                                                    )}
+                                                    {row.ruleType === 'global_override' && (
+                                                        <Badge variant="default" className="bg-purple-600 text-white font-medium text-[11px]">
+                                                            <Sparkles className="w-3 h-3 mr-1" />
+                                                            {row.ruleName}
+                                                        </Badge>
+                                                    )}
+                                                    {row.ruleType === 'agency_base' && (
+                                                        <Badge variant="secondary" className="font-medium text-[11px]">
+                                                            <Building2 className="w-3 h-3 mr-1 text-primary" />
+                                                            {row.ruleName}
+                                                        </Badge>
+                                                    )}
+                                                    {row.ruleType === 'global_base' && (
+                                                        <Badge variant="outline" className="text-emerald-500 border-emerald-500/30 bg-emerald-500/10 font-medium text-[11px]">
+                                                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                            {row.ruleName}
+                                                        </Badge>
+                                                    )}
+                                                    {row.ruleType === 'none' && (
+                                                        <Badge variant="destructive" className="font-medium text-[11px]">
+                                                            {row.ruleName}
+                                                        </Badge>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-8 text-center text-muted-foreground text-xs italic">
+                        Geçerli bir tarih aralığı seçin (Giriş tarihi Çıkış tarihinden önce olmalıdır).
+                    </div>
+                )}
+            </CardContent>
+        </Card>
     )
 }

@@ -294,6 +294,25 @@ export type Translations = {
     'pricing.ai.desc': string
     'pricing.price.custom': string
 
+    // Pricing Redesign V3
+    'pricing.tabs.matrix': string
+    'pricing.tabs.campaigns': string
+    'pricing.tabs.calculator': string
+    'pricing.hierarchy.title': string
+    'pricing.hierarchy.step1': string
+    'pricing.hierarchy.step2': string
+    'pricing.hierarchy.step3': string
+    'pricing.hierarchy.step4': string
+    'pricing.matrix.editBaseTitle': string
+    'pricing.matrix.editAgencyTitle': string
+    'pricing.matrix.baseLabel': string
+    'pricing.matrix.inheritsBase': string
+    'pricing.calculator.nights': string
+    'pricing.calculator.averageNight': string
+    'pricing.calculator.total': string
+    'pricing.calculator.breakdown': string
+    'pricing.calculator.appliedRule': string
+
     // Room Types
     'room.standard': string
     'room.corner': string

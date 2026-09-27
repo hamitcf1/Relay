@@ -269,6 +269,25 @@ const en: Translations = {
         'pricing.ai.desc': 'Paste date ranges and prices in text or table format.',
         'pricing.price.custom': 'Custom',
 
+        // Pricing Redesign V3
+        'pricing.tabs.matrix': 'Rate Matrix',
+        'pricing.tabs.campaigns': 'Special Periods & Seasons',
+        'pricing.tabs.calculator': 'Price Calculator & Breakdown',
+        'pricing.hierarchy.title': 'Price Resolution Hierarchy',
+        'pricing.hierarchy.step1': 'Agency Special Period',
+        'pricing.hierarchy.step2': 'Global Special Period',
+        'pricing.hierarchy.step3': 'Agency Standard Rate',
+        'pricing.hierarchy.step4': 'Hotel Base Rate',
+        'pricing.matrix.editBaseTitle': 'Edit Hotel Base Rates',
+        'pricing.matrix.editAgencyTitle': 'Edit Agency Rates',
+        'pricing.matrix.baseLabel': 'Hotel Default Base Rate',
+        'pricing.matrix.inheritsBase': 'Base',
+        'pricing.calculator.nights': 'Length of Stay',
+        'pricing.calculator.averageNight': 'Nightly Average',
+        'pricing.calculator.total': 'Total Amount',
+        'pricing.calculator.breakdown': 'Nightly Price Breakdown',
+        'pricing.calculator.appliedRule': 'Applied Pricing Rule',
+
         // Room Types
         'room.standard': 'Standard Room',
         'room.corner': 'Corner Suite',

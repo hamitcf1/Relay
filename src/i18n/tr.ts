@@ -211,6 +211,25 @@ const tr: Translations = {
         'pricing.ai.title': 'AI Fiyat Asistanı',
         'pricing.ai.desc': 'Tarih aralıklarını ve fiyatları metin veya tablo formatında yapıştırın.',
 
+        // Pricing Redesign V3
+        'pricing.tabs.matrix': 'Fiyat Matrisi',
+        'pricing.tabs.campaigns': 'Özel Dönemler & Sezonlar',
+        'pricing.tabs.calculator': 'Fiyat Hesaplama & Kırılım',
+        'pricing.hierarchy.title': 'Fiyat Öncelik Hiyerarşisi',
+        'pricing.hierarchy.step1': 'Acente Özel Dönem',
+        'pricing.hierarchy.step2': 'Genel Özel Dönem',
+        'pricing.hierarchy.step3': 'Acente Standart Fiyatı',
+        'pricing.hierarchy.step4': 'Otel Taban Fiyatı',
+        'pricing.matrix.editBaseTitle': 'Otel Taban Fiyatlarını Düzenle',
+        'pricing.matrix.editAgencyTitle': 'Acente Fiyatlarını Düzenle',
+        'pricing.matrix.baseLabel': 'Otel Genel Taban Fiyatı',
+        'pricing.matrix.inheritsBase': 'Taban',
+        'pricing.calculator.nights': 'Konaklama Süresi',
+        'pricing.calculator.averageNight': 'Gecelik Ortalama',
+        'pricing.calculator.total': 'Toplam Tutar',
+        'pricing.calculator.breakdown': 'Gece Bazlı Fiyat Kırılımı',
+        'pricing.calculator.appliedRule': 'Uygulanan Fiyat Mantığı',
+
         // Room Types
         'room.standard': 'Standart Oda',
         'room.corner': 'Corner Süit',

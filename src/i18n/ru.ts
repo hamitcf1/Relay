@@ -269,6 +269,25 @@ const en: Translations = {
         'pricing.ai.desc': 'Paste date ranges and prices in text or table format.',
         'pricing.price.custom': 'Custom',
 
+        // Pricing Redesign V3
+        'pricing.tabs.matrix': 'Матрица Цен',
+        'pricing.tabs.campaigns': 'Особые Периоды и Сезоны',
+        'pricing.tabs.calculator': 'Расчет Цен и Калькулятор',
+        'pricing.hierarchy.title': 'Иерархия Приоритета Цен',
+        'pricing.hierarchy.step1': 'Период Агентства',
+        'pricing.hierarchy.step2': 'Общий Период',
+        'pricing.hierarchy.step3': 'Базовая Цена Агентства',
+        'pricing.hierarchy.step4': 'Базовая Цена Отеля',
+        'pricing.matrix.editBaseTitle': 'Редактировать Базовые Цены',
+        'pricing.matrix.editAgencyTitle': 'Редактировать Цены Агентства',
+        'pricing.matrix.baseLabel': 'Базовая Цена Отеля',
+        'pricing.matrix.inheritsBase': 'Базовая',
+        'pricing.calculator.nights': 'Продолжительность',
+        'pricing.calculator.averageNight': 'В среднем за ночь',
+        'pricing.calculator.total': 'Итоговая Сумма',
+        'pricing.calculator.breakdown': 'Посуточная Детализация',
+        'pricing.calculator.appliedRule': 'Примененное Правило',
+
         // Room Types
         'room.standard': 'Standard Room',
         'room.corner': 'Corner Suite',
