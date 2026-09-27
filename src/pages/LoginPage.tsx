@@ -70,18 +70,34 @@ export function LoginPage() {
 
         const fetchHotelStaff = async () => {
             try {
+                const { doc, getDoc } = await import('firebase/firestore')
+                
                 // 1. Find hotel by code
                 const hotelsRef = collection(db, 'hotels')
                 const hQuery = query(hotelsRef, where('code', '==', trimmedCode))
-                const hSnap = await getDocs(hQuery)
+                let hSnap = await getDocs(hQuery)
 
-                if (hSnap.empty) {
+                let hotelId: string | null = null
+
+                if (!hSnap.empty) {
+                    hotelId = hSnap.docs[0].id
+                } else {
+                    // Try checking directly by document ID in case hotel code is hotel ID
+                    try {
+                        const directDocRef = doc(db, 'hotels', trimmedCode)
+                        const directDoc = await getDoc(directDocRef)
+                        if (directDoc.exists()) {
+                            hotelId = directDoc.id
+                        }
+                    } catch (e) {
+                        // ignore direct lookup error
+                    }
+                }
+
+                if (!hotelId) {
                     if (isMounted) setStaffList([])
                     return
                 }
-
-                const hotelDoc = hSnap.docs[0]
-                const hotelId = hotelDoc.id
 
                 // 2. Fetch active staff for this hotel
                 const usersRef = collection(db, 'users')
@@ -102,9 +118,17 @@ export function LoginPage() {
                     }
                 })
 
+                // Sort: GM first, then alphabetical by name
+                members.sort((a, b) => {
+                    if (a.role === 'gm' && b.role !== 'gm') return -1
+                    if (a.role !== 'gm' && b.role === 'gm') return 1
+                    return a.name.localeCompare(b.name)
+                })
+
                 if (isMounted) setStaffList(members)
             } catch (err) {
                 console.error("Error fetching staff for hotel code:", err)
+                if (isMounted) setStaffList([])
             } finally {
                 if (isMounted) setIsFetchingStaff(false)
             }

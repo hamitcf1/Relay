@@ -46,13 +46,8 @@ service cloud.firestore {
     // USERS COLLECTION
     // ==========================================
     match /users/{userId} {
-      // Users can read their own document
-      // GMs can read any user in their hotel
-      allow read: if isAuthenticated() && (
-        request.auth.uid == userId ||
-        (managesHotel(resource.data.hotel_id)) ||
-        (resource != null && resource.data.hotel_id == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.hotel_id)
-      );
+      // Allow read for all so login screen can query staff by hotel_id
+      allow read: if true;
       
       // Users can only be created during registration (by themselves) OR by GMs.
       // A manager registering their own hotel has no hotel yet, so a self-created GM is
@@ -81,8 +76,8 @@ service cloud.firestore {
     // HOTELS COLLECTION
     // ==========================================
     match /hotels/{hotelId} {
-      // Anyone authenticated can read hotel info
-      allow read: if isAuthenticated();
+      // Anyone can read hotel info (required for login hotel code lookup)
+      allow read: if true;
       
       // Anyone can create a hotel (during registration), but only under their own ownership.
       // Without the owner_id check any signed-in user could stamp someone else's uid on a
