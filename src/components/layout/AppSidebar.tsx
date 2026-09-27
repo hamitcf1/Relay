@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Check, ChevronDown, ChevronLeft, Globe, LogOut, Palette, SlidersHorizontal, Sparkles } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, Globe, LogOut, Palette, Settings, SlidersHorizontal, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -15,6 +15,7 @@ import {
     DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
+import { HotelSettings } from '@/components/settings/HotelSettings'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { RelayMark } from '@/components/brand/RelayBrand'
 import { getModuleLabel, resolvePersonalNavigation } from '@/lib/navigation'
@@ -119,6 +120,7 @@ function NavItem({ item, label, active, collapsed, onClick }: { item: ModuleDefi
 
 function UserMenu({ collapsed, user, t, language, setLanguage, signOut }: any) {
     const [appearanceOpen, setAppearanceOpen] = useState(false)
+    const [hotelSettingsOpen, setHotelSettingsOpen] = useState(false)
     return (
         <>
         <DropdownMenu>
@@ -126,6 +128,9 @@ function UserMenu({ collapsed, user, t, language, setLanguage, signOut }: any) {
             <DropdownMenuContent side={collapsed ? 'right' : 'top'} align="start" className="mb-2 w-64 p-2">
                 <DropdownMenuLabel>{user?.name}</DropdownMenuLabel><DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => setAppearanceOpen(true)} className="gap-2"><Palette className="h-4 w-4 text-primary" />{t('common.appearance')}</DropdownMenuItem>
+                {user?.role === 'gm' && (
+                    <DropdownMenuItem onSelect={() => setHotelSettingsOpen(true)} className="gap-2"><Settings className="h-4 w-4 text-primary" />{t('hotel.settings.title')}</DropdownMenuItem>
+                )}
                 <DropdownMenuSub><DropdownMenuSubTrigger className="gap-2"><Globe className="h-4 w-4 text-primary" />{t('common.language')}</DropdownMenuSubTrigger><DropdownMenuPortal><DropdownMenuSubContent>{(['en', 'tr', 'ru'] as const).map((code) => <DropdownMenuItem key={code} onClick={() => setLanguage(code)}>{code === 'en' ? 'English' : code === 'tr' ? 'Türkçe' : 'Русский'}{language === code && <Check className="ml-auto h-3.5 w-3.5" />}</DropdownMenuItem>)}</DropdownMenuSubContent></DropdownMenuPortal></DropdownMenuSub>
                 <DropdownMenuSeparator /><DropdownMenuItem onClick={signOut} className="gap-2 text-destructive"><LogOut className="h-4 w-4" />{t('auth.logout')}</DropdownMenuItem>
             </DropdownMenuContent>
@@ -134,6 +139,12 @@ function UserMenu({ collapsed, user, t, language, setLanguage, signOut }: any) {
             <DialogContent className="flex max-h-[calc(100dvh-1rem)] flex-col overflow-hidden border-border bg-card p-0 sm:max-w-md">
                 <DialogHeader><DialogTitle className="px-6 pt-6">{t('common.appearance')}</DialogTitle><DialogDescription className="sr-only">Appearance and workspace settings</DialogDescription></DialogHeader>
                 <div className="min-h-0 overflow-y-auto overscroll-contain px-6 pb-6"><AppearanceOptions /></div>
+            </DialogContent>
+        </Dialog>
+        <Dialog open={hotelSettingsOpen} onOpenChange={setHotelSettingsOpen}>
+            <DialogContent className="flex max-h-[calc(100dvh-1rem)] max-w-4xl flex-col overflow-hidden border-border bg-card p-0">
+                <DialogHeader className="px-6 pt-6"><DialogTitle>{t('hotel.settings.title')}</DialogTitle><DialogDescription className="sr-only">Hotel settings</DialogDescription></DialogHeader>
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6"><HotelSettings /></div>
             </DialogContent>
         </Dialog>
         </>

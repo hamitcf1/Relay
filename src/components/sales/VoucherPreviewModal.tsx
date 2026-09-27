@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { toPng } from 'html-to-image'
 import QRCode from 'react-qr-code'
-import { Download, Printer, Sun, Moon, ChevronDown, Share2, Copy, Edit3, Check, X, ShieldCheck } from 'lucide-react'
+import { Download, Printer, Sun, Moon, ChevronDown, Share2, Copy, Edit3, Check, X, ShieldCheck, FileText } from 'lucide-react'
 
 import {
     Dialog,
@@ -32,6 +32,7 @@ import { useCurrencyStore } from '@/stores/currencyStore'
 import { cn, formatDisplayDate, parseGuestNames, isTRYCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
 import type { Sale, Currency, PaymentStatus } from '@/types'
+import { TourConfirmationPdfModal } from './TourConfirmationPdfModal'
 
 interface VoucherPreviewModalProps {
     saleId: string | null
@@ -49,6 +50,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
     const [theme, setTheme] = useState<'dark' | 'light'>('dark')
     const [isEditing, setIsEditing] = useState(false)
     const [editForm, setEditForm] = useState<Partial<Sale>>({})
+    const [showConfirmationPdf, setShowConfirmationPdf] = useState(false)
 
     const sale = sales.find(s => s.id === saleId)
 
@@ -246,6 +248,7 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
     const qrWrapper = 'bg-white p-3 rounded-2xl shadow-xl border border-zinc-200/80 flex flex-col items-center justify-center gap-1.5'
 
     return (
+        <>
         <Dialog open={!!saleId} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="max-w-5xl bg-background border-border p-6 gap-6 max-h-[90vh] overflow-y-auto">
                 <DialogTitle className="sr-only">Voucher Preview & Edit</DialogTitle>
@@ -299,6 +302,9 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                             </Button>
                         </div>
                         
+                        <Button variant="outline" size="sm" onClick={() => setShowConfirmationPdf(true)} className="border-amber-500/40 text-amber-400 hover:bg-amber-500/10 font-semibold">
+                            <FileText className="mr-1.5 h-3.5 w-3.5 text-amber-400" /> A4 Konfirme Belgesi (PDF)
+                        </Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="sm">
@@ -774,6 +780,13 @@ export function VoucherPreviewModal({ saleId, onClose }: VoucherPreviewModalProp
                 </div>
             </DialogContent>
         </Dialog>
+
+        <TourConfirmationPdfModal
+            isOpen={showConfirmationPdf}
+            onClose={() => setShowConfirmationPdf(false)}
+            sale={sale}
+        />
+        </>
     )
 }
 

@@ -2,7 +2,6 @@ import { motion } from 'framer-motion'
 import {
     LayoutDashboard,
     ShieldAlert,
-    ShieldCheck,
     CalendarDays,
     Map,
     CreditCard,
@@ -10,10 +9,7 @@ import {
     Users,
     ScrollText,
     KeyRound,
-    CircleDollarSign,
     Info,
-    Utensils,
-    UserX,
 } from 'lucide-react'
 import { useLanguageStore } from '@/stores/languageStore'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
@@ -42,40 +38,16 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             featured: true,
         },
         {
-            id: 'compliance',
-            label: t('module.compliance') || 'Compliance',
-            icon: ShieldCheck,
-            desc: t('operations.compliance.desc') || 'KBS & Agency check-ins',
+            id: 'asset-management',
+            label: language === 'tr' ? 'Varlık & Bakım Yönetimi' : language === 'ru' ? 'Управление активами' : 'Asset & Maintenance',
+            icon: KeyRound,
+            desc: language === 'tr' ? 'Bakım, kayıp eşya ve emanet kart takibi' : language === 'ru' ? 'Обслуживание, находки и карты' : 'Maintenance, lost & found, card tracking',
         },
         {
-            id: 'hotel-info',
-            label: t('module.hotelInfo'),
+            id: 'hotel-tools',
+            label: language === 'tr' ? 'Otel Bilgi & Araçları' : language === 'ru' ? 'Инструменты отеля' : 'Hotel Info & Tools',
             icon: Info,
-            desc: t('overview.hotel.desc'),
-        },
-        {
-            id: 'currency',
-            label: t('module.currencyConverter'),
-            icon: CircleDollarSign,
-            desc: t('overview.currency.desc'),
-        },
-        {
-            id: 'calendar',
-            label: t('module.calendar'),
-            icon: CalendarDays,
-            desc: t('overview.calendar.desc'),
-        },
-        {
-            id: 'menu',
-            label: t('menu.title'),
-            icon: Utensils,
-            desc: t('overview.menu.desc'),
-        },
-        {
-            id: 'blacklist',
-            label: t('blacklist.title'),
-            icon: UserX,
-            desc: language === 'tr' ? 'Riskli misafir kayıtları' : language === 'ru' ? 'Записи о нежелательных гостях' : 'Restricted guest records',
+            desc: language === 'tr' ? 'Genel bilgiler, takvim, kur çevirici ve yemek menüsü' : language === 'ru' ? 'Информация, календарь, валюты и меню' : 'General info, calendar, currency & meal menu',
         },
         {
             id: 'feedback',
@@ -94,12 +66,6 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             label: t('module.tours'),
             icon: Map,
             desc: t('operations.tours.desc')
-        },
-        {
-            id: 'cards-loans',
-            label: t('module.cards-loans'),
-            icon: KeyRound,
-            desc: t('operations.cards-loans.desc')
         },
         {
             id: 'sales',

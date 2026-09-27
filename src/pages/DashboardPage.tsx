@@ -39,7 +39,6 @@ import { OperationsOverview } from '@/components/dashboard/OperationsOverview'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { ShiftTimer } from '@/components/layout/ShiftTimer'
-import { CompliancePulse } from '@/components/dashboard/CompliancePulse'
 import { RelayMark } from '@/components/brand/RelayBrand'
 import { ModulePageSurface } from '@/components/layout/ModulePageSurface'
 import { CompactShift } from '@/components/workspace/CompactShift'
@@ -377,13 +376,6 @@ export function DashboardPage() {
 
                     <div className="flex items-center gap-2">
                         <div className="flex items-center gap-2 mr-1 sm:mr-2 scale-90 sm:scale-100 origin-right">
-                            {(currentShift || user?.role === 'gm' || (user && schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] && schedule[user.uid]?.[format(new Date(), 'yyyy-MM-dd')] !== 'OFF')) && (
-                                <CompliancePulse 
-                                    agencyChecked={currentShift?.compliance.agency_msg_checked_count ? currentShift.compliance.agency_msg_checked_count > 0 : false}
-                                    kbsChecked={currentShift?.compliance.kbs_checked || false}
-                                    className="hidden md:flex md:mr-2"
-                                />
-                            )}
                             <div className="hidden md:block"><ShiftTimer /></div>
                         </div>
                         <AnimatePresence>

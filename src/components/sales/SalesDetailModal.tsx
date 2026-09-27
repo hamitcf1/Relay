@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
     Calendar, Users, MapPin,
-    MessageSquare, Edit3, Check, Trash2, Clock, Ticket, RotateCcw, XCircle, User
+    MessageSquare, Edit3, Check, Trash2, Clock, Ticket, RotateCcw, XCircle, User, FileText
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { VoucherPreviewModal } from './VoucherPreviewModal'
+import { TourConfirmationPdfModal } from './TourConfirmationPdfModal'
 
 // Inline Textarea to avoid missing component
 const Textarea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
@@ -50,6 +51,7 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
     const [editForm, setEditForm] = useState<Partial<Sale>>({})
     const [collectAmount, setCollectAmount] = useState('')
     const [showVoucherPreview, setShowVoucherPreview] = useState(false)
+    const [showConfirmationPdf, setShowConfirmationPdf] = useState(false)
     const [paymentCurrency, setPaymentCurrency] = useState<Currency>('EUR')
     const [targetAmount, setTargetAmount] = useState('')
 
@@ -201,7 +203,10 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
                         <div className="absolute top-0 right-0 p-4 flex items-center gap-2">
                             {!isEditing ? (
                                 <>
-                                    <Button size="icon" variant="ghost" className="text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 mr-1" onClick={() => setShowVoucherPreview(true)} title="Generate Voucher">
+                                    <Button size="icon" variant="ghost" className="text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 mr-1" onClick={() => setShowConfirmationPdf(true)} title="A4 Tur Rezervasyon Konfirme Belgesi (PDF)">
+                                        <FileText className="w-4 h-4 text-amber-400" />
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 mr-1" onClick={() => setShowVoucherPreview(true)} title="Digital Voucher Pass">
                                         <Ticket className="w-4 h-4" />
                                     </Button>
                                     <Button size="icon" variant="ghost" className="hover:bg-white/10" onClick={() => setIsEditing(true)}>
@@ -665,6 +670,14 @@ export function SalesDetailModal({ saleId, onClose }: SalesDetailModalProps) {
             <VoucherPreviewModal 
                 saleId={saleId} 
                 onClose={() => setShowVoucherPreview(false)} 
+            />
+        )}
+
+        {showConfirmationPdf && (
+            <TourConfirmationPdfModal
+                isOpen={showConfirmationPdf}
+                onClose={() => setShowConfirmationPdf(false)}
+                sale={sale || null}
             />
         )}
         </>

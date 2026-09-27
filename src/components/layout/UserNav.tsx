@@ -6,6 +6,7 @@ import {
     Check,
     Palette,
     ChevronDown,
+    Settings,
 } from 'lucide-react'
 import {
     DropdownMenu,
@@ -27,6 +28,7 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog'
 import { AppearanceOptions } from '@/components/settings/AppearanceOptions'
+import { HotelSettings } from '@/components/settings/HotelSettings'
 import { useAuthStore } from '@/stores/authStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { UserAvatar } from '@/components/ui/UserAvatar'
@@ -37,6 +39,7 @@ export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile
     const { t, language, setLanguage } = useLanguageStore()
     const isMobile = useIsMobile()
     const [showAppearanceDialog, setShowAppearanceDialog] = useState(false)
+    const [showHotelSettingsDialog, setShowHotelSettingsDialog] = useState(false)
     const [showLanguageDialog, setShowLanguageDialog] = useState(false)
 
     return (
@@ -75,6 +78,17 @@ export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile
                         <Palette className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
                         <span>{t('common.appearance')}</span>
                     </DropdownMenuItem>
+
+                    {/* HOTEL SETTINGS */}
+                    {user?.role === 'gm' && (
+                        <DropdownMenuItem
+                            onSelect={() => setShowHotelSettingsDialog(true)}
+                            className="gap-2 cursor-pointer text-sm"
+                        >
+                            <Settings className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                            <span>{t('hotel.settings.title')}</span>
+                        </DropdownMenuItem>
+                    )}
 
                     {/* LANGUAGE */}
                     {isMobile ? (
@@ -126,6 +140,20 @@ export function UserNav({ variant = 'default' }: { variant?: 'default' | 'mobile
                     </DialogHeader>
                     <div className="min-h-0 overflow-y-auto overscroll-contain px-6 pb-6">
                         <AppearanceOptions />
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={showHotelSettingsDialog} onOpenChange={setShowHotelSettingsDialog}>
+                <DialogContent className="flex max-h-[calc(100dvh-1rem)] max-w-4xl flex-col overflow-hidden border-border bg-card p-0">
+                    <DialogHeader className="px-6 pt-6">
+                        <DialogTitle>{t('hotel.settings.title')}</DialogTitle>
+                        <DialogDescription className="sr-only">
+                            Manage hotel settings and configuration.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6">
+                        <HotelSettings />
                     </div>
                 </DialogContent>
             </Dialog>

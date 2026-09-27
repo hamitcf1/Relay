@@ -4,12 +4,8 @@ import type { ModuleId } from '@/config/moduleRegistry'
 import { ShiftNotes } from '@/components/notes/ShiftNotes'
 import { PersonalNotes } from '@/components/notes/PersonalNotes'
 import { RosterMatrix } from '@/components/roster/RosterMatrix'
-import { HotelInfoPanel } from '@/components/hotel/HotelInfoPanel'
-import { CurrencyWidget } from '@/components/dashboard/CurrencyWidget'
-import { StaffMealCard } from '@/components/hotel/StaffMealCard'
-import { CalendarWidget } from '@/components/calendar/CalendarWidget'
-import { BlacklistModule } from '@/components/dashboard/BlacklistModule'
-import { CompliancePanel } from '@/components/dashboard/CompliancePanel'
+import { AssetManagementModule, type AssetTab } from '@/components/operations/AssetManagementModule'
+import { HotelToolsModule, type HotelToolTab } from '@/components/tools/HotelToolsModule'
 import { useLanguageStore } from '@/stores/languageStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useHotelStore } from '@/stores/hotelStore'
@@ -17,8 +13,6 @@ import { resolveNavigation } from '@/lib/navigation'
 
 const MessagingPanel = lazy(() => import('@/components/messaging/MessagingPanel').then((m) => ({ default: m.MessagingPanel })))
 const FeedbackSection = lazy(() => import('@/components/feedback/FeedbackSection').then((m) => ({ default: m.FeedbackSection })))
-const MaintenanceQueue = lazy(() => import('@/components/maintenance/MaintenanceQueue').then((m) => ({ default: m.MaintenanceQueue })))
-const LostAndFoundModule = lazy(() => import('@/components/lostfound/LostAndFoundModule').then((m) => ({ default: m.LostAndFoundModule })))
 const OffDayScheduler = lazy(() => import('@/components/staff/OffDayScheduler').then((m) => ({ default: m.OffDayScheduler })))
 const TourCatalogue = lazy(() => import('@/components/tours/TourCatalogue').then((m) => ({ default: m.TourCatalogue })))
 const SalesPanel = lazy(() => import('@/components/sales/SalesPanel').then((m) => ({ default: m.SalesPanel })))
@@ -26,7 +20,6 @@ const PricingPanel = lazy(() => import('@/components/pricing/PricingPanel').then
 const LeaderboardPanel = lazy(() => import('@/components/team/LeaderboardPanel').then((m) => ({ default: m.LeaderboardPanel })))
 const ActivityLogPanel = lazy(() => import('@/components/activity/ActivityLogPanel').then((m) => ({ default: m.ActivityLogPanel })))
 const HotelSettings = lazy(() => import('@/components/settings/HotelSettings').then((m) => ({ default: m.HotelSettings })))
-const CardsAndLoansPanel = lazy(() => import('@/components/loans/CardsAndLoansPanel').then((m) => ({ default: m.CardsAndLoansPanel })))
 
 interface ModuleContentProps {
     moduleId: ModuleId
@@ -36,7 +29,7 @@ interface ModuleContentProps {
 }
 
 export function ModuleContent({ moduleId, hotelId, canEdit, initialAddOpen }: ModuleContentProps) {
-    const { t, language } = useLanguageStore()
+    const { language } = useLanguageStore()
     const role = useAuthStore((state) => state.user?.role)
     const navigation = useHotelStore((state) => state.hotel?.settings.navigation)
     const permitted = resolveNavigation(role, navigation).all.some((module) => module.id === moduleId)
@@ -46,26 +39,40 @@ export function ModuleContent({ moduleId, hotelId, canEdit, initialAddOpen }: Mo
     if (moduleId === 'notes') return <ShiftNotes hotelId={hotelId} initialAddOpen={initialAddOpen} />
     if (moduleId === 'personal-notes') return <PersonalNotes hotelId={hotelId} />
     if (moduleId === 'roster') return <RosterMatrix hotelId={hotelId} canEdit={canEdit} />
-    if (moduleId === 'hotel-info') return <HotelInfoPanel hotelId={hotelId} canEdit={canEdit} />
-    if (moduleId === 'currency') return <CurrencyWidget />
-    if (moduleId === 'menu') return <StaffMealCard hotelId={hotelId} canEdit={canEdit} />
-    if (moduleId === 'calendar') return <CalendarWidget hotelId={hotelId} />
-    if (moduleId === 'blacklist') return <BlacklistModule hotelId={hotelId} />
-    // An early return rather than one more link in the chain below. The chain is already nine
-    // ternaries deep, and this module does not need anything the ternary chain cannot give it.
-    if (moduleId === 'maintenance') return <MaintenanceQueue />
-    if (moduleId === 'lostfound') return <LostAndFoundModule />
+
+    // Consolidated Asset & Maintenance Module
+    if (['asset-management', 'maintenance', 'lostfound', 'cards-loans'].includes(moduleId)) {
+        const tabMap: Record<string, AssetTab> = {
+            'asset-management': 'maintenance',
+            'maintenance': 'maintenance',
+            'lostfound': 'lostfound',
+            'cards-loans': 'cards-loans',
+        }
+        return <AssetManagementModule initialTab={tabMap[moduleId] || 'maintenance'} />
+    }
+
+    // Consolidated Hotel Tools & Info Module
+    if (['hotel-tools', 'hotel-info', 'currency', 'calendar', 'menu', 'blacklist'].includes(moduleId)) {
+        const tabMap: Record<string, HotelToolTab> = {
+            'hotel-tools': 'hotel-info',
+            'hotel-info': 'hotel-info',
+            'currency': 'currency',
+            'calendar': 'calendar',
+            'menu': 'menu',
+            'blacklist': 'blacklist',
+        }
+        return <HotelToolsModule hotelId={hotelId} canEdit={canEdit} initialTab={tabMap[moduleId] || 'hotel-info'} />
+    }
+
     const content = moduleId === 'messaging' ? <MessagingPanel />
-        : moduleId === 'compliance' ? <div className="mx-auto max-w-2xl space-y-6"><div><h2 className="text-2xl font-semibold">{t('module.compliance')}</h2><p className="text-sm text-muted-foreground">{language === 'tr' ? 'Güncel vardiyanın operasyon standartlarını takip edin.' : language === 'ru' ? 'Контролируйте стандарты текущей смены.' : 'Track operational standards for the current shift.'}</p></div><CompliancePanel hotelId={hotelId} /></div>
-            : moduleId === 'settings' ? <HotelSettings />
-                : moduleId === 'sales' ? <SalesPanel />
-                    : moduleId === 'feedback' ? <FeedbackSection />
-                        : moduleId === 'off-days' ? <OffDayScheduler />
-                            : moduleId === 'tours' ? <TourCatalogue />
-                                : moduleId === 'cards-loans' ? <CardsAndLoansPanel />
-                                    : moduleId === 'pricing' ? <PricingPanel />
-                                        : moduleId === 'team' ? <LeaderboardPanel />
-                                            : moduleId === 'activity' ? <ActivityLogPanel />
-                                                : null
+        : moduleId === 'settings' ? <HotelSettings />
+            : moduleId === 'sales' ? <SalesPanel />
+                : moduleId === 'feedback' ? <FeedbackSection />
+                    : moduleId === 'off-days' ? <OffDayScheduler />
+                        : moduleId === 'tours' ? <TourCatalogue />
+                            : moduleId === 'pricing' ? <PricingPanel />
+                                : moduleId === 'team' ? <LeaderboardPanel />
+                                    : moduleId === 'activity' ? <ActivityLogPanel />
+                                        : null
     return <Suspense fallback={<div className="grid min-h-48 place-items-center"><Loader2 className="h-5 w-5 animate-spin" /></div>}>{content}</Suspense>
 }

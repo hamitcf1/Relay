@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
-import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Receipt, Ticket, Trash2, Archive, Search, Download } from 'lucide-react'
+import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Receipt, Ticket, Trash2, Archive, Search, Download, FileText } from 'lucide-react'
 import { exportToCsv } from '@/lib/exportCsv'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,6 +13,7 @@ import { useTourStore } from '@/stores/tourStore'
 import { SalesDetailModal } from './SalesDetailModal'
 import { VoucherPreviewModal } from './VoucherPreviewModal'
 import { NewSaleModal } from './NewSaleModal'
+import { TourConfirmationPdfModal } from './TourConfirmationPdfModal'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
 import {
     Select,
@@ -48,6 +49,7 @@ export function SalesPanel() {
     const [isAdding, setIsAdding] = useState(false)
     const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
     const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null)
+    const [selectedConfirmationSale, setSelectedConfirmationSale] = useState<any | null>(null)
     const [selectedSaleIds, setSelectedSaleIds] = useState<string[]>([])
     const [filterPriority, setFilterPriority] = useState<NotePriority | 'all'>('all')
     const [filterLifecycle, setFilterLifecycle] = useState<'active' | 'archived' | 'trash'>('active')
@@ -502,15 +504,26 @@ export function SalesPanel() {
                                                     </span>
                                                 )}
                                                 
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    className="w-7 h-7 ml-auto hover:bg-primary/20 hover:text-primary transition-colors" 
-                                                    onClick={(e) => { e.stopPropagation(); setSelectedVoucherId(sale.id); }}
-                                                    title="Digital Voucher Görüntüle ve Yazdır"
-                                                >
-                                                    <Ticket className="w-4 h-4 text-primary" />
-                                                </Button>
+                                                <div className="flex items-center gap-1 ml-auto">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="w-7 h-7 hover:bg-amber-500/20 hover:text-amber-400 transition-colors" 
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedConfirmationSale(sale); }}
+                                                        title="A4 Tur Rezervasyon Konfirme Belgesi (PDF)"
+                                                    >
+                                                        <FileText className="w-4 h-4 text-amber-400" />
+                                                    </Button>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="w-7 h-7 hover:bg-primary/20 hover:text-primary transition-colors" 
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedVoucherId(sale.id); }}
+                                                        title="Digital Voucher Görüntüle ve Yazdır"
+                                                    >
+                                                        <Ticket className="w-4 h-4 text-primary" />
+                                                    </Button>
+                                                </div>
                                             </div>
 
                                             {/* Secondary Meta Details: Room, Guest Names, Date & Creator */}
@@ -683,6 +696,12 @@ export function SalesPanel() {
             <VoucherPreviewModal
                 saleId={selectedVoucherId}
                 onClose={() => setSelectedVoucherId(null)}
+            />
+
+            <TourConfirmationPdfModal
+                isOpen={!!selectedConfirmationSale}
+                onClose={() => setSelectedConfirmationSale(null)}
+                sale={selectedConfirmationSale}
             />
         </Card >
     )
