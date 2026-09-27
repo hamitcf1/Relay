@@ -2,12 +2,9 @@ import { motion } from 'framer-motion'
 import {
     LayoutDashboard,
     ShieldAlert,
-    CalendarDays,
-    Map,
     CreditCard,
     DollarSign,
     Users,
-    ScrollText,
     KeyRound,
     Info,
 } from 'lucide-react'
@@ -20,7 +17,7 @@ interface OperationsGridProps {
     userRole?: string
 }
 
-export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
+export function OperationsGrid({ onSelect }: OperationsGridProps) {
     const { t, language } = useLanguageStore()
 
     const items: Array<{
@@ -56,22 +53,16 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
             desc: t('operations.feedback.desc')
         },
         {
-            id: 'off-days',
-            label: t('module.offDays'),
-            icon: CalendarDays,
-            desc: t('operations.offdays.desc')
-        },
-        {
-            id: 'tours',
-            label: t('module.tours'),
-            icon: Map,
-            desc: t('operations.tours.desc')
-        },
-        {
             id: 'sales',
-            label: t('module.sales'),
+            label: language === 'tr' ? 'Satışlar & Turlar' : language === 'ru' ? 'Продажи и туры' : 'Sales & Tours',
             icon: CreditCard,
-            desc: t('operations.sales.desc')
+            desc: language === 'tr' ? 'Tur, transfer ve çamaşırhane satışları ile tur kataloğu' : language === 'ru' ? 'Продажи и каталог туров' : 'Sales records & tour product catalogue',
+        },
+        {
+            id: 'feedback',
+            label: t('module.complaints'),
+            icon: ShieldAlert,
+            desc: t('operations.feedback.desc')
         },
         {
             id: 'pricing',
@@ -81,20 +72,11 @@ export function OperationsGrid({ onSelect, userRole }: OperationsGridProps) {
         },
         {
             id: 'team',
-            label: t('module.team_label'),
+            label: language === 'tr' ? 'Ekip & İzin Günleri' : language === 'ru' ? 'Команда и выходные' : 'Team & Off-Days',
             icon: Users,
-            desc: t('operations.team.desc')
+            desc: language === 'tr' ? 'Personel performansı, puanlar ve izin planlayıcı' : language === 'ru' ? 'Производительность и график выходных' : 'Team performance, points & off-day planner',
         },
     ]
-
-    if (userRole === 'gm') {
-        items.push({
-            id: 'activity',
-            label: t('module.activity'),
-            icon: ScrollText,
-            desc: t('operations.activity.desc')
-        })
-    }
 
     const container = {
         hidden: { opacity: 0 },

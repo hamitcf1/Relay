@@ -5,7 +5,7 @@ import { Plus, MapPin, Truck, ShoppingBag, CreditCard, Loader2, X, Receipt, Tick
 import { exportToCsv } from '@/lib/exportCsv'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn, formatDisplayDate, parseGuestNames, isTRYCurrency } from '@/lib/utils'
 import { useSalesStore, saleTypeInfo, paymentStatusInfo, saleStatusInfo } from '@/stores/salesStore'
@@ -32,11 +32,17 @@ import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { SaleType, Currency, SaleStatus, NotePriority } from '@/types'
 import { toast } from 'sonner'
-import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
 import { useSearchParams } from 'react-router-dom'
+import { useWorkspaceDirty } from '@/hooks/useWorkspaceDirty'
+import { TourCatalogue } from '@/components/tours/TourCatalogue'
 
-export function SalesPanel() {
-    const { t } = useLanguageStore()
+interface SalesPanelProps {
+    initialTab?: 'sales' | 'tours'
+}
+
+export function SalesPanel({ initialTab = 'sales' }: SalesPanelProps = {}) {
+    const { language, t } = useLanguageStore()
+    const [mainTab, setMainTab] = useState<'sales' | 'tours'>(initialTab)
     const [searchParams, setSearchParams] = useSearchParams()
     const { sales, loading, subscribeToSales, addSale, updateSale, bulkUpdateSales, bulkDeleteSales, emptySalesTrash } = useSalesStore()
     const { tours, subscribeToTours } = useTourStore()
@@ -91,6 +97,30 @@ export function SalesPanel() {
             unsubTours()
         }
     }, [hotel?.id, subscribeToSales, subscribeToTours, fetchRates, user?.is_demo])
+
+    if (mainTab === 'tours') {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+                    <button
+                        onClick={() => setMainTab('sales')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
+                    >
+                        <CreditCard className="w-4 h-4" />
+                        <span>{language === 'tr' ? 'Satış Kayıtları' : 'Sales Records'}</span>
+                    </button>
+                    <button
+                        onClick={() => setMainTab('tours')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground shadow-md transition-colors"
+                    >
+                        <MapPin className="w-4 h-4" />
+                        <span>{language === 'tr' ? 'Tur Kataloğu & Ürünler' : 'Tour Catalogue'}</span>
+                    </button>
+                </div>
+                <TourCatalogue />
+            </div>
+        )
+    }
 
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -297,11 +327,23 @@ export function SalesPanel() {
     return (
         <Card className="bg-card/50 border-border min-h-full w-full flex flex-col">
             <CardHeader className="pb-3 flex-shrink-0">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
-                        <CreditCard className="w-5 h-5 text-primary" />
-                        {t('sales.tracker')}
-                    </CardTitle>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/40">
+                        <button
+                            onClick={() => setMainTab('sales')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground shadow-xs transition-all"
+                        >
+                            <CreditCard className="size-3.5" />
+                            <span>{language === 'tr' ? 'Satış Kayıtları' : 'Sales Records'}</span>
+                        </button>
+                        <button
+                            onClick={() => setMainTab('tours')}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all"
+                        >
+                            <MapPin className="size-3.5" />
+                            <span>{language === 'tr' ? 'Tur Kataloğu' : 'Tour Catalogue'}</span>
+                        </button>
+                    </div>
                     <div className="flex items-center gap-2">
                         <Button
                             size="sm"

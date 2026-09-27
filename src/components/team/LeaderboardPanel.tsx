@@ -1,24 +1,50 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useLeaderboardStore } from '@/stores/leaderboardStore'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Trophy, Medal, Clock, Crown, TrendingUp } from 'lucide-react'
+import { Trophy, Medal, Clock, Crown, TrendingUp, Users, CalendarDays } from 'lucide-react'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { ScrollToTopButton } from '@/components/ui/ScrollToTopButton'
+import { OffDayScheduler } from '@/components/staff/OffDayScheduler'
 
-export function LeaderboardPanel() {
+export function LeaderboardPanel({ initialTab = 'leaderboard' }: { initialTab?: 'leaderboard' | 'off-days' }) {
+    const [activeTab, setActiveTab] = useState<'leaderboard' | 'off-days'>(initialTab)
     const { hotel } = useHotelStore()
     const { entries, loadLeaderboard, loading, timeRange, setTimeRange } = useLeaderboardStore()
-    const { t } = useLanguageStore()
+    const { language, t } = useLanguageStore()
 
     useEffect(() => {
         if (hotel?.id) {
             loadLeaderboard(hotel.id)
         }
     }, [hotel?.id, timeRange, loadLeaderboard])
+
+    if (activeTab === 'off-days') {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+                    <button
+                        onClick={() => setActiveTab('leaderboard')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
+                    >
+                        <Users className="w-4 h-4" />
+                        <span>{language === 'tr' ? 'Ekip & Performans' : 'Team & Performance'}</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('off-days')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground shadow-md transition-colors"
+                    >
+                        <CalendarDays className="w-4 h-4" />
+                        <span>{language === 'tr' ? 'İzin Günleri Planlayıcı' : 'Off-Days Planner'}</span>
+                    </button>
+                </div>
+                <OffDayScheduler />
+            </div>
+        )
+    }
 
     const getRankIcon = (rank: number) => {
         switch (rank) {
@@ -37,18 +63,36 @@ export function LeaderboardPanel() {
     }
 
     return (
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
-            <CardHeader className="pb-4 border-b border-border/30">
-                <div className="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold flex items-center gap-3 text-foreground">
-                            <Trophy className="w-6 h-6 text-primary" />
-                            {t('leaderboard.title')}
-                        </CardTitle>
-                        <CardDescription className="text-muted-foreground mt-1">
-                            {t('leaderboard.desc')}
-                        </CardDescription>
-                    </div>
+        <div className="space-y-4">
+            <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/40 w-fit">
+                <button
+                    onClick={() => setActiveTab('leaderboard')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground shadow-xs transition-all"
+                >
+                    <Users className="size-3.5" />
+                    <span>{language === 'tr' ? 'Ekip & Performans' : 'Team & Performance'}</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('off-days')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all"
+                >
+                    <CalendarDays className="size-3.5" />
+                    <span>{language === 'tr' ? 'İzin Günleri Planlayıcı' : 'Off-Days Planner'}</span>
+                </button>
+            </div>
+
+            <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+                <CardHeader className="pb-4 border-b border-border/30">
+                    <div className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle className="text-2xl font-bold flex items-center gap-3 text-foreground">
+                                <Trophy className="w-6 h-6 text-primary" />
+                                {t('leaderboard.title')}
+                            </CardTitle>
+                            <CardDescription className="text-muted-foreground mt-1">
+                                {t('leaderboard.desc')}
+                            </CardDescription>
+                        </div>
                     <div className="flex bg-muted p-1 rounded-lg border border-border">
                         <button
                             onClick={() => setTimeRange('day')}
@@ -158,5 +202,6 @@ export function LeaderboardPanel() {
                 <ScrollToTopButton />
             </CardContent>
         </Card>
+        </div>
     )
 }

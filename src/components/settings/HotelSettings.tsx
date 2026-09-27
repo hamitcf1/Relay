@@ -11,10 +11,12 @@ import {
     Users, 
     ShieldCheck,
     BarChart3,
-    Loader2
-    ,PanelLeft
+    Loader2,
+    PanelLeft,
+    Activity
 } from 'lucide-react'
 import { ManagementReportPanel } from '@/components/admin/ManagementReportPanel'
+import { ActivityLogPanel } from '@/components/activity/ActivityLogPanel'
 import { StaffManagement } from './StaffManagement'
 import { useHotelStore } from '@/stores/hotelStore'
 import { useLanguageStore } from '@/stores/languageStore'
@@ -150,6 +152,10 @@ export function HotelSettings() {
                     <TabsTrigger value="reports" className="gap-2">
                         <BarChart3 className="w-4 h-4" />
                         {t('module.reports')}
+                    </TabsTrigger>
+                    <TabsTrigger value="activity" className="gap-2">
+                        <Activity className="w-4 h-4" />
+                        {language === 'tr' ? 'Sistem Logları' : language === 'ru' ? 'Логи системы' : 'Activity Logs'}
                     </TabsTrigger>
                 </TabsList>
 
@@ -298,6 +304,10 @@ export function HotelSettings() {
 
                 <TabsContent value="reports" className="space-y-6">
                     <ManagementReportPanel />
+                </TabsContent>
+
+                <TabsContent value="activity" className="space-y-6">
+                    <ActivityLogPanel />
                 </TabsContent>
             </Tabs>
         </div>
