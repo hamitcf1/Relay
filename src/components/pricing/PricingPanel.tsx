@@ -82,7 +82,8 @@ export function PricingPanel() {
         getEffectivePrice
     } = usePricingStore()
 
-    const [activeTab, setActiveTab] = useState<'matrix' | 'campaigns' | 'calculator'>('matrix')
+    // Default tab is 'campaigns' (Seasonal / Date-Range Driven Pricing)
+    const [activeTab, setActiveTab] = useState<'campaigns' | 'matrix' | 'calculator'>('campaigns')
 
     // Modal & Drawer States
     const [editPricesTarget, setEditPricesTarget] = useState<{ id: string; name: string; prices: Record<string, RoomPriceEntry> } | null>(null)
@@ -128,19 +129,19 @@ export function PricingPanel() {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             {/* Header & Priority Hierarchy Guide */}
-            <div className="relative overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-r from-background/80 via-background/40 to-primary/5 p-6 backdrop-blur-xl shadow-2xl">
-                <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+            <div className="relative overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-r from-background/80 via-background/40 to-amber-500/5 p-6 backdrop-blur-xl shadow-2xl">
+                <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <div className="flex items-center gap-2">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-                                <Building2 className="h-5 w-5 text-primary" />
+                            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/20">
+                                <CalendarIcon className="h-5 w-5 text-amber-500" />
                             </div>
                             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                                {t('module.pricing_label')} & Sezon Yönetimi
+                                Sezonluk & Tarihsel Fiyat Yönetimi
                             </h1>
                             {isGM ? (
-                                <Badge variant="default" className="ml-2 font-mono text-[10px]">
+                                <Badge variant="default" className="ml-2 font-mono text-[10px] bg-amber-500 text-white">
                                     Yönetici Erişimi
                                 </Badge>
                             ) : (
@@ -150,48 +151,41 @@ export function PricingPanel() {
                             )}
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                            Genel acente fiyat tarifelerini, özel anlaşmalı acenteleri ve dönemsel fiyat kampanyalarını yönetin.
+                            Otelin tüm oda fiyatları tarih aralıkları ve sezon kontratları üzerinden yönetilir.
                         </p>
                     </div>
 
                     {/* Priority Resolution Hierarchy Pills */}
                     <div className="rounded-2xl border border-border/40 bg-background/50 p-3 backdrop-blur-md shrink-0">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                            <Layers className="w-3.5 h-3.5 text-primary" />
+                            <Layers className="w-3.5 h-3.5 text-amber-500" />
                             <span>{t('pricing.hierarchy.title')}</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-1 text-[11px] font-medium">
                             <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 font-semibold">
-                                1. {t('pricing.hierarchy.step1')}
+                                {t('pricing.hierarchy.step1')}
                             </span>
                             <span className="text-muted-foreground/60">→</span>
                             <span className="px-2 py-0.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 font-semibold">
-                                2. {t('pricing.hierarchy.step2')}
+                                {t('pricing.hierarchy.step2')}
                             </span>
                             <span className="text-muted-foreground/60">→</span>
                             <span className="px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold">
-                                3. {t('pricing.hierarchy.step3')}
+                                {t('pricing.hierarchy.step3')}
                             </span>
                             <span className="text-muted-foreground/60">→</span>
                             <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">
-                                4. {t('pricing.hierarchy.step4')}
+                                {t('pricing.hierarchy.step4')}
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Navigation Tabs */}
+            {/* Navigation Tabs (Primary Tab: Seasonal / Date-Range Rates) */}
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
                 <div className="flex justify-center">
                     <TabsList className="bg-background/60 backdrop-blur-xl border border-border/50 p-1 rounded-2xl gap-1 shadow-2xl h-auto">
-                        <TabsTrigger
-                            value="matrix"
-                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
-                        >
-                            <TableIcon className="w-4 h-4" />
-                            <span>{t('pricing.tabs.matrix')}</span>
-                        </TabsTrigger>
                         <TabsTrigger
                             value="campaigns"
                             className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
@@ -205,6 +199,13 @@ export function PricingPanel() {
                             )}
                         </TabsTrigger>
                         <TabsTrigger
+                            value="matrix"
+                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
+                        >
+                            <TableIcon className="w-4 h-4" />
+                            <span>{t('pricing.tabs.matrix')}</span>
+                        </TabsTrigger>
+                        <TabsTrigger
                             value="calculator"
                             className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
                         >
@@ -214,30 +215,7 @@ export function PricingPanel() {
                     </TabsList>
                 </div>
 
-                {/* TAB 1: RATE MATRIX */}
-                <TabsContent value="matrix" className="space-y-6 focus-visible:outline-none">
-                    <RateMatrixView
-                        agencies={agencies}
-                        basePrices={basePrices}
-                        isGM={isGM}
-                        onEditPrices={(id, name, prices) => setEditPricesTarget({ id, name, prices })}
-                        onOpenAddAgency={() => setAddAgencyOpen(true)}
-                        onRemoveAgency={async (agencyId, name) => {
-                            const confirmed = await confirm({
-                                title: `${name} acentesi silinsin mi?`,
-                                description: 'Bu acenteye tanımlı tüm özel fiyatlar silinecektir.',
-                                variant: 'destructive',
-                                confirmLabel: t('common.delete'),
-                            })
-                            if (confirmed) {
-                                await removeAgency(hotelId, agencyId)
-                                toast.success(`${name} silindi.`)
-                            }
-                        }}
-                    />
-                </TabsContent>
-
-                {/* TAB 2: SPECIAL PERIODS & CAMPAIGNS */}
+                {/* TAB 1: SEASONAL / DATE-RANGE RATES (PRIMARY) */}
                 <TabsContent value="campaigns" className="space-y-6 focus-visible:outline-none">
                     <SpecialPeriodsCampaignsView
                         agencies={agencies}
@@ -248,6 +226,29 @@ export function PricingPanel() {
                         setAgencyOverride={setAgencyOverride}
                         removeBaseOverride={removeBaseOverride}
                         removeAgencyOverride={removeAgencyOverride}
+                    />
+                </TabsContent>
+
+                {/* TAB 2: AGENCY SEASON MATRIX OVERVIEW */}
+                <TabsContent value="matrix" className="space-y-6 focus-visible:outline-none">
+                    <RateMatrixView
+                        agencies={agencies}
+                        basePrices={basePrices}
+                        isGM={isGM}
+                        onEditPrices={(id, name, prices) => setEditPricesTarget({ id, name, prices })}
+                        onOpenAddAgency={() => setAddAgencyOpen(true)}
+                        onRemoveAgency={async (agencyId, name) => {
+                            const confirmed = await confirm({
+                                title: `${name} acentesi silinsin mi?`,
+                                description: 'Bu acenteye tanımlı tüm özel fiyatlar ve sezonlar silinecektir.',
+                                variant: 'destructive',
+                                confirmLabel: t('common.delete'),
+                            })
+                            if (confirmed) {
+                                await removeAgency(hotelId, agencyId)
+                                toast.success(`${name} silindi.`)
+                            }
+                        }}
                     />
                 </TabsContent>
 
@@ -294,7 +295,7 @@ export function PricingPanel() {
                             {t('pricing.agencies.add')}
                         </DialogTitle>
                         <DialogDescription>
-                            Oteliniz ile özel anlaşması olan yeni bir seyahat acentesi tanımlayın.
+                            Oteliniz ile özel sezonsal anlaşması olan yeni bir seyahat acentesi tanımlayın.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 space-y-3">
@@ -350,7 +351,353 @@ export function PricingPanel() {
 }
 
 /* ============================================================================
- * 1. RATE MATRIX VIEW (TAB 1)
+ * 1. SEASONAL & DATE-RANGE RATES VIEW (TAB 1 - PRIMARY)
+ * ============================================================================ */
+function SpecialPeriodsCampaignsView({
+    agencies,
+    baseOverrides,
+    isGM,
+    hotelId,
+    setBaseOverride,
+    setAgencyOverride,
+    removeBaseOverride,
+    removeAgencyOverride
+}: {
+    agencies: Agency[]
+    baseOverrides: BaseOverride[]
+    isGM: boolean
+    hotelId: string
+    setBaseOverride: (hotelId: string, override: BaseOverride) => Promise<void>
+    setAgencyOverride: (hotelId: string, agencyId: string, override: AgencyOverride) => Promise<void>
+    removeBaseOverride: (hotelId: string, overrideId: string) => Promise<void>
+    removeAgencyOverride: (hotelId: string, agencyId: string, overrideId: string) => Promise<void>
+}) {
+    const { t } = useLanguageStore()
+    const confirm = useConfirm()
+
+    const [targetFilter, setTargetFilter] = useState<'all' | 'global' | string>('all')
+    const [sortOrder, setSortOrder] = useState<'approaching' | 'newest'>('approaching')
+    const [showAIAssistant, setShowAIAssistant] = useState(false)
+    const [createModalOpen, setCreateModalOpen] = useState(false)
+    const [editingOverride, setEditingOverride] = useState<{ targetId: string; override: BaseOverride | AgencyOverride } | null>(null)
+
+    // Merge all overrides into a unified flat array
+    const allOverrides = useMemo(() => {
+        const list: Array<{
+            id: string
+            targetId: string // 'global' or agencyId
+            targetName: string
+            override: BaseOverride | AgencyOverride
+            isGlobal: boolean
+        }> = []
+
+        baseOverrides.forEach((bo) => {
+            list.push({
+                id: `global_${bo.id}`,
+                targetId: 'global',
+                targetName: 'Genel Acentalar (Tüm Herkes)',
+                override: bo,
+                isGlobal: true
+            })
+        })
+
+        agencies.forEach((ag) => {
+            (ag.overrides || []).forEach((ao) => {
+                list.push({
+                    id: `${ag.id}_${ao.id}`,
+                    targetId: ag.id,
+                    targetName: ag.name,
+                    override: ao,
+                    isGlobal: false
+                })
+            })
+        })
+
+        return list
+    }, [baseOverrides, agencies])
+
+    const filteredOverrides = useMemo(() => {
+        let result = [...allOverrides]
+
+        if (targetFilter === 'global') {
+            result = result.filter((item) => item.isGlobal)
+        } else if (targetFilter !== 'all') {
+            result = result.filter((item) => item.targetId === targetFilter)
+        }
+
+        if (sortOrder === 'approaching') {
+            result.sort((a, b) => a.override.start_date.localeCompare(b.override.start_date))
+        } else {
+            result.sort((a, b) => b.override.start_date.localeCompare(a.override.start_date))
+        }
+
+        return result
+    }, [allOverrides, targetFilter, sortOrder])
+
+    return (
+        <div className="space-y-6">
+            {/* Header & Controls */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 className="text-lg font-bold flex items-center gap-2">
+                        <CalendarIcon className="w-5 h-5 text-amber-500" />
+                        Sezonlar & Tarihsel Fiyat Tarifeleri
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                        Tarih aralıklarına (Yaz sezonu, bayram, fuar, düşük sezon vb.) göre tanımlanmış oda fiyat kontratları.
+                    </p>
+                </div>
+
+                {isGM && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowAIAssistant(!showAIAssistant)}
+                            className={cn("gap-2 h-9 text-xs border-amber-500/30", showAIAssistant && "bg-amber-500/10 text-amber-500 border-amber-500")}
+                        >
+                            <Sparkle className="w-4 h-4 text-amber-500" />
+                            AI Asistanı {showAIAssistant ? 'Kapat' : 'Aç'}
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={() => setCreateModalOpen(true)}
+                            className="gap-2 h-9 text-xs bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 font-bold"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Yeni Sezon / Tarih Aralığı Ekle
+                        </Button>
+                    </div>
+                )}
+            </div>
+
+            {/* AI ASSISTANT COLLAPSIBLE CARD */}
+            <AnimatePresence>
+                {showAIAssistant && isGM && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <AIPricingAgentCard
+                            hotelId={hotelId}
+                            agencies={agencies}
+                            setBaseOverride={setBaseOverride}
+                            setAgencyOverride={setAgencyOverride}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* FILTERS TOOLBAR */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-muted/20 border border-border/40">
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Hedef Acente:</span>
+                    <Select value={targetFilter} onValueChange={setTargetFilter}>
+                        <SelectTrigger className="h-8 w-52 text-xs bg-background">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Tüm Sezon Tarifeleri ({allOverrides.length})</SelectItem>
+                            <SelectItem value="global">Genel Acentalar (Tüm Herkes)</SelectItem>
+                            {agencies.map((a) => (
+                                <SelectItem key={a.id} value={a.id}>
+                                    {a.name} ({a.overrides?.length || 0} Sezon)
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Sıralama:</span>
+                    <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as any)}>
+                        <SelectTrigger className="h-8 w-40 text-xs bg-background">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="approaching">Tarihe Göre (Yaklaşan)</SelectItem>
+                            <SelectItem value="newest">Eklenme Tarihine Göre</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            {/* OVERRIDES LIST CARDS */}
+            <div className="grid grid-cols-1 gap-4">
+                {filteredOverrides.length === 0 ? (
+                    <Card className="border-dashed border-2 border-border/40 bg-muted/5 p-12 text-center text-muted-foreground">
+                        <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-30 text-amber-500" />
+                        <p className="text-sm font-semibold">Henüz tanımlanmış sezonsal tarih aralığı bulunmuyor.</p>
+                        <p className="text-xs mt-1">Özel sezon veya tarih aralıklı fiyat kontratı tanımlamak için yukarıdaki butonu kullanabilirsiniz.</p>
+                    </Card>
+                ) : (
+                    filteredOverrides.map((item) => {
+                        const today = format(new Date(), 'yyyy-MM-dd')
+                        const isCurrent = today >= item.override.start_date && today <= item.override.end_date
+                        const isUpcoming = today < item.override.start_date
+                        const isPast = today > item.override.end_date
+
+                        return (
+                            <Card
+                                key={item.id}
+                                className={cn(
+                                    "border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden transition-all duration-300 relative group shadow-md",
+                                    isCurrent && "border-amber-500/60 ring-1 ring-amber-500/40 shadow-lg shadow-amber-500/10"
+                                )}
+                            >
+                                <div className="p-4 sm:p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                    <div className="space-y-2 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {/* Target Tag */}
+                                            <Badge
+                                                variant={item.isGlobal ? 'default' : 'secondary'}
+                                                className={cn(
+                                                    "font-bold text-xs px-2.5 py-0.5",
+                                                    item.isGlobal && "bg-purple-600 text-white"
+                                                )}
+                                            >
+                                                {item.targetName}
+                                            </Badge>
+
+                                            {/* Status Badge */}
+                                            {isCurrent && (
+                                                <Badge variant="success" className="animate-pulse flex items-center gap-1">
+                                                    <Zap className="w-3 h-3" />
+                                                    Şu An Aktif Sezon
+                                                </Badge>
+                                            )}
+                                            {isUpcoming && (
+                                                <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10">
+                                                    Yaklaşan Sezon
+                                                </Badge>
+                                            )}
+                                            {isPast && (
+                                                <Badge variant="outline" className="text-muted-foreground opacity-60">
+                                                    Geçmiş Sezon
+                                                </Badge>
+                                            )}
+
+                                            {/* Date Range */}
+                                            <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary ml-auto lg:ml-0">
+                                                <CalendarIcon className="w-3.5 h-3.5" />
+                                                <span>{formatDisplayDate(item.override.start_date)}</span>
+                                                <span className="text-muted-foreground">→</span>
+                                                <span>{formatDisplayDate(item.override.end_date)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Room Prices Chips */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-2">
+                                            {ROOM_TYPES.map((room) => {
+                                                const p = item.override.prices?.[room]
+                                                return (
+                                                    <div
+                                                        key={room}
+                                                        className="p-2 rounded-xl bg-muted/20 border border-border/30 flex flex-col gap-0.5"
+                                                    >
+                                                        <span className="text-[10px] text-muted-foreground font-semibold truncate capitalize">
+                                                            {t(`room.${room}`)}
+                                                        </span>
+                                                        <span className="font-mono font-bold text-xs text-foreground">
+                                                            {p?.amount ? (
+                                                                <>
+                                                                    <span className="text-[9px] font-normal opacity-60 mr-1">{p.currency || 'EUR'}</span>
+                                                                    {p.amount.toFixed(2)}
+                                                                </>
+                                                            ) : (
+                                                                <span className="text-muted-foreground/30 font-light">---</span>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* GM Actions */}
+                                    {isGM && (
+                                        <div className="flex items-center justify-end gap-2 shrink-0 border-t border-border/20 pt-3 lg:border-0 lg:pt-0">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-8 text-xs gap-1.5"
+                                                onClick={() =>
+                                                    setEditingOverride({
+                                                        targetId: item.targetId,
+                                                        override: item.override
+                                                    })
+                                                }
+                                            >
+                                                <Pencil className="w-3.5 h-3.5" />
+                                                Düzenle
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                onClick={async () => {
+                                                    const confirmed = await confirm({
+                                                        title: 'Sezon / Tarih aralığı silinsin mi?',
+                                                        variant: 'destructive',
+                                                        confirmLabel: t('common.delete')
+                                                    })
+                                                    if (confirmed) {
+                                                        if (item.isGlobal) {
+                                                            await removeBaseOverride(hotelId, item.override.id)
+                                                        } else {
+                                                            await removeAgencyOverride(hotelId, item.targetId, item.override.id)
+                                                        }
+                                                        toast.success('Tarihsel sezonsal kural silindi.')
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </Card>
+                        )
+                    })
+                )}
+            </div>
+
+            {/* CREATE / EDIT OVERRIDE DIALOG */}
+            {(createModalOpen || editingOverride) && (
+                <OverrideEditorModal
+                    agencies={agencies}
+                    isOpen={createModalOpen || Boolean(editingOverride)}
+                    initialTargetId={editingOverride?.targetId || 'global'}
+                    initialData={editingOverride?.override}
+                    onClose={() => {
+                        setCreateModalOpen(false)
+                        setEditingOverride(null)
+                    }}
+                    onSave={async (targetId, overrideData) => {
+                        try {
+                            if (targetId === 'global') {
+                                await setBaseOverride(hotelId, overrideData)
+                            } else {
+                                await setAgencyOverride(hotelId, targetId, overrideData)
+                            }
+                            toast.success('Sezonluk fiyat kontratı kaydedildi.')
+                            setCreateModalOpen(false)
+                            setEditingOverride(null)
+                        } catch (err) {
+                            console.error(err)
+                            toast.error('Sezon kaydedilirken hata oluştu.')
+                        }
+                    }}
+                />
+            )}
+        </div>
+    )
+}
+
+/* ============================================================================
+ * 2. AGENCY & SEASON MATRIX OVERVIEW (TAB 2)
  * ============================================================================ */
 function RateMatrixView({
     agencies,
@@ -386,10 +733,10 @@ function RateMatrixView({
                     <div>
                         <CardTitle className="text-lg flex items-center gap-2">
                             <TableIcon className="w-5 h-5 text-primary" />
-                            Acente Fiyat Matrisi
+                            Acente & Sezon Matrisi Özeti
                         </CardTitle>
                         <CardDescription className="text-xs">
-                            Genel acente fiyat tarifesi ve özel anlaşmalı acentelerin oda fiyatları.
+                            Acentelere tanımlanmış toplam sezon kontratları ve varsayılan acente tarifeleri.
                         </CardDescription>
                     </div>
 
@@ -442,7 +789,7 @@ function RateMatrixView({
                                                     Varsayılan
                                                 </Badge>
                                             </div>
-                                            <div className="text-[10px] text-muted-foreground">Özel fiyatı olmayan tüm acenteler için geçerli tarife</div>
+                                            <div className="text-[10px] text-muted-foreground">Özel sezonu olmayan tüm acenteler için geçerli tarife</div>
                                         </div>
                                     </div>
                                 </td>
@@ -494,7 +841,7 @@ function RateMatrixView({
                                                     {(agency.overrides?.length || 0) > 0 ? (
                                                         <span className="text-amber-500 font-medium flex items-center gap-1">
                                                             <Zap className="w-3 h-3 inline" />
-                                                            {agency.overrides.length} Özel Sezon Tanımlı
+                                                            {agency.overrides.length} Sezon Kontratı Tanımlı
                                                         </span>
                                                     ) : (
                                                         'Özel Anlaşmalı Acente'
@@ -694,352 +1041,6 @@ function EditPricesModal({
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    )
-}
-
-/* ============================================================================
- * 2. SPECIAL PERIODS & CAMPAIGNS VIEW (TAB 2)
- * ============================================================================ */
-function SpecialPeriodsCampaignsView({
-    agencies,
-    baseOverrides,
-    isGM,
-    hotelId,
-    setBaseOverride,
-    setAgencyOverride,
-    removeBaseOverride,
-    removeAgencyOverride
-}: {
-    agencies: Agency[]
-    baseOverrides: BaseOverride[]
-    isGM: boolean
-    hotelId: string
-    setBaseOverride: (hotelId: string, override: BaseOverride) => Promise<void>
-    setAgencyOverride: (hotelId: string, agencyId: string, override: AgencyOverride) => Promise<void>
-    removeBaseOverride: (hotelId: string, overrideId: string) => Promise<void>
-    removeAgencyOverride: (hotelId: string, agencyId: string, overrideId: string) => Promise<void>
-}) {
-    const { t } = useLanguageStore()
-    const confirm = useConfirm()
-
-    const [targetFilter, setTargetFilter] = useState<'all' | 'global' | string>('all')
-    const [sortOrder, setSortOrder] = useState<'approaching' | 'newest'>('approaching')
-    const [showAIAssistant, setShowAIAssistant] = useState(false)
-    const [createModalOpen, setCreateModalOpen] = useState(false)
-    const [editingOverride, setEditingOverride] = useState<{ targetId: string; override: BaseOverride | AgencyOverride } | null>(null)
-
-    // Merge all overrides into a unified flat array
-    const allOverrides = useMemo(() => {
-        const list: Array<{
-            id: string
-            targetId: string // 'global' or agencyId
-            targetName: string
-            override: BaseOverride | AgencyOverride
-            isGlobal: boolean
-        }> = []
-
-        baseOverrides.forEach((bo) => {
-            list.push({
-                id: `global_${bo.id}`,
-                targetId: 'global',
-                targetName: 'Genel Acentalar (Tüm Herkes)',
-                override: bo,
-                isGlobal: true
-            })
-        })
-
-        agencies.forEach((ag) => {
-            (ag.overrides || []).forEach((ao) => {
-                list.push({
-                    id: `${ag.id}_${ao.id}`,
-                    targetId: ag.id,
-                    targetName: ag.name,
-                    override: ao,
-                    isGlobal: false
-                })
-            })
-        })
-
-        return list
-    }, [baseOverrides, agencies])
-
-    const filteredOverrides = useMemo(() => {
-        let result = [...allOverrides]
-
-        if (targetFilter === 'global') {
-            result = result.filter((item) => item.isGlobal)
-        } else if (targetFilter !== 'all') {
-            result = result.filter((item) => item.targetId === targetFilter)
-        }
-
-        if (sortOrder === 'approaching') {
-            result.sort((a, b) => a.override.start_date.localeCompare(b.override.start_date))
-        } else {
-            result.sort((a, b) => b.override.start_date.localeCompare(a.override.start_date))
-        }
-
-        return result
-    }, [allOverrides, targetFilter, sortOrder])
-
-    return (
-        <div className="space-y-6">
-            {/* Header & Controls */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 className="text-lg font-bold flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-amber-500" />
-                        Özel Dönemler & Kampanya Sezonları
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                        Bayram, yaz sezonu, fuar vb. özel tarih aralıklarında acente tarifelerini ezmek için tanımlanan kurallar.
-                    </p>
-                </div>
-
-                {isGM && (
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowAIAssistant(!showAIAssistant)}
-                            className={cn("gap-2 h-9 text-xs border-amber-500/30", showAIAssistant && "bg-amber-500/10 text-amber-500 border-amber-500")}
-                        >
-                            <Sparkle className="w-4 h-4 text-amber-500" />
-                            AI Asistanı {showAIAssistant ? 'Kapat' : 'Aç'}
-                        </Button>
-                        <Button
-                            size="sm"
-                            onClick={() => setCreateModalOpen(true)}
-                            className="gap-2 h-9 text-xs bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Yeni Özel Dönem Ekle
-                        </Button>
-                    </div>
-                )}
-            </div>
-
-            {/* AI ASSISTANT COLLAPSIBLE CARD */}
-            <AnimatePresence>
-                {showAIAssistant && isGM && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                    >
-                        <AIPricingAgentCard
-                            hotelId={hotelId}
-                            agencies={agencies}
-                            setBaseOverride={setBaseOverride}
-                            setAgencyOverride={setAgencyOverride}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* FILTERS TOOLBAR */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-muted/20 border border-border/40">
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Hedef:</span>
-                    <Select value={targetFilter} onValueChange={setTargetFilter}>
-                        <SelectTrigger className="h-8 w-48 text-xs bg-background">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Tüm Özel Dönemler ({allOverrides.length})</SelectItem>
-                            <SelectItem value="global">Genel Acentalar (Tüm Herkes)</SelectItem>
-                            {agencies.map((a) => (
-                                <SelectItem key={a.id} value={a.id}>
-                                    {a.name} ({a.overrides?.length || 0})
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Sıralama:</span>
-                    <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as any)}>
-                        <SelectTrigger className="h-8 w-40 text-xs bg-background">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="approaching">Tarihe Göre (Yaklaşan)</SelectItem>
-                            <SelectItem value="newest">Eklenme Tarihine Göre</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-
-            {/* OVERRIDES LIST CARDS */}
-            <div className="grid grid-cols-1 gap-4">
-                {filteredOverrides.length === 0 ? (
-                    <Card className="border-dashed border-2 border-border/40 bg-muted/5 p-12 text-center text-muted-foreground">
-                        <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-30 text-amber-500" />
-                        <p className="text-sm font-semibold">Henüz özel tarih aralığı tanımlanmadı.</p>
-                        <p className="text-xs mt-1">Özel sezon veya kampanya eklemek için yukarıdaki butonu kullanabilirsiniz.</p>
-                    </Card>
-                ) : (
-                    filteredOverrides.map((item) => {
-                        const today = format(new Date(), 'yyyy-MM-dd')
-                        const isCurrent = today >= item.override.start_date && today <= item.override.end_date
-                        const isUpcoming = today < item.override.start_date
-                        const isPast = today > item.override.end_date
-
-                        return (
-                            <Card
-                                key={item.id}
-                                className={cn(
-                                    "border-border/50 bg-background/50 backdrop-blur-xl overflow-hidden transition-all duration-300 relative group",
-                                    isCurrent && "border-amber-500/50 ring-1 ring-amber-500/30 shadow-lg shadow-amber-500/5"
-                                )}
-                            >
-                                <div className="p-4 sm:p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                                    <div className="space-y-2 flex-1">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            {/* Target Tag */}
-                                            <Badge
-                                                variant={item.isGlobal ? 'default' : 'secondary'}
-                                                className={cn(
-                                                    "font-bold text-xs px-2.5 py-0.5",
-                                                    item.isGlobal && "bg-purple-600 text-white"
-                                                )}
-                                            >
-                                                {item.targetName}
-                                            </Badge>
-
-                                            {/* Status Badge */}
-                                            {isCurrent && (
-                                                <Badge variant="success" className="animate-pulse flex items-center gap-1">
-                                                    <Zap className="w-3 h-3" />
-                                                    Şu An Aktif
-                                                </Badge>
-                                            )}
-                                            {isUpcoming && (
-                                                <Badge variant="outline" className="text-amber-500 border-amber-500/30 bg-amber-500/10">
-                                                    Gelecek Dönem
-                                                </Badge>
-                                            )}
-                                            {isPast && (
-                                                <Badge variant="outline" className="text-muted-foreground opacity-60">
-                                                    Geçmiş
-                                                </Badge>
-                                            )}
-
-                                            {/* Date Range */}
-                                            <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary ml-auto lg:ml-0">
-                                                <CalendarIcon className="w-3.5 h-3.5" />
-                                                <span>{formatDisplayDate(item.override.start_date)}</span>
-                                                <span className="text-muted-foreground">→</span>
-                                                <span>{formatDisplayDate(item.override.end_date)}</span>
-                                            </div>
-                                        </div>
-
-                                        {/* Room Prices Chips */}
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 pt-2">
-                                            {ROOM_TYPES.map((room) => {
-                                                const p = item.override.prices?.[room]
-                                                return (
-                                                    <div
-                                                        key={room}
-                                                        className="p-2 rounded-xl bg-muted/20 border border-border/30 flex flex-col gap-0.5"
-                                                    >
-                                                        <span className="text-[10px] text-muted-foreground font-semibold truncate capitalize">
-                                                            {t(`room.${room}`)}
-                                                        </span>
-                                                        <span className="font-mono font-bold text-xs text-foreground">
-                                                            {p?.amount ? (
-                                                                <>
-                                                                    <span className="text-[9px] font-normal opacity-60 mr-1">{p.currency || 'EUR'}</span>
-                                                                    {p.amount.toFixed(2)}
-                                                                </>
-                                                            ) : (
-                                                                <span className="text-muted-foreground/30 font-light">---</span>
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {/* GM Actions */}
-                                    {isGM && (
-                                        <div className="flex items-center justify-end gap-2 shrink-0 border-t border-border/20 pt-3 lg:border-0 lg:pt-0">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 text-xs gap-1.5"
-                                                onClick={() =>
-                                                    setEditingOverride({
-                                                        targetId: item.targetId,
-                                                        override: item.override
-                                                    })
-                                                }
-                                            >
-                                                <Pencil className="w-3.5 h-3.5" />
-                                                Düzenle
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                onClick={async () => {
-                                                    const confirmed = await confirm({
-                                                        title: 'Özel dönem silinsin mi?',
-                                                        variant: 'destructive',
-                                                        confirmLabel: t('common.delete')
-                                                    })
-                                                    if (confirmed) {
-                                                        if (item.isGlobal) {
-                                                            await removeBaseOverride(hotelId, item.override.id)
-                                                        } else {
-                                                            await removeAgencyOverride(hotelId, item.targetId, item.override.id)
-                                                        }
-                                                        toast.success('Özel dönem silindi.')
-                                                    }
-                                                }}
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </Card>
-                        )
-                    })
-                )}
-            </div>
-
-            {/* CREATE / EDIT OVERRIDE DIALOG */}
-            {(createModalOpen || editingOverride) && (
-                <OverrideEditorModal
-                    agencies={agencies}
-                    isOpen={createModalOpen || Boolean(editingOverride)}
-                    initialTargetId={editingOverride?.targetId || 'global'}
-                    initialData={editingOverride?.override}
-                    onClose={() => {
-                        setCreateModalOpen(false)
-                        setEditingOverride(null)
-                    }}
-                    onSave={async (targetId, overrideData) => {
-                        try {
-                            if (targetId === 'global') {
-                                await setBaseOverride(hotelId, overrideData)
-                            } else {
-                                await setAgencyOverride(hotelId, targetId, overrideData)
-                            }
-                            toast.success('Özel dönem kaydedildi.')
-                            setCreateModalOpen(false)
-                            setEditingOverride(null)
-                        } catch (err) {
-                            console.error(err)
-                            toast.error('Özel dönem kaydedilirken hata oluştu.')
-                        }
-                    }}
-                />
-            )}
-        </div>
     )
 }
 
@@ -1255,10 +1256,10 @@ function OverrideEditorModal({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Zap className="w-5 h-5 text-amber-500" />
-                        {initialData ? 'Özel Dönemi Düzenle' : 'Yeni Özel Dönem / Sezon Ekle'}
+                        {initialData ? 'Sezonu Düzenle' : 'Yeni Sezon / Tarih Aralığı Ekle'}
                     </DialogTitle>
                     <DialogDescription>
-                        Belirli tarih aralığında geçerli olacak oda fiyat tarifesini girin.
+                        Belirli tarih aralığında geçerli olacak sezonsal oda fiyat tarifesini girin.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -1360,7 +1361,7 @@ function OverrideEditorModal({
                     </Button>
                     <Button onClick={handleSave} disabled={isSaving} className="bg-amber-500 hover:bg-amber-600 text-white">
                         {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                        Özel Dönemi Kaydet
+                        Sezonu Kaydet
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -1427,10 +1428,10 @@ function PriceCalculatorView({
                         (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[selectedRoomType]?.amount
                     )
                     if (agencyOverride) {
-                        ruleName = `${agencyObj.name} Özel Sezon Kampanyası`
+                        ruleName = `${agencyObj.name} Özel Sezon Kontratı`
                         ruleType = 'agency_override'
                     } else if (agencyObj.base_prices?.[selectedRoomType]?.amount) {
-                        ruleName = `${agencyObj.name} Özel Anlaşma Fiyatı`
+                        ruleName = `${agencyObj.name} Standart Anlaşma Fiyatı`
                         ruleType = 'agency_base'
                     }
                 }
@@ -1440,7 +1441,7 @@ function PriceCalculatorView({
                         (o) => dateStr >= o.start_date && dateStr <= o.end_date && o.prices[selectedRoomType]?.amount
                     )
                     if (globalOverride) {
-                        ruleName = 'Genel Acenta Özel Dönemi'
+                        ruleName = 'Genel Acenta Sezon Tarifesi'
                         ruleType = 'global_override'
                     }
                 }
@@ -1487,7 +1488,7 @@ function PriceCalculatorView({
                         Fiyat Hesaplama & Gece Kırılımı
                     </CardTitle>
                     <CardDescription className="text-xs">
-                        Tarih aralığı, oda tipi ve acente seçerek konaklama tutarını ve gece gece hangi kuralın uygulandığını sorgulayın.
+                        Tarih aralığı, oda tipi ve acente seçerek konaklama tutarını ve gece gece hangi sezonsal kuralın uygulandığını sorgulayın.
                     </CardDescription>
                 </div>
             </CardHeader>
@@ -1526,10 +1527,10 @@ function PriceCalculatorView({
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="base">Genel Acentalar (Varsayılan Tarife)</SelectItem>
+                                <SelectItem value="base">Genel Acentalar (Varsayılan Sezonlar)</SelectItem>
                                 {agencies.map((a) => (
                                     <SelectItem key={a.id} value={a.id}>
-                                        {a.name} (Özel Anlaşma)
+                                        {a.name} (Özel Anlaşmalı)
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -1595,7 +1596,7 @@ function PriceCalculatorView({
                         <div className="space-y-3">
                             <h3 className="text-sm font-bold flex items-center gap-2">
                                 <CalendarDays className="w-4 h-4 text-emerald-500" />
-                                Gecelik Fiyat Kırılımı ve Uygulanan Kurallar
+                                Gecelik Fiyat Kırılımı ve Uygulanan Sezonlar
                             </h3>
 
                             <div className="border border-border/40 rounded-2xl overflow-hidden bg-background/60">
@@ -1604,7 +1605,7 @@ function PriceCalculatorView({
                                         <tr>
                                             <th className="p-3 pl-4">Tarih</th>
                                             <th className="p-3 text-center">Gecelik Fiyat</th>
-                                            <th className="p-3 pl-4">Uygulanan Fiyat Mantığı / Kural</th>
+                                            <th className="p-3 pl-4">Uygulanan Sezon Kuralı</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/20">
