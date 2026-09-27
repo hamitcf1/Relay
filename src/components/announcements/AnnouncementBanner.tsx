@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils'
  * still has it in the history and in the modal. Withdrawals are exempt: a correction is worth
  * interrupting for no matter how old the thing it corrects was.
  */
-const BANNER_RECENCY_MS = 1000 * 60 * 60 * 24
+const BANNER_RECENCY_MS = 1000 * 60 * 60 * 24 * 7
 
 /**
  * Surfaces management announcements at the top of the dashboard, and tells a reader when one

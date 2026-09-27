@@ -25,12 +25,30 @@ export function AnnouncementModal() {
     const updateSettings = useAuthStore((state) => state.updateSettings)
     const { announcements, receipts, markSeen, markDismissed, acknowledgeRecall } = useAnnouncementStore()
     const [currentId, setCurrentId] = useState<string | null>(null)
+    const [dismissedSession, setDismissedSession] = useState<Set<string>>(new Set())
     const openedRef = useRef<string | null>(null)
 
     const dismissedSettings = useMemo(() => user?.settings?.dismissed_announcements || [], [user?.settings?.dismissed_announcements])
+
+    const mergedReceipts = useMemo(() => {
+        if (dismissedSession.size === 0) return receipts
+        const copy = { ...receipts }
+        for (const id of dismissedSession) {
+            copy[id] = {
+                announcementId: id,
+                uid: user?.uid || '',
+                state: 'dismissed',
+                seenAt: copy[id]?.seenAt || new Date(),
+                dismissedAt: new Date(),
+                recalledAckAt: copy[id]?.recalledAckAt,
+            }
+        }
+        return copy
+    }, [receipts, dismissedSession, user?.uid])
+
     const candidate = useMemo(
-        () => nextUnreadAnnouncement(announcements, receipts, { uid: user?.uid, role: user?.role }),
-        [announcements, receipts, user?.uid, user?.role],
+        () => nextUnreadAnnouncement(announcements, mergedReceipts, { uid: user?.uid, role: user?.role }),
+        [announcements, mergedReceipts, user?.uid, user?.role],
     )
     // Announcements published before this feature shipped live on as notifications. They are shown
     // once so nobody misses them, but they have no read receipt and cannot be withdrawn.
@@ -76,6 +94,7 @@ export function AnnouncementModal() {
     const close = () => {
         if (announcement && hotelId && user?.uid) {
             const id = announcement.id
+            setDismissedSession((prev) => new Set(prev).add(id))
             setCurrentId(null)
             if (retraction) void acknowledgeRecall(hotelId, id, user.uid)
             else void markDismissed(hotelId, id, user.uid)
