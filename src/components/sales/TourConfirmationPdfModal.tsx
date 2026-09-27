@@ -301,129 +301,129 @@ export function TourConfirmationPdfModal({ isOpen, onClose, sale }: TourConfirma
                     {/* A4 Sheet Container */}
                     <div
                         ref={docRef}
-                        className="printable-area bg-white text-zinc-950 w-full max-w-[210mm] min-h-[297mm] p-6 sm:p-10 shadow-2xl rounded-sm flex flex-col justify-between space-y-6 font-sans border border-zinc-200 relative select-text"
+                        className="printable-area bg-white text-zinc-950 w-full max-w-[210mm] p-5 sm:p-8 print:p-4 shadow-2xl rounded-sm flex flex-col justify-between space-y-4 print:space-y-2.5 font-sans border border-zinc-200 relative select-text"
                         style={{ boxSizing: 'border-box' }}
                     >
                         {/* Top Header */}
                         <div>
-                            <div className="flex items-start justify-between border-b-2 border-zinc-900 pb-5">
+                            <div className="flex items-start justify-between border-b-2 border-zinc-900 pb-3.5 print:pb-2">
                                 <div>
-                                    <div className="flex items-center gap-2.5 mb-1">
-                                        <div className="size-8 rounded-lg bg-zinc-950 p-1.5 flex items-center justify-center shrink-0 shadow-xs">
-                                            <RelayMark className="size-5 text-amber-400" />
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="size-7 rounded-lg bg-zinc-950 p-1 flex items-center justify-center shrink-0 shadow-xs">
+                                            <RelayMark className="size-4.5 text-amber-400" />
                                         </div>
-                                        <h1 className="text-xl font-black tracking-tight text-zinc-950 uppercase">
+                                        <h1 className="text-lg print:text-base font-black tracking-tight text-zinc-950 uppercase">
                                             {hotel?.info?.name || 'AETHERIUS RELAY CONCIERGE'}
                                         </h1>
                                     </div>
-                                    <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest pl-10">
+                                    <p className="text-[10px] print:text-[9px] font-bold text-zinc-500 uppercase tracking-widest pl-9">
                                         {texts.subtitle}
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-900 text-white rounded-md text-xs font-mono font-bold tracking-wider">
+                                    <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-zinc-900 text-white rounded-md text-xs font-mono font-bold tracking-wider">
                                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                                         {reservationCode}
                                     </div>
-                                    <p className="text-[10px] text-zinc-500 mt-1.5 font-mono">
+                                    <p className="text-[10px] text-zinc-500 mt-1 font-mono">
                                         {texts.labels.saleDate}: {formatDisplayDate(sale.sale_date || sale.created_at)}
                                     </p>
                                 </div>
                             </div>
 
                             {/* Document Title Bar */}
-                            <div className="my-5 bg-zinc-950 text-white py-2.5 px-4 rounded-lg flex items-center justify-between shadow-sm">
-                                <h2 className="text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-amber-400" />
+                            <div className="my-3.5 print:my-2 bg-zinc-950 text-white py-2 px-3.5 rounded-lg flex items-center justify-between shadow-sm">
+                                <h2 className="text-xs print:text-[11px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                                    <FileText className="w-3.5 h-3.5 text-amber-400" />
                                     {texts.title}
                                 </h2>
-                                <span className="text-[11px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                <span className="text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
                                     <CheckCircle2 className="w-3 h-3 text-emerald-400" /> {texts.labels.verifiedStamp}
                                 </span>
                             </div>
 
                             {/* Welcome Note */}
-                            <p className="text-xs text-zinc-700 leading-relaxed mb-5 italic border-l-2 border-zinc-400 pl-3 py-0.5">
+                            <p className="text-xs print:text-[11px] text-zinc-700 leading-relaxed mb-3.5 print:mb-2 italic border-l-2 border-zinc-400 pl-2.5 py-0.5">
                                 "{texts.welcome}"
                             </p>
 
                             {/* Guest & Service Summary Grid */}
-                            <div className="bg-zinc-50 border border-zinc-300 rounded-xl p-4 mb-6 shadow-xs">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-250 pb-2 mb-3 flex items-center gap-1.5">
+                            <div className="bg-zinc-50 border border-zinc-300 rounded-xl p-3.5 print:p-2.5 mb-4 print:mb-2.5 shadow-xs">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-250 pb-1.5 mb-2.5 flex items-center gap-1.5">
                                     <User className="w-3.5 h-3.5 text-zinc-600" />
                                     {texts.guestSection}
                                 </h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3 text-xs">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-2 text-xs print:text-[11px]">
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.guestName}</span>
-                                        <span className="font-bold text-zinc-950 text-sm">{sale.customer_name || '—'}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.guestName}</span>
+                                        <span className="font-bold text-zinc-950">{sale.customer_name || '—'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.roomNo}</span>
-                                        <span className="font-bold text-zinc-950 text-sm">{sale.room_number ? `Oda #${sale.room_number}` : '—'}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.roomNo}</span>
+                                        <span className="font-bold text-zinc-950">{sale.room_number ? `Oda #${sale.room_number}` : '—'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.phone}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.phone}</span>
                                         <span className="font-mono text-zinc-900">{sale.customer_phone || '—'}</span>
                                     </div>
                                     <div className="col-span-2 sm:col-span-2">
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.tourName}</span>
-                                        <span className="font-black text-zinc-950 text-sm text-primary">{sale.name}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.tourName}</span>
+                                        <span className="font-black text-zinc-950 text-xs text-primary">{sale.name}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.pax}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.pax}</span>
                                         <span className="font-bold text-zinc-900">{sale.pax} {docLang === 'tr' ? 'Kişi' : 'Pax'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.serviceDate}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.serviceDate}</span>
                                         <span className="font-bold text-zinc-950">{formatDisplayDate(sale.date)}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.pickupTime}</span>
-                                        <span className="font-bold font-mono text-zinc-950 text-sm text-amber-700">🕒 {sale.pickup_time || '—'}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.pickupTime}</span>
+                                        <span className="font-bold font-mono text-zinc-950 text-xs text-amber-700">🕒 {sale.pickup_time || '—'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.pickupLocation}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.pickupLocation}</span>
                                         <span className="font-semibold text-zinc-900">{sale.pickup_location || 'Otel Resepsiyon / Lobisi'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.price}</span>
-                                        <span className="font-black font-mono text-sm text-zinc-950">{sale.total_price} {sale.currency}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.price}</span>
+                                        <span className="font-black font-mono text-xs text-zinc-950">{sale.total_price} {sale.currency}</span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.paymentStatus}</span>
-                                        <span className={`font-bold text-xs ${remaining === 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.paymentStatus}</span>
+                                        <span className={`font-bold text-[11px] ${remaining === 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
                                             {remaining === 0 ? '✓ Ödendi (Paid)' : `Kalan: ${remaining} ${sale.currency}`}
                                         </span>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] font-bold uppercase text-zinc-500 block">{texts.labels.issuedBy}</span>
+                                        <span className="text-[9px] font-bold uppercase text-zinc-500 block">{texts.labels.issuedBy}</span>
                                         <span className="text-zinc-800">{sale.created_by_name || 'Resepsiyon'}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Informative Instructions Section */}
-                            <div className="space-y-3 mb-6">
+                            <div className="space-y-2 mb-4 print:mb-2.5">
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 border-b border-zinc-300 pb-1 flex items-center gap-1.5">
                                     <Clock className="w-3.5 h-3.5 text-amber-600" />
                                     {texts.guidelinesTitle}
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] leading-relaxed">
-                                    <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-1">
-                                        <h4 className="font-bold text-zinc-900 text-xs">{texts.pickupHeader}</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10.5px] print:text-[9.5px] leading-snug">
+                                    <div className="p-2 print:p-1.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-0.5">
+                                        <h4 className="font-bold text-zinc-900 text-[11px] print:text-[10px]">{texts.pickupHeader}</h4>
                                         <p className="text-zinc-700">{texts.pickupText}</p>
                                     </div>
-                                    <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-1">
-                                        <h4 className="font-bold text-zinc-900 text-xs">{texts.bringHeader}</h4>
+                                    <div className="p-2 print:p-1.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-0.5">
+                                        <h4 className="font-bold text-zinc-900 text-[11px] print:text-[10px]">{texts.bringHeader}</h4>
                                         <p className="text-zinc-700">{texts.bringText}</p>
                                     </div>
-                                    <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-1">
-                                        <h4 className="font-bold text-zinc-900 text-xs">{texts.policyHeader}</h4>
+                                    <div className="p-2 print:p-1.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-0.5">
+                                        <h4 className="font-bold text-zinc-900 text-[11px] print:text-[10px]">{texts.policyHeader}</h4>
                                         <p className="text-zinc-700">{texts.policyText}</p>
                                     </div>
-                                    <div className="p-2.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-1">
-                                        <h4 className="font-bold text-zinc-900 text-xs">{texts.supportHeader}</h4>
+                                    <div className="p-2 print:p-1.5 bg-zinc-50 rounded-lg border border-zinc-200 space-y-0.5">
+                                        <h4 className="font-bold text-zinc-900 text-[11px] print:text-[10px]">{texts.supportHeader}</h4>
                                         <p className="text-zinc-700">{texts.supportText}</p>
                                     </div>
                                 </div>
@@ -431,51 +431,51 @@ export function TourConfirmationPdfModal({ isOpen, onClose, sale }: TourConfirma
                         </div>
 
                         {/* BOTTOM SECTION: DIGITAL VOUCHER TICKET PASS (EN ALTTA) */}
-                        <div className="border-t-2 border-dashed border-zinc-400 pt-5 mt-auto">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
-                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <div className="border-t-2 border-dashed border-zinc-400 pt-3 print:pt-2 mt-auto">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1">
+                                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
                                     {texts.voucherHeader}
                                 </span>
-                                <span className="text-[10px] font-mono text-zinc-400">CUT OR KEEP WITH YOU</span>
+                                <span className="text-[9px] font-mono text-zinc-400">CUT OR KEEP WITH YOU</span>
                             </div>
 
                             {/* The Ticket Pass Box */}
-                            <div className="bg-zinc-950 text-white rounded-xl p-4 shadow-lg border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                            <div className="bg-zinc-950 text-white rounded-xl p-3 print:p-2.5 shadow-lg border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 relative overflow-hidden">
                                 {/* Accent Side Strip */}
                                 <div className="absolute left-0 top-0 bottom-0 w-2 bg-amber-400" />
 
-                                <div className="pl-3 space-y-1.5 flex-1">
+                                <div className="pl-2.5 space-y-1 flex-1">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[9px] font-mono font-bold bg-amber-400 text-zinc-950 px-2 py-0.5 rounded uppercase">
+                                        <span className="text-[8.5px] font-mono font-bold bg-amber-400 text-zinc-950 px-1.5 py-0.5 rounded uppercase">
                                             {sale.type.toUpperCase()} PASS
                                         </span>
-                                        <span className="text-[10px] font-mono text-zinc-400">{reservationCode}</span>
+                                        <span className="text-[9.5px] font-mono text-zinc-400">{reservationCode}</span>
                                     </div>
-                                    <h4 className="text-base font-black text-white tracking-tight leading-tight">{sale.name}</h4>
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-300">
+                                    <h4 className="text-sm print:text-xs font-black text-white tracking-tight leading-tight">{sale.name}</h4>
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] print:text-[10px] text-zinc-300">
                                         <span>👤 <strong>{sale.customer_name || 'Misafir'}</strong></span>
                                         {sale.room_number && <span>🏠 Oda: <strong>{sale.room_number}</strong></span>}
                                         <span>👥 <strong>{sale.pax} Pax</strong></span>
                                         <span>📅 <strong>{formatDisplayDate(sale.date)}</strong></span>
                                         <span>🕒 <strong>{sale.pickup_time}</strong></span>
                                     </div>
-                                    <div className="text-[10px] text-zinc-400 font-mono pt-1">
+                                    <div className="text-[9px] text-zinc-400 font-mono pt-0.5">
                                         {hotel?.info?.name || 'Aetherius Concierge'} · Verified Ticket Pass
                                     </div>
                                 </div>
 
                                 {/* QR Code & Scan Stub */}
-                                <div className="bg-white p-2.5 rounded-xl text-zinc-950 flex flex-col items-center justify-center shrink-0 border border-zinc-200">
-                                    {qrData && <QRCode value={qrData} size={76} level="M" />}
-                                    <span className="text-[9px] font-mono font-bold text-zinc-700 mt-1 uppercase">
+                                <div className="bg-white p-2 rounded-xl text-zinc-950 flex flex-col items-center justify-center shrink-0 border border-zinc-200">
+                                    {qrData && <QRCode value={qrData} size={66} level="M" />}
+                                    <span className="text-[8.5px] font-mono font-bold text-zinc-700 mt-0.5 uppercase">
                                         {reservationCode}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Verification Footer */}
-                            <div className="flex items-center justify-between pt-3 text-[9px] text-zinc-400 font-mono">
+                            <div className="flex items-center justify-between pt-2 text-[8.5px] text-zinc-400 font-mono">
                                 <span>{hotel?.info?.name || 'Aetherius Hotel Concierge Desk'} · İletişim / Contact: +90 539 516 07 60 (WhatsApp & 7/24)</span>
                                 <span>Official Confirmation & Ticket Pass · Generated Version 2.0</span>
                             </div>
