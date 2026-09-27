@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useIsMobile } from '@/hooks/useMediaQuery'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -51,8 +51,15 @@ import { ModuleContent } from '@/components/workspace/ModuleContent'
 import type { ModuleId } from '@/config/moduleRegistry'
 import { useWorkspaceEditStore } from '@/stores/workspaceEditStore'
 import { toast } from 'sonner'
+
 export function DashboardPage() {
     const location = useLocation()
+    const navigate = useNavigate()
+
+    const initialParams = new URLSearchParams(location.search)
+    const initialTabParam = initialParams.get('tab')
+    const initialChatParam = initialParams.get('chat')
+
     const user = useAuthStore((state) => state.user)
     const initAuth = useAuthStore((state) => state.initialize)
     const hotel = useHotelStore((state) => state.hotel)
@@ -66,9 +73,20 @@ export function DashboardPage() {
     const { t, language } = useLanguageStore()
 
     const [showTour, setShowTour] = useState(false)
-    const [activeTab, setActiveTab] = useState(location.pathname === '/operations' ? 'operations' : 'overview')
-    const [operationTab, setOperationTab] = useState('messaging')
-    const [overviewTab, setOverviewTab] = useState('grid')
+    const [activeTab, setActiveTab] = useState(() => (location.pathname === '/operations' ? 'operations' : 'overview'))
+    const [operationTab, setOperationTab] = useState(() => {
+        if (location.pathname === '/operations') {
+            if (initialTabParam) return initialTabParam
+            if (initialChatParam) return 'messaging'
+        }
+        return 'messaging'
+    })
+    const [overviewTab, setOverviewTab] = useState(() => {
+        if (location.pathname === '/dashboard' || location.pathname === '/') {
+            if (initialTabParam) return initialTabParam
+        }
+        return 'grid'
+    })
     const [openNewNote, setOpenNewNote] = useState(false)
     const workspaceMode = normalizeWorkspaceMode(user?.settings?.workspace_mode)
     const [compactArea, setCompactArea] = useState<CompactArea>('shift')
@@ -90,6 +108,28 @@ export function DashboardPage() {
         return saved !== 'false' // default: true
     })
 
+    // Unified navigation state and browser URL synchronizer
+    const updateNavigationState = (area: 'overview' | 'operations', subTab?: string, options?: { replace?: boolean }) => {
+        setActiveTab(area)
+        const targetSubTab = subTab || (area === 'overview' ? 'grid' : 'messaging')
+
+        if (area === 'overview') {
+            if (subTab === 'notes') setOpenNewNote(false)
+            setOverviewTab(targetSubTab)
+        } else {
+            setOperationTab(targetSubTab)
+        }
+
+        const targetPath = area === 'operations' ? '/operations' : '/dashboard'
+        const search = targetSubTab && targetSubTab !== 'grid' ? `?tab=${targetSubTab}` : ''
+        const newUrl = `${targetPath}${search}`
+        const currentUrl = `${location.pathname}${location.search}`
+
+        if (newUrl !== currentUrl) {
+            navigate(newUrl, { replace: options?.replace ?? true })
+        }
+    }
+
     // Global Ctrl+K / Cmd+K Command Palette Shortcut Listener
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -107,7 +147,7 @@ export function DashboardPage() {
         localStorage.setItem('relay_show_datetime', String(showDateTime))
     }, [showDateTime])
 
-    // Update activeTab when location changes (e.g. via navigate('/operations'))
+    // Update activeTab when location changes (e.g. via navigate('/operations') or browser refresh)
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search)
         const tabParam = searchParams.get('tab')
@@ -193,10 +233,8 @@ export function DashboardPage() {
     // Automate shifts
     useShiftAutomator(hotel?.id || null)
 
-    // Due payment notifications
+    // Due payment notifier
     useDuePaymentNotifier()
-
-
 
     // Subscribe to sales for dashboard visibility
     const { subscribeToSales } = useSalesStore()
@@ -209,8 +247,6 @@ export function DashboardPage() {
         }
     }, [hotel?.id, subscribeToSales])
 
-
-
     // Initialize auth listener
     useEffect(() => {
         const unsubscribe = initAuth()
@@ -222,7 +258,6 @@ export function DashboardPage() {
 
     useEffect(() => {
         if (!userHotelId) {
-            // Only redirect if explicitly not loading and no hotelId (handled in auth guard usually)
             return
         }
 
@@ -244,23 +279,10 @@ export function DashboardPage() {
         }
     }, [userHotelId, subscribeToHotel, subscribeToCurrentShift, subscribeToNotes, subscribeToRoster, subscribeToTodayMenu])
 
-
-
-
-
-
-
-
     const [showTutorial, setShowTutorial] = useState(false)
 
     const handleModuleSelect = (item: ModuleDefinition) => {
-        setActiveTab(item.area)
-        if (item.area === 'overview') {
-            setOpenNewNote(false)
-            setOverviewTab(item.subTab || 'grid')
-        } else {
-            setOperationTab(item.subTab || 'messaging')
-        }
+        updateNavigationState(item.area, item.subTab)
     }
 
     const handleQuickAction = (id: 'notes' | 'feedback' | 'sales' | 'messaging' | 'calendar') => {
@@ -277,18 +299,15 @@ export function DashboardPage() {
             return
         }
         if (id === 'notes') {
-            setActiveTab('overview')
             setOpenNewNote(true)
-            setOverviewTab('notes')
+            updateNavigationState('overview', 'notes')
             return
         }
         if (id === 'calendar') {
-            setActiveTab('overview')
-            setOverviewTab('calendar')
+            updateNavigationState('overview', 'calendar')
             return
         }
-        setActiveTab('operations')
-        setOperationTab(id)
+        updateNavigationState('operations', id)
     }
 
     const openCompactShiftModule = (id: string, add = false) => {
@@ -334,13 +353,7 @@ export function DashboardPage() {
                 overviewTab={overviewTab}
                 userRole={user?.role}
                 onNavigate={(tab, subTab) => {
-                    setActiveTab(tab)
-                    if (tab === 'operations' && subTab) {
-                        setOperationTab(subTab)
-                    } else if (tab === 'overview') {
-                        if (subTab === 'notes') setOpenNewNote(false)
-                        setOverviewTab(subTab || 'grid')
-                    }
+                    updateNavigationState(tab, subTab)
                 }}
             />}
 
@@ -409,15 +422,14 @@ export function DashboardPage() {
                             <OperationsOverview
                                 onOpenNotes={() => {
                                     setOpenNewNote(false)
-                                    setOverviewTab('notes')
+                                    updateNavigationState('overview', 'notes')
                                 }}
                                 onNewRecord={() => {
                                     setOpenNewNote(true)
-                                    setOverviewTab('notes')
+                                    updateNavigationState('overview', 'notes')
                                 }}
                                 onOpenSales={() => {
-                                    setActiveTab('operations')
-                                    setOperationTab('sales')
+                                    updateNavigationState('operations', 'sales')
                                 }}
                             />
                         ) : (
@@ -437,22 +449,20 @@ export function DashboardPage() {
 
                         {/* OPERATIONS VIEW */}
                         <TabsContent value="operations" className="m-0 border-none p-0 outline-none">
-                            <Tabs value={operationTab} onValueChange={setOperationTab}>
+                            <Tabs value={operationTab} onValueChange={(val) => updateNavigationState('operations', val)}>
                                 <div>
                                     {isMobile && operationTab === 'grid' && (
                                         <OperationsGrid
                                             onSelect={(id) => {
                                                 if (id === 'overview') {
-                                                    setActiveTab('overview')
-                                                    setOverviewTab('grid')
+                                                    updateNavigationState('overview', 'grid')
                                                     return
                                                 }
                                                 if (['hotel-info', 'currency', 'calendar', 'menu', 'blacklist'].includes(id)) {
-                                                    setActiveTab('overview')
-                                                    setOverviewTab(id)
+                                                    updateNavigationState('overview', id)
                                                     return
                                                 }
-                                                setOperationTab(id)
+                                                updateNavigationState('operations', id)
                                             }}
                                             userRole={user?.role}
                                         />
@@ -490,17 +500,14 @@ export function DashboardPage() {
                 onClose={() => setCommandPaletteOpen(false)}
                 onOpen={() => setCommandPaletteOpen(true)}
                 onNavigateTab={(tabId) => {
-                    setActiveTab('operations')
-                    setOperationTab(tabId)
+                    updateNavigationState('operations', tabId)
                 }}
                 onOpenNewSale={() => {
-                    setActiveTab('operations')
-                    setOperationTab('sales')
+                    updateNavigationState('operations', 'sales')
                 }}
                 onOpenNewNote={() => {
-                    setActiveTab('overview')
                     setOpenNewNote(true)
-                    setOverviewTab('notes')
+                    updateNavigationState('overview', 'notes')
                 }}
                 onOpenOfficialRecord={() => setOfficialRecordOpen(true)}
             />
