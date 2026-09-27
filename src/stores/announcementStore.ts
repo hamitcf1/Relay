@@ -76,6 +76,7 @@ interface AnnouncementState {
     /** Audience receipts per announcement, read by admins only. */
     audience: Record<string, Record<string, AnnouncementReceipt>>
     loading: boolean
+    receiptsLoaded: boolean
     error: string | null
 }
 
@@ -176,6 +177,7 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
     receipts: {},
     audience: {},
     loading: true,
+    receiptsLoaded: false,
     error: null,
 
     subscribeToAnnouncements: (hotelId) => {
@@ -206,12 +208,13 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
     },
 
     subscribeToMyReceipts: (hotelId, uid) => {
-        if (!uid) return () => { }
+        if (!hotelId || !uid) return () => { }
         if (hotelId === DEMO_HOTEL_ID || hotelId.includes('demo')) {
             demoViewer = uid
-            set({ receipts: myDemoReceipts(uid) })
+            set({ receipts: myDemoReceipts(uid), receiptsLoaded: true })
             return () => { }
         }
+        set({ receiptsLoaded: false })
         const q = query(
             collection(db, 'hotels', hotelId, 'announcement_receipts'),
             where('uid', '==', uid),
@@ -222,12 +225,12 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
                 const receipt = toReceipt(entry.data())
                 if (receipt.announcementId) next[receipt.announcementId] = receipt
             }
-            set({ receipts: next })
+            set({ receipts: next, receiptsLoaded: true })
         }, (err) => {
             if (err.code !== 'permission-denied') {
                 console.error("Announcement receipt subscription error:", err)
             }
-            set({ error: err.message })
+            set({ error: err.message, receiptsLoaded: true })
         })
         return unsubscribe
     },

@@ -23,8 +23,9 @@ export function AnnouncementModal() {
     const storeHotelId = useHotelStore((state) => state.hotel?.id)
     const hotelId = user?.is_demo ? 'demo-hotel-id' : (user?.hotel_id || storeHotelId)
     const notifications = useNotificationStore((state) => state.notifications)
+    const markNotificationAsRead = useNotificationStore((state) => state.markAsRead)
     const updateSettings = useAuthStore((state) => state.updateSettings)
-    const { announcements, receipts, markSeen, markDismissed, acknowledgeRecall } = useAnnouncementStore()
+    const { announcements, receipts, receiptsLoaded, markSeen, markDismissed, acknowledgeRecall } = useAnnouncementStore()
     const [currentId, setCurrentId] = useState<string | null>(null)
     const [dismissedSession, setDismissedSession] = useState<Set<string>>(new Set())
     const openedRef = useRef<string | null>(null)
@@ -47,10 +48,11 @@ export function AnnouncementModal() {
         return copy
     }, [receipts, dismissedSession, user?.uid])
 
-    const candidate = useMemo(
-        () => nextUnreadAnnouncement(announcements, mergedReceipts, { uid: user?.uid, role: user?.role }),
-        [announcements, mergedReceipts, user?.uid, user?.role],
-    )
+    const candidate = useMemo(() => {
+        if (!receiptsLoaded) return null
+        return nextUnreadAnnouncement(announcements, mergedReceipts, { uid: user?.uid, role: user?.role })
+    }, [announcements, mergedReceipts, user?.uid, user?.role, receiptsLoaded])
+
     // Announcements published before this feature shipped live on as notifications. They are shown
     // once so nobody misses them, but they have no read receipt and cannot be withdrawn.
     const legacy = useMemo(
@@ -66,6 +68,13 @@ export function AnnouncementModal() {
     useEffect(() => {
         if (!currentId && candidate) setCurrentId(candidate.id)
     }, [currentId, candidate])
+
+    // Unlatch if receipt for currentId arrives showing it is already dismissed
+    useEffect(() => {
+        if (currentId && receipts[currentId]?.state === 'dismissed') {
+            setCurrentId(null)
+        }
+    }, [currentId, receipts])
 
     const announcement = useMemo(
         () => announcements.find((item) => item.id === currentId) || null,
@@ -101,7 +110,10 @@ export function AnnouncementModal() {
             else void markDismissed(hotelId, id, user.uid)
             return
         }
-        if (legacy) void updateSettings({ dismissed_announcements: [...dismissedSettings, legacy.id] })
+        if (legacy && hotelId) {
+            void markNotificationAsRead(hotelId, legacy.id)
+            void updateSettings({ dismissed_announcements: [...dismissedSettings, legacy.id] })
+        }
     }
 
     const pick = (tr: string, ru: string, en: string) => (language === 'tr' ? tr : language === 'ru' ? ru : en)
