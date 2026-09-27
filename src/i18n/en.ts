@@ -931,6 +931,16 @@ const en: Translations = {
         'tours.book.date': 'Date',
         'tours.book.totalPrice': 'Total Price',
         'tours.book.confirm': 'Confirm Booking',
+        'tours.view.table': 'Table View',
+        'tours.view.cards': 'Catalogue View',
+        'tours.table.name': 'Tour Info & Description',
+        'tours.table.days': 'Operating Days',
+        'tours.table.base': 'Cost (€)',
+        'tours.table.adult': 'Adult (€)',
+        'tours.table.child37': 'Child 3-7y (€)',
+        'tours.table.child03': 'Child 0-3y (€)',
+        'tours.table.actions': 'Actions',
+        'tours.book.action': 'Book / Sell',
 
         // Personal Notes
         'personalNotes.title': 'Personal notes',

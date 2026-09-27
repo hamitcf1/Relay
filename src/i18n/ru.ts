@@ -930,7 +930,17 @@ const en: Translations = {
         'tours.book.pax': 'Pax',
         'tours.book.date': 'Date',
         'tours.book.totalPrice': 'Total Price',
-        'tours.book.confirm': 'Confirm Booking',
+        'tours.book.confirm': 'Подтвердить бронирование',
+        'tours.view.table': 'Вид таблицы',
+        'tours.view.cards': 'Вид карточек',
+        'tours.table.name': 'Информация о туре',
+        'tours.table.days': 'Дни проведения',
+        'tours.table.base': 'Себестоимость (€)',
+        'tours.table.adult': 'Взрослый (€)',
+        'tours.table.child37': 'Ребенок 3-7л (€)',
+        'tours.table.child03': 'Ребенок 0-3л (€)',
+        'tours.table.actions': 'Действия',
+        'tours.book.action': 'Забронировать',
 
         // Personal Notes
         'personalNotes.title': 'Личные заметки',

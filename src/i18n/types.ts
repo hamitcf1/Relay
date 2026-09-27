@@ -799,6 +799,16 @@ export type Translations = {
     'tours.book.date': string
     'tours.book.totalPrice': string
     'tours.book.confirm': string
+    'tours.view.table': string
+    'tours.view.cards': string
+    'tours.table.name': string
+    'tours.table.days': string
+    'tours.table.base': string
+    'tours.table.adult': string
+    'tours.table.child37': string
+    'tours.table.child03': string
+    'tours.table.actions': string
+    'tours.book.action': string
 
     // Personal Notes
     'personalNotes.title': string

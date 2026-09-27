@@ -744,6 +744,16 @@ const tr: Translations = {
         'tours.book.date': 'Tarih',
         'tours.book.totalPrice': 'Toplam Tutar',
         'tours.book.confirm': 'Rezervasyonu Onayla',
+        'tours.view.table': 'Tablo Görünümü',
+        'tours.view.cards': 'Katalog Görünümü',
+        'tours.table.name': 'Tur Bilgisi & Açıklama',
+        'tours.table.days': 'Çalışma Günleri',
+        'tours.table.base': 'Maliyet (€)',
+        'tours.table.adult': 'Yetişkin (€)',
+        'tours.table.child37': 'Çocuk 3-7y (€)',
+        'tours.table.child03': 'Bebek 0-3y (€)',
+        'tours.table.actions': 'İşlemler',
+        'tours.book.action': 'Satış Yap / Rezerve Et',
 
         // Personal Notes
         'personalNotes.title': 'Kişisel notlar',
