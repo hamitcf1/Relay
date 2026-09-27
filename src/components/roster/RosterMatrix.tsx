@@ -61,7 +61,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     const { t, language } = useLanguageStore()
     const { hotel, updateHotelSettings } = useHotelStore()
     const { user } = useAuthStore()
-    const { subscribeToDraft, updateDraftCell, publishRoster, draft, draftSaving, draftConflict } = useRosterStore()
     const { activeStaff: storeStaff } = useRosterStore()
     const [staff, setStaff] = useState<StaffMember[]>([])
     const [schedule, setSchedule] = useState<Record<string, Record<string, ShiftValue>>>({})
@@ -153,25 +152,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     }
 
     const weekStart = getWeekStart(weekOffset)
-
-    useEffect(() => {
-        if (!isGM) return
-        return subscribeToDraft(hotelId, weekStart)
-    }, [hotelId, isGM, subscribeToDraft, weekStart])
-
-    useEffect(() => {
-        if (!isGM || !draft || draft.weekId !== weekStart) return
-        setSchedule((previous) => {
-            const next = { ...previous }
-            Object.entries(draft.cells).forEach(([key, cell]) => {
-                const split = key.lastIndexOf(':')
-                const uid = key.slice(0, split)
-                const day = key.slice(split + 1)
-                next[uid] = { ...next[uid], [day]: cell.value }
-            })
-            return next
-        })
-    }, [draft, isGM, weekStart])
 
     // Calculate dates for the header
     const weekDates = useMemo(() => {
@@ -292,7 +272,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
     }, [hotelId, weekStart, staff.length === 0]) // Re-run if staff list was initially empty
 
     const setShift = async (userId: string, day: string, nextValue: ShiftValue) => {
-        if (!canEdit) return
+        if (!canEdit || !hotelId) return
         setSchedule((prev) => ({
             ...prev,
             [userId]: {
@@ -301,14 +281,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             },
         }))
 
-        if (isGM) {
-            const key = `${userId}:${day}`
-            const result = await updateDraftCell(hotelId, weekStart, { staffId: userId, day, value: nextValue, expectedCellVersion: draft?.cells[key]?.version || 0 })
-            if (result === 'conflict') toast.error(language === 'tr' ? 'Bu hücre başka bir yönetici tarafından değiştirildi.' : 'This cell was changed by another manager.')
-            return
-        }
-
-        // Save to Firestore
+        // Save directly to Firestore live
         setSaving(true)
         try {
             const rosterRef = doc(db, 'hotels', hotelId, 'roster', weekStart)
@@ -343,6 +316,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             }
         } catch (error) {
             console.error('Error saving roster:', error)
+            toast.error(language === 'tr' ? 'Vardiya kaydedilirken hata oluştu.' : 'Error saving shift.')
         } finally {
             setSaving(false)
         }
@@ -379,11 +353,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             }
             headerActions={
                 <div className="flex items-center gap-0.5 sm:gap-2">
-                    {isGM && (
-                        <Button variant="outline" size="sm" className="h-8" disabled={!draft || draftSaving || Object.keys(draft.cells).length === 0} onClick={async (event) => { event.stopPropagation(); if (!draft) return; const result = await publishRoster(hotelId, weekStart, draft.version); if (result === 'published') toast.success(language === 'tr' ? 'Vardiya yayınlandı' : 'Roster published'); else toast.error(language === 'tr' ? 'Taslak güncellendi, tekrar deneyin.' : 'Draft changed. Try again.') }}>
-                            {language === 'tr' ? 'Yayınla' : 'Publish'}
-                        </Button>
-                    )}
                     {isGM && (
                         <Button
                             variant="ghost"
@@ -439,7 +408,6 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
             }
         >
             <div className="pt-2">
-                {isGM && <div className="mb-3 flex min-h-9 items-center justify-between rounded-xl border border-border/60 bg-muted/30 px-3 text-xs text-muted-foreground"><span>{draftSaving ? (language === 'tr' ? 'Taslak kaydediliyor…' : 'Saving draft…') : draftConflict ? (language === 'tr' ? 'Hücre çakışması' : 'Cell conflict') : Object.keys(draft?.cells || {}).length ? (language === 'tr' ? 'Ortak taslak kaydedildi' : 'Shared draft saved') : (language === 'tr' ? 'Yayınlanmış vardiya' : 'Published roster')}</span>{draft?.updatedByName && <span>{draft.updatedByName}</span>}</div>}
                 {staff.length > 0 && (
                     <div className="space-y-3 md:hidden">
                         <RosterViewSwitcher

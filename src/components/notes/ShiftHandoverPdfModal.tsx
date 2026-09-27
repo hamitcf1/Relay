@@ -23,11 +23,28 @@ export function ShiftHandoverPdfModal({ isOpen, onClose, notes }: ShiftHandoverP
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="bg-card border-border text-foreground max-w-3xl p-0 overflow-hidden max-h-[90vh]">
+            <DialogContent className="bg-card border-border text-foreground max-w-4xl p-0 overflow-hidden max-h-[92vh] flex flex-col">
                 <DialogTitle className="sr-only">Yazdırılabilir Vardiya Devir Özet Tutanak Belgesi</DialogTitle>
                 <DialogDescription className="sr-only">Printable Shift Handover Summary Document</DialogDescription>
 
-                <div className="flex flex-col h-full overflow-y-auto p-6 space-y-6 bg-white text-zinc-950 printable-area">
+                {/* Fixed Top Toolbar (Always Visible, Hidden during printing) */}
+                <div className="flex items-center justify-between p-4 bg-muted/90 backdrop-blur-md border-b border-border/50 shrink-0 no-print">
+                    <div className="flex items-center gap-2">
+                        <Printer className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-bold text-foreground uppercase tracking-wider">Vardiya Devir Teslim Tutanağı Önizleme</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={onClose} className="h-8 text-xs">
+                            Kapat
+                        </Button>
+                        <Button size="sm" onClick={handlePrint} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs font-bold gap-1.5 shadow-md">
+                            <Printer className="w-4 h-4" /> Devir Tutanağını Yazdır / PDF İndir
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Printable Document Scroll Area */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white text-zinc-950 printable-area">
                     {/* Document Header */}
                     <div className="flex items-center justify-between border-b-2 border-zinc-900 pb-4">
                         <div>
@@ -118,16 +135,16 @@ export function ShiftHandoverPdfModal({ isOpen, onClose, notes }: ShiftHandoverP
                             <p className="text-[9px] text-zinc-400 mt-1">İmza & Tarih</p>
                         </div>
                     </div>
+                </div>
 
-                    {/* Print Actions */}
-                    <div className="flex items-center justify-between pt-4 border-t border-zinc-200 no-print">
-                        <Button variant="outline" size="sm" onClick={onClose} className="h-8 text-xs text-zinc-700">
-                            Kapat
-                        </Button>
-                        <Button size="sm" onClick={handlePrint} className="bg-zinc-900 text-white hover:bg-zinc-800 h-8 text-xs">
-                            <Printer className="w-3.5 h-3.5 mr-1" /> Devir Tutanağını Yazdır / PDF İndir
-                        </Button>
-                    </div>
+                {/* Fixed Bottom Toolbar (Hidden during printing) */}
+                <div className="flex items-center justify-between p-4 bg-muted/90 backdrop-blur-md border-t border-border/50 shrink-0 no-print">
+                    <Button variant="outline" size="sm" onClick={onClose} className="h-8 text-xs">
+                        Kapat
+                    </Button>
+                    <Button size="sm" onClick={handlePrint} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs font-bold gap-1.5 shadow-md">
+                        <Printer className="w-4 h-4" /> Devir Tutanağını Yazdır / PDF İndir
+                    </Button>
                 </div>
             </DialogContent>
         </Dialog>

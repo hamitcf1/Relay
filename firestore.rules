@@ -213,6 +213,14 @@ service cloud.firestore {
         allow write: if managesHotel(hotelId);
       }
 
+      // LOST_FOUND - Lost & Found items
+      match /lost_found/{itemId} {
+        allow read: if isAuthenticated() && belongsToHotel(hotelId);
+        allow create: if isAuthenticated() && belongsToHotel(hotelId);
+        allow update: if isAuthenticated() && belongsToHotel(hotelId);
+        allow delete: if managesHotel(hotelId);
+      }
+
       // TOURS
       match /tours/{tourId} {
         allow read: if isAuthenticated() && belongsToHotel(hotelId);

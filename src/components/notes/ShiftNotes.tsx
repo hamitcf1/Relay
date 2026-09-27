@@ -12,8 +12,8 @@ import { useConfirm } from '@/components/ui/confirm-dialog'
 import { cn } from '@/lib/utils'
 
 import { NoteFilters } from './NoteFilters'
-import { NoteForm } from './NoteForm'
 import { NoteList } from './NoteList'
+import { NewNoteModal } from './NewNoteModal'
 import { ShiftHandoverPdfModal } from './ShiftHandoverPdfModal'
 
 interface ShiftNotesProps {
@@ -282,19 +282,14 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                 />
             </div>
 
-            {/* Collapsible Add Note Form */}
-            <AnimatePresence>
-                {isAdding && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="cyber-card p-4 border-primary/30 bg-primary/[0.02] backdrop-blur-xl"
-                    >
-                        <NoteForm hotelId={hotelId} hotel={hotel} staff={activeStaff} onCancel={() => setIsAdding(false)} />
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* New Note Modal */}
+            <NewNoteModal
+                isOpen={isAdding}
+                onClose={() => setIsAdding(false)}
+                hotelId={hotelId}
+                hotel={hotel}
+                staff={activeStaff}
+            />
 
             {/* Note List Container - Single Natural Scroll Flow */}
             <NoteList

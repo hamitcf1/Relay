@@ -859,3 +859,31 @@ body.disable-animations *::after {
   .handover-list { max-height: none; overflow: visible; }
   .handover-note { padding: 0.75rem !important; }
 }
+
+/* ============================================
+   Print Media Styles
+   ============================================ */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-area, .printable-area * {
+    visibility: visible;
+  }
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
