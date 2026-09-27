@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -31,7 +32,7 @@ export function NewNoteModal({
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, [isOpen, onClose])
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto">
@@ -50,7 +51,7 @@ export function NewNoteModal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 15 }}
                         transition={{ duration: 0.2, ease: 'easeOut' }}
-                        className="relative z-10 w-full max-w-2xl bg-card border border-primary/30 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+                        className="relative z-10 my-auto w-full max-w-2xl bg-card border border-primary/30 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-border/60 bg-muted/30">
@@ -89,6 +90,7 @@ export function NewNoteModal({
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     )
 }

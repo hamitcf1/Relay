@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { AlertTriangle, X, Camera, DollarSign, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -67,12 +68,12 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
         }
     }
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="w-full max-w-md bg-card border border-border shadow-2xl rounded-3xl overflow-hidden"
+                className="my-auto w-full max-w-md bg-card border border-border shadow-2xl rounded-3xl overflow-hidden"
             >
                 <div className="p-6 border-b border-border/40 bg-muted/20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -174,6 +175,7 @@ export function IncidentReportModal({ isOpen, onClose, roomNumber, hotelId }: In
                     </Button>
                 </div>
             </motion.div>
-        </div>
+        </div>,
+        document.body
     )
 }

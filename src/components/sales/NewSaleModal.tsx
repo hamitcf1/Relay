@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
 import { X, MapPin, Truck, ShoppingBag, CreditCard, User, Clock, Check, Loader2, DollarSign, Tag, Calendar } from 'lucide-react'
@@ -242,7 +243,7 @@ export function NewSaleModal({
         { type: 'laundry', icon: <ShoppingBag className="w-4 h-4" /> }
     ]
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto">
@@ -261,7 +262,7 @@ export function NewSaleModal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 15 }}
                         transition={{ duration: 0.2, ease: 'easeOut' }}
-                        className="relative z-10 w-full max-w-2xl bg-card border border-primary/30 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+                        className="relative z-10 my-auto w-full max-w-2xl bg-card border border-primary/30 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-border/60 bg-muted/30">
@@ -687,6 +688,7 @@ export function NewSaleModal({
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     )
 }

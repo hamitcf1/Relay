@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { History, X, ArrowRight, Clock } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
@@ -71,12 +72,12 @@ export function NoteHistoryModal({ isOpen, onClose, note, staff }: NoteHistoryMo
         return entries
     }
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="w-full max-w-2xl bg-card border border-border shadow-2xl rounded-3xl overflow-hidden max-h-[90vh] flex flex-col"
+                className="my-auto w-full max-w-2xl bg-card border border-border shadow-2xl rounded-3xl overflow-hidden max-h-[90vh] flex flex-col"
             >
                 <div className="p-6 border-b border-border/40 bg-muted/20 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
@@ -186,7 +187,8 @@ export function NoteHistoryModal({ isOpen, onClose, note, staff }: NoteHistoryMo
                     </Button>
                 </div>
             </motion.div>
-        </div>
+        </div>,
+        document.body
     )
 }
 
