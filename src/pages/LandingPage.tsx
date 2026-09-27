@@ -192,8 +192,8 @@ function HeroSection({ t, navigate, mockCopy }: { t: any; navigate: any; mockCop
                 >
                     <Button
                         size="lg"
-                        onClick={() => navigate('/pricing')}
-                        className="h-12 px-6 bg-white text-black hover:bg-zinc-200 rounded-full active:scale-[0.98] transition-transform group"
+                        onClick={() => navigate('/login')}
+                        className="h-12 px-6 bg-white text-black hover:bg-zinc-200 rounded-full active:scale-[0.98] transition-transform group font-bold"
                     >
                         {t('landing.hero.cta.primary')}
                         <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
@@ -760,8 +760,8 @@ function FinalCta({ t, navigate }: { t: any; navigate: any }) {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Button
                         size="lg"
-                        onClick={() => navigate('/pricing')}
-                        className="h-12 px-6 bg-white text-black hover:bg-zinc-200 rounded-full active:scale-[0.98] transition-transform group"
+                        onClick={() => navigate('/login')}
+                        className="h-12 px-6 bg-white text-black hover:bg-zinc-200 rounded-full active:scale-[0.98] transition-transform group font-bold"
                     >
                         {t('landing.hero.cta.primary')}
                         <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />

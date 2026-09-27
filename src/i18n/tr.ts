@@ -1317,7 +1317,7 @@ const tr: Translations = {
         'landing.hero.title.prefix': 'Yeni Nesil',
         'landing.hero.title.suffix': 'Konaklama',
         'landing.hero.subtitle': 'Modern oteller için akıllı işletim sistemi. Sorunsuz devir teslimler, gerçek zamanlı senkronizasyon ve operasyon otomasyonu.',
-        'landing.hero.cta.primary': 'Ücretsiz Deneyin',
+        'landing.hero.cta.primary': 'Giriş Yap',
         'landing.hero.cta.secondary': 'Canlı Demo',
         'landing.features.title': 'Tam Kapsamlı Otel Operasyonları',
         'landing.features.subtitle': 'Modern bir oteli verimli bir şekilde yönetmek için ihtiyacınız olan her şey.',

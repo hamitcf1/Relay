@@ -62,18 +62,13 @@ export function PublicNavbar() {
                     </DropdownMenu>
 
                     {!isAuthPage && (
-                        <>
-                            <Link to="/login" className="px-3 py-1.5 text-sm font-medium text-zinc-300 hover:text-white transition-colors">
-                                {t('landing.nav.login')}
-                            </Link>
-                            <Button
-                                onClick={() => navigate('/pricing')}
-                                size="sm"
-                            className="rounded-full"
-                            >
-                                {t('landing.nav.getStarted')}
-                            </Button>
-                        </>
+                        <Button
+                            onClick={() => navigate('/login')}
+                            size="sm"
+                            className="rounded-full font-bold px-4 bg-white text-black hover:bg-zinc-200"
+                        >
+                            {t('landing.nav.login')}
+                        </Button>
                     )}
                     {isAuthPage && (
                         <Button
@@ -88,8 +83,18 @@ export function PublicNavbar() {
                     )}
                 </div>
 
-                {/* Mobile Menu Toggle */}
-                <div className="flex md:hidden items-center gap-1">
+                {/* Mobile Menu Toggle & Quick Login */}
+                <div className="flex md:hidden items-center gap-2">
+                    {!isAuthPage && (
+                        <Button
+                            onClick={() => navigate('/login')}
+                            size="sm"
+                            className="rounded-full text-xs font-bold px-3 h-8 bg-white text-black hover:bg-zinc-200"
+                        >
+                            {t('landing.nav.login')}
+                        </Button>
+                    )}
+
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" aria-label="Select language" className="text-zinc-400 hover:text-white hover:bg-white/5 h-9 w-9">
@@ -104,6 +109,10 @@ export function PublicNavbar() {
                             <DropdownMenuItem onClick={() => setLanguage('tr')} className="hover:bg-white/5 cursor-pointer">
                                 Türkçe
                                 {language === 'tr' && <span className="ml-2 text-primary">✓</span>}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setLanguage('ru')} className="hover:bg-white/5 cursor-pointer">
+                                Русский
+                                {language === 'ru' && <span className="ml-2 text-primary">✓</span>}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -137,15 +146,14 @@ export function PublicNavbar() {
                             <div className="h-px w-full bg-white/10 my-2" />
 
                             {!isAuthPage && (
-                                <>
-                                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2.5 text-sm font-medium text-zinc-300 hover:text-white">{t('landing.nav.login')}</Link>
+                                <div className="pt-1">
                                     <Button
-                                        onClick={() => { setMobileMenuOpen(false); navigate('/pricing'); }}
-                                        className="w-full mt-2 bg-white text-black hover:bg-zinc-200 rounded-full"
+                                        onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
+                                        className="w-full bg-white text-black hover:bg-zinc-200 rounded-full font-bold h-10"
                                     >
-                                        {t('landing.nav.getStarted')}
+                                        {t('landing.nav.login')}
                                     </Button>
-                                </>
+                                </div>
                             )}
                             {isAuthPage && (
                                 <Button

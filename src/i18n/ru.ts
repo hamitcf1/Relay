@@ -1379,7 +1379,7 @@ const en: Translations = {
         'landing.hero.title.prefix': 'Next Gen',
         'landing.hero.title.suffix': 'Hospitality',
         'landing.hero.subtitle': 'Smart operating system for modern hotels. Seamless shift transfers, real-time sync, and operations automation.',
-        'landing.hero.cta.primary': 'Try for Free',
+        'landing.hero.cta.primary': 'Войти',
         'landing.hero.cta.secondary': 'Live Demo',
         'landing.features.title': 'Full-Spectrum Hotel Operations',
         'landing.features.subtitle': 'Everything you need to manage a modern hotel efficiently.',
