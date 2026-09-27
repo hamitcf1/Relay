@@ -271,7 +271,7 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
     },
 
     markSeen: async (hotelId, announcementId, uid) => {
-        if (!uid) return
+        if (!hotelId || !uid) return
         const isDemo = hotelId === DEMO_HOTEL_ID || hotelId.includes('demo')
         if (isDemo) {
             // A closed announcement must not be downgraded back to merely seen.
@@ -300,26 +300,25 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             },
         }))
 
-        // A transaction rather than a plain set, because seenAt has to mean "first opened" and not
-        // "last opened". The banner reappears every day until it is closed, so a plain merge would
-        // move seenAt forward on each visit, and the receipt could no longer answer the only
-        // question it exists for: when was this person actually told. It also gives the dismissed
-        // guard the demo path already had, instead of leaving the two implementations to disagree.
-        await runTransaction(db, async (tx) => {
-            const ref = receiptDoc(hotelId, announcementId, uid)
-            const existingDoc = await tx.get(ref)
-            const data = existingDoc.exists() ? existingDoc.data() : undefined
-            if (data?.state === 'dismissed') return
+        try {
+            await runTransaction(db, async (tx) => {
+                const ref = receiptDoc(hotelId, announcementId, uid)
+                const existingDoc = await tx.get(ref)
+                const data = existingDoc.exists() ? existingDoc.data() : undefined
+                if (data?.state === 'dismissed') return
 
-            const fields: Record<string, unknown> = { ...receiptFields(announcementId, uid, 'seen') }
-            // Only set when absent, so the first opening is the one that is kept.
-            if (!data?.seenAt) fields.seenAt = serverTimestamp()
-            tx.set(ref, fields, { merge: true })
-        })
+                const fields: Record<string, unknown> = { ...receiptFields(announcementId, uid, 'seen') }
+                // Only set when absent, so the first opening is the one that is kept.
+                if (!data?.seenAt) fields.seenAt = serverTimestamp()
+                tx.set(ref, fields, { merge: true })
+            })
+        } catch (err) {
+            console.error("Failed to mark announcement seen:", err)
+        }
     },
 
     markDismissed: async (hotelId, announcementId, uid) => {
-        if (!uid) return
+        if (!hotelId || !uid) return
         const isDemo = hotelId === DEMO_HOTEL_ID || hotelId.includes('demo')
         if (isDemo) {
             const mine = writeDemoReceipt(announcementId, uid, 'dismissed')
@@ -344,14 +343,14 @@ export const useAnnouncementStore = create<AnnouncementStore>((set) => ({
             },
         }))
 
-        // seenAt is deliberately not written here. Dismissing is a later moment than reading, and
-        // the receipt is the audit trail: overwriting seenAt made the two indistinguishable and
-        // destroyed when the person actually first opened the announcement, which is the fact a
-        // manager needs when a shift notice is disputed. Marking seen is what sets it.
-        await setDoc(receiptDoc(hotelId, announcementId, uid), {
-            ...receiptFields(announcementId, uid, 'dismissed'),
-            dismissedAt: serverTimestamp(),
-        }, { merge: true })
+        try {
+            await setDoc(receiptDoc(hotelId, announcementId, uid), {
+                ...receiptFields(announcementId, uid, 'dismissed'),
+                dismissedAt: serverTimestamp(),
+            }, { merge: true })
+        } catch (err) {
+            console.error("Failed to mark announcement dismissed:", err)
+        }
     },
 
     /**
