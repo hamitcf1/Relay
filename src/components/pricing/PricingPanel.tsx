@@ -82,8 +82,8 @@ export function PricingPanel() {
         getEffectivePrice
     } = usePricingStore()
 
-    // Default tab is 'campaigns' (Seasonal / Date-Range Driven Pricing)
-    const [activeTab, setActiveTab] = useState<'campaigns' | 'matrix' | 'calculator'>('campaigns')
+    // Default tab is 'calculator' (Price Calculator & Nightly Breakdown)
+    const [activeTab, setActiveTab] = useState<'calculator' | 'matrix' | 'campaigns'>('calculator')
 
     // Modal & Drawer States
     const [editPricesTarget, setEditPricesTarget] = useState<{ id: string; name: string; prices: Record<string, RoomPriceEntry> } | null>(null)
@@ -182,10 +182,24 @@ export function PricingPanel() {
                 </div>
             </div>
 
-            {/* Navigation Tabs (Primary Tab: Seasonal / Date-Range Rates) */}
+            {/* Navigation Tabs (Primary Tab: Price Calculator & Nightly Breakdown) */}
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="space-y-6">
                 <div className="flex justify-center">
                     <TabsList className="bg-background/60 backdrop-blur-xl border border-border/50 p-1 rounded-2xl gap-1 shadow-2xl h-auto">
+                        <TabsTrigger
+                            value="calculator"
+                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
+                        >
+                            <Calculator className="w-4 h-4" />
+                            <span>{t('pricing.tabs.calculator')}</span>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="matrix"
+                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
+                        >
+                            <TableIcon className="w-4 h-4" />
+                            <span>{t('pricing.tabs.matrix')}</span>
+                        </TabsTrigger>
                         <TabsTrigger
                             value="campaigns"
                             className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
@@ -198,34 +212,16 @@ export function PricingPanel() {
                                 </Badge>
                             )}
                         </TabsTrigger>
-                        <TabsTrigger
-                            value="matrix"
-                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300"
-                        >
-                            <TableIcon className="w-4 h-4" />
-                            <span>{t('pricing.tabs.matrix')}</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="calculator"
-                            className="rounded-xl px-5 py-2.5 gap-2 text-xs font-semibold data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300"
-                        >
-                            <Calculator className="w-4 h-4" />
-                            <span>{t('pricing.tabs.calculator')}</span>
-                        </TabsTrigger>
                     </TabsList>
                 </div>
 
-                {/* TAB 1: SEASONAL / DATE-RANGE RATES (PRIMARY) */}
-                <TabsContent value="campaigns" className="space-y-6 focus-visible:outline-none">
-                    <SpecialPeriodsCampaignsView
+                {/* TAB 1: PRICE CALCULATOR (PRIMARY DEFAULT VIEW) */}
+                <TabsContent value="calculator" className="space-y-6 focus-visible:outline-none">
+                    <PriceCalculatorView
                         agencies={agencies}
                         baseOverrides={baseOverrides}
-                        isGM={isGM}
-                        hotelId={hotelId}
-                        setBaseOverride={setBaseOverride}
-                        setAgencyOverride={setAgencyOverride}
-                        removeBaseOverride={removeBaseOverride}
-                        removeAgencyOverride={removeAgencyOverride}
+                        getEffectivePrice={getEffectivePrice}
+                        dateLocale={dateLocale}
                     />
                 </TabsContent>
 
@@ -252,13 +248,17 @@ export function PricingPanel() {
                     />
                 </TabsContent>
 
-                {/* TAB 3: PRICE CALCULATOR */}
-                <TabsContent value="calculator" className="space-y-6 focus-visible:outline-none">
-                    <PriceCalculatorView
+                {/* TAB 3: SEASONAL / DATE-RANGE RATES */}
+                <TabsContent value="campaigns" className="space-y-6 focus-visible:outline-none">
+                    <SpecialPeriodsCampaignsView
                         agencies={agencies}
                         baseOverrides={baseOverrides}
-                        getEffectivePrice={getEffectivePrice}
-                        dateLocale={dateLocale}
+                        isGM={isGM}
+                        hotelId={hotelId}
+                        setBaseOverride={setBaseOverride}
+                        setAgencyOverride={setAgencyOverride}
+                        removeBaseOverride={removeBaseOverride}
+                        removeAgencyOverride={removeAgencyOverride}
                     />
                 </TabsContent>
             </Tabs>
