@@ -167,14 +167,16 @@ export function LoginPage() {
             return
         }
 
-        const passToUse = staff.password
-        if (!passToUse) {
-            // Switch to email mode and prefill email
+        // GM / Admin accounts MUST log in via classic email & password
+        if (staff.role === 'gm') {
             setEmail(staff.email)
-            toast.info(`${staff.name} hesabı seçildi. Lütfen şifrenizi giriniz.`)
             setLoginMode('email')
+            toast.info(`${staff.name} (Genel Müdür) hesabı güvenlik gereği e-posta ve şifre ile giriş yapmalıdır.`)
             return
         }
+
+        // Direct 1-Click login for normal staff (receptionist, staff, housekeeping)
+        const passToUse = staff.password || '123456'
 
         try {
             await signIn(staff.email, passToUse)
@@ -183,8 +185,29 @@ export function LoginPage() {
                 navigate('/')
             }
         } catch (err: any) {
-            console.error("Quick login error:", err)
-            setLoginError("Giriş yapılamadı. Şifreyi kontrol ediniz.")
+            console.error("Quick login primary attempt error:", err)
+            // Fallback attempts for alternative default passwords if staff.password wasn't set on old accounts
+            const fallbacks = ['12345678', 'password', '123456']
+            let success = false
+            for (const fbPass of fallbacks) {
+                if (fbPass === passToUse) continue
+                try {
+                    await signIn(staff.email, fbPass)
+                    const user = useAuthStore.getState().user
+                    if (user) {
+                        success = true
+                        navigate('/')
+                        break
+                    }
+                } catch (e) {
+                    // try next fallback
+                }
+            }
+            if (!success) {
+                setLoginError(`${staff.name} hesabı ile direkt giriş yapılamadı. Lütfen şifre ile giriş yapmayı deneyiniz.`)
+                setEmail(staff.email)
+                setLoginMode('email')
+            }
         }
     }
 
@@ -361,7 +384,7 @@ export function LoginPage() {
                                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 border ${
                                                         staff.role === 'gm'
                                                             ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-                                                            : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                                                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                                                     }`}>
                                                         {staff.name.charAt(0).toUpperCase()}
                                                     </div>
@@ -373,15 +396,21 @@ export function LoginPage() {
                                                             <span className="font-mono">{staff.email}</span>
                                                             <span>•</span>
                                                             <span className="capitalize text-primary/80 font-medium">
-                                                                {staff.role === 'gm' ? 'Genel Müdür' : 'Resepsiyonist'}
+                                                                {staff.role === 'gm' ? 'Genel Müdür' : 'Personel'}
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="shrink-0 flex items-center gap-1 bg-primary/10 group-hover:bg-primary text-primary group-hover:text-primary-foreground border border-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
-                                                    <Zap className="w-3.5 h-3.5 fill-current" /> Giriş Yap
-                                                </div>
+                                                {staff.role === 'gm' ? (
+                                                    <div className="shrink-0 flex items-center gap-1 bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                                        <KeyRound className="w-3.5 h-3.5" /> Şifre Gerekli
+                                                    </div>
+                                                ) : (
+                                                    <div className="shrink-0 flex items-center gap-1 bg-emerald-500/10 group-hover:bg-emerald-500 text-emerald-400 group-hover:text-emerald-950 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">
+                                                        <Zap className="w-3.5 h-3.5 fill-current" /> Direkt Giriş
+                                                    </div>
+                                                )}
                                             </motion.button>
                                         ))}
                                     </div>
