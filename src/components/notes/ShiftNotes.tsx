@@ -171,8 +171,8 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
 
     return (
         <div className="space-y-4">
-            {/* STICKY CONTROL BAR - STAYS FIXED AT TOP INSIDE PAGE SURFACE */}
-            <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/60 pb-3 pt-2 shadow-xs transition-all -mx-3 px-3 sm:-mx-6 sm:px-6">
+            {/* CONTROL BAR - RELATIVE ON MOBILE, STICKY ON DESKTOP */}
+            <div className="relative z-10 md:sticky md:top-0 md:z-30 bg-background/95 backdrop-blur-xl border-b border-border/60 pb-3 pt-2 shadow-xs transition-all -mx-3 px-3 sm:-mx-6 sm:px-6">
                 {/* Row 1: Page Identity + Inline Metrics Strip + Action Buttons */}
                 <div className="flex flex-wrap items-center justify-between gap-2.5 mb-2.5">
                     <div className="flex items-center gap-2.5 max-w-full overflow-x-auto no-scrollbar">
