@@ -185,29 +185,10 @@ export function LoginPage() {
                 navigate('/')
             }
         } catch (err: any) {
-            console.error("Quick login primary attempt error:", err)
-            // Fallback attempts for alternative default passwords if staff.password wasn't set on old accounts
-            const fallbacks = ['12345678', 'password', '123456']
-            let success = false
-            for (const fbPass of fallbacks) {
-                if (fbPass === passToUse) continue
-                try {
-                    await signIn(staff.email, fbPass)
-                    const user = useAuthStore.getState().user
-                    if (user) {
-                        success = true
-                        navigate('/')
-                        break
-                    }
-                } catch (e) {
-                    // try next fallback
-                }
-            }
-            if (!success) {
-                setLoginError(`${staff.name} hesabı ile direkt giriş yapılamadı. Lütfen şifre ile giriş yapmayı deneyiniz.`)
-                setEmail(staff.email)
-                setLoginMode('email')
-            }
+            console.warn("Quick login attempt failed for user:", staff.email, err?.message || err)
+            setLoginError(`${staff.name} hesabı için hızlı giriş şifresi doğrulanamadı. Lütfen şifrenizi girerek giriş yapınız.`)
+            setEmail(staff.email)
+            setLoginMode('email')
         }
     }
 
