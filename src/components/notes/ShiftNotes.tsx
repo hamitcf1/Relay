@@ -172,34 +172,37 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
     return (
         <div className="space-y-4">
             {/* STICKY CONTROL BAR - STAYS FIXED AT TOP INSIDE PAGE SURFACE */}
-            <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/60 pb-3 pt-2 shadow-xs transition-all -mx-4 px-4 sm:-mx-6 sm:px-6">
+            <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/60 pb-3 pt-2 shadow-xs transition-all -mx-3 px-3 sm:-mx-6 sm:px-6">
                 {/* Row 1: Page Identity + Inline Metrics Strip + Action Buttons */}
                 <div className="flex flex-wrap items-center justify-between gap-2.5 mb-2.5">
-                    <div className="flex items-center gap-2.5">
-                        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/40">
+                    <div className="flex items-center gap-2.5 max-w-full overflow-x-auto no-scrollbar">
+                        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/40 shrink-0">
                             <button
                                 onClick={() => setMainTab('handover')}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground shadow-xs transition-all"
+                                className={cn(
+                                    "flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0",
+                                    mainTab === 'handover' ? "bg-primary text-primary-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+                                )}
                             >
                                 <ArrowLeftRight className="size-3.5" />
-                                <span>{language === 'tr' ? 'Ortak Vardiya Logu' : 'Handover Log'}</span>
+                                <span className="whitespace-nowrap">{language === 'tr' ? 'Ortak Vardiya Logu' : 'Handover Log'}</span>
                             </button>
                             <button
                                 onClick={() => setMainTab('personal')}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all"
+                                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all shrink-0"
                             >
                                 <NotebookPen className="size-3.5" />
-                                <span>{language === 'tr' ? 'Kişisel Notlarım' : 'Personal Notes'}</span>
+                                <span className="whitespace-nowrap">{language === 'tr' ? 'Kişisel Notlarım' : 'Personal Notes'}</span>
                             </button>
                         </div>
                     </div>
 
                     {/* Inline Compact Metric Badges */}
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full shrink-0">
                         <button
                             onClick={() => setStatusFilter('active')}
                             className={cn(
-                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none",
+                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none shrink-0",
                                 statusFilter === 'active'
                                     ? "bg-sky-500/15 border-sky-500/40 text-sky-400 font-semibold"
                                     : "bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground"
@@ -208,13 +211,13 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                         >
                             <Clock3 className="size-3.5 text-sky-400" />
                             <span className="font-bold tabular-nums text-foreground">{metrics.active}</span>
-                            <span className="text-[11px] text-muted-foreground hidden md:inline">{copy.active}</span>
+                            <span className="text-[11px] text-muted-foreground hidden sm:inline">{copy.active}</span>
                         </button>
 
                         <button
                             onClick={() => setStatusFilter('active')}
                             className={cn(
-                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none",
+                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none shrink-0",
                                 metrics.critical > 0
                                     ? "bg-rose-500/15 border-rose-500/40 text-rose-400 font-semibold animate-pulse"
                                     : "bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted/80"
@@ -223,23 +226,23 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                         >
                             <AlertTriangle className="size-3.5 text-rose-400" />
                             <span className="font-bold tabular-nums text-rose-400">{metrics.critical}</span>
-                            <span className="text-[11px] text-rose-400/80 hidden md:inline">{copy.critical}</span>
+                            <span className="text-[11px] text-rose-400/80 hidden sm:inline">{copy.critical}</span>
                         </button>
 
                         <button
                             onClick={() => setStatusFilter('active')}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-border/40 bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all select-none"
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-border/40 bg-muted/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all select-none shrink-0"
                             title={copy.pinned}
                         >
                             <Pin className="size-3.5 text-amber-400" />
                             <span className="font-bold tabular-nums text-foreground">{metrics.pinned}</span>
-                            <span className="text-[11px] text-muted-foreground hidden md:inline">{copy.pinned}</span>
+                            <span className="text-[11px] text-muted-foreground hidden sm:inline">{copy.pinned}</span>
                         </button>
 
                         <button
                             onClick={() => setStatusFilter('resolved')}
                             className={cn(
-                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none",
+                                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all select-none shrink-0",
                                 statusFilter === 'resolved'
                                     ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 font-semibold"
                                     : "bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted/80 hover:text-foreground"
@@ -248,7 +251,7 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                         >
                             <CheckCircle2 className="size-3.5 text-emerald-400" />
                             <span className="font-bold tabular-nums text-foreground">{metrics.completed}</span>
-                            <span className="text-[11px] text-muted-foreground hidden md:inline">{copy.completed}</span>
+                            <span className="text-[11px] text-muted-foreground hidden sm:inline">{copy.completed}</span>
                         </button>
 
                         {/* Collapsible Stat Grid Toggle Button */}
@@ -256,7 +259,7 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowMetricsGrid(prev => !prev)}
-                            className="h-7 w-7 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            className="h-7 w-7 p-0 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 shrink-0"
                             title={showMetricsGrid ? "İstatistikleri Gizle" : "İstatistikleri Genişlet"}
                         >
                             <BarChart2 className="size-3.5" />
@@ -270,7 +273,7 @@ export function ShiftNotes({ hotelId, showAddButton = true, initialAddOpen = fal
                             onClick={() => setIsAdding((open) => !open)}
                             aria-expanded={isAdding}
                             size="sm"
-                            className="h-8 px-3 text-xs font-bold gap-1.5 rounded-lg bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all ml-auto sm:ml-0"
+                            className="h-8 px-3 text-xs font-bold gap-1.5 rounded-lg bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all ml-auto sm:ml-0 shrink-0"
                         >
                             <Plus className="size-3.5" />
                             <span>{copy.add}</span>

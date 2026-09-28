@@ -34,7 +34,7 @@ export interface ModuleDefinition {
 
 export const MODULE_REGISTRY: readonly ModuleDefinition[] = [
     { id: 'overview', icon: LayoutDashboard, group: 'today', labels: { tr: 'Operasyon özeti', en: 'Operations overview', ru: 'Сводка операций' }, shortLabels: { tr: 'Özet', en: 'Home', ru: 'Обзор' }, area: 'overview', primary: true },
-    { id: 'notes', icon: ArrowLeftRight, group: 'today', labels: { tr: 'Vardiya devri & Notlar', en: 'Shift handover & Notes', ru: 'Передача смены и заметки' }, shortLabels: { tr: 'Devir', en: 'Handover', ru: 'Смена' }, area: 'overview', subTab: 'notes', primary: true },
+    { id: 'notes', icon: ArrowLeftRight, group: 'today', labels: { tr: 'Vardiya devri & Notlar', en: 'Shift handover & Notes', ru: 'Передача смены и заметки' }, shortLabels: { tr: 'Vardiya Devri', en: 'Handover', ru: 'Смена' }, area: 'overview', subTab: 'notes', primary: true },
     { id: 'roster', icon: CalendarDays, group: 'today', labels: { tr: 'Haftalık vardiya', en: 'Weekly roster', ru: 'График на неделю' }, shortLabels: { tr: 'Vardiya', en: 'Roster', ru: 'График' }, area: 'overview', subTab: 'roster', primary: true },
     { id: 'messaging', icon: MessageCircle, group: 'operations', labelKey: 'module.messaging', labels: { tr: 'Mesajlar', en: 'Messages', ru: 'Сообщения' }, area: 'operations', subTab: 'messaging', primary: true },
     { id: 'feedback', icon: ShieldAlert, group: 'operations', labelKey: 'module.complaints', labels: { tr: 'Şikâyetler', en: 'Complaints', ru: 'Жалобы' }, area: 'operations', subTab: 'feedback' },

@@ -30,7 +30,7 @@ export function PriorityQueue({ items, copy, onOpenNotes, onOpenSales }: { items
                                 <span className="min-w-0">
                                     <span className="flex items-center gap-2">
                                         <strong className="truncate text-sm font-semibold text-foreground">{item.title}</strong>
-                                        <span className={cn('hidden rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider sm:inline', item.label === 'critical' ? 'glow-badge-unpaid' : item.label === 'payment' ? 'glow-badge-amber' : 'glow-badge-cyan')}>
+                                        <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0', item.label === 'critical' ? 'glow-badge-unpaid' : item.label === 'payment' ? 'glow-badge-amber' : 'glow-badge-cyan')}>
                                             {copy[item.label]}
                                         </span>
                                     </span>

@@ -431,7 +431,7 @@ export function DashboardPage() {
                                 transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
                                 className="w-full"
                             >
-                                <ModulePageSurface wide data-testid="modern-module-surface" className="h-[calc(100dvh-7rem)] min-h-0 overflow-y-auto overscroll-contain">
+                                <ModulePageSurface wide data-testid="modern-module-surface" className="h-[calc(100dvh-4.5rem)] md:h-[calc(100dvh-7rem)] min-h-0 overflow-y-auto overscroll-contain">
                                     <ModuleContent moduleId={overviewTab as ModuleId} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} initialAddOpen={openNewNote} />
                                 </ModulePageSurface>
                             </motion.div>
@@ -461,7 +461,7 @@ export function DashboardPage() {
                                     )}
 
                                     {operationTab !== 'grid' && <div className="block">
-                                        <ModulePageSurface wide data-testid="modern-module-surface" className="h-[calc(100dvh-7rem)] min-h-0 overflow-y-auto overscroll-contain">
+                                        <ModulePageSurface wide data-testid="modern-module-surface" className="h-[calc(100dvh-4.5rem)] md:h-[calc(100dvh-7rem)] min-h-0 overflow-y-auto overscroll-contain">
                                             <ModuleContent moduleId={operationTab as ModuleId} hotelId={hotel?.id || ''} canEdit={user?.role === 'gm'} />
                                         </ModulePageSurface>
                                         <ScrollToTopButton />

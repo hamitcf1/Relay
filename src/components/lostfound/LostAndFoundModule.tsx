@@ -208,7 +208,7 @@ export function LostAndFoundModule() {
                         />
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full shrink-0">
                         {(['unclaimed', 'claimed', 'disposed', 'all'] as const).map(st => (
                             <button
                                 key={st}

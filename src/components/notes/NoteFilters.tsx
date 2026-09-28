@@ -65,8 +65,8 @@ export function NoteFilters({
     return (
         <div className="space-y-3.5">
             {/* Row 1: Status Pills + Search Bar */}
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border/50 backdrop-blur-md overflow-x-auto no-scrollbar" role="tablist">
+            <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/50 backdrop-blur-md overflow-x-auto no-scrollbar max-w-full shrink-0" role="tablist">
                     {statusTabs.map((tab) => {
                         const isActive = statusFilter === tab.key
                         const count = counts[tab.key] || 0
@@ -77,9 +77,9 @@ export function NoteFilters({
                                 role="tab"
                                 aria-selected={isActive}
                                 className={cn(
-                                    "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 select-none whitespace-nowrap",
+                                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 select-none whitespace-nowrap shrink-0",
                                     isActive
-                                        ? "bg-card text-foreground shadow-sm border border-border/80 font-bold"
+                                        ? "bg-card text-foreground shadow-xs border border-border/80 font-bold"
                                         : "text-muted-foreground hover:text-foreground hover:bg-card/40"
                                 )}
                             >
@@ -111,7 +111,7 @@ export function NoteFilters({
             </div>
 
             {/* Row 2: Category Filter Badges */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar" aria-label={t('category.allIssues') as string}>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar sm:custom-scrollbar max-w-full" aria-label={t('category.allIssues') as string}>
                 {categories.map((category) => {
                     const isActive = filter === category.key
                     return (
