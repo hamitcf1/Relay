@@ -27,31 +27,44 @@ export function MobileNav({ activeTab, overviewTab, operationTab, userRole, onSe
     const isActive = (item: ModuleDefinition) => item.area === 'overview'
         ? activeTab === 'overview' && (item.subTab ? overviewTab === item.subTab : overviewTab === 'grid')
         : activeTab === 'operations' && operationTab === item.subTab
-    const half = Math.ceil(MOBILE_SLOT_COUNT / 2)
+    const half = Math.ceil(slots.length / 2)
 
     return (
-        <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-2 pb-[calc(env(safe-area-inset-bottom)+8px)] md:hidden" aria-label="Mobile navigation">
-            <div className="pointer-events-auto relative mx-auto grid h-[68px] max-w-md grid-cols-[1fr_1fr_56px_1fr_1fr_1fr] items-center rounded-2xl border border-border/90 bg-background/95 px-1 shadow-[0_16px_40px_-16px_hsl(var(--primary)/0.25)] backdrop-blur-xl">
-                {slots.slice(0, half).map((item) => <MobileItem key={item.id} item={item} label={getModuleShortLabel(item, language, navigationConfig)} active={isActive(item)} action={() => onSelect(item)} />)}
+        <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(env(safe-area-inset-bottom)+8px)] md:hidden" aria-label="Mobile navigation">
+            <div className="pointer-events-auto relative mx-auto flex h-[66px] w-full max-w-md items-center justify-between rounded-2xl border border-border/90 bg-background/95 px-2 shadow-[0_16px_40px_-16px_hsl(var(--primary)/0.3)] backdrop-blur-xl">
+                {/* Left Slots Container */}
+                <div className="flex flex-1 items-center justify-around">
+                    {slots.slice(0, half).map((item) => (
+                        <MobileItem key={item.id} item={item} label={getModuleShortLabel(item, language, navigationConfig)} active={isActive(item)} action={() => onSelect(item)} />
+                    ))}
+                </div>
+
+                {/* Center Floating Action Button (FAB) */}
                 <button
                     onClick={openQuickActions}
                     aria-label={addLabel}
-                    className="relative -top-3.5 mx-auto grid h-13 w-13 place-items-center rounded-full border-4 border-background bg-primary text-primary-foreground shadow-[0_8px_20px_-6px_hsl(var(--primary)/0.7)] transition-all active:scale-90"
+                    className="relative -top-3.5 z-20 shrink-0 grid h-13 w-13 place-items-center rounded-full border-4 border-background bg-primary text-primary-foreground shadow-[0_8px_20px_-6px_hsl(var(--primary)/0.7)] transition-transform active:scale-90"
                 >
                     <Plus className="h-6 w-6" strokeWidth={2.2} />
                 </button>
-                {slots.slice(half).map((item) => <MobileItem key={item.id} item={item} label={getModuleShortLabel(item, language, navigationConfig)} active={isActive(item)} action={() => onSelect(item)} />)}
-                <button
-                    onClick={openAllTabs}
-                    aria-current={allTabsOpen ? 'page' : undefined}
-                    className={cn(
-                        'relative flex h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-muted-foreground transition-colors active:scale-95',
-                        allTabsOpen && 'text-primary font-semibold'
-                    )}
-                >
-                    <MoreHorizontal className="h-5 w-5 shrink-0" strokeWidth={1.8} />
-                    <span className="max-w-full truncate text-[10px] font-medium leading-tight">{allTabsLabel}</span>
-                </button>
+
+                {/* Right Slots Container */}
+                <div className="flex flex-1 items-center justify-around">
+                    {slots.slice(half).map((item) => (
+                        <MobileItem key={item.id} item={item} label={getModuleShortLabel(item, language, navigationConfig)} active={isActive(item)} action={() => onSelect(item)} />
+                    ))}
+                    <button
+                        onClick={openAllTabs}
+                        aria-current={allTabsOpen ? 'page' : undefined}
+                        className={cn(
+                            'relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-muted-foreground transition-colors active:scale-95',
+                            allTabsOpen && 'text-primary font-semibold'
+                        )}
+                    >
+                        <MoreHorizontal className="h-5 w-5 shrink-0" strokeWidth={1.8} />
+                        <span className="max-w-full truncate text-[10px] font-medium leading-tight">{allTabsLabel}</span>
+                    </button>
+                </div>
             </div>
         </nav>
     )
@@ -64,7 +77,7 @@ function MobileItem({ item, label, active, action }: { item: ModuleDefinition; l
             onClick={action}
             aria-current={active ? 'page' : undefined}
             className={cn(
-                'relative flex h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-muted-foreground transition-colors active:scale-95 select-none',
+                'relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-muted-foreground transition-colors active:scale-95 select-none',
                 active && 'text-primary font-bold'
             )}
         >
