@@ -28,6 +28,7 @@ export function AnnouncementModal() {
     const { announcements, receipts, receiptsLoaded, markSeen, markDismissed, acknowledgeRecall } = useAnnouncementStore()
     const [currentId, setCurrentId] = useState<string | null>(null)
     const [dismissedSession, setDismissedSession] = useState<Set<string>>(new Set())
+    const [acknowledgedSession, setAcknowledgedSession] = useState<Set<string>>(new Set())
     const openedRef = useRef<string | null>(null)
 
     const dismissedSettings = useMemo(() => user?.settings?.dismissed_announcements || [], [user?.settings?.dismissed_announcements])
@@ -42,11 +43,11 @@ export function AnnouncementModal() {
                 state: 'dismissed',
                 seenAt: copy[id]?.seenAt || new Date(),
                 dismissedAt: new Date(),
-                recalledAckAt: copy[id]?.recalledAckAt,
+                recalledAckAt: copy[id]?.recalledAckAt || (acknowledgedSession.has(id) ? new Date() : undefined),
             }
         }
         return copy
-    }, [receipts, dismissedSession, user?.uid])
+    }, [receipts, dismissedSession, acknowledgedSession, user?.uid])
 
     const candidate = useMemo(() => {
         if (!receiptsLoaded) return null
@@ -69,17 +70,19 @@ export function AnnouncementModal() {
         if (!currentId && candidate) setCurrentId(candidate.id)
     }, [currentId, candidate])
 
-    // Unlatch if receipt for currentId arrives showing it is already dismissed
-    useEffect(() => {
-        if (currentId && receipts[currentId]?.state === 'dismissed') {
-            setCurrentId(null)
-        }
-    }, [currentId, receipts])
-
     const announcement = useMemo(
         () => announcements.find((item) => item.id === currentId) || null,
         [announcements, currentId],
     )
+
+    // An already dismissed announcement can still need a withdrawal acknowledgement.
+    useEffect(() => {
+        if (currentId && receipts[currentId]?.state === 'dismissed' &&
+            (!announcement || !isRetractionPending(announcement, receipts[currentId]))) {
+            setCurrentId(null)
+        }
+    }, [currentId, receipts, announcement])
+
     const retraction = announcement ? isRetractionPending(announcement, receipts[announcement.id]) : false
     const open = announcement !== null || legacy !== null
 
@@ -105,6 +108,7 @@ export function AnnouncementModal() {
         if (announcement && hotelId && user?.uid) {
             const id = announcement.id
             setDismissedSession((prev) => new Set(prev).add(id))
+            if (retraction) setAcknowledgedSession((prev) => new Set(prev).add(id))
             setCurrentId(null)
             if (retraction) void acknowledgeRecall(hotelId, id, user.uid)
             else void markDismissed(hotelId, id, user.uid)
