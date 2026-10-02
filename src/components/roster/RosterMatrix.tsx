@@ -38,6 +38,9 @@ interface StaffMember {
 type ShiftValue = ShiftType | 'OFF' | null
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const TURKISH_SHORT_DAYS: Record<string, string> = {
+    Mon: 'Pzt', Tue: 'Sal', Wed: 'Çar', Thu: 'Per', Fri: 'Cum', Sat: 'Cmt', Sun: 'Paz',
+}
 
 // Default shifts if none configured in hotel settings
 const DEFAULT_SHIFT_COLORS: Record<string, string> = {
@@ -439,7 +442,7 @@ export function RosterMatrix({ hotelId, canEdit }: RosterMatrixProps) {
                         />}
                         {mobileView === 'matrix' && <MobileRosterMatrix
                             staff={mobileStaff}
-                            days={weekDates.map((item) => ({ ...item, label: t(`day.${item.day.toLowerCase()}` as any), date: item.dateStr }))}
+                            days={weekDates.map((item) => ({ ...item, label: t(`day.${item.day.toLowerCase()}` as any), shortLabel: language === 'tr' ? TURKISH_SHORT_DAYS[item.day] : item.day, date: item.dateStr }))}
                             schedule={schedule}
                             canEdit={canEdit}
                             onCell={openShiftSelector}

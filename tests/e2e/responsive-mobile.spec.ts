@@ -53,6 +53,23 @@ test.describe('Responsive Mobile Experience', () => {
     await expect(views.getByRole('tab')).toHaveCount(3);
     await views.getByRole('tab', { name: /Matris|Matrix/i }).click();
     await expect(views.getByRole('tab', { name: /Matris|Matrix/i })).toHaveAttribute('aria-selected', 'true');
+    const matrix = views.locator('..').locator('table');
+    await expect(matrix.locator('thead th')).toHaveCount(7);
+    const dayNames = await matrix.locator('thead th span').allTextContents();
+    expect(new Set(dayNames).size).toBe(7);
+    const daysFit = await matrix.locator('thead').evaluate((header) => {
+      const first = header.querySelector('th:first-child')!.getBoundingClientRect();
+      const last = header.querySelector('th:last-child')!.getBoundingClientRect();
+      const bounds = header.getBoundingClientRect();
+      return first.left >= bounds.left && last.right <= bounds.right && last.right <= window.innerWidth;
+    });
+    expect(daysFit).toBe(true);
+    await page.setViewportSize({ width: 320, height: 700 });
+    const narrowDaysFit = await matrix.locator('thead').evaluate((header) => {
+      const last = header.querySelector('th:last-child')!.getBoundingClientRect();
+      return last.right <= window.innerWidth && document.documentElement.scrollWidth <= window.innerWidth;
+    });
+    expect(narrowDaysFit).toBe(true);
     await views.getByRole('tab', { name: /Gün|Day/i }).click();
     await page.getByRole('button', { name: /Demo Manager/i }).last().click();
     await expect(page.getByRole('dialog')).toBeVisible();
